@@ -311,6 +311,8 @@ public class Actions {
     /**
      * @param pid
      *            The pid that must be updated
+     * @param json
+     *            dc as json object
      * @param content
      *            A dublin core object
      * @return a short message
@@ -450,6 +452,12 @@ public class Actions {
     }
 
     /**
+     * @param type
+     *            the type of the new resource
+     * @param parent
+     *            the parent of a new rsource
+     * @param transformers
+     *            transformers connected to the resource
      * @param input
      *            the input defines the contenttype and a optional parent
      * @param rawPid
