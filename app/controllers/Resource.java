@@ -50,19 +50,28 @@ public class Resource extends MyController {
 
     final static Logger logger = LoggerFactory.getLogger(Resource.class);
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", response = ObjectList.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json,text/html", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", response = ObjectList.class, httpMethod = "GET")
     public static Result listResources(
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
 	    @QueryParam("src") String src, @QueryParam("from") int from,
 	    @QueryParam("until") int until) {
 	try {
-	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    response().setContentType("application/json");
-	    Actions actions = Actions.getInstance();
-	    ObjectList rem = new ObjectList(actions.list(contentType,
-		    namespace, from, until, src));
-	    return JsonResponse(rem);
+	    if (request().accepts("text/html")) {
+		response().setHeader("Access-Control-Allow-Origin", "*");
+		response().setContentType("text/html");
+		Actions actions = Actions.getInstance();
+		String rem = actions.listAsHtml(contentType, namespace, from,
+			until, src);
+		return ok(rem);
+	    } else {
+		response().setHeader("Access-Control-Allow-Origin", "*");
+		response().setContentType("application/json");
+		Actions actions = Actions.getInstance();
+		ObjectList rem = new ObjectList(actions.list(contentType,
+			namespace, from, until, src));
+		return JsonResponse(rem);
+	    }
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -337,7 +346,7 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.oaiore(pid, "text/html");
 	    response().setContentType("text/html;charset=utf-8");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
