@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
+ * Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package helper;
 import java.io.InputStream;
 import java.net.URL;
 
-import de.nrw.hbz.regal.mab.*;
 import de.nrw.hbz.regal.datatypes.Node;
+import de.nrw.hbz.regal.mab.MabConverter;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de

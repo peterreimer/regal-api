@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
+ * Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ public class HttpArchiveException extends RuntimeException {
     }
 
     public int getCode() {
-        return code;
+	return code;
     }
 
     public void setCode(int code) {
-        this.code = code;
+	this.code = code;
     }
 
 }
