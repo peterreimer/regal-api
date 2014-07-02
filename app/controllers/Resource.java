@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package controllers;
 
 import static de.nrw.hbz.regal.fedora.FedoraVocabulary.HAS_PART;
@@ -79,7 +95,7 @@ public class Resource extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,text/html,application/json+compact", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json+regal-v0.4.0,application/json,text/html,application/json+compact,application/rdf+xml,text/plain", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Result listResource(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
@@ -89,6 +105,12 @@ public class Resource extends MyController {
 		return asJson(pid, null);
 	    if (request().accepts("application/json+compact"))
 		return asJson(pid, "compact");
+	    if (request().accepts("application/rdf+xml"))
+		return asRdf(pid);
+	    if (request().accepts("text/plain"))
+		return asRdf(pid);
+	    if (request().accepts("application/json+regal-v0.4.0"))
+		return asRegalObject(pid);
 
 	    return asRdf(pid);
 	} catch (HttpArchiveException e) {
@@ -109,7 +131,7 @@ public class Resource extends MyController {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    Actions actions = Actions.getInstance();
 	    String result = actions.readMetadata(pid);
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -310,7 +332,7 @@ public class Resource extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,text/html", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Result listParts(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
@@ -325,7 +347,7 @@ public class Resource extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,text/html", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Result listParents(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
@@ -354,7 +376,7 @@ public class Resource extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asHtml", value = "asHtml", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
     public static Result asRdf(@PathParam("pid") String pid) {
 	try {
 	    Actions actions = Actions.getInstance();
@@ -362,9 +384,11 @@ public class Resource extends MyController {
 	    if (request().accepts("application/rdf+xml")) {
 		result = actions.oaiore(pid, "application/rdf+xml");
 		response().setContentType("application/rdf+xml");
+		return ok(result);
 	    } else if (request().accepts("text/plain")) {
 		result = actions.oaiore(pid, "text/plain");
 		response().setContentType("text/plain");
+		return ok(result);
 	    }
 	    return JsonResponse(new Message(result));
 	} catch (HttpArchiveException e) {
@@ -384,7 +408,7 @@ public class Resource extends MyController {
 	    else
 		result = actions.oaiore(pid, "application/json");
 	    response().setContentType("application/json");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -412,7 +436,7 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.oaidc(pid);
 	    response().setContentType("application/xml");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -426,7 +450,7 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.epicur(pid);
 	    response().setContentType("application/xml");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -440,7 +464,7 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.aleph(pid);
 	    response().setContentType("application/xml");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -487,7 +511,7 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.pdfbox(pid);
 	    response().setContentType("text/plain");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
@@ -501,7 +525,7 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.makeOAISet(pid);
 	    response().setContentType("text/plain");
-	    return JsonResponse(new Message(result));
+	    return ok(result);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
