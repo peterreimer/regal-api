@@ -21,6 +21,11 @@ import java.io.StringWriter;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * 
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * 
+ */
 @XmlRootElement(name = "errorMessage")
 public class Message {
     String text;

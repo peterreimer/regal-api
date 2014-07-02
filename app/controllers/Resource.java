@@ -53,7 +53,7 @@ import de.nrw.hbz.regal.exceptions.ArchiveException;
 
 /**
  * 
- * @author Jan Schnasse
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  *         Api is documented using swagger. See:
  *         https://github.com/wordnik/swagger-ui

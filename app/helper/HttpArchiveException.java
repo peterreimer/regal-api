@@ -17,7 +17,7 @@
 package helper;
 
 /**
- * @author Jan Schnasse
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
 public class HttpArchiveException extends RuntimeException {

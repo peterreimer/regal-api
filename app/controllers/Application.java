@@ -19,6 +19,11 @@ package controllers;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+/**
+ * 
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * 
+ */
 public class Application extends Controller {
 
     public static Result index() {

@@ -48,6 +48,11 @@ import de.nrw.hbz.regal.fedora.FedoraInterface;
 import de.nrw.hbz.regal.fedora.RdfUtils;
 import de.nrw.hbz.regal.fedora.XmlUtils;
 
+/**
+ * 
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * 
+ */
 class Services {
 
     @SuppressWarnings("serial")

@@ -24,6 +24,11 @@ import play.mvc.Result;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
+/**
+ * 
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * 
+ */
 public class MyController extends Controller {
 
     protected static ObjectMapper mapper = JsonUtil.mapper();
