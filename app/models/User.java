@@ -24,6 +24,7 @@ import play.Play;
  * @see <a
  *      href="http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation">digitalsanctum</a>
  */
+@SuppressWarnings("javadoc")
 public class User {
 
     String name;

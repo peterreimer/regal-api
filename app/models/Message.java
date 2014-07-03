@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
+@SuppressWarnings("javadoc")
 @XmlRootElement(name = "errorMessage")
 public class Message {
     String text;

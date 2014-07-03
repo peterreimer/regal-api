@@ -26,6 +26,9 @@ import play.mvc.Result;
  */
 public class Application extends Controller {
 
+    /**
+     * @return the swagger-doc site
+     */
     public static Result index() {
 	return redirect("/public/docs/index.html");
     }

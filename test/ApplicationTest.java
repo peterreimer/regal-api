@@ -26,6 +26,7 @@ import org.junit.Test;
  *         details.
  * 
  */
+@SuppressWarnings("javadoc")
 public class ApplicationTest {
 
     @Test

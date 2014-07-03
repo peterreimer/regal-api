@@ -20,6 +20,7 @@ package helper;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
+@SuppressWarnings({ "serial", "javadoc" })
 public class HttpArchiveException extends RuntimeException {
 
     int code = 500;

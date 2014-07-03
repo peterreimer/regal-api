@@ -33,10 +33,22 @@ public class MyController extends Controller {
 
     protected static ObjectMapper mapper = JsonUtil.mapper();
 
+    /**
+     * @param obj
+     *            a string representation of this object will be retourned
+     * @return a json response for the passed object
+     */
     public static Result JsonResponse(Object obj) {
 	return JsonResponse(obj, 200);
     }
 
+    /**
+     * @param obj
+     *            a string representation of this object will be retourned
+     * @param code
+     *            http code
+     * @return JSON Standard Response
+     */
     public static Result JsonResponse(Object obj, int code) {
 	response().setHeader("Access-Control-Allow-Methods",
 		"POST, GET, OPTIONS, PUT, DELETE");
