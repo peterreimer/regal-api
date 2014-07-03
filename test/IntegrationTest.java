@@ -41,8 +41,7 @@ public class IntegrationTest {
 		HTMLUNIT, new Callback<TestBrowser>() {
 		    public void invoke(TestBrowser browser) {
 			browser.goTo("http://localhost:3333");
-			assertThat(browser.pageSource()).contains(
-				"Your new application is ready.");
+			assertThat(browser.pageSource()).contains("Swagger");
 		    }
 		});
     }
