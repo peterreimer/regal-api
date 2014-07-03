@@ -811,7 +811,10 @@ public class Actions {
 	return fedora.readNode(pid);
     }
 
-    Services getServices() {
+    /**
+     * @return an instance of services
+     */
+    public Services getServices() {
 	return services;
     }
 

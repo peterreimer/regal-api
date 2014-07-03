@@ -53,9 +53,9 @@ import de.nrw.hbz.regal.fedora.XmlUtils;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
-class Services {
+public class Services {
 
-    @SuppressWarnings("serial")
+    @SuppressWarnings({ "serial", "javadoc" })
     public class MetadataNotFoundException extends RuntimeException {
 
 	public MetadataNotFoundException() {
@@ -83,6 +83,12 @@ class Services {
     FedoraInterface fedora = null;
     String uriPrefix = null;
 
+    /**
+     * @param fedora
+     *            a fedora connection
+     * @param server
+     *            the server where the app runs
+     */
     public Services(FedoraInterface fedora, String server) {
 	this.fedora = fedora;
 	uriPrefix = server + "/" + "resource" + "/";
@@ -390,6 +396,13 @@ class Services {
 	}
     }
 
+    /**
+     * @param node
+     *            to create a pdfa from.
+     * @param fedoraExtern
+     *            the url of the datastream
+     * @return a url to the generated Pdfa
+     */
     public String getPdfaUrl(Node node, String fedoraExtern) {
 	String redirectUrl = null;
 	try {
