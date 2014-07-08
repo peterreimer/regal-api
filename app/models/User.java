@@ -16,7 +16,6 @@ package models;
  * limitations under the License.
  *
  */
-import play.Play;
 
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
@@ -26,18 +25,21 @@ import play.Play;
  */
 @SuppressWarnings("javadoc")
 public class User {
-
-    String name;
-    String pwd;
-
-    public User() {
-
-	name = Play.application().configuration().getString("regal-api.user");
-	pwd = Play.application().configuration()
-		.getString("regal-api.password");
-    }
+    String role = null;
 
     public User authenticate(String username, String password) {
-	return name.equals(username) ? this : null;
+	// authenticate user against LDAP and find it's role
+
+	role = username;
+	return this;
     }
+
+    public String getRole() {
+	return role;
+    }
+
+    public void setRole(String role) {
+	this.role = role;
+    }
+
 }

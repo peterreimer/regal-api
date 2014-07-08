@@ -29,6 +29,7 @@ public class RegalObject {
     String parentPid = null;
     List<String> transformer = null;
     List<String> indexes = null;
+    String accessScheme = null;
 
     /**
      * Default constructor
@@ -107,6 +108,14 @@ public class RegalObject {
      */
     public void setIndexes(List<String> indexes) {
 	this.indexes = indexes;
+    }
+
+    public String getAccessScheme() {
+	return accessScheme;
+    }
+
+    public void setAccessScheme(String accessScheme) {
+	this.accessScheme = accessScheme;
     }
 
 }

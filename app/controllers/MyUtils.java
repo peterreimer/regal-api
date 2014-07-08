@@ -32,6 +32,7 @@ import models.ObjectList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.mvc.Http;
 import play.mvc.Result;
 import actions.BasicAuth;
 
@@ -48,16 +49,19 @@ import de.nrw.hbz.regal.datatypes.Transformer;
  *         https://github.com/wordnik/swagger-ui
  * 
  */
+@BasicAuth
 @Api(value = "/utils", description = "The utils endpoint provides rpc style methods.")
 @SuppressWarnings("javadoc")
 public class MyUtils extends MyController {
     final static Logger logger = LoggerFactory.getLogger(MyUtils.class);
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = ObjectList.class, httpMethod = "POST")
     public static Result index(@PathParam("pid") String pid,
 	    @QueryParam("type") final String type) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.index(pid, pid.split(":")[0], type);
 	    return JsonResponse(new Message(result));
@@ -70,11 +74,13 @@ public class MyUtils extends MyController {
 
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
     public static Result removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("type") final String type) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.removeFromIndex(pid.split(":")[0], type,
 		    pid);
@@ -84,11 +90,13 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", response = ObjectList.class, httpMethod = "POST")
     public static Result publicIndex(@PathParam("pid") String pid,
 	    @QueryParam("type") final String type) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.index(pid, "public_" + pid.split(":")[0],
 		    type);
@@ -98,11 +106,13 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
     public static Result removeFromPublicIndex(@PathParam("pid") String pid,
 	    @QueryParam("type") final String type) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.removeFromIndex("public_"
 		    + pid.split(":")[0], type, pid);
@@ -112,10 +122,12 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", response = ObjectList.class, httpMethod = "POST")
     public static Result lobidify(@PathParam("pid") String pid) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.lobidify(pid);
 	    return JsonResponse(new Message(result));
@@ -124,12 +136,14 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", response = ObjectList.class, httpMethod = "POST")
     public static Result addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.addUrn(id, namespace, snid);
 	    return JsonResponse(new Message(result));
@@ -138,12 +152,14 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "replaceUrn", value = "replaceUrn", notes = "Replaces a urn on the /metadata of the resource.", response = ObjectList.class, httpMethod = "POST")
     public static Result replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.replaceUrn(id, namespace, snid);
 	    return JsonResponse(new Message(result));
@@ -152,11 +168,13 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @BasicAuth
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", response = ObjectList.class, httpMethod = "POST")
     public static Result initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
 	try {
+	    String role = (String) Http.Context.current().args.get("role");
+	    if (!Resource.modifyingAccessIsAllowed(role))
+		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",

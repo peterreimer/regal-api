@@ -65,16 +65,6 @@ public class MyController extends Controller {
 	} catch (Exception e) {
 	    return internalServerError("Not able to create response!");
 	}
-	switch (code) {
-	case 500:
-	    return internalServerError(w.toString());
-	case 404:
-	    return notFound(w.toString());
-	case 400:
-	    return badRequest(w.toString());
-	case 200:
-	    return ok(w.toString());
-	}
-	return internalServerError(w.toString());
+	return status(code, w.toString());
     }
 }

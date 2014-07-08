@@ -114,7 +114,6 @@ public class Actions {
 		.getString("regal-api.fedoraIntern"), Play.application()
 		.configuration().getString("regal-api.user"), Play
 		.application().configuration().getString("regal-api.password"));
-
 	services = new Services(fedora, server);
 	representations = new Representations(fedora, server);
 	search = new SearchFacade(escluster);
@@ -149,14 +148,12 @@ public class Actions {
 	}
 	StringBuffer msg = new StringBuffer();
 	for (String pid : pids) {
-
 	    try {
 		msg.append(delete(pid) + "\n");
 	    } catch (Exception e) {
 		logger.warn(pid + " " + e.getMessage());
 	    }
 	}
-
 	return msg.toString();
     }
 
@@ -166,16 +163,13 @@ public class Actions {
      * @return A short Message
      */
     public String delete(String pid) {
-
 	StringBuffer msg = new StringBuffer();
-
 	List<Node> pids = null;
 	try {
 	    pids = fedora.deleteComplexObject(pid);
 	} catch (Exception e) {
 	    msg.append("\n" + e);
 	}
-
 	try {
 	    if (pids != null) {
 		for (Node n : pids) {
@@ -185,7 +179,6 @@ public class Actions {
 	} catch (Exception e) {
 	    msg.append("\n" + e);
 	}
-
 	return pid + " successfully deleted! \n" + msg + "\n";
     }
 
@@ -431,15 +424,15 @@ public class Actions {
 	}
     }
 
-    /**
-     * @param query
-     *            a query to define objects that must be deleted
-     * @return a message
-     */
-    public String deleteByQuery(String query) {
-	List<String> objects = listByQuery(query);
-	return deleteAll(objects);
-    }
+    // /**
+    // * @param query
+    // * a query to define objects that must be deleted
+    // * @return a message
+    // */
+    // public String deleteByQuery(String query) {
+    // List<String> objects = listByQuery(query);
+    // return deleteAll(objects);
+    // }
 
     /**
      * @param pid
@@ -467,19 +460,24 @@ public class Actions {
      * @return the Node representing the resource
      */
     public Node createResource(String type, String parent,
-	    List<String> transformers, String rawPid, String namespace) {
+	    List<String> transformers, String accessScheme, String rawPid,
+	    String namespace) {
 	logger.debug("create " + type);
-	Node node = createNodeIfNotExists(type, parent, transformers, rawPid,
-		namespace);
+	Node node = createNodeIfNotExists(type, parent, transformers,
+		accessScheme, rawPid, namespace);
+	removeFromIndex(namespace, node.getContentType(), node.getPID());
+	node.setAccessScheme(accessScheme);
 	setNodeType(type, node);
 	linkWithParent(parent, node);
 	updateTransformer(transformers, node);
 	fedora.updateNode(node);
+	index(node);
 	return node;
     }
 
     private Node createNodeIfNotExists(String type, String parent,
-	    List<String> transformers, String rawPid, String namespace) {
+	    List<String> transformers, String accessScheme, String rawPid,
+	    String namespace) {
 	String pid = namespace + ":" + rawPid;
 	Node node = null;
 	if (fedora.nodeExists(pid)) {
@@ -488,8 +486,8 @@ public class Actions {
 	    node = new Node();
 	    node.setNamespace(namespace).setPID(pid);
 	    node.setContentType(type);
+	    node.setAccessScheme(accessScheme);
 	    fedora.createNode(node);
-	    index(node);
 	}
 	return node;
     }
@@ -509,7 +507,6 @@ public class Actions {
 
     private void updateTransformer(List<String> transformers, Node node) {
 	node.removeAllContentModels();
-
 	for (String t : transformers) {
 	    node.addTransformer(new Transformer(t));
 	}
@@ -538,7 +535,6 @@ public class Actions {
      */
     public String getUrn(String pid) {
 	try {
-
 	    String metadataAdress = fedoraExtern + "/objects/" + pid
 		    + "/datastreams/metadata/content";
 	    URL url = new URL(metadataAdress);
@@ -555,11 +551,9 @@ public class Actions {
 			+ urns + "\n Expected exactly one urn.");
 	    }
 	    return urns.get(0);
-
 	} catch (Exception e) {
 	    throw new UrnException(e);
 	}
-
     }
 
     /**
@@ -646,14 +640,12 @@ public class Actions {
      */
     public List<String> list(String type, String namespace, int from,
 	    int until, String getListingFrom) {
-
 	List<String> list = null;
 	if (!"es".equals(getListingFrom)) {
 	    list = listRepo(type, namespace, from, until);
 	} else {
 	    list = listSearch(type, namespace, from, until);
 	}
-
 	return list;
     }
 
@@ -670,7 +662,6 @@ public class Actions {
      */
     public List<String> listSearch(String type, String namespace, int from,
 	    int until) {
-
 	return search.listIds(namespace, type, from, until);
     }
 
@@ -692,9 +683,7 @@ public class Actions {
 	} else {
 	    list = listRepo(type, namespace);
 	}
-
 	return sublist(list, from, until);
-
     }
 
     private List<String> listRepo(String type, String namespace) {
@@ -733,7 +722,6 @@ public class Actions {
     private List<String> listRepoType(String type, int from, int until) {
 	List<String> list = listRepoType(type);
 	return sublist(list, from, until);
-
     }
 
     /**
@@ -750,7 +738,6 @@ public class Actions {
     private List<String> listRepoNamespace(String namespace, int from, int until) {
 	List<String> list = listRepoNamespace(namespace);
 	return sublist(list, from, until);
-
     }
 
     private List<String> listByQuery(String query) {
@@ -786,9 +773,7 @@ public class Actions {
      */
     public String listAsHtml(String type, String namespace, int from,
 	    int until, String getListingFrom) {
-
 	List<String> list = list(type, namespace, from, until, getListingFrom);
-
 	return representations.getAllOfTypeAsHtml(list, type, namespace, from,
 		until, getListingFrom);
     }
@@ -832,10 +817,8 @@ public class Actions {
     public String replaceUrn(String pid, String namespace, String snid) {
 	String subject = namespace + ":" + pid;
 	String urn = services.generateUrn(subject, snid);
-
 	// String hasUrnOld =
 	// "http://geni-orca.renci.org/owl/topology.owl#hasURN";
-
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	// String sameAs = "http://www.w3.org/2002/07/owl#sameAs";
 	String metadata = readMetadata(subject);
@@ -861,7 +844,6 @@ public class Actions {
 	// String hasUrnOld =
 	// "http://geni-orca.renci.org/owl/topology.owl#hasURN";
 	String hasUrn = "http://purl.org/lobid/lv#urn";
-
 	String metadata = null;
 	if (fedora.dataStreamExists(subject, "metadata")) {
 	    metadata = readMetadata(subject);
@@ -992,5 +974,4 @@ public class Actions {
 	return representations.getReM(pid, format, fedoraExtern, parents,
 		children);
     }
-
 }
