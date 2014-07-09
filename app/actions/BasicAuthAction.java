@@ -52,26 +52,13 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 	String username = credString[0];
 	String password = credString[1];
+
 	User authUser = new User().authenticate(username, password);
-
-	// authenticate user against LDAP and find it's role
-
-	if ("admin".equals(authUser.getRole())) {
+	if (authUser != null) {
 	    context.args.put("role", authUser.getRole());
 	    return delegate.call(context);
-	} else if ("editor".equals(authUser.getRole())) {
-	    context.args.put("role", authUser.getRole());
-	    return delegate.call(context);
-	} else if ("reader".equals(authUser.getRole())) {
-	    context.args.put("role", authUser.getRole());
-	    return delegate.call(context);
-	} else if ("anonymous".equals(authUser.getRole())) {
-	    context.args.put("role", authUser.getRole());
-	    return delegate.call(context);
-	} else {
-	    return unauthorized(context);
 	}
-
+	return unauthorized(context);
     }
 
     private play.libs.F.Promise<SimpleResult> unauthorized(Http.Context context) {

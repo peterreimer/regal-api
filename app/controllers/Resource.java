@@ -638,15 +638,16 @@ public class Resource extends MyController {
     }
 
     public static boolean readAccessIsAllowed(String accessScheme, String role) {
-	if (!"admin".equals(role)) {
+	if (!"edoweb-admin".equals(role)) {
 	    if ("public".equals(accessScheme)) {
 		return true;
 	    } else if ("lbz-wide".equals(accessScheme)) {
-		if ("edior".equals(role) || "reader".equals(role)) {
+		if ("edoweb-editor".equals(role)
+			|| "edoweb-reader".equals(role)) {
 		    return true;
 		}
 	    } else if ("private".equals(accessScheme)) {
-		if ("editor".equals(role))
+		if ("edoweb-editor".equals(role))
 		    return true;
 	    }
 	} else {
@@ -656,7 +657,7 @@ public class Resource extends MyController {
     }
 
     public static boolean modifyingAccessIsAllowed(String role) {
-	if ("admin".equals(role) || "editor".equals(role))
+	if ("edoweb-admin".equals(role) || "edoweb-editor".equals(role))
 	    return true;
 	return false;
     }
