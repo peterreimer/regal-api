@@ -16,9 +16,6 @@
  */
 package helper;
 
-import static de.nrw.hbz.regal.fedora.FedoraVocabulary.IS_MEMBER_OF;
-import static de.nrw.hbz.regal.fedora.FedoraVocabulary.ITEM_ID;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -29,24 +26,27 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
-import org.culturegraph.mf.Flux;
 import org.openrdf.model.Statement;
-import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import de.nrw.hbz.regal.datatypes.DCBean;
-import de.nrw.hbz.regal.datatypes.Link;
-import de.nrw.hbz.regal.datatypes.Node;
-import de.nrw.hbz.regal.exceptions.ArchiveException;
-import de.nrw.hbz.regal.fedora.CopyUtils;
-import de.nrw.hbz.regal.fedora.FedoraInterface;
-import de.nrw.hbz.regal.fedora.RdfUtils;
-import de.nrw.hbz.regal.fedora.XmlUtils;
+import org.antlr.runtime.RecognitionException;
+import org.culturegraph.mf.Flux;
+import org.openrdf.repository.RepositoryResult;
+
+import archive.datatypes.DCBean;
+import archive.datatypes.Link;
+import archive.datatypes.Node;
+import archive.exceptions.ArchiveException;
+import archive.fedora.CopyUtils;
+import archive.fedora.FedoraInterface;
+import archive.fedora.RdfUtils;
+import archive.fedora.XmlUtils;
+
+import static archive.fedora.FedoraVocabulary.*;
 
 /**
  * 

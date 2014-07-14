@@ -16,8 +16,6 @@
  */
 package controllers;
 
-import static de.nrw.hbz.regal.fedora.FedoraVocabulary.HAS_PART;
-import static de.nrw.hbz.regal.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.Actions;
 import helper.HttpArchiveException;
 
@@ -25,9 +23,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 import models.DCBeanAnnotated;
 import models.Message;
@@ -42,15 +37,18 @@ import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import actions.BasicAuth;
+import archive.exceptions.ArchiveException;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import de.nrw.hbz.regal.datatypes.Node;
-import de.nrw.hbz.regal.exceptions.ArchiveException;
+import static archive.fedora.FedoraVocabulary.*;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import com.fasterxml.jackson.databind.JsonNode;
+import archive.datatypes.Node;
 
 /**
  * 

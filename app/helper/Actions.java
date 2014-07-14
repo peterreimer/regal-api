@@ -16,11 +16,11 @@
  */
 package helper;
 
-import static de.nrw.hbz.regal.datatypes.Vocabulary.REL_CONTENT_TYPE;
-import static de.nrw.hbz.regal.datatypes.Vocabulary.REL_IS_NODE_TYPE;
-import static de.nrw.hbz.regal.datatypes.Vocabulary.TYPE_OBJECT;
-import static de.nrw.hbz.regal.fedora.FedoraVocabulary.HAS_PART;
-import static de.nrw.hbz.regal.fedora.FedoraVocabulary.IS_PART_OF;
+import static archive.datatypes.Vocabulary.REL_CONTENT_TYPE;
+import static archive.datatypes.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.datatypes.Vocabulary.TYPE_OBJECT;
+import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,19 +40,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
-import de.nrw.hbz.regal.datatypes.DCBean;
-import de.nrw.hbz.regal.datatypes.Link;
-import de.nrw.hbz.regal.datatypes.Node;
-import de.nrw.hbz.regal.datatypes.Transformer;
-import de.nrw.hbz.regal.exceptions.ArchiveException;
-import de.nrw.hbz.regal.fedora.CopyUtils;
-import de.nrw.hbz.regal.fedora.FedoraFactory;
-import de.nrw.hbz.regal.fedora.FedoraInterface;
-import de.nrw.hbz.regal.fedora.FedoraVocabulary;
-import de.nrw.hbz.regal.fedora.RdfException;
-import de.nrw.hbz.regal.fedora.RdfUtils;
-import de.nrw.hbz.regal.fedora.UrlConnectionException;
-import de.nrw.hbz.regal.search.SearchFacade;
+import archive.datatypes.DCBean;
+import archive.datatypes.Link;
+import archive.datatypes.Node;
+import archive.datatypes.Transformer;
+import archive.exceptions.ArchiveException;
+import archive.fedora.CopyUtils;
+import archive.fedora.FedoraFactory;
+import archive.fedora.FedoraInterface;
+import archive.fedora.FedoraVocabulary;
+import archive.fedora.RdfException;
+import archive.fedora.RdfUtils;
+import archive.fedora.UrlConnectionException;
+import archive.search.SearchFacade;
 
 /**
  * Actions provide a single class to access the archive. All endpoints are using

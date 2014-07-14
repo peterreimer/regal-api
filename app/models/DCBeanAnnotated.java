@@ -19,8 +19,8 @@ package models;
 import java.util.List;
 import java.util.Vector;
 
-import de.nrw.hbz.regal.datatypes.DCBean;
-import de.nrw.hbz.regal.datatypes.Node;
+import archive.datatypes.DCBean;
+import archive.datatypes.Node;
 
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de

@@ -19,8 +19,8 @@ package helper;
 import java.io.InputStream;
 import java.net.URL;
 
-import de.nrw.hbz.regal.datatypes.Node;
-import de.nrw.hbz.regal.mab.MabConverter;
+import archive.datatypes.Node;
+import converter.mab.MabConverter;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de

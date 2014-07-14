@@ -29,7 +29,7 @@ import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 
-import de.nrw.hbz.regal.exceptions.ArchiveException;
+import archive.exceptions.ArchiveException;
 
 /**
  * provides text extraction with itext and pdfbox.

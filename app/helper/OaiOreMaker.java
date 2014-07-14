@@ -54,8 +54,8 @@ import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JSONUtils;
 
-import de.nrw.hbz.regal.datatypes.Node;
-import de.nrw.hbz.regal.datatypes.Transformer;
+import archive.datatypes.Node;
+import archive.datatypes.Transformer;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de

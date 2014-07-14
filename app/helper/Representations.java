@@ -26,11 +26,11 @@ import models.RegalObject;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stringtemplate.v4.ST;
 
-import de.nrw.hbz.regal.datatypes.Node;
-import de.nrw.hbz.regal.datatypes.Transformer;
-import de.nrw.hbz.regal.fedora.FedoraInterface;
+import org.stringtemplate.v4.ST;
+import archive.datatypes.Node;
+import archive.datatypes.Transformer;
+import archive.fedora.FedoraInterface;
 
 /**
  * 

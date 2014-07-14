@@ -10,8 +10,6 @@ Play2WarKeys.servletVersion := "2.5"
 
 libraryDependencies ++= Seq(
   cache,
-  "de.nrw.hbz.regal" % "regal-archive" % "0.5.0-SNAPSHOT" ,
-  "de.nrw.hbz.regal" % "regal-mabconverter" % "0.5.0-SNAPSHOT" ,
   "org.marc4j" % "marc4j" % "2.4", 
   "junit" % "junit" % "4.10", 
   "org.lobid" % "lodmill-rd" % "regal-0.1.0", 
@@ -28,7 +26,8 @@ libraryDependencies ++= Seq(
   "org.codehaus.jackson" % "jackson-core-lgpl" % "1.9.13",
   "org.codehaus.jackson" % "jackson-mapper-lgpl" % "1.9.13" ,
   "com.github.jsonld-java" % "jsonld-java" % "0.3",
-  "com.sun.jersey" % "jersey-core" % "1.17.1" ,
+  "com.sun.jersey" % "jersey-core" % "1.18.1" ,
+  "com.sun.jersey" % "jersey-server" % "1.18.1" ,
   "org.openrdf.sesame" % "sesame-repository-api" % "2.7.10" ,
   "org.openrdf.sesame" % "sesame-core" % "2.7.10",
   "org.openrdf.sesame" % "sesame-rio" % "2.7.10",
@@ -49,13 +48,19 @@ libraryDependencies ++= Seq(
   "org.openrdf.sesame" % "sesame-repository-sail" % "2.7.10",
   "org.openrdf.sesame" % "sesame-sail-memory" % "2.7.10",
   "org.openrdf.sesame" % "sesame-sail-nativerdf" % "2.7.10",
-  "com.wordnik" %% "swagger-play2" % "1.3.5"
+  "com.wordnik" %% "swagger-play2" % "1.3.5",
+  "com.yourmediashelf.fedora.client" % "fedora-client" % "0.7",
+  "com.yourmediashelf.fedora.client" % "fedora-client-core" % "0.7",
+  "org.elasticsearch" % "elasticsearch" % "1.1.0",
+  "org.antlr" % "antlr4" % "4.0",
+  "javax.ws.rs" % "javax.ws.rs-api" % "2.0",
+  "xmlunit" % "xmlunit" % "1.5" 
 )
 
 play.Project.playJavaSettings
 
 resolvers := Seq("Maven Central Server" at "http://repo1.maven.org/maven2","edoweb releases" at "http://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "http://maven.ontotext.com/content/repositories/aduna/" ,
-Resolver.mavenLocal,"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/"
+"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty"
 )
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
