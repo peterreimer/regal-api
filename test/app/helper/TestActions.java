@@ -1,3 +1,5 @@
+package app.helper;
+
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -16,12 +18,9 @@
  */
 import helper.Actions;
 import helper.HttpArchiveException;
-import helper.Md5Checksum;
 import helper.Services;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
@@ -39,7 +38,7 @@ import archive.datatypes.Transformer;
 import archive.exceptions.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfUtils;
-import archive.fedora.XmlUtils;
+import base.BaseModelTest;
 
 /**
  * 
@@ -47,7 +46,7 @@ import archive.fedora.XmlUtils;
  * 
  */
 @SuppressWarnings("javadoc")
-public class TestActions {
+public class TestActions extends BaseModelTest {
 
     Actions actions;
 
@@ -249,18 +248,19 @@ public class TestActions {
 		"application/json+compact"));
     }
 
-    @Test
-    public void oaidc() throws IOException {
-	createTestObject("123");
-	actions.addUrn("123", "test", "test");
-	String schemaDecl = ""; // "<!DOCTYPE oai_dc PUBLIC \"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\" \"\">\n";
-	URL schema = new URL("http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
-	String xmlString = schemaDecl + actions.oaidc("test:123");
-	XmlUtils.validate(
-		new ByteArrayInputStream(xmlString.getBytes("UTF-8")),
-		schema.openStream());
-	System.out.println(actions.oaidc("test:123"));
-    }
+    // @Test
+    // public void oaidc() throws IOException {
+    // createTestObject("123");
+    // actions.addUrn("123", "test", "test");
+    // String schemaDecl = ""; //
+    // "<!DOCTYPE oai_dc PUBLIC \"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\" \"\">\n";
+    // URL schema = new URL("http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
+    // String xmlString = schemaDecl + actions.oaidc("test:123");
+    // XmlUtils.validate(
+    // new ByteArrayInputStream(xmlString.getBytes("UTF-8")),
+    // schema.openStream());
+    // System.out.println(actions.oaidc("test:123"));
+    // }
 
     @Test
     public void html() throws IOException {
@@ -350,12 +350,12 @@ public class TestActions {
 	actions.addUrn("123", "test", "hbz:test:902");
     }
 
-    @Test
-    public void alephConversion() throws IOException {
-	createTestObject("123");
-	Node node = actions.readNode("test:123");
-	System.out.println("Start-\"" + actions.aleph(node) + "\"-End");
-    }
+    // @Test
+    // public void alephConversion() throws IOException {
+    // createTestObject("123");
+    // Node node = actions.readNode("test:123");
+    // System.out.println("Start-\"" + actions.aleph(node) + "\"-End");
+    // }
 
     @Test(expected = HttpArchiveException.class)
     public void checksumTest_shouldFail() throws IOException {
@@ -371,22 +371,22 @@ public class TestActions {
 	}
     }
 
-    @Test
-    public void checksumTest_shouldSucceed() throws IOException {
-	createTestObject("123");
-	try {
-	    Md5Checksum c = new Md5Checksum();
-	    String md5 = c.getMd5Checksum(Thread.currentThread()
-		    .getContextClassLoader().getResourceAsStream("test.pdf"));
-	    String msg = actions.updateData("test:123", Thread.currentThread()
-		    .getContextClassLoader().getResourceAsStream("test.pdf"),
-		    "application/pdf", "TestFile", md5);
-	    System.out.println(msg);
-	} catch (HttpArchiveException e) {
-	    System.out.println(e);
-	    throw e;
-	}
-    }
+    // @Test
+    // public void checksumTest_shouldSucceed() throws IOException {
+    // createTestObject("123");
+    // try {
+    // Md5Checksum c = new Md5Checksum();
+    // String md5 = c.getMd5Checksum(Thread.currentThread()
+    // .getContextClassLoader().getResourceAsStream("test.pdf"));
+    // String msg = actions.updateData("test:123", Thread.currentThread()
+    // .getContextClassLoader().getResourceAsStream("test.pdf"),
+    // "application/pdf", "TestFile", md5);
+    // System.out.println(msg);
+    // } catch (HttpArchiveException e) {
+    // System.out.println(e);
+    // throw e;
+    // }
+    // }
 
     @After
     public void tearDown() {

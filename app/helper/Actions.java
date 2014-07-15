@@ -512,8 +512,10 @@ public class Actions {
 
     private void updateTransformer(List<String> transformers, Node node) {
 	node.removeAllContentModels();
-	for (String t : transformers) {
-	    node.addTransformer(new Transformer(t));
+	if (transformers != null) {
+	    for (String t : transformers) {
+		node.addTransformer(new Transformer(t));
+	    }
 	}
     }
 

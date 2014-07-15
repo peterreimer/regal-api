@@ -28,6 +28,8 @@ libraryDependencies ++= Seq(
   "com.github.jsonld-java" % "jsonld-java" % "0.3",
   "com.sun.jersey" % "jersey-core" % "1.18.1" ,
   "com.sun.jersey" % "jersey-server" % "1.18.1" ,
+  "com.sun.jersey.contribs" % "jersey-multipart" % "1.18.1",
+  "com.sun.jersey" % "jersey-json" % "1.18.1",
   "org.openrdf.sesame" % "sesame-repository-api" % "2.7.10" ,
   "org.openrdf.sesame" % "sesame-core" % "2.7.10",
   "org.openrdf.sesame" % "sesame-rio" % "2.7.10",
@@ -48,13 +50,17 @@ libraryDependencies ++= Seq(
   "org.openrdf.sesame" % "sesame-repository-sail" % "2.7.10",
   "org.openrdf.sesame" % "sesame-sail-memory" % "2.7.10",
   "org.openrdf.sesame" % "sesame-sail-nativerdf" % "2.7.10",
+  "com.github.jsonld-java" % "jsonld-java-sesame" % "0.3" ,
   "com.wordnik" %% "swagger-play2" % "1.3.5",
   "com.yourmediashelf.fedora.client" % "fedora-client" % "0.7",
   "com.yourmediashelf.fedora.client" % "fedora-client-core" % "0.7",
   "org.elasticsearch" % "elasticsearch" % "1.1.0",
   "org.antlr" % "antlr4" % "4.0",
   "javax.ws.rs" % "javax.ws.rs-api" % "2.0",
-  "xmlunit" % "xmlunit" % "1.5" 
+  "xmlunit" % "xmlunit" % "1.5",
+  "com.sun.xml.bind" % "jaxb-impl" % "2.2.6",
+  "javax.xml.bind" % "jaxb-api" % "2.2.6",
+  "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2"
 )
 
 play.Project.playJavaSettings

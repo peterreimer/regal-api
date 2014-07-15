@@ -1,0 +1,12 @@
+language: java
+env:
+  - PLAY_VERSION=2.2.3
+jdk: oraclejdk8
+before_script:
+ - wget http://edoweb-rlp.de/fedora.tgz
+ - tar xzf fedora.tgz
+ - ./fedora/tomcat/bin/startup.sh
+install:
+  - mvn org.nanoko.playframework:play2-maven-plugin:install-play -Dplay2version=2.2.3 -Dplay2basedir=${HOME}/opt
+  - mvn play2:start
+  - mvn clean install
