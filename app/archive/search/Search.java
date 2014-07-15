@@ -46,7 +46,7 @@ public class Search {
     final static Logger logger = LoggerFactory.getLogger(Search.class);
 
     @SuppressWarnings("serial")
-    public class InvalidRangeException extends RuntimeException {
+    class InvalidRangeException extends RuntimeException {
 	// It is just there to be thrown
     }
 

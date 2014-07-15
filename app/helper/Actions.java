@@ -110,10 +110,13 @@ public class Actions {
 		.getString("regal-api.urnbase");
 	escluster = Play.application().configuration()
 		.getString("regal-api.escluster");
-	fedora = FedoraFactory.getFedoraImpl(Play.application().configuration()
-		.getString("regal-api.fedoraIntern"), Play.application()
-		.configuration().getString("regal-api.user"), Play
-		.application().configuration().getString("regal-api.password"));
+	fedora = FedoraFactory.getFedoraImpl(
+		Play.application().configuration()
+			.getString("regal-api.fedoraIntern"),
+		Play.application().configuration()
+			.getString("regal-api.fedoraUser"),
+		Play.application().configuration()
+			.getString("regal-api.fedoraUserPassword"));
 	services = new Services(fedora, server);
 	representations = new Representations(fedora, server);
 	search = new SearchFacade(escluster);
