@@ -8,4 +8,4 @@ install:
   - ./fedora/tomcat/bin/startup.sh
   - mvn org.nanoko.playframework:play2-maven-plugin:install-play -Dplay2version=2.2.3 -Dplay2basedir=${HOME}/opt
   - mvn play2:start
-  - mvn clean install
+  - mvn clean install -D skipTests
