@@ -114,73 +114,74 @@ public class FedoraFacadeTest extends BaseModelTest {
 
     }
 
-//    @Test
-//    public void updateNode() {
-//
-//	// Object Creation
-//	facade.createNode(object);
-//	object = facade.readNode(object.getPID());
-//	Assert.assertEquals("Ein Testtitel",
-//		object.dublinCoreData.getFirstTitle());
-//	Assert.assertEquals("test", object.getFileLabel());
-//	// Assert.assertEquals("application/pdf", object.getMimeType());
-//
-//	// Object update modifying the local instance
-//	Vector<String> newTitle = new Vector<String>();
-//	newTitle.add("Neuer Titel");
-//	object.dublinCoreData.setTitle(newTitle);
-//	URL url = Thread.currentThread().getContextClassLoader()
-//		.getResource("logback-test.xml");
-//	object.setUploadData(url.getPath(), "text/xml");
-//	object.setFileLabel("logback-test.xml");
-//	facade.updateNode(object);
-//
-//	object = facade.readNode(object.getPID());
-//	Assert.assertEquals("Neuer Titel",
-//		object.dublinCoreData.getFirstTitle());
-//	Assert.assertEquals("logback-test.xml", object.getFileLabel());
-//	// Assert.assertEquals("text/xml", object.getMimeType());
-//
-//	// Object update on the reread object
-//	object.setUploadData(url.getPath(), "application/pdf");
-//	facade.updateNode(object);
-//	object = facade.readNode(object.getPID());
-//	// Assert.assertEquals("application/pdf", object.getMimeType());
-//    }
+    // @Test
+    // public void updateNode() {
+    //
+    // // Object Creation
+    // facade.createNode(object);
+    // object = facade.readNode(object.getPID());
+    // Assert.assertEquals("Ein Testtitel",
+    // object.dublinCoreData.getFirstTitle());
+    // Assert.assertEquals("test", object.getFileLabel());
+    // // Assert.assertEquals("application/pdf", object.getMimeType());
+    //
+    // // Object update modifying the local instance
+    // Vector<String> newTitle = new Vector<String>();
+    // newTitle.add("Neuer Titel");
+    // object.dublinCoreData.setTitle(newTitle);
+    // URL url = Thread.currentThread().getContextClassLoader()
+    // .getResource("logback-test.xml");
+    // object.setUploadData(url.getPath(), "text/xml");
+    // object.setFileLabel("logback-test.xml");
+    // facade.updateNode(object);
+    //
+    // object = facade.readNode(object.getPID());
+    // Assert.assertEquals("Neuer Titel",
+    // object.dublinCoreData.getFirstTitle());
+    // Assert.assertEquals("logback-test.xml", object.getFileLabel());
+    // // Assert.assertEquals("text/xml", object.getMimeType());
+    //
+    // // Object update on the reread object
+    // object.setUploadData(url.getPath(), "application/pdf");
+    // facade.updateNode(object);
+    // object = facade.readNode(object.getPID());
+    // // Assert.assertEquals("application/pdf", object.getMimeType());
+    // }
 
-//    @Test(expected = org.junit.ComparisonFailure.class)
-//    public void updateNode_fails_because_of_fedora_bug_in_mime_type_handling() {
-//
-//	// Object Creation
-//	facade.createNode(object);
-//	object = facade.readNode(object.getPID());
-//	Assert.assertEquals("Ein Testtitel",
-//		object.dublinCoreData.getFirstTitle());
-//	Assert.assertEquals("test", object.getFileLabel());
-//	Assert.assertEquals("application/pdf", object.getMimeType());
-//
-//	// Object update modifying the local instance
-//	Vector<String> newTitle = new Vector<String>();
-//	newTitle.add("Neuer Titel");
-//	object.dublinCoreData.setTitle(newTitle);
-//	URL url = Thread.currentThread().getContextClassLoader()
-//		.getResource("logback-test.xml");
-//	object.setUploadData(url.getPath(), "text/xml");
-//	object.setFileLabel("logback-test.xml");
-//	facade.updateNode(object);
-//
-//	object = facade.readNode(object.getPID());
-//	Assert.assertEquals("Neuer Titel",
-//		object.dublinCoreData.getFirstTitle());
-//	Assert.assertEquals("logback-test.xml", object.getFileLabel());
-//	Assert.assertEquals("text/xml", object.getMimeType());
-//
-//	// Object update on the reread object
-//	object.setUploadData(url.getPath(), "application/pdf");
-//	facade.updateNode(object);
-//	object = facade.readNode(object.getPID());
-//	Assert.assertEquals("application/pdf", object.getMimeType());
-//    }
+    // @Test(expected = org.junit.ComparisonFailure.class)
+    // public void
+    // updateNode_fails_because_of_fedora_bug_in_mime_type_handling() {
+    //
+    // // Object Creation
+    // facade.createNode(object);
+    // object = facade.readNode(object.getPID());
+    // Assert.assertEquals("Ein Testtitel",
+    // object.dublinCoreData.getFirstTitle());
+    // Assert.assertEquals("test", object.getFileLabel());
+    // Assert.assertEquals("application/pdf", object.getMimeType());
+    //
+    // // Object update modifying the local instance
+    // Vector<String> newTitle = new Vector<String>();
+    // newTitle.add("Neuer Titel");
+    // object.dublinCoreData.setTitle(newTitle);
+    // URL url = Thread.currentThread().getContextClassLoader()
+    // .getResource("logback-test.xml");
+    // object.setUploadData(url.getPath(), "text/xml");
+    // object.setFileLabel("logback-test.xml");
+    // facade.updateNode(object);
+    //
+    // object = facade.readNode(object.getPID());
+    // Assert.assertEquals("Neuer Titel",
+    // object.dublinCoreData.getFirstTitle());
+    // Assert.assertEquals("logback-test.xml", object.getFileLabel());
+    // Assert.assertEquals("text/xml", object.getMimeType());
+    //
+    // // Object update on the reread object
+    // object.setUploadData(url.getPath(), "application/pdf");
+    // facade.updateNode(object);
+    // object = facade.readNode(object.getPID());
+    // Assert.assertEquals("application/pdf", object.getMimeType());
+    // }
 
     @Test
     public void findObjects() {
