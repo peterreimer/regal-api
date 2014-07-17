@@ -1,3 +1,4 @@
+package archive.fedora;
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -15,13 +16,11 @@
  *
  */
 
-
 import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openrdf.model.Graph;
 import org.openrdf.rio.RDFFormat;

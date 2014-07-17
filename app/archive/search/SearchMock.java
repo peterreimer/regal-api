@@ -16,8 +16,10 @@ package archive.search;
  * limitations under the License.
  *
  */
-import java.util.List;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
+import java.util.List;
+
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.node.Node;
@@ -27,7 +29,7 @@ import org.elasticsearch.search.SearchHits;
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
-public class SearchMock {
+class SearchMock {
 
     Search search;
     Node node = null;

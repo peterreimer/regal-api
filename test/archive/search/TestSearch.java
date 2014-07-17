@@ -1,3 +1,4 @@
+package archive.search;
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *

@@ -16,18 +16,17 @@
  */
 import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.HTMLUNIT;
-import static play.test.Helpers.fakeApplication;
-import static play.test.Helpers.inMemoryDatabase;
 import static play.test.Helpers.running;
 import static play.test.Helpers.testServer;
 
 import org.junit.Test;
 
 import play.libs.F.Callback;
+import play.libs.WS;
 import play.test.TestBrowser;
 
 /**
- * @author Jan Schnasse, schnasse@hbz-nrw.de #
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  *         add your integration test here in this example we just check if the
  *         welcome page is being shown
@@ -36,14 +35,91 @@ import play.test.TestBrowser;
 public class IntegrationTest {
 
     @Test
-    public void test() {
-	running(testServer(3333, fakeApplication(inMemoryDatabase())),
-		HTMLUNIT, new Callback<TestBrowser>() {
-		    public void invoke(TestBrowser browser) {
-			browser.goTo("http://localhost:3333");
-			assertThat(browser.pageSource()).contains("Swagger");
-		    }
-		});
+    public void serverStarts() {
+	running(testServer(3333), new Runnable() {
+	    @SuppressWarnings("deprecation")
+	    public void run() {
+		assertThat(
+			WS.url("http://localhost:3333").get().get().getStatus())
+			.isEqualTo(200);
+	    }
+	});
+    }
+
+    @Test
+    public void serverWelcome() {
+	running(testServer(3333), HTMLUNIT, new Callback<TestBrowser>() {
+	    public void invoke(TestBrowser browser) {
+		browser.goTo("http://localhost:3333");
+		assertThat(browser.url()).isEqualTo(
+			"http://localhost:3333/public/docs/index.html");
+	    }
+	});
+    }
+
+    @Test
+    public void asksForAuthorization() {
+
+    }
+
+    @Test
+    public void createObject() {
+
+    }
+
+    @Test
+    public void moveObject() {
+
+    }
+
+    @Test
+    public void listObject() {
+
+    }
+
+    @Test
+    public void deleteObject() {
+
+    }
+
+    @Test
+    public void listObjects() {
+
+    }
+
+    @Test
+    public void accessObject_fail() {
+
+    }
+
+    @Test
+    public void accessObject_succeed() {
+
+    }
+
+    @Test
+    public void addUrn() {
+
+    }
+
+    @Test
+    public void createTransformer() {
+
+    }
+
+    @Test
+    public void addAndRemoveTransformer() {
+
+    }
+
+    @Test
+    public void checksum_fail() {
+
+    }
+
+    @Test
+    public void checksum_succeed() {
+
     }
 
 }
