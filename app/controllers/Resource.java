@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import models.DCBeanAnnotated;
+import models.DublinCoreData;
 import models.Message;
 import models.ObjectList;
 import models.RegalObject;
@@ -186,7 +186,7 @@ public class Resource extends MyController {
 		throw new HttpArchiveException(401);
 
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    DCBeanAnnotated dc = actions.readDC(pid);
+	    DublinCoreData dc = actions.readDC(pid);
 	    return JsonResponse(dc);
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());

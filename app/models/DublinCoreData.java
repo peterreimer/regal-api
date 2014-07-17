@@ -19,7 +19,6 @@ package models;
 import java.util.List;
 import java.util.Vector;
 
-import archive.datatypes.DCBean;
 import archive.datatypes.Node;
 
 /**
@@ -27,7 +26,7 @@ import archive.datatypes.Node;
  * 
  */
 
-public class DCBeanAnnotated {
+public class DublinCoreData {
     List<String> contributer = new Vector<String>();
     List<String> coverage = new Vector<String>();
     List<String> creator = new Vector<String>();
@@ -48,7 +47,7 @@ public class DCBeanAnnotated {
      * An empty DCBean
      * 
      */
-    public DCBeanAnnotated() {
+    public DublinCoreData() {
 
     }
 
@@ -56,7 +55,7 @@ public class DCBeanAnnotated {
      * @param node
      *            a bean to initialise from
      */
-    public DCBeanAnnotated(DCBean node) {
+    public DublinCoreData(DublinCoreData node) {
 	contributer = node.getContributer();
 	coverage = node.getCoverage();
 	creator = node.getCreator();
@@ -78,8 +77,8 @@ public class DCBeanAnnotated {
      * @param node
      *            a node to initalise from
      */
-    public DCBeanAnnotated(Node node) {
-	DCBean dc = node.getBean();
+    public DublinCoreData(Node node) {
+	DublinCoreData dc = node.getBean();
 	contributer = dc.getContributer();
 	coverage = dc.getCoverage();
 	creator = dc.getCreator();
@@ -101,7 +100,7 @@ public class DCBeanAnnotated {
      * @param other
      *            a bean to copy data from
      */
-    public void add(DCBeanAnnotated other) {
+    public void add(DublinCoreData other) {
 	for (String str : other.getContributer()) {
 	    contributer.add(str);
 	}
@@ -161,7 +160,7 @@ public class DCBeanAnnotated {
      *            dc:contributer
      * @return this
      */
-    public DCBeanAnnotated setContributer(List<String> contributer) {
+    public DublinCoreData setContributer(List<String> contributer) {
 	this.contributer = contributer;
 	return this;
     }
@@ -171,7 +170,7 @@ public class DCBeanAnnotated {
      *            dc:contributer
      * @return this
      */
-    public DCBeanAnnotated addContributer(String e) {
+    public DublinCoreData addContributer(String e) {
 	contributer.add(e);
 	return this;
     }
@@ -200,7 +199,7 @@ public class DCBeanAnnotated {
      *            dc:coverage
      * @return this
      */
-    public DCBeanAnnotated setCoverage(List<String> coverage) {
+    public DublinCoreData setCoverage(List<String> coverage) {
 	this.coverage = coverage;
 	return this;
     }
@@ -210,7 +209,7 @@ public class DCBeanAnnotated {
      *            dc:coverage
      * @return this
      */
-    public DCBeanAnnotated addCoverage(String e) {
+    public DublinCoreData addCoverage(String e) {
 	coverage.add(e);
 	return this;
     }
@@ -239,7 +238,7 @@ public class DCBeanAnnotated {
      *            dc:creator
      * @return this
      */
-    public DCBeanAnnotated setCreator(List<String> creator) {
+    public DublinCoreData setCreator(List<String> creator) {
 	this.creator = creator;
 	return this;
     }
@@ -249,7 +248,7 @@ public class DCBeanAnnotated {
      *            dc:creator
      * @return this
      */
-    public DCBeanAnnotated addCreator(String e) {
+    public DublinCoreData addCreator(String e) {
 	creator.add(e);
 	return this;
     }
@@ -278,7 +277,7 @@ public class DCBeanAnnotated {
      *            dc:date
      * @return this
      */
-    public DCBeanAnnotated setDate(List<String> date) {
+    public DublinCoreData setDate(List<String> date) {
 	this.date = date;
 	return this;
     }
@@ -288,7 +287,7 @@ public class DCBeanAnnotated {
      *            dc:date
      * @return this
      */
-    public DCBeanAnnotated addDate(String e) {
+    public DublinCoreData addDate(String e) {
 	date.add(e);
 	return this;
     }
@@ -317,7 +316,7 @@ public class DCBeanAnnotated {
      *            dc:description
      * @return this
      */
-    public DCBeanAnnotated setDescription(List<String> description) {
+    public DublinCoreData setDescription(List<String> description) {
 	this.description = description;
 	return this;
     }
@@ -327,7 +326,7 @@ public class DCBeanAnnotated {
      *            dc:description
      * @return this
      */
-    public DCBeanAnnotated addDescription(String e) {
+    public DublinCoreData addDescription(String e) {
 	description.add(e);
 	return this;
     }
@@ -356,7 +355,7 @@ public class DCBeanAnnotated {
      *            dc:format
      * @return this
      */
-    public DCBeanAnnotated setFormat(List<String> format) {
+    public DublinCoreData setFormat(List<String> format) {
 	this.format = format;
 	return this;
     }
@@ -366,7 +365,7 @@ public class DCBeanAnnotated {
      *            dc:format
      * @return this
      */
-    public DCBeanAnnotated addFormat(String e) {
+    public DublinCoreData addFormat(String e) {
 	format.add(e);
 	return this;
     }
@@ -395,7 +394,7 @@ public class DCBeanAnnotated {
      *            dc:identifier
      * @return this
      */
-    public DCBeanAnnotated setIdentifier(List<String> list) {
+    public DublinCoreData setIdentifier(List<String> list) {
 	this.identifier = list;
 	return this;
     }
@@ -405,7 +404,7 @@ public class DCBeanAnnotated {
      *            dc:identifier
      * @return this
      */
-    public DCBeanAnnotated addIdentifier(String e) {
+    public DublinCoreData addIdentifier(String e) {
 	identifier.add(e);
 	return this;
     }
@@ -434,7 +433,7 @@ public class DCBeanAnnotated {
      *            dc:language
      * @return this
      */
-    public DCBeanAnnotated setLanguage(List<String> language) {
+    public DublinCoreData setLanguage(List<String> language) {
 	this.language = language;
 	return this;
     }
@@ -444,7 +443,7 @@ public class DCBeanAnnotated {
      *            dc:language
      * @return this
      */
-    public DCBeanAnnotated addLanguage(String e) {
+    public DublinCoreData addLanguage(String e) {
 	language.add(e);
 	return this;
     }
@@ -473,7 +472,7 @@ public class DCBeanAnnotated {
      *            dc:publisher
      * @return this
      */
-    public DCBeanAnnotated setPublisher(List<String> publisher) {
+    public DublinCoreData setPublisher(List<String> publisher) {
 	this.publisher = publisher;
 	return this;
     }
@@ -483,7 +482,7 @@ public class DCBeanAnnotated {
      *            dc:publisher
      * @return this
      */
-    public DCBeanAnnotated addPublisher(String e) {
+    public DublinCoreData addPublisher(String e) {
 	publisher.add(e);
 	return this;
     }
@@ -512,7 +511,7 @@ public class DCBeanAnnotated {
      *            dc:relation
      * @return this
      */
-    public DCBeanAnnotated setRelation(List<String> relation) {
+    public DublinCoreData setRelation(List<String> relation) {
 	this.relation = relation;
 	return this;
     }
@@ -522,7 +521,7 @@ public class DCBeanAnnotated {
      *            dc:relation
      * @return this
      */
-    public DCBeanAnnotated addRelation(String e) {
+    public DublinCoreData addRelation(String e) {
 	relation.add(e);
 	return this;
     }
@@ -551,7 +550,7 @@ public class DCBeanAnnotated {
      *            dc:rights
      * @return this
      */
-    public DCBeanAnnotated setRights(List<String> rights) {
+    public DublinCoreData setRights(List<String> rights) {
 	this.rights = rights;
 	return this;
     }
@@ -561,7 +560,7 @@ public class DCBeanAnnotated {
      *            dc:rights
      * @return this
      */
-    public DCBeanAnnotated addRights(String e) {
+    public DublinCoreData addRights(String e) {
 	rights.add(e);
 	return this;
     }
@@ -590,7 +589,7 @@ public class DCBeanAnnotated {
      *            dc:source
      * @return this
      */
-    public DCBeanAnnotated setSource(List<String> source) {
+    public DublinCoreData setSource(List<String> source) {
 	this.source = source;
 	return this;
     }
@@ -600,7 +599,7 @@ public class DCBeanAnnotated {
      *            dc:source
      * @return this
      */
-    public DCBeanAnnotated addSource(String e) {
+    public DublinCoreData addSource(String e) {
 	source.add(e);
 	return this;
     }
@@ -629,7 +628,7 @@ public class DCBeanAnnotated {
      *            dc:subject
      * @return this
      */
-    public DCBeanAnnotated setSubject(List<String> subject) {
+    public DublinCoreData setSubject(List<String> subject) {
 	this.subject = subject;
 	return this;
     }
@@ -639,7 +638,7 @@ public class DCBeanAnnotated {
      *            dc:subject
      * @return this
      */
-    public DCBeanAnnotated addSubject(String e) {
+    public DublinCoreData addSubject(String e) {
 	subject.add(e);
 	return this;
     }
@@ -668,7 +667,7 @@ public class DCBeanAnnotated {
      *            dc:title
      * @return this
      */
-    public DCBeanAnnotated setTitle(List<String> title) {
+    public DublinCoreData setTitle(List<String> title) {
 	this.title = title;
 	return this;
     }
@@ -678,7 +677,7 @@ public class DCBeanAnnotated {
      *            dc:title
      * @return this
      */
-    public DCBeanAnnotated addTitle(String e) {
+    public DublinCoreData addTitle(String e) {
 	title.add(e);
 	return this;
     }
@@ -707,7 +706,7 @@ public class DCBeanAnnotated {
      *            dc:type
      * @return this
      */
-    public DCBeanAnnotated setType(List<String> type) {
+    public DublinCoreData setType(List<String> type) {
 	this.type = type;
 	return this;
     }
@@ -717,7 +716,7 @@ public class DCBeanAnnotated {
      *            dc:type
      * @return this
      */
-    public DCBeanAnnotated addType(String e) {
+    public DublinCoreData addType(String e) {
 	type.add(e);
 	return this;
     }

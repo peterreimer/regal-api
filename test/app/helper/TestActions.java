@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import models.DCBeanAnnotated;
+import models.DublinCoreData;
 import models.RegalObject;
 
 import org.junit.After;
@@ -76,7 +76,7 @@ public class TestActions extends BaseModelTest {
 	RegalObject input = new RegalObject();
 	input.setType("monograph");
 	actions.createResource("monograph", null, null, "lbz-wide", pid, "test");
-	DCBeanAnnotated dc = new DCBeanAnnotated();
+	DublinCoreData dc = new DublinCoreData();
 	dc.addIdentifier("HT015702837");
 	// actions.updateDC("test:" + pid, json);
 	actions.updateData("test:" + pid, Thread.currentThread()
