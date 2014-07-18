@@ -328,18 +328,16 @@ public class Utils {
 
 	try {
 	    File file = new File(node.getUploadFile());
-	    Upload request = new Upload(file);
-	    UploadResponse response = request.execute();
-	    String location = response.getUploadLocation();
 	    if (dataStreamExists(node.getPID(), "data")) {
+		System.out.println("ModifyDatastream " + node.getMimeType());
 		new ModifyDatastream(node.getPID(), "data").versionable(true)
 			.dsState("A").dsLabel(node.getFileLabel())
 			.mimeType(node.getMimeType()).controlGroup("M")
-			.dsLocation(location).execute();
+			.content(file).execute();
 	    } else {
 		new AddDatastream(node.getPID(), "data").versionable(true)
 			.dsState("A").mimeType(node.getMimeType())
-			.dsLabel(node.getFileLabel()).dsLocation(location)
+			.dsLabel(node.getFileLabel()).content(file)
 			.controlGroup("M").execute();
 	    }
 	} catch (Exception e) {
@@ -351,21 +349,17 @@ public class Utils {
 
     void updateMetadataStream(Node node) {
 	try {
-
-	    Upload request = new Upload(new File(node.getMetadataFile()));
-	    UploadResponse response = request.execute();
-	    String location = response.getUploadLocation();
-
+	    File file = new File(node.getMetadataFile());
 	    if (dataStreamExists(node.getPID(), "metadata")) {
 		new ModifyDatastream(node.getPID(), "metadata")
 			.versionable(true).dsLabel("n-triple rdf metadata")
 			.dsState("A").controlGroup("M").mimeType("text/plain")
-			.dsLocation(location).execute();
+			.content(file).execute();
 	    } else {
 		new AddDatastream(node.getPID(), "metadata").versionable(true)
 			.dsState("A").dsLabel("n-triple rdf metadata")
-			.controlGroup("M").mimeType("text/plain")
-			.dsLocation(location).execute();
+			.controlGroup("M").mimeType("text/plain").content(file)
+			.execute();
 	    }
 	} catch (Exception e) {
 	    throw new ArchiveException(node.getPID()

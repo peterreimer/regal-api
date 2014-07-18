@@ -17,6 +17,7 @@
 package actions;
 
 import models.User;
+import play.Play;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
@@ -53,12 +54,26 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	String username = credString[0];
 	String password = credString[1];
 
-	User authUser = new User().authenticate(username, password);
+	User authUser = getAuthenticatedUser(username, password);
 	if (authUser != null) {
 	    context.args.put("role", authUser.getRole());
 	    return delegate.call(context);
 	}
 	return unauthorized(context);
+    }
+
+    private User getAuthenticatedUser(String username, String password) {
+	try {
+	    String userImpl = Play.application().configuration()
+		    .getString("regal-api.userImpl");
+	    Class<?> cl = null;
+	    cl = Class.forName(userImpl);
+	    return ((User) cl.newInstance()).authenticate(username, password);
+	} catch (Throwable e) {
+	    e.printStackTrace();
+	    return null;
+	}
+
     }
 
     private play.libs.F.Promise<SimpleResult> unauthorized(Http.Context context) {

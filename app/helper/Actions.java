@@ -286,6 +286,7 @@ public class Actions {
 	    node.setUploadData(tmp.getAbsolutePath(), mimeType);
 	    node.setFileLabel(name);
 	    node.setMimeType(mimeType);
+	    System.out.println("Actions.updateData " + mimeType);
 	    fedora.updateNode(node);
 	} else {
 	    throw new HttpArchiveException(500, "Lost Node!");
