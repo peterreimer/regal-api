@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import models.DublinCoreData;
+
 /**
  * A Node of object graph. Nodes are used to model complex objects
  * 
@@ -34,7 +36,7 @@ public class Node {
     /**
      * Dublin Core Metadata
      */
-    public DCBean dublinCoreData = new DCBean();
+    public DublinCoreData dublinCoreData = new DublinCoreData();
 
     private String metadataFile;
     private String uploadFile;
@@ -372,7 +374,7 @@ public class Node {
     /**
      * @return a dublin core java object representation
      */
-    public DCBean getBean() {
+    public DublinCoreData getBean() {
 	return dublinCoreData;
     }
 
@@ -421,7 +423,7 @@ public class Node {
      *            dublin core data in one bag
      * @return this
      */
-    public Node setDcBean(DCBean dc) {
+    public Node setDcBean(DublinCoreData dc) {
 	this.dublinCoreData = dc;
 	return this;
     }

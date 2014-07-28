@@ -27,7 +27,8 @@ libraryDependencies ++= Seq(
   "org.codehaus.jackson" % "jackson-mapper-lgpl" % "1.9.13" ,
   "com.github.jsonld-java" % "jsonld-java" % "0.3",
   "com.sun.jersey" % "jersey-core" % "1.18.1" ,
-  "com.sun.jersey" % "jersey-server" % "1.14" ,
+  "com.sun.jersey" % "jersey-server" % "1.18.1",
+  "com.sun.jersey" % "jersey-client" % "1.18.1",
   "com.sun.jersey.contribs" % "jersey-multipart" % "1.18.1",
   "com.sun.jersey" % "jersey-json" % "1.18.1",
   "com.sun.jersey" % "jersey-bundle" % "1.18.1",
@@ -66,7 +67,7 @@ libraryDependencies ++= Seq(
 
 play.Project.playJavaSettings
 
-resolvers := Seq("Maven Central Server" at "http://repo1.maven.org/maven2","edoweb releases" at "http://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "http://maven.ontotext.com/content/repositories/aduna/" ,
+resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "http://repo1.maven.org/maven2","edoweb releases" at "http://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "http://maven.ontotext.com/content/repositories/aduna/" ,
 "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty"
 )
 

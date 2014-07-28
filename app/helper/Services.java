@@ -16,6 +16,9 @@
  */
 package helper;
 
+import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
+import static archive.fedora.FedoraVocabulary.ITEM_ID;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -26,18 +29,18 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import models.DublinCoreData;
+
+import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
+import org.culturegraph.mf.Flux;
 import org.openrdf.model.Statement;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import org.antlr.runtime.RecognitionException;
-import org.culturegraph.mf.Flux;
-import org.openrdf.repository.RepositoryResult;
-
-import archive.datatypes.DCBean;
 import archive.datatypes.Link;
 import archive.datatypes.Node;
 import archive.exceptions.ArchiveException;
@@ -45,8 +48,6 @@ import archive.fedora.CopyUtils;
 import archive.fedora.FedoraInterface;
 import archive.fedora.RdfUtils;
 import archive.fedora.XmlUtils;
-
-import static archive.fedora.FedoraVocabulary.*;
 
 /**
  * 
@@ -388,7 +389,7 @@ public class Services {
 	    setNameLink.setObject(name, true);
 	    oaiset.addRelation(setNameLink);
 
-	    DCBean dc = oaiset.getBean();
+	    DublinCoreData dc = oaiset.getBean();
 	    dc.addTitle(name);
 
 	    oaiset.setDcBean(dc);

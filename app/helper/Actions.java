@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import models.DCBeanAnnotated;
+import models.DublinCoreData;
 import models.RegalObject;
 
 import org.openrdf.rio.RDFFormat;
@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
-import archive.datatypes.DCBean;
 import archive.datatypes.Link;
 import archive.datatypes.Node;
 import archive.datatypes.Transformer;
@@ -229,10 +228,10 @@ public class Actions {
      *            The pid to read the dublin core stream from.
      * @return A DCBeanAnnotated java object.
      */
-    public DCBeanAnnotated readDC(String pid) {
+    public DublinCoreData readDC(String pid) {
 	Node node = fedora.readNode(pid);
 	if (node != null)
-	    return new DCBeanAnnotated(node);
+	    return new DublinCoreData(node);
 	return null;
     }
 
@@ -287,6 +286,7 @@ public class Actions {
 	    node.setUploadData(tmp.getAbsolutePath(), mimeType);
 	    node.setFileLabel(name);
 	    node.setMimeType(mimeType);
+	    System.out.println("Actions.updateData " + mimeType);
 	    fedora.updateNode(node);
 	} else {
 	    throw new HttpArchiveException(500, "Lost Node!");
@@ -316,7 +316,7 @@ public class Actions {
     public String updateDC(String pid,
 	    com.fasterxml.jackson.databind.JsonNode json) {
 	Node node = fedora.readNode(pid);
-	DCBean dc = node.getBean();
+	DublinCoreData dc = node.getBean();
 	dc.setContributer(json.findValuesAsText("contributor"));
 	dc.setCoverage(json.findValuesAsText("coverage"));
 	dc.setCreator(json.findValuesAsText("creator"));

@@ -20,26 +20,23 @@ package models;
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
-public interface User {
+public class FakeUser implements User {
+    String role = null;
 
-    /**
-     * @param username
-     *            username
-     * @param password
-     *            password
-     * @return null if credentials are not valid
-     */
-    public abstract User authenticate(String username, String password);
+    @Override
+    public User authenticate(String username, String password) {
+	role = username;
+	return this;
+    }
 
-    /**
-     * @return the role of the user
-     */
-    public abstract String getRole();
+    @Override
+    public String getRole() {
+	return role;
+    }
 
-    /**
-     * @param role
-     *            a user role that exists in the system
-     */
-    public abstract void setRole(String role);
+    @Override
+    public void setRole(String role) {
+	this.role = role;
+    }
 
 }
