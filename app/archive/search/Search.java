@@ -36,6 +36,7 @@ import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
 import archive.fedora.CopyUtils;
 
 /**
@@ -65,9 +66,8 @@ public class Search {
 
     void init(String index, String config) {
 	try {
-	    String indexConfig = CopyUtils.copyToString(Thread.currentThread()
-		    .getContextClassLoader().getResourceAsStream(config),
-		    "utf-8");
+	    String indexConfig = CopyUtils.copyToString(Play.application()
+		    .resourceAsStream(config), "utf-8");
 	    client.admin().indices().prepareCreate(index)
 		    .setSource(indexConfig).execute().actionGet();
 

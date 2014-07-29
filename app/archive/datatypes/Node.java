@@ -56,6 +56,8 @@ public class Node {
     private String checksum = null;
     private String accessScheme = null;
 
+    private String metadata;
+
     /**
      * Creates a new Node.
      * 
@@ -494,6 +496,21 @@ public class Node {
      */
     public void setAccessScheme(String accessScheme) {
 	this.accessScheme = accessScheme;
+    }
+
+    /**
+     * @return n-triple metadata as string
+     */
+    public String getMetadata() {
+	return metadata;
+    }
+
+    /**
+     * @param metadata
+     *            n-triple metadata as string
+     */
+    public void setMetadata(String metadata) {
+	this.metadata = metadata;
     }
 
 }

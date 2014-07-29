@@ -34,7 +34,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import archive.datatypes.Node;
-import archive.exceptions.ArchiveException;
 
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.request.GetDatastreamDissemination;

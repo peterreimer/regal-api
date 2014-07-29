@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +49,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stringtemplate.v4.ST;
 
+import play.Play;
+import archive.datatypes.Node;
+import archive.datatypes.Transformer;
+
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JSONUtils;
-
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -107,20 +107,20 @@ public class OaiOreMaker {
      */
     public String getReM(String format, List<String> parents,
 	    List<String> children, List<Transformer> transformers) {
+
 	String result = null;
-	addDescriptiveData();
+	addDescriptiveMetadata();
 	addStructuralData(parents, children, transformers);
 	result = write(format);
 	closeRdfRepository();
 	return result;
+
     }
 
-    private void addDescriptiveData() {
+    private void addDescriptiveMetadata() {
 	try {
-	    URL metadata = new URL(server + "/fedora/objects/" + node.getPID()
-		    + "/datastreams/metadata/content");
-	    InputStream in = metadata.openStream();
-	    con.add(in, node.getPID(), RDFFormat.N3);
+	    con.add(new StringReader(node.getMetadata()), node.getPID(),
+		    RDFFormat.N3);
 	} catch (Exception e) {
 	    logger.debug("", e);
 	}
@@ -131,20 +131,21 @@ public class OaiOreMaker {
 	    if ("text/html".equals(format)) {
 		return getHtml();
 	    } else if ("application/json+compact".equals(format)) {
-		URL contextUrl = new URL(server
-			+ "/public/edoweb-resources.json");
+		InputStream contextUrl = Play.application().resourceAsStream(
+			"edoweb-resources.json");
 		StringWriter out = new StringWriter();
 		RDFWriter writer = null;
 		writer = configureWriter("application/json", out, writer);
 		String jsonString = write(out, writer);
 		Object json = JSONUtils.fromString(jsonString);
 		@SuppressWarnings("rawtypes")
-		Map context = (Map) JSONUtils.fromURL(contextUrl);
+		Map context = (Map) JSONUtils.fromInputStream(contextUrl);
 		JsonLdOptions options = new JsonLdOptions();
 		Map<String, Object> normalized = (Map<String, Object>) JsonLdProcessor
 			.compact(json, context, options);
 		normalized.remove("@context");
-		normalized.put("@context", contextUrl.toString());
+		normalized.put("@context", server
+			+ "/public/edoweb-resources.json");
 
 		return JSONUtils.toPrettyString(normalized);
 	    }

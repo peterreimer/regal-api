@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -392,8 +393,8 @@ public class RdfUtils {
      *            find triples with this subject
      * @param predicate
      *            find triples with this predicate
-     * @param rdfUrl
-     *            url with rdf data
+     * @param metadata
+     *            the metadata to search in
      * @param inf
      *            format of the rdf data
      * @param accept
@@ -401,8 +402,10 @@ public class RdfUtils {
      * @return a list of rdf objects
      */
     public static List<String> findRdfObjects(String subject, String predicate,
-	    URL rdfUrl, RDFFormat inf, String accept) {
-	RepositoryConnection con = RdfUtils.readRdfUrlToRepository(rdfUrl, inf);
+	    String metadata, RDFFormat inf, String accept) {
+	RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
+		new ByteArrayInputStream(metadata
+			.getBytes(StandardCharsets.UTF_8)), inf);
 	return findRdfObjects(subject, predicate, con);
     }
 

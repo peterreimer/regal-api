@@ -43,7 +43,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import actions.BasicAuth;
 import archive.datatypes.Node;
-import archive.exceptions.ArchiveException;
+import archive.fedora.ArchiveException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.annotations.Api;

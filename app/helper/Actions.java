@@ -25,8 +25,6 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,7 +41,7 @@ import play.Play;
 import archive.datatypes.Link;
 import archive.datatypes.Node;
 import archive.datatypes.Transformer;
-import archive.exceptions.ArchiveException;
+import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraFactory;
 import archive.fedora.FedoraInterface;
@@ -101,8 +99,6 @@ public class Actions {
      *             if properties can not be loaded.
      */
     private Actions() throws IOException {
-	fedoraExtern = Play.application().configuration()
-		.getString("regal-api.fedoraExtern");
 	server = Play.application().configuration()
 		.getString("regal-api.serverName");
 	urnbase = Play.application().configuration()
@@ -116,6 +112,8 @@ public class Actions {
 			.getString("regal-api.fedoraUser"),
 		Play.application().configuration()
 			.getString("regal-api.fedoraUserPassword"));
+	fedoraExtern = Play.application().configuration()
+		.getString("regal-api.fedoraIntern");
 	services = new Services(fedora, server);
 	representations = new Representations(fedora, server);
 	search = new SearchFacade(escluster);
@@ -241,14 +239,10 @@ public class Actions {
      * @return n-triple metadata
      */
     public String readMetadata(String pid) {
-	String metadataAdress = fedoraExtern + "/objects/" + pid
-		+ "/datastreams/metadata/content";
 	try {
-	    return RdfUtils.readRdfToString(new URL(metadataAdress),
-		    RDFFormat.NTRIPLES, RDFFormat.NTRIPLES, "text/plain");
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, "Wrong Metadata adress: "
-		    + metadataAdress);
+	    Node node = readNode(pid);
+
+	    return node.getMetadata();
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(500, e);
 	} catch (UrlConnectionException e) {
@@ -542,14 +536,9 @@ public class Actions {
      */
     public String getUrn(String pid) {
 	try {
-	    String metadataAdress = fedoraExtern + "/objects/" + pid
-		    + "/datastreams/metadata/content";
-	    URL url = new URL(metadataAdress);
 	    String newUrn = "http://purl.org/lobid/lv#urn";
-	    // String oldUrn =
-	    // "http://geni-orca.renci.org/owl/topology.owl#hasURN";
-	    List<String> urns = RdfUtils.findRdfObjects(pid, newUrn, url,
-		    RDFFormat.NTRIPLES, "text/plain");
+	    List<String> urns = RdfUtils.findRdfObjects(pid, newUrn,
+		    readMetadata(pid), RDFFormat.NTRIPLES, "text/plain");
 	    if (urns == null || urns.isEmpty()) {
 		throw new UrnException("Found no urn!");
 	    }
@@ -848,16 +837,11 @@ public class Actions {
     public String addUrn(String pid, String namespace, String snid) {
 	String subject = namespace + ":" + pid;
 	String urn = services.generateUrn(subject, snid);
-	// String hasUrnOld =
-	// "http://geni-orca.renci.org/owl/topology.owl#hasURN";
 	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = null;
-	if (fedora.dataStreamExists(subject, "metadata")) {
-	    metadata = readMetadata(subject);
-	    if (RdfUtils.hasTriple(subject, hasUrn, urn, metadata))
-		throw new ArchiveException(subject + "already has a urn: "
-			+ metadata);
-	}
+	String metadata = readMetadata(subject);
+	if (RdfUtils.hasTriple(subject, hasUrn, urn, metadata))
+	    throw new ArchiveException(subject + "already has a urn: "
+		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
 	updateMetadata(namespace + ":" + pid, metadata);
 	return "Update " + subject + " metadata " + metadata;

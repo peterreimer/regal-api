@@ -29,7 +29,7 @@ import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 
-import archive.exceptions.ArchiveException;
+import archive.fedora.ArchiveException;
 
 /**
  * provides text extraction with itext and pdfbox.

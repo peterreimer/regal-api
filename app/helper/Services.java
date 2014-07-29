@@ -43,7 +43,7 @@ import org.w3c.dom.Element;
 
 import archive.datatypes.Link;
 import archive.datatypes.Node;
-import archive.exceptions.ArchiveException;
+import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraInterface;
 import archive.fedora.RdfUtils;
@@ -192,6 +192,7 @@ public class Services {
 	    return "No node with pid " + pid + " found";
 
 	String metadata = this.uriPrefix + pid + "/metadata";
+	System.out.println(metadata);
 	try {
 	    File outfile = File.createTempFile("oaidc", "xml");
 	    outfile.deleteOnExit();

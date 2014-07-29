@@ -47,13 +47,13 @@ import org.slf4j.LoggerFactory;
 import archive.datatypes.Link;
 import archive.datatypes.Node;
 import archive.datatypes.Transformer;
-import archive.exceptions.ArchiveException;
 
 import com.yourmediashelf.fedora.client.FedoraClient;
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.FedoraCredentials;
 import com.yourmediashelf.fedora.client.request.FedoraRequest;
 import com.yourmediashelf.fedora.client.request.GetDatastream;
+import com.yourmediashelf.fedora.client.request.GetDatastreamDissemination;
 import com.yourmediashelf.fedora.client.request.GetNextPID;
 import com.yourmediashelf.fedora.client.request.GetObjectProfile;
 import com.yourmediashelf.fedora.client.request.Ingest;
@@ -318,14 +318,20 @@ class FedoraFacade implements FedoraInterface {
 	try {
 	    GetDatastreamResponse response = new GetDatastream(pid, "data")
 		    .execute();
-	    System.out.println("FedoraFacade: read "
-		    + response.getDatastreamProfile().getDsMIME());
 	    node.setMimeType(response.getDatastreamProfile().getDsMIME());
 	    node.setFileLabel(response.getDatastreamProfile().getDsLabel());
 	    node.setChecksum(response.getDatastreamProfile().getDsChecksum());
 	    node.setFileSize(response.getDatastreamProfile().getDsSize());
 	} catch (FedoraClientException e) {
 	    // datastream with name data is optional
+	}
+	try {
+	    FedoraResponse response = new GetDatastreamDissemination(pid,
+		    "metadata").execute();
+	    node.setMetadata(CopyUtils.copyToString(
+		    response.getEntityInputStream(), "utf-8"));
+	} catch (Exception e) {
+	    // datastream with name metadata is optional
 	}
 	return node;
     }

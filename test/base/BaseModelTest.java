@@ -1,10 +1,12 @@
 package base;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import play.test.FakeApplication;
 import play.test.Helpers;
 
+@SuppressWarnings("javadoc")
 public class BaseModelTest {
     public static FakeApplication app;
 

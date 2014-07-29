@@ -20,7 +20,6 @@ import java.util.List;
 
 import archive.datatypes.Node;
 import archive.datatypes.Transformer;
-import archive.exceptions.ArchiveException;
 
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.request.AddDatastream;

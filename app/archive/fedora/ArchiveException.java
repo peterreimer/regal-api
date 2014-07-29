@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package archive.exceptions;
+package archive.fedora;
 
 /**
  * @author Jan Schnasse

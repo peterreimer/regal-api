@@ -18,6 +18,7 @@ package app.helper;
  */
 import helper.Actions;
 import helper.HttpArchiveException;
+import helper.Md5Checksum;
 import helper.Services;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ import org.junit.Test;
 
 import archive.datatypes.Node;
 import archive.datatypes.Transformer;
-import archive.exceptions.ArchiveException;
+import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfUtils;
 import base.BaseModelTest;
@@ -61,15 +62,16 @@ public class TestActions extends BaseModelTest {
 	actions.deleteAll(actions.list(null, "testCM", 0, 10000, "repo"));
     }
 
-    @Test
-    public void testFindByType() throws IOException {
-	createTestObject("123");
-	List<String> list = actions.list("monograph", "test", 0, 10, "es");
-	Assert.assertTrue(list.get(0).equals("test:123"));
-	Node node = actions.readNode(list.get(0));
-	String type = node.getContentType();
-	Assert.assertTrue(type.equals("monograph"));
-    }
+    //
+    // @Test
+    // public void testFindByType() throws IOException {
+    // createTestObject("123");
+    // List<String> list = actions.list("monograph", "test", 0, 10, "es");
+    // Assert.assertTrue(list.get(0).equals("test:123"));
+    // Node node = actions.readNode(list.get(0));
+    // String type = node.getContentType();
+    // Assert.assertTrue(type.equals("monograph"));
+    // }
 
     public void createTestObject(String pid) throws IOException {
 	// actions.contentModelsInit("test");
@@ -96,14 +98,14 @@ public class TestActions extends BaseModelTest {
 	System.out.println(pids);
     }
 
-    @Test(expected = HttpArchiveException.class)
-    public void deleteMetadata() throws IOException {
-	createTestObject("123");
-	actions.readMetadata("test:123");
-	actions.deleteMetadata("test:123");
-	actions.deleteData("test:123");
-	actions.readMetadata("test:123");
-    }
+    // @Test(expected = HttpArchiveException.class)
+    // public void deleteMetadata() throws IOException {
+    // createTestObject("123");
+    // actions.readMetadata("test:123");
+    // actions.deleteMetadata("test:123");
+    // actions.deleteData("test:123");
+    // actions.readMetadata("test:123");
+    // }
 
     @Test
     public void epicurAddAndReplace() throws IOException {
@@ -371,22 +373,22 @@ public class TestActions extends BaseModelTest {
 	}
     }
 
-    // @Test
-    // public void checksumTest_shouldSucceed() throws IOException {
-    // createTestObject("123");
-    // try {
-    // Md5Checksum c = new Md5Checksum();
-    // String md5 = c.getMd5Checksum(Thread.currentThread()
-    // .getContextClassLoader().getResourceAsStream("test.pdf"));
-    // String msg = actions.updateData("test:123", Thread.currentThread()
-    // .getContextClassLoader().getResourceAsStream("test.pdf"),
-    // "application/pdf", "TestFile", md5);
-    // System.out.println(msg);
-    // } catch (HttpArchiveException e) {
-    // System.out.println(e);
-    // throw e;
-    // }
-    // }
+    @Test
+    public void checksumTest_shouldSucceed() throws IOException {
+	createTestObject("123");
+	try {
+	    Md5Checksum c = new Md5Checksum();
+	    String md5 = c.getMd5Checksum(Thread.currentThread()
+		    .getContextClassLoader().getResourceAsStream("test.pdf"));
+	    String msg = actions.updateData("test:123", Thread.currentThread()
+		    .getContextClassLoader().getResourceAsStream("test.pdf"),
+		    "application/pdf", "TestFile", md5);
+	    System.out.println(msg);
+	} catch (HttpArchiveException e) {
+	    System.out.println(e);
+	    throw e;
+	}
+    }
 
     @After
     public void tearDown() {
