@@ -1,4 +1,5 @@
 package archive.search;
+
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -21,22 +22,20 @@ import java.util.List;
 
 import org.elasticsearch.index.mapper.MapperParsingException;
 import org.elasticsearch.search.SearchHits;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import archive.fedora.CopyUtils;
-import archive.search.SearchMock;
-import archive.search.Search;
+import base.BaseModelTest;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
 @SuppressWarnings("javadoc")
-public class TestSearch {
+public class TestSearch extends BaseModelTest {
 
     String edoweb2606976 = null;
     String query1 = null;
