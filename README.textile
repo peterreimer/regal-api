@@ -7,6 +7,10 @@ Regal - repository for electronic documents and bibliographic data
 
 For more information visit the "wiki":https://github.com/edoweb/edoweb2/wiki/
 
+Releases
+
+0.5.0:"https://github.com/edoweb/regal-api/releases/tag/0.5.0"
+
 h1. License
 
 Apache License  Version 2.0, January 2004  http://www.apache.org/licenses/
