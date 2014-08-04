@@ -179,17 +179,6 @@ public interface FedoraInterface {
     public Node createRootObject(String namespace);
 
     /**
-     * Adds a new node as child of the parent.
-     * 
-     * @param parent
-     *            the parent of the new node
-     * @param node
-     *            a new node that doesn't exist in Fedora yet
-     * @return The new created object.
-     */
-    public Node createNode(Node parent, Node node);
-
-    /**
      * @param node
      *            a node connected to a parent
      * @return the pid of the parent connected via isPartOf

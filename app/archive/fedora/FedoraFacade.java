@@ -23,7 +23,6 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
-import static archive.fedora.FedoraVocabulary.SPO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -255,37 +254,6 @@ class FedoraFacade implements FedoraInterface {
     }
 
     @Override
-    public Node createNode(Node parent, Node node) {
-	String pid = node.getPID();
-	if (nodeExists(pid)) {
-	    throw new ArchiveException(pid);
-	}
-	String namespace = parent.getNamespace();// FedoraFacade.pred2pid(parent.getNamespace());
-	if (pid == null) {
-	    pid = getPid(namespace);
-	    node.setPID(pid);
-	    node.setNamespace(namespace);
-	}
-	if (!nodeExists(pid)) {
-	    node.setNamespace(namespace);
-	    createNode(node);
-	}
-	node = readNode(node.getPID());
-	// Parent to node
-	Link meToNode = new Link();
-	meToNode.setPredicate(FedoraVocabulary.HAS_PART);
-	meToNode.setObject(addUriPrefix(node.getPID()), false);
-	parent.addRelation(meToNode);
-	Link nodeToMe = new Link();
-	nodeToMe.setPredicate(FedoraVocabulary.IS_PART_OF);
-	nodeToMe.setObject(addUriPrefix(parent.getPID()), false);
-	node.addRelation(nodeToMe);
-	updateNode(node);
-	updateNode(parent);
-	return node;
-    }
-
-    @Override
     public Node createRootObject(String namespace) {
 	Node rootObject = null;
 	String pid = getPid(namespace);
@@ -389,7 +357,6 @@ class FedoraFacade implements FedoraInterface {
     @Override
     public void deleteNode(String rootPID) {
 	try {
-	    logger.debug("deletNode " + rootPID);
 	    unlinkParent(rootPID);
 	    new PurgeObject(rootPID).execute();
 	} catch (FedoraClientException e) {
@@ -454,17 +421,11 @@ class FedoraFacade implements FedoraInterface {
 	if (!nodeExists(rootPID)) {
 	    throw new NodeNotFoundException(rootPID);
 	}
-	List<String> pids = null;
-	List<Node> result = new ArrayList<Node>();
-	result.add(readNode(rootPID));
-	pids = findPids("* <" + IS_PART_OF + "> <" + rootPID + ">", SPO);
-	if (pids != null)
-	    for (String pid : pids) {
-		Node node = readNode(pid);
-		result.addAll(deleteComplexObject(node.getPID()));
-	    }
-	deleteNode(rootPID);
-	return result;
+	List<Node> list = listComplexObject(rootPID);
+	for (Node n : list) {
+	    deleteNode(n.getPID());
+	}
+	return list;
     }
 
     @Override
@@ -473,15 +434,20 @@ class FedoraFacade implements FedoraInterface {
 	    throw new NodeNotFoundException(rootPID);
 	}
 	Node root = readNode(rootPID);
-	List<String> pids = null;
 	List<Node> result = new ArrayList<Node>();
 	result.add(root);
-	pids = findPids("* <" + IS_PART_OF + "> <" + rootPID + ">", SPO);
-	if (pids != null)
-	    for (String pid : pids) {
-		Node node = readNode(pid);
-		result.addAll(listComplexObject(node.getPID()));
+	result.addAll(listChildren(root));
+	return result;
+    }
+
+    private List<Node> listChildren(Node root) {
+	List<Node> result = new ArrayList<Node>();
+	List<Link> rels = root.getRelsExt();
+	for (Link r : rels) {
+	    if (HAS_PART.equals(r.getPredicate())) {
+		result.addAll(listComplexObject(r.getObject()));
 	    }
+	}
 	return result;
     }
 

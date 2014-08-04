@@ -71,7 +71,7 @@ public class Resource extends MyController {
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
 	    @QueryParam("src") String src, @QueryParam("from") int from,
-	    @QueryParam("until") int until) {
+	    @QueryParam("until") int until, @QueryParam("format") String format) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    System.out.println(role);
@@ -87,7 +87,7 @@ public class Resource extends MyController {
 		response().setContentType("application/json");
 		Actions actions = Actions.getInstance();
 		ObjectList rem = new ObjectList(actions.list(contentType,
-			namespace, from, until, src));
+			namespace, from, until, src, format));
 		return JsonResponse(rem);
 	    }
 	} catch (HttpArchiveException e) {

@@ -513,4 +513,8 @@ public class Node {
 	this.metadata = metadata;
     }
 
+    @Override
+    public String toString() {
+	return getPID();
+    }
 }

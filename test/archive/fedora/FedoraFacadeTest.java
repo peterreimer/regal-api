@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
-import archive.datatypes.Link;
 import archive.datatypes.Node;
 import archive.datatypes.Transformer;
 import archive.datatypes.Vocabulary;
@@ -200,13 +199,45 @@ public class FedoraFacadeTest extends BaseModelTest {
     }
 
     @Test
-    public void deleteNode() {
+    public void deleteNodeSimple() {
 	if (!facade.nodeExists(object.getPID()))
-
 	    facade.createNode(object);
 
 	facade.deleteNode(object.getPID());
 	Assert.assertFalse(facade.nodeExists(object.getPID()));
+    }
+
+    @Test
+    public void deleteNodeComplex() throws InterruptedException {
+	if (!facade.nodeExists(object.getPID()))
+	    facade.createNode(object);
+
+	Node child = new Node().setNamespace("test").setPID("test:2345")
+		.setLabel("Ein Testobjekt").setFileLabel("test")
+		.setType(Vocabulary.TYPE_OBJECT);
+	child.setContentType("monograph");
+	facade.createNode(child);
+	facade.unlinkParent(child);
+	facade.linkToParent(child, object.getPID());
+	facade.linkParentToNode(object.getPID(), child.getPID());
+
+	Node grandchild = new Node().setNamespace("test").setPID("test:23456")
+		.setLabel("Ein Testobjekt").setFileLabel("test")
+		.setType(Vocabulary.TYPE_OBJECT);
+	grandchild.setContentType("monograph");
+	facade.createNode(grandchild);
+	facade.unlinkParent(grandchild);
+	facade.linkToParent(grandchild, child.getPID());
+	facade.linkParentToNode(child.getPID(), grandchild.getPID());
+
+	System.out.println(facade.deleteComplexObject(object.getPID()));
+
+	Assert.assertFalse(facade.nodeExists(object.getPID()));
+	System.out.println("Deleted: " + object.getPID());
+	Assert.assertFalse(facade.nodeExists(child.getPID()));
+	System.out.println("Deleted: " + child.getPID());
+	Assert.assertFalse(facade.nodeExists(grandchild.getPID()));
+	System.out.println("Deleted: " + grandchild.getPID());
     }
 
     @Test
@@ -271,31 +302,9 @@ public class FedoraFacadeTest extends BaseModelTest {
 	Assert.assertTrue(facade.nodeExists(object.getPID()));
     }
 
-    @Test
-    public void createHierarchy() {
-	Node node = new Node();
-	node.setPID(facade.getPid("test"));
-	Node parent = facade.createRootObject("test");
-	node = facade.createNode(parent, node);
-	for (Link link : node.getRelsExt()) {
-	    if (link.getPredicate().equals(FedoraVocabulary.IS_PART_OF)) {
-		System.out.println(link.getObject());
-		Assert.assertTrue(link.getObject().equals(
-			"info:fedora/" + parent.getPID()));
-	    }
-	}
-	for (Link link : parent.getRelsExt()) {
-	    if (link.getPredicate().equals(FedoraVocabulary.HAS_PART)) {
-		System.out.println(link.getObject());
-		Assert.assertTrue(link.getObject().equals(
-			"info:fedora/" + node.getPID()));
-	    }
-	}
-    }
-
     @After
     public void tearDown() {
-	// cleanUp();
+	cleanUp();
     }
 
     private void cleanUp() {
