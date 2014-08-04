@@ -639,7 +639,7 @@ public class Resource extends MyController {
 	if (!"edoweb-admin".equals(role)) {
 	    if ("public".equals(accessScheme)) {
 		return true;
-	    } else if ("lbz-wide".equals(accessScheme)) {
+	    } else if ("restricted".equals(accessScheme)) {
 		if ("edoweb-editor".equals(role)
 			|| "edoweb-reader".equals(role)) {
 		    return true;
