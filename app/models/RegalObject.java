@@ -16,8 +16,12 @@
  */
 package models;
 
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -125,4 +129,15 @@ public class RegalObject {
 	this.accessScheme = accessScheme;
     }
 
+    @Override
+    public String toString() {
+	ObjectMapper mapper = JsonUtil.mapper();
+	StringWriter w = new StringWriter();
+	try {
+	    mapper.writeValue(w, this);
+	} catch (Exception e) {
+	    return super.toString();
+	}
+	return w.toString();
+    }
 }
