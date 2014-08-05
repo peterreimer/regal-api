@@ -1,0 +1,24 @@
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/elements/1.1/publisher> "Greim" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/elements/1.1/publisher> "Mainz" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/elements/1.1/publisher> "Oppenheimer Dr.-Haus" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/elements/1.1/publisher> "Staatskanzlei" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/elements/1.1/publisher> "W\u00F6rrstadt" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/terms/creator> <http://d-nb.info/gnd/35789-3> .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/terms/language> "http://id.loc.gov/vocabulary/iso639-2/deu" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/terms/subject> <http://dewey.info/class/350/> .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/dc/terms/title> "Staatsanzeiger f\u00FCr Rheinland-Pfalz" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/ontology/bibo/shortTitle> "SRPFD" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/ontology/bibo/shortTitle> "Staatsanz. Rheinl.-Pfalz" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://purl.org/ontology/bibo/shortTitle> "Staatsanzeiger Rheinland-Pfalz" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://rdvocab.info/Elements/otherTitleInformation> "amtliche Bekanntmachungen" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://rdvocab.info/Elements/placeOfPublication> "Alzey" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://rdvocab.info/Elements/placeOfPublication> "Mainz" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://rdvocab.info/Elements/placeOfPublication> "W\u00F6rrstadt" .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/ontology/bibo/Journal> .
+<edoweb:002760c0-8470-4d46-b9ff-f1938ca2fefd.rdf> <http://purl.org/dc/terms/creator> <http://edoweb-test.hbz-nrw.de/user/1> .
+<http://d-nb.info/gnd/35789-3> <http://d-nb.info/standards/elementset/gnd#dateOfEstablishment> "30.8.1946" .
+<http://d-nb.info/gnd/35789-3> <http://d-nb.info/standards/elementset/gnd#gndIdentifier> "35789-3" .
+<http://d-nb.info/gnd/35789-3> <http://d-nb.info/standards/elementset/gnd#preferredName> "Rheinland-Pfalz" .
+<http://d-nb.info/gnd/35789-3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://d-nb.info/standards/elementset/gnd#PlaceOrGeographicName> .
+<http://d-nb.info/gnd/35789-3> <http://www.w3.org/2004/02/skos/core#notation> "35789-3" .
+<http://d-nb.info/gnd/35789-3> <http://www.w3.org/2004/02/skos/core#prefLabel> "Rheinland-Pfalz"@en .

@@ -19,6 +19,7 @@ package archive.search;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.elasticsearch.action.ActionResponse;
@@ -129,7 +130,7 @@ public class Search {
 	return response.getHits();
     }
 
-    String getSettings(String index, String type) {
+    Map<String, Object> getSettings(String index, String type) {
 	try {
 
 	    client.admin().indices().refresh(new RefreshRequest()).actionGet();
@@ -137,7 +138,7 @@ public class Search {
 		    .setIndices(index).execute().actionGet().getState();
 	    IndexMetaData inMetaData = clusterState.getMetaData().index(index);
 	    MappingMetaData metad = inMetaData.mapping(type);
-	    return metad.getSourceAsMap().toString();
+	    return metad.getSourceAsMap();
 	} catch (IOException e) {
 	    throw new SearchException(e);
 	}

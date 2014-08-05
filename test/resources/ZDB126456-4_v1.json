@@ -1,0 +1,56 @@
+{
+  "@graph" : [ {
+    "@id" : "edoweb:5268035",
+    "@type" : [ "http://iflastandards.info/ns/isbd/terms/mediatype/T1002", "http://purl.org/dc/terms/BibliographicResource", "http://purl.org/ontology/bibo/Collection", "http://purl.org/ontology/bibo/Journal", "http://purl.org/ontology/bibo/Periodical", "http://rdvocab.info/termList/RDACarrierType/1018" ],
+    "contentType" : "journal",
+    "hasTransformer" : [ "oaidc", "epicur" ],
+    "creator" : [ "http://d-nb.info/gnd/35789-3", "http://d-nb.info/gnd/36467-8" ],
+    "hasPart" : [ "edoweb:5268038", "edoweb:5268042", "edoweb:5268046", "edoweb:5268050", "edoweb:5268054", "edoweb:5268058", "edoweb:5268062", "edoweb:5268066", "edoweb:5268070", "edoweb:5268074", "edoweb:5268078", "edoweb:5268082", "edoweb:5268086", "edoweb:5268090", "edoweb:5268094", "edoweb:5268098", "edoweb:5268102", "edoweb:5268106", "edoweb:5268110", "edoweb:5268114", "edoweb:5268118", "edoweb:5268122", "edoweb:5268126", "edoweb:5268130", "edoweb:5269253", "edoweb:5269273", "edoweb:5269277", "edoweb:5269281", "edoweb:5269285", "edoweb:5269289", "edoweb:5269293", "edoweb:5269297", "edoweb:5269301", "edoweb:5269305", "edoweb:5269371", "edoweb:5269375", "edoweb:5269379", "edoweb:5269383", "edoweb:5269387", "edoweb:5269391", "edoweb:5269395", "edoweb:5269399", "edoweb:5269407", "edoweb:5269411", "edoweb:5269442", "edoweb:5269446", "edoweb:5268142", "edoweb:5268134", "edoweb:5268138", "edoweb:5269355", "edoweb:5269359", "edoweb:5269403", "edoweb:5269427", "edoweb:5269438", "edoweb:5269454", "edoweb:5269458", "edoweb:5269466", "edoweb:5269470", "edoweb:5269474", "edoweb:5269478", "edoweb:5269482", "edoweb:5269486", "edoweb:5269150", "edoweb:5269153", "edoweb:5269157", "edoweb:5269161", "edoweb:5269165", "edoweb:5269169", "edoweb:5269173", "edoweb:5269177", "edoweb:5269181", "edoweb:5269185", "edoweb:5269189", "edoweb:5269193", "edoweb:5269197", "edoweb:5269201", "edoweb:5269205", "edoweb:5269209", "edoweb:5269213", "edoweb:5269217", "edoweb:5269221", "edoweb:5269225", "edoweb:5269363", "edoweb:5269367", "edoweb:5269431", "edoweb:5269434", "edoweb:5269229", "edoweb:5269233", "edoweb:5269237", "edoweb:5269241", "edoweb:5269245", "edoweb:5269249", "edoweb:5269257", "edoweb:5269261", "edoweb:5269265", "edoweb:5269269", "edoweb:5269490", "edoweb:5269494", "edoweb:5269498", "edoweb:5269502", "edoweb:5269309", "edoweb:5269313", "edoweb:5269317", "edoweb:5269321", "edoweb:5269325", "edoweb:5269506", "edoweb:5269329", "edoweb:5269333", "edoweb:5269337", "edoweb:5269341", "edoweb:5269347", "edoweb:5269351", "edoweb:5269415", "edoweb:5269419", "edoweb:5269423", "edoweb:5269450", "edoweb:5269462", "edoweb:5303795", "edoweb:5304559", "edoweb:5304567", "edoweb:5304571", "edoweb:5304575", "edoweb:5304475", "edoweb:5304479", "edoweb:5304483", "edoweb:5304487", "edoweb:5304491", "edoweb:5304495", "edoweb:5304499", "edoweb:5304503", "edoweb:5304507", "edoweb:5304511", "edoweb:5304515", "edoweb:5304519", "edoweb:5304523", "edoweb:5304527", "edoweb:5304555", "edoweb:5304589", "edoweb:5304597", "edoweb:5304601", "edoweb:5304605", "edoweb:5304609", "edoweb:5304613", "edoweb:5304617", "edoweb:5304645", "edoweb:5304649", "edoweb:5304579", "edoweb:5304531", "edoweb:5304535", "edoweb:5304539", "edoweb:5304543", "edoweb:5304547", "edoweb:5304551", "edoweb:5304563", "edoweb:5304585", "edoweb:5304593", "edoweb:5304621", "edoweb:5304625", "edoweb:5304629", "edoweb:5304633", "edoweb:5304637", "edoweb:5304641", "edoweb:5303799", "edoweb:5303803", "edoweb:5303807", "edoweb:5303811", "edoweb:5303815", "edoweb:5303819", "edoweb:5303823", "edoweb:5303827", "edoweb:5303831", "edoweb:5303835", "edoweb:5303839", "edoweb:5303843", "edoweb:5303847", "edoweb:5303851", "edoweb:5303855", "edoweb:5303859", "edoweb:aa291c5e-e27b-4538-832d-a04eac0f6eae" ],
+    "hasVersion" : [ "http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=5306940&custom_att_2=simple_viewer", "http://www.bibliothek.uni-regensburg.de/ezeit/?2245980" ],
+    "issued" : "2001 - ",
+    "language" : "http://id.loc.gov/vocabulary/iso639-2/deu",
+    "subject" : "http://dewey.info/class/310/",
+    "title" : "Statistisches Landesamt Rheinland-Pfalz",
+    "fulltextOnline" : [ "http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=5306940&custom_att_2=simple_viewer", "http://www.bibliothek.uni-regensburg.de/ezeit/?2245980" ],
+    "hbzId" : "HT014812594",
+    "urn" : "urn:nbn:de:hbz:929:02-edoweb:52680350",
+    "oclcnum" : "645354475",
+    "exemplar" : [ "http://lobid.org/item/ZDB2245980-7%3ADE-38", "http://lobid.org/item/ZDB2245980-7%3ADE-385", "http://lobid.org/item/ZDB2245980-7%3ADE-466", "http://lobid.org/item/ZDB2245980-7%3ADE-Tr5" ],
+    "placeOfPublication" : "Bad Ems",
+    "publicationStatement" : "Bad Ems",
+    "aggregates" : [ "edoweb:5268038", "edoweb:5268042", "edoweb:5268046", "edoweb:5268050", "edoweb:5268054", "edoweb:5268058", "edoweb:5268062", "edoweb:5268066", "edoweb:5268070", "edoweb:5268074", "edoweb:5268078", "edoweb:5268082", "edoweb:5268086", "edoweb:5268090", "edoweb:5268094", "edoweb:5268098", "edoweb:5268102", "edoweb:5268106", "edoweb:5268110", "edoweb:5268114", "edoweb:5268118", "edoweb:5268122", "edoweb:5268126", "edoweb:5268130", "edoweb:5269253", "edoweb:5269273", "edoweb:5269277", "edoweb:5269281", "edoweb:5269285", "edoweb:5269289", "edoweb:5269293", "edoweb:5269297", "edoweb:5269301", "edoweb:5269305", "edoweb:5269371", "edoweb:5269375", "edoweb:5269379", "edoweb:5269383", "edoweb:5269387", "edoweb:5269391", "edoweb:5269395", "edoweb:5269399", "edoweb:5269407", "edoweb:5269411", "edoweb:5269442", "edoweb:5269446", "edoweb:5268142", "edoweb:5268134", "edoweb:5268138", "edoweb:5269355", "edoweb:5269359", "edoweb:5269403", "edoweb:5269427", "edoweb:5269438", "edoweb:5269454", "edoweb:5269458", "edoweb:5269466", "edoweb:5269470", "edoweb:5269474", "edoweb:5269478", "edoweb:5269482", "edoweb:5269486", "edoweb:5269150", "edoweb:5269153", "edoweb:5269157", "edoweb:5269161", "edoweb:5269165", "edoweb:5269169", "edoweb:5269173", "edoweb:5269177", "edoweb:5269181", "edoweb:5269185", "edoweb:5269189", "edoweb:5269193", "edoweb:5269197", "edoweb:5269201", "edoweb:5269205", "edoweb:5269209", "edoweb:5269213", "edoweb:5269217", "edoweb:5269221", "edoweb:5269225", "edoweb:5269363", "edoweb:5269367", "edoweb:5269431", "edoweb:5269434", "edoweb:5269229", "edoweb:5269233", "edoweb:5269237", "edoweb:5269241", "edoweb:5269245", "edoweb:5269249", "edoweb:5269257", "edoweb:5269261", "edoweb:5269265", "edoweb:5269269", "edoweb:5269490", "edoweb:5269494", "edoweb:5269498", "edoweb:5269502", "edoweb:5269309", "edoweb:5269313", "edoweb:5269317", "edoweb:5269321", "edoweb:5269325", "edoweb:5269506", "edoweb:5269329", "edoweb:5269333", "edoweb:5269337", "edoweb:5269341", "edoweb:5269347", "edoweb:5269351", "edoweb:5269415", "edoweb:5269419", "edoweb:5269423", "edoweb:5269450", "edoweb:5269462", "edoweb:5303795", "edoweb:5304559", "edoweb:5304567", "edoweb:5304571", "edoweb:5304575", "edoweb:5304475", "edoweb:5304479", "edoweb:5304483", "edoweb:5304487", "edoweb:5304491", "edoweb:5304495", "edoweb:5304499", "edoweb:5304503", "edoweb:5304507", "edoweb:5304511", "edoweb:5304515", "edoweb:5304519", "edoweb:5304523", "edoweb:5304527", "edoweb:5304555", "edoweb:5304589", "edoweb:5304597", "edoweb:5304601", "edoweb:5304605", "edoweb:5304609", "edoweb:5304613", "edoweb:5304617", "edoweb:5304645", "edoweb:5304649", "edoweb:5304579", "edoweb:5304531", "edoweb:5304535", "edoweb:5304539", "edoweb:5304543", "edoweb:5304547", "edoweb:5304551", "edoweb:5304563", "edoweb:5304585", "edoweb:5304593", "edoweb:5304621", "edoweb:5304625", "edoweb:5304629", "edoweb:5304633", "edoweb:5304637", "edoweb:5304641", "edoweb:5303799", "edoweb:5303803", "edoweb:5303807", "edoweb:5303811", "edoweb:5303815", "edoweb:5303819", "edoweb:5303823", "edoweb:5303827", "edoweb:5303831", "edoweb:5303835", "edoweb:5303839", "edoweb:5303843", "edoweb:5303847", "edoweb:5303851", "edoweb:5303855", "edoweb:5303859", "edoweb:aa291c5e-e27b-4538-832d-a04eac0f6eae" ],
+    "isDescribedBy" : "edoweb:5268035.rdf",
+    "similarTo" : [ "http://klio.hbz-nrw.de:1801/webclient/MetadataManager?pid=5268035", "http://api.edoweb-test.hbz-nrw.de/fedora/objects/edoweb:5268035" ],
+    "isLike" : "http://lobid.org/resource/HT014812594",
+    "sameAs" : [ "edoweb:5268035", "http://hub.culturegraph.org/resource/ZDB-ZDB2245980-7", "http://ld.zdb-services.de/resource/2245980-7", "http://lobid.org/resource/ZDB2245980-7", "http://worldcat.org/oclc/645354475" ],
+    "describedBy" : "edoweb:5268035/about",
+    "isPrimaryTopicOf" : "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3DHT014812594"
+  }, {
+    "@id" : "edoweb:5268035.rdf",
+    "created" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2014-05-07T15:17:02.939+02:00"
+    },
+    "modified" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2014-06-03T11:41:04.747+02:00"
+    },
+    "describes" : "edoweb:5268035"
+  }, {
+    "@id" : "edoweb:5268035/about",
+    "primaryTopic" : "edoweb:5268035"
+  }, {
+    "@id" : "http://d-nb.info/gnd/35789-3",
+    "preferredNameForThePlaceOrGeographicName" : "Rheinland-Pfalz"
+  }, {
+    "@id" : "http://d-nb.info/gnd/36467-8",
+    "preferredNameForTheCorporateBody" : "Rheinland-Pfalz / Statistisches Landesamt"
+  }, {
+    "@id" : "http://dewey.info/class/310/2009/08/about.en",
+    "prefLabel" : {
+      "@language" : "en",
+      "@value" : "Collections of general statistics"
+    }
+  } ],
+  "@context" : "http://api.edoweb-test.hbz-nrw.de/edoweb-resources.json"
+}

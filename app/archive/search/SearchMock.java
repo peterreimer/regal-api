@@ -19,6 +19,7 @@ package archive.search;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
@@ -93,7 +94,7 @@ class SearchMock {
 	return search.query(index, fieldName, fieldValue);
     }
 
-    public String getSettings(String index, String type) {
+    public Map<String, Object> getSettings(String index, String type) {
 	return search.getSettings(index, type);
     }
 

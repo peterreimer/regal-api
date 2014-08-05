@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -141,8 +143,8 @@ public class OaiOreMaker {
 		@SuppressWarnings("rawtypes")
 		Map context = (Map) JSONUtils.fromInputStream(contextUrl);
 		JsonLdOptions options = new JsonLdOptions();
-		Map<String, Object> normalized = (Map<String, Object>) JsonLdProcessor
-			.compact(json, context, options);
+		Map<String, Object> normalized = (Map<String, Object>) expandSimpleValues((Map<String, Object>) JsonLdProcessor
+			.compact(json, context, options));
 		normalized.remove("@context");
 		normalized.put("@context", server
 			+ "/public/edoweb-resources.json");
@@ -156,6 +158,50 @@ public class OaiOreMaker {
 	} catch (Exception e) {
 	    throw new WriteRdfException(e);
 	}
+    }
+
+    private Object expandSimpleValues(Object element) {
+
+	if (element instanceof String) {
+	    final List<Object> result = new ArrayList<Object>();
+	    final Map<String, Object> actualValues = new LinkedHashMap<String, Object>();
+	    actualValues.put("@value", element);
+	    result.add(actualValues);
+	    return result;
+	}
+	if (element instanceof List) {
+	    final List<Object> result = new ArrayList<Object>();
+	    for (final Object item : (List<Object>) element) {
+		final Object compactedItem = expandSimpleValues(item);
+		if (compactedItem != null) {
+		    result.add(compactedItem);
+		}
+	    }
+	    return result;
+	}
+	if (element instanceof Map) {
+
+	    Map<String, Object> result = new LinkedHashMap<String, Object>();
+	    for (Map.Entry<String, Object> c : ((Map<String, Object>) element)
+		    .entrySet()) {
+		String key = c.getKey();
+		Object value = c.getValue();
+		if ("@value".equals(key)) {
+		    result.put(key, value);
+		} else if ("@id".equals(key)) {
+		    result.put(key, value);
+		} else if ("@type".equals(key)) {
+		    result.put(key, value);
+		} else if ("@language".equals(key)) {
+		    result.put(key, value);
+		} else {
+		    result.put(key, expandSimpleValues(value));
+		}
+	    }
+	    return result;
+	}
+
+	return element;
     }
 
     private String write(StringWriter out, RDFWriter writer)

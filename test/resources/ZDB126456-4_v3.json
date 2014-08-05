@@ -1,0 +1,64 @@
+{
+	"@graph": 
+	[
+		{
+			"@id": "edoweb:dda088b3-48d5-4c7b-a614-aa1935c7e2bc",
+			"@type": "http://purl.org/ontology/bibo/Journal",
+			"contentType": "journal",
+			"publisher": "Oppenheimer Druckhaus",
+			"contributor": 
+			[
+				"http://d-nb.info/gnd/2029758-0",
+				"http://d-nb.info/gnd/35789-3"
+			],
+
+			"creator": "http://d-nb.info/gnd/35789-3",
+			"http://purl.org/dc/terms/language": "http://id.loc.gov/vocabulary/iso639-2/ger",
+			"subject": "http://dewey.info/class/350/",
+			"title": "Staatsanzeiger für Rheinland-Pfalz",
+			"otherTitleInformation": "amtliche Bekanntmachungen",
+			"placeOfPublication": "Alzey",
+			"isDescribedBy": "edoweb:dda088b3-48d5-4c7b-a614-aa1935c7e2bc.rdf",
+			"similarTo": "http://api.edoweb-test.hbz-nrw.de/fedora/objects/edoweb:dda088b3-48d5-4c7b-a614-aa1935c7e2bc"
+		},
+
+		{
+			"@id": "edoweb:dda088b3-48d5-4c7b-a614-aa1935c7e2bc.rdf",
+			"created": 
+			{
+				"@type": "xsd:dateTime",
+				"@value": "2014-08-04T20:09:42.276+02:00"
+			},
+
+			"creator": "http://edoweb-test.hbz-nrw.de/user/1",
+			"modified": 
+			{
+				"@type": "xsd:dateTime",
+				"@value": "2014-08-04T20:09:45.840+02:00"
+			},
+
+			"describes": "edoweb:dda088b3-48d5-4c7b-a614-aa1935c7e2bc"
+		},
+
+		{
+			"@id": "http://d-nb.info/gnd/2029758-0",
+			"@type": "http://d-nb.info/standards/elementset/gnd#CorporateBody",
+			"http://d-nb.info/standards/elementset/gnd#gndIdentifier": "2029758-0",
+			"preferredName": "Rheinland-Pfalz / Staatskanzlei",
+			"http://www.w3.org/2004/02/skos/core#notation": "2029758-0",
+			"prefLabel": "Rheinland-Pfalz / Staatskanzlei"
+		},
+
+		{
+			"@id": "http://d-nb.info/gnd/35789-3",
+			"@type": "http://d-nb.info/standards/elementset/gnd#PlaceOrGeographicName",
+			"http://d-nb.info/standards/elementset/gnd#dateOfEstablishment": "30.8.1946",
+			"http://d-nb.info/standards/elementset/gnd#gndIdentifier": "35789-3",
+			"preferredName": "Rheinland-Pfalz",
+			"http://www.w3.org/2004/02/skos/core#notation": "35789-3",
+			"prefLabel": "Rheinland-Pfalz"
+		}
+	],
+
+	"@context": "http://api.edoweb-test.hbz-nrw.de/edoweb-resources.json"
+}

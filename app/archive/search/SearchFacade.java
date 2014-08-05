@@ -17,6 +17,7 @@
 package archive.search;
 
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
@@ -145,7 +146,7 @@ public class SearchFacade {
      *            the type
      * @return settings for a particular type and index
      */
-    public String getSettings(String index, String type) {
+    public Map<String, Object> getSettings(String index, String type) {
 	return search.getSettings(index, type);
     }
 
