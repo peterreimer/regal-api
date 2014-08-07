@@ -376,7 +376,7 @@ public class Node {
     /**
      * @return a dublin core java object representation
      */
-    public DublinCoreData getBean() {
+    public DublinCoreData getDublinCoreData() {
 	return dublinCoreData;
     }
 
@@ -425,7 +425,7 @@ public class Node {
      *            dublin core data in one bag
      * @return this
      */
-    public Node setDcBean(DublinCoreData dc) {
+    public Node setDublinCoreData(DublinCoreData dc) {
 	this.dublinCoreData = dc;
 	return this;
     }

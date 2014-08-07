@@ -396,7 +396,9 @@ public class OaiOreMaker {
 		}
 	    }
 
-	    URI fedoraObject = f.createURI(server + "/fedora/objects/" + pid);
+	    URI fedoraObject = f.createURI(Play.application().configuration()
+		    .getString("regal-api.fedoraIntern")
+		    + "/objects/" + pid);
 
 	    con.add(rem, describes, aggregation);
 	    con.add(rem, modified, lastTimeModified);

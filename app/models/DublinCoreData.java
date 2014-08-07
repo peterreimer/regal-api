@@ -16,10 +16,14 @@
  */
 package models;
 
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
 
 import archive.datatypes.Node;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
@@ -78,7 +82,7 @@ public class DublinCoreData {
      *            a node to initalise from
      */
     public DublinCoreData(Node node) {
-	DublinCoreData dc = node.getBean();
+	DublinCoreData dc = node.getDublinCoreData();
 	contributer = dc.getContributer();
 	coverage = dc.getCoverage();
 	creator = dc.getCreator();
@@ -770,13 +774,15 @@ public class DublinCoreData {
 	    ;
     }
 
+    @Override
     public String toString() {
-	return "contributer :" + contributer + ", coverage:" + coverage
-		+ ", creator:" + creator + ", date:" + date + ", description:"
-		+ description + ", format:" + format + ", identifier:"
-		+ identifier + ", language:" + language + ", publisher:"
-		+ publisher + ", relation:" + relation + ", rights:" + rights
-		+ ", source:" + source + ", subject:" + subject + ", title:"
-		+ title + ", type:" + type;
+	ObjectMapper mapper = JsonUtil.mapper();
+	StringWriter w = new StringWriter();
+	try {
+	    mapper.writeValue(w, this);
+	} catch (Exception e) {
+	    return super.toString();
+	}
+	return w.toString();
     }
 }

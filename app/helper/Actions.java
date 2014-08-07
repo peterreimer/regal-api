@@ -86,7 +86,7 @@ public class Actions {
     private Representations representations = null;
     private FedoraInterface fedora = null;
 
-    private String fedoraExtern = null;
+    private String fedoraIntern = null;
     private String server = null;
     private String urnbase = null;
     private SearchFacade search = null;
@@ -112,7 +112,7 @@ public class Actions {
 			.getString("regal-api.fedoraUser"),
 		Play.application().configuration()
 			.getString("regal-api.fedoraUserPassword"));
-	fedoraExtern = Play.application().configuration()
+	fedoraIntern = Play.application().configuration()
 		.getString("regal-api.fedoraIntern");
 	services = new Services(fedora, server);
 	representations = new Representations(fedora, server);
@@ -307,26 +307,9 @@ public class Actions {
      *            A dublin core object
      * @return a short message
      */
-    public String updateDC(String pid,
-	    com.fasterxml.jackson.databind.JsonNode json) {
+    public String updateDC(String pid, DublinCoreData dc) {
 	Node node = fedora.readNode(pid);
-	DublinCoreData dc = node.getBean();
-	dc.setContributer(json.findValuesAsText("contributor"));
-	dc.setCoverage(json.findValuesAsText("coverage"));
-	dc.setCreator(json.findValuesAsText("creator"));
-	dc.setDate(json.findValuesAsText("date"));
-	dc.setDescription(json.findValuesAsText("description"));
-	dc.setFormat(json.findValuesAsText("format"));
-	dc.setIdentifier(json.findValuesAsText("identifier"));
-	dc.setLanguage(json.findValuesAsText("language"));
-	dc.setPublisher(json.findValuesAsText("publisher"));
-	dc.setDescription(json.findValuesAsText("description"));
-	dc.setRights(json.findValuesAsText("rights"));
-	dc.setSource(json.findValuesAsText("source"));
-	dc.setSubject(json.findValuesAsText("subject"));
-	dc.setTitle(json.findValuesAsText("title"));
-	dc.setType(json.findValuesAsText("type"));
-	node.setDcBean(dc);
+	node.setDublinCoreData(dc);
 	fedora.updateNode(node);
 	index(node);
 	return pid + " dc successfully updated!";
@@ -558,7 +541,7 @@ public class Actions {
      * @return A short message.
      */
     public String makeOAISet(String pid) {
-	return services.makeOAISet(pid, fedoraExtern);
+	return services.makeOAISet(pid, fedoraIntern);
     }
 
     /**
@@ -903,7 +886,7 @@ public class Actions {
      * @return a URL to a PDF/A Conversion
      */
     public String getPdfaUrl(Node node) {
-	return services.getPdfaUrl(node, fedoraExtern);
+	return services.getPdfaUrl(node, fedoraIntern);
     }
 
     /**
@@ -931,7 +914,7 @@ public class Actions {
      * @return the plain text content of the pdf
      */
     public String pdfbox(String pid) {
-	return services.pdfbox(readNode(pid), fedoraExtern);
+	return services.pdfbox(readNode(pid), fedoraIntern);
     }
 
     /**
@@ -940,7 +923,7 @@ public class Actions {
      * @return the plain text content of the pdf
      */
     public String pdfbox(Node node) {
-	return services.pdfbox(node, fedoraExtern);
+	return services.pdfbox(node, fedoraIntern);
     }
 
     /**
@@ -949,7 +932,7 @@ public class Actions {
      * @return the plain text content of the pdf
      */
     public String itext(Node node) {
-	return services.itext(node, fedoraExtern);
+	return services.itext(node, fedoraIntern);
     }
 
     /**
@@ -962,7 +945,11 @@ public class Actions {
     public String oaiore(String pid, String format) {
 	List<String> parents = getRelatives(pid, IS_PART_OF);
 	List<String> children = getRelatives(pid, HAS_PART);
-	return representations.getReM(pid, format, fedoraExtern, parents,
+	return representations.getReM(pid, format, fedoraIntern, parents,
 		children);
+    }
+
+    public String getFedoraIntern() {
+	return fedoraIntern;
     }
 }

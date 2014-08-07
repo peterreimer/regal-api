@@ -104,7 +104,7 @@ public class Services {
 
 	String pid = node.getPID();
 
-	List<String> identifier = node.getBean().getIdentifier();
+	List<String> identifier = node.getDublinCoreData().getIdentifier();
 	String alephid = "";
 	for (String id : identifier) {
 	    if (id.startsWith("TT") || id.startsWith("HT")) {
@@ -390,10 +390,10 @@ public class Services {
 	    setNameLink.setObject(name, true);
 	    oaiset.addRelation(setNameLink);
 
-	    DublinCoreData dc = oaiset.getBean();
+	    DublinCoreData dc = oaiset.getDublinCoreData();
 	    dc.addTitle(name);
 
-	    oaiset.setDcBean(dc);
+	    oaiset.setDublinCoreData(dc);
 	    fedora.createNode(oaiset);
 	}
     }

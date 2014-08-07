@@ -45,7 +45,6 @@ import actions.BasicAuth;
 import archive.datatypes.Node;
 import archive.fedora.ArchiveException;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -162,7 +161,7 @@ public class Resource extends MyController {
 	    if (!readAccessIsAllowed(accessScheme, role))
 		throw new HttpArchiveException(401);
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    URL url = new URL(actions.getServer() + "/fedora/objects/" + pid
+	    URL url = new URL(actions.getFedoraIntern() + "/objects/" + pid
 		    + "/datastreams/data/content");
 	    HttpURLConnection connection = (HttpURLConnection) url
 		    .openConnection();
@@ -211,7 +210,8 @@ public class Resource extends MyController {
 		object = (RegalObject) MyController.mapper.readValue(
 			o.toString(), RegalObject.class);
 	    } else {
-		object = new RegalObject();
+		throw new NullPointerException(
+			"Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
 	    }
 	    Node node = actions.createResource(object.getType(),
 		    object.getParentPid(), object.getTransformer(),
@@ -263,11 +263,11 @@ public class Resource extends MyController {
 	    Actions actions = Actions.getInstance();
 	    MultipartFormData body = request().body().asMultipartFormData();
 	    FilePart d = body.getFile("data");
-	    String mimeType = d.getContentType();
-	    String name = d.getFilename();
 	    if (d == null) {
 		return JsonResponse(new Message("Missing File.", 400), 400);
 	    }
+	    String mimeType = d.getContentType();
+	    String name = d.getFilename();
 	    FileInputStream content = new FileInputStream(d.getFile());
 	    actions.updateData(pid, content, mimeType, name, md5);
 	    return JsonResponse(new Message("File uploaded! Type: " + mimeType
@@ -291,9 +291,18 @@ public class Resource extends MyController {
 	    if (!modifyingAccessIsAllowed(role))
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
-	    JsonNode json = request().body().asJson();
-	    String result = actions.updateDC(pid, json);
-	    return JsonResponse(new Message(result));
+	    Object o = request().body().asJson();
+	    DublinCoreData dc;
+	    if (o != null) {
+		dc = (DublinCoreData) MyController.mapper.readValue(
+			o.toString(), DublinCoreData.class);
+	    } else {
+		dc = new DublinCoreData();
+	    }
+
+	    String result = actions.updateDC(pid, dc);
+
+	    return JsonResponse(new Message(result, 200));
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
