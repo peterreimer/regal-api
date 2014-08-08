@@ -22,6 +22,10 @@ import helper.HttpArchiveException;
 import java.util.List;
 import java.util.Vector;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+
 import models.Message;
 import models.ObjectList;
 
@@ -32,9 +36,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import actions.BasicAuth;
 import archive.datatypes.Transformer;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
+
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -54,7 +56,7 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = ObjectList.class, httpMethod = "POST")
     public static Result index(@PathParam("pid") String pid,
-	    @QueryParam("type") final String type) {
+	    @QueryParam("contentType") final String type) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    if (!Resource.modifyingAccessIsAllowed(role))
@@ -73,7 +75,7 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
     public static Result removeFromIndex(@PathParam("pid") String pid,
-	    @QueryParam("type") final String type) {
+	    @QueryParam("contentType") final String type) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    if (!Resource.modifyingAccessIsAllowed(role))
@@ -89,7 +91,7 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", response = ObjectList.class, httpMethod = "POST")
     public static Result publicIndex(@PathParam("pid") String pid,
-	    @QueryParam("type") final String type) {
+	    @QueryParam("contentType") final String type) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    if (!Resource.modifyingAccessIsAllowed(role))
@@ -105,7 +107,7 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
     public static Result removeFromPublicIndex(@PathParam("pid") String pid,
-	    @QueryParam("type") final String type) {
+	    @QueryParam("contentType") final String type) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    if (!Resource.modifyingAccessIsAllowed(role))

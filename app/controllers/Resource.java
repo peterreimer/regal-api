@@ -285,6 +285,7 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateDc", value = "updateDc", notes = "Updates the dc data of a resource", response = Message.class, httpMethod = "PUT")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "Add Dublin Core", required = true, dataType = "DublinCoreData", paramType = "body") })
     public static Result updateDc(@PathParam("pid") String pid) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
@@ -628,6 +629,7 @@ public class Resource extends MyController {
 	}
     }
 
+    @ApiOperation(produces = "text/plain", nickname = "updateOaiSets", value = "updateOaiSets", notes = "Links resource to oai sets and creates new sets if needed", response = String.class, httpMethod = "POST")
     public static Result updateOaiSets(@PathParam("pid") String pid) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
