@@ -348,8 +348,8 @@ public class TestSearch extends BaseModelTest {
 	search = new SearchMock("test", "public-index-journal-mapping.json");
 	System.out.println(printJsonFormatted(search.getSettings("test",
 		"journal")));
-	search.index("edoweb", "journal", "3", v3);
-	printJsonFormatted(search.getSettings("edoweb", "journal"));
+	search.index("test", "journal", "3", v3);
+	printJsonFormatted(search.getSettings("test", "journal"));
 	System.out.println(printJsonFormatted(search.getSettings("test",
 		"journal")));
 	// search.index("edoweb", "journal", "1", v1);
