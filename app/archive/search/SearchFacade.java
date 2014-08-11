@@ -54,7 +54,7 @@ public class SearchFacade {
      * @param config
      *            an elasticsearch mapping
      */
-    public void init(String index, String config) {
+    public void init(String[] index, String config) {
 	search.init(index, config);
     }
 

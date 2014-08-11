@@ -49,7 +49,7 @@ class SearchMock {
 	client = node.client();
 	client.admin().indices().prepareDelete("_all").execute().actionGet();
 	search = new Search(client);
-	search.init(indexName, configName);
+	search.init(new String[] { indexName }, configName);
     }
 
     /**
@@ -64,7 +64,7 @@ class SearchMock {
 	return search.hashCode();
     }
 
-    public void init(String index, String config) {
+    public void init(String[] index, String config) {
 	search.init(index, config);
     }
 

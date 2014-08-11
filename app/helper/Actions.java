@@ -117,6 +117,11 @@ public class Actions {
 	services = new Services(fedora, server);
 	representations = new Representations(fedora, server);
 	search = new SearchFacade(escluster);
+
+	search.init(
+		Play.application().configuration()
+			.getString("regal-api.namespace").split("\\s*,[,\\s]*"),
+		"public-index-config.json");
     }
 
     /**
@@ -569,7 +574,6 @@ public class Actions {
      * @return a short message.
      */
     public String index(String p, String index, String type) {
-	search.init(index, "public-index-config.json");
 	String jsonCompactStr = oaiore(p, "application/json+compact");
 	search.index(index, type, p, jsonCompactStr);
 	return p + " indexed!";

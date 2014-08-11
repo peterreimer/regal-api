@@ -65,12 +65,14 @@ public class Search {
 	this.client = client;
     }
 
-    void init(String index, String config) {
+    void init(String[] index, String config) {
 	try {
 	    String indexConfig = CopyUtils.copyToString(Play.application()
 		    .resourceAsStream(config), "utf-8");
-	    client.admin().indices().prepareCreate(index)
-		    .setSource(indexConfig).execute().actionGet();
+	    for (String i : index) {
+		client.admin().indices().prepareCreate(i)
+			.setSource(indexConfig).execute().actionGet();
+	    }
 
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
 	    logger.debug("", e);
