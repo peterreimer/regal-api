@@ -56,18 +56,19 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = ObjectList.class, httpMethod = "POST")
     public static Result index(@PathParam("pid") String pid,
-	    @QueryParam("contentType") final String type) {
+	    @QueryParam("contentType") final String type,
+	    @QueryParam("index") final String index) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    if (!Resource.modifyingAccessIsAllowed(role))
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
-	    String result = actions.index(pid, pid.split(":")[0], type);
+	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
+	    String result = actions.index(pid, curIndex, type);
 	    return JsonResponse(new Message(result));
 	} catch (HttpArchiveException e) {
 	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
 	} catch (Exception e) {
-
 	    return JsonResponse(new Message(e, 500), 500);
 	}
 
@@ -91,14 +92,15 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", response = ObjectList.class, httpMethod = "POST")
     public static Result publicIndex(@PathParam("pid") String pid,
-	    @QueryParam("contentType") final String type) {
+	    @QueryParam("contentType") final String type,
+	    @QueryParam("index") final String index) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    if (!Resource.modifyingAccessIsAllowed(role))
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
-	    String result = actions.index(pid, "public_" + pid.split(":")[0],
-		    type);
+	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
+	    String result = actions.index(pid, "public_" + curIndex, type);
 	    return JsonResponse(new Message(result));
 	} catch (Exception e) {
 	    return JsonResponse(new Message(e, 500), 500);
