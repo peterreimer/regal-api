@@ -34,6 +34,8 @@ public class RegalObject {
     List<String> transformer = null;
     List<String> indexes = null;
     String accessScheme = null;
+    String createdBy = null;
+    String importedFrom = null;
 
     /**
      * Default constructor
@@ -127,6 +129,34 @@ public class RegalObject {
      */
     public void setAccessScheme(String accessScheme) {
 	this.accessScheme = accessScheme;
+    }
+
+    /**
+     * @return createdBy
+     */
+    public String getCreatedBy() {
+	return createdBy;
+    }
+
+    /**
+     * @param createdBy
+     */
+    public void setCreatedBy(String createdBy) {
+	this.createdBy = createdBy;
+    }
+
+    /**
+     * @return importedFrom
+     */
+    public String getImportedFrom() {
+	return importedFrom;
+    }
+
+    /**
+     * @param importedFrom
+     */
+    public void setImportedFrom(String importedFrom) {
+	this.importedFrom = importedFrom;
     }
 
     @Override

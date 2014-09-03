@@ -24,13 +24,19 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import models.Link;
+import models.RdfResource;
+
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -56,8 +62,6 @@ import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import archive.datatypes.Link;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -610,4 +614,64 @@ public class RdfUtils {
 	    throw new RdfException(e);
 	}
     }
+
+    /**
+     * @param stream
+     *            rdf data
+     * @param format
+     *            format of rdf data
+     * @param uri
+     *            uri that is described by data
+     * @return a RdfResource
+     */
+    public static RdfResource createRdfResource(InputStream stream,
+	    RDFFormat format, String uri) {
+	try {
+	    Map<String, RdfResource> parents;
+	    RepositoryConnection con = readRdfInputStreamToRepository(stream,
+		    format);
+	    RepositoryResult<Statement> statements = con.getStatements(null,
+		    null, null, true);
+	    parents = fetchSubjects(statements);
+	    RdfResource me = parents.get(uri);
+	    for (Link l : me.getLinks()) {
+		if (!l.getObject().equals(uri) && !l.isLiteral()
+			&& parents.containsKey(l.getObject())) {
+		    RdfResource c = parents.get(l.getObject());
+		    me.addResolvedLink(c);
+		}
+	    }
+	    return me;
+	} catch (RepositoryException e) {
+	    throw new RdfException(e);
+	}
+    }
+
+    private static Map<String, RdfResource> fetchSubjects(
+	    RepositoryResult<Statement> statements) throws RepositoryException {
+
+	Map<String, RdfResource> subjs = new HashMap<String, RdfResource>();
+	while (statements.hasNext()) {
+	    Statement st = statements.next();
+	    Resource subject = st.getSubject();
+	    if (subjs.containsKey(subject.stringValue())) {
+
+		subjs.get(subject.stringValue()).addLink(
+			(new Link(st.getPredicate().stringValue(), st
+				.getObject().stringValue(),
+				(st.getObject() instanceof Literal))));
+	    } else {
+		RdfResource r = new RdfResource();
+
+		r.addLink(new Link(st.getPredicate().stringValue(), st
+			.getObject().stringValue(),
+			(st.getObject() instanceof Literal)));
+		r.setUri(subject.stringValue());
+		subjs.put(subject.stringValue(), r);
+	    }
+
+	}
+	return subjs;
+    }
+
 }

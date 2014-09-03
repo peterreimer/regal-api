@@ -1,0 +1,18 @@
+@* resource Template File *@
+@(node:String)
+
+@import play.api.libs.json._
+
+
+
+@main("Message") {
+	@defining(Json.parse(node)){js=>
+	<div class="message">
+	<pre>@((js \ "text").as[String])</pre>
+	</div>
+	<p/>
+	<div class="statusCode">
+	<pre>@(js \ "code")</pre>
+	</div>
+	}
+}

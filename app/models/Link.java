@@ -14,7 +14,12 @@
  * limitations under the License.
  *
  */
-package archive.datatypes;
+package models;
+
+import java.io.StringWriter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * 
@@ -22,8 +27,10 @@ package archive.datatypes;
  */
 public class Link {
     boolean isLiteral = false;
+    private String predicateLabel = null;
     private String predicate = null;
     private String object = null;
+    private String objectLabel = null;
 
     /**
      * Creates a new link
@@ -95,6 +102,41 @@ public class Link {
 
     }
 
+    /**
+     * @return predicateLabel
+     */
+    public String getPredicateLabel() {
+	return predicateLabel;
+    }
+
+    /**
+     * @param predicateLabel
+     */
+    public void setPredicateLabel(String predicateLabel) {
+	this.predicateLabel = predicateLabel;
+    }
+
+    /**
+     * @return objectLabel
+     */
+    public String getObjectLabel() {
+	return objectLabel;
+    }
+
+    /**
+     * @param objectLabel
+     */
+    public void setObjectLabel(String objectLabel) {
+	this.objectLabel = objectLabel;
+    }
+
+    /**
+     * @param object
+     */
+    public void setObject(String object) {
+	this.object = object;
+    }
+
     @Override
     public boolean equals(Object obj) {
 	if (obj == null)
@@ -129,4 +171,30 @@ public class Link {
 	return hash;
     }
 
+    @Override
+    public String toString() {
+	ObjectMapper mapper = JsonUtil.mapper();
+	StringWriter w = new StringWriter();
+	try {
+	    mapper.writeValue(w, this);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    return super.toString();
+	}
+	return w.toString();
+    }
+
+    /**
+     * @return The short name of the predicate uses String.split on first index
+     *         of '#' or last index of '/'
+     */
+    public String getShortName() {
+	if (predicate.contains("#"))
+	    return predicate.split("#")[1];
+	else if (predicate.startsWith("http")) {
+	    int i = predicate.lastIndexOf("/");
+	    return predicate.substring(i + 1);
+	}
+	return predicate;
+    }
 }

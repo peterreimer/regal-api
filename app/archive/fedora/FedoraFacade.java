@@ -16,13 +16,13 @@
  */
 package archive.fedora;
 
-import static archive.datatypes.Vocabulary.REL_ACCESS_SCHEME;
-import static archive.datatypes.Vocabulary.REL_CONTENT_TYPE;
-import static archive.datatypes.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
+import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
+import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +30,10 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
+import models.Link;
+import models.Node;
+import models.Transformer;
 
 import org.openrdf.model.Statement;
 import org.openrdf.repository.Repository;
@@ -42,10 +46,6 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import archive.datatypes.Link;
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
 
 import com.yourmediashelf.fedora.client.FedoraClient;
 import com.yourmediashelf.fedora.client.FedoraClientException;
@@ -223,9 +223,9 @@ class FedoraFacade implements FedoraInterface {
     @Override
     public void createNode(Node node) {
 	try {
-	    new Ingest(node.getPID()).label(node.getLabel()).execute();
+	    new Ingest(node.getPid()).label(node.getLabel()).execute();
 	    DublinCoreHandler.updateDc(node);
-	    List<Transformer> cms = node.getContentModels();
+	    List<Transformer> cms = node.getTransformer();
 	    // utils.createContentModels(cms);
 	    utils.linkContentModels(cms, node);
 	    if (node.getUploadFile() != null) {
@@ -307,7 +307,7 @@ class FedoraFacade implements FedoraInterface {
     @Override
     public void updateNode(Node node) {
 	DublinCoreHandler.updateDc(node);
-	List<Transformer> models = node.getContentModels();
+	List<Transformer> models = node.getTransformer();
 	// utils.updateContentModels(models);
 	node.removeRelations(REL_HAS_MODEL);
 	if (node.getUploadFile() != null) {
@@ -423,7 +423,7 @@ class FedoraFacade implements FedoraInterface {
 	}
 	List<Node> list = listComplexObject(rootPID);
 	for (Node n : list) {
-	    deleteNode(n.getPID());
+	    deleteNode(n.getPid());
 	}
 	return list;
     }
@@ -466,7 +466,7 @@ class FedoraFacade implements FedoraInterface {
 	try {
 	    Node node = readNode(pid);
 	    Node parent = readNode(getNodeParent(node));
-	    parent.removeRelation(HAS_PART, node.getPID());
+	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
 	    // Nothing to do
@@ -481,7 +481,7 @@ class FedoraFacade implements FedoraInterface {
     public void unlinkParent(Node node) {
 	try {
 	    Node parent = readNode(getNodeParent(node));
-	    parent.removeRelation(HAS_PART, node.getPID());
+	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
 	    // Nothing to do

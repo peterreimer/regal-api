@@ -41,6 +41,7 @@ public class TestSearch extends BaseModelTest {
     String edoweb2606976 = null;
     String query1 = null;
     SearchMock search = null;
+    @SuppressWarnings("unused")
     private String edoweb3273325, edoweb3273325_2007, edoweb3273331,
 	    edowebMappingTest, drupalOne, drupalTwo, drupalThree, drupalFour,
 	    drupalFive, drupalSix, v1, v2, v3, v4;

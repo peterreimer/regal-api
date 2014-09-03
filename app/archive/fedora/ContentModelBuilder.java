@@ -18,8 +18,8 @@ package archive.fedora;
 
 import java.util.List;
 
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
+import models.Node;
+import models.Transformer;
 
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.request.AddDatastream;
@@ -32,7 +32,7 @@ public class ContentModelBuilder {
 
     void createFedoraXMLForContentModels(Node node) {
 	StringBuffer infoStream = new StringBuffer();
-	List<Transformer> models = node.getContentModels();
+	List<Transformer> models = node.getTransformer();
 
 	infoStream.append("<ContentModelInfoStream>");
 	for (Transformer model : models) {
@@ -75,7 +75,7 @@ public class ContentModelBuilder {
 
 	try {
 
-	    new AddDatastream(node.getPID(), "HBZCMInfoStream")
+	    new AddDatastream(node.getPid(), "HBZCMInfoStream")
 		    .mimeType("text/xml")
 		    .formatURI(
 			    "info:hbz/hbz-system:HBZContentModelInfoStream1.0")

@@ -30,6 +30,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import models.DublinCoreData;
+import models.Link;
+import models.Node;
 
 import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
@@ -41,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import archive.datatypes.Link;
-import archive.datatypes.Node;
 import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraInterface;
@@ -102,7 +102,7 @@ public class Services {
      */
     public Node lobidify(Node node) {
 
-	String pid = node.getPID();
+	String pid = node.getPid();
 
 	List<String> identifier = node.getDublinCoreData().getIdentifier();
 	String alephid = "";
@@ -192,7 +192,7 @@ public class Services {
 	    return "No node with pid " + pid + " found";
 
 	String metadata = this.uriPrefix + pid + "/metadata";
-	System.out.println(metadata);
+
 	try {
 	    File outfile = File.createTempFile("oaidc", "xml");
 	    outfile.deleteOnExit();
@@ -220,7 +220,7 @@ public class Services {
      * @return the plain text content of the pdf
      */
     public String pdfbox(Node node, String fedoraExtern) {
-	String pid = node.getPID();
+	String pid = node.getPid();
 
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
@@ -322,7 +322,7 @@ public class Services {
      * @return the plain text content of the pdf
      */
     public String itext(Node node, String fedoraExtern) {
-	String pid = node.getPID();
+	String pid = node.getPid();
 
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
@@ -362,7 +362,7 @@ public class Services {
 
 	link = new Link();
 	link.setPredicate(ITEM_ID);
-	link.setObject(uriPrefix + node.getPID(), false);
+	link.setObject(uriPrefix + node.getPid(), false);
 	node.addRelation(link);
 
 	fedora.updateNode(node);
@@ -410,7 +410,7 @@ public class Services {
 	try {
 	    URL pdfaConverter = new URL(
 		    "http://nyx.hbz-nrw.de/pdfa/api/convertFromUrl?inputFile="
-			    + fedoraExtern + "/objects/" + node.getPID()
+			    + fedoraExtern + "/objects/" + node.getPid()
 			    + "/datastreams/data/content");
 
 	    HttpURLConnection connection = (HttpURLConnection) pdfaConverter

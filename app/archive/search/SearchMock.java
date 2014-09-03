@@ -83,7 +83,7 @@ class SearchMock {
     }
 
     public List<String> listIds(String index, String type, int from, int until) {
-	return search.listIds(index, type, from, until);
+	return search.list(index, type, from, until);
     }
 
     public ActionResponse delete(String index, String type, String id) {

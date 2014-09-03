@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package archive.datatypes;
+package archive.fedora;
 
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
@@ -54,4 +54,18 @@ public abstract class Vocabulary {
      */
     public final static String REL_ACCESS_SCHEME = HBZ_MODEL_NAMESPACE
 	    + "accessScheme";
+
+    /**
+     * Used to point to a legacy system which originally created the resource
+     * 
+     */
+    public final static String REL_IMPORTED_FROM = HBZ_MODEL_NAMESPACE
+	    + "importedFrom";
+
+    /**
+     * Used to identify the creator of the regal resource
+     * 
+     */
+    public final static String REL_CREATED_BY = HBZ_MODEL_NAMESPACE
+	    + "createdBy";
 }

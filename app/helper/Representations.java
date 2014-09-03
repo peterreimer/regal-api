@@ -19,17 +19,14 @@ package helper;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Vector;
 
-import models.RegalObject;
+import models.Node;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.stringtemplate.v4.ST;
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
+
 import archive.fedora.FedoraInterface;
 
 /**
@@ -103,44 +100,10 @@ class Representations {
 	return result;
     }
 
-    /**
-     * @param pid
-     *            the pid to read from
-     * @return the parentPid and contentType as json
-     */
-    public RegalObject getRegalObject(String pid) {
-	try {
-	    Node node = fedora.readNode(pid);
-	    RegalObject result = new RegalObject();
-	    String parentPid = null;
-	    String type = node.getContentType();
-	    parentPid = fedora.getNodeParent(node);
-	    result.setParentPid(parentPid);
-	    result.setType(type);
-
-	    result.setTransformer(getTransformerIds(node));
-
-	    return result;
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	}
-    }
-
-    private List<String> getTransformerIds(Node node) {
-	List<Transformer> transformers = node.getContentModels();
-	List<String> transformerIds = new Vector<String>();
-
-	for (Transformer t : transformers) {
-	    transformerIds.add(t.getId());
-	}
-	return transformerIds;
-    }
-
-    public String getReM(String pid, String format, String fedoraExtern,
-	    List<String> parents, List<String> children) {
+    public String getReM(String pid, String format, String fedoraExtern) {
 	Node node = fedora.readNode(pid);
-	OaiOreMaker ore = new OaiOreMaker(node, server, uriPrefix);
-	return ore.getReM(format, parents, children, node.getContentModels());
+	OaiOreMaker ore = new OaiOreMaker(node);
+	return ore.getReM(format, node.getTransformer());
     }
 
 }

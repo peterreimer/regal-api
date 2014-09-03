@@ -28,12 +28,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import models.Node;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import archive.datatypes.Node;
 
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.request.GetDatastreamDissemination;
@@ -48,7 +48,7 @@ public class DublinCoreHandler {
 
     static void readFedoraDcToNode(Node node) throws FedoraClientException {
 
-	FedoraResponse response = new GetDatastreamDissemination(node.getPID(),
+	FedoraResponse response = new GetDatastreamDissemination(node.getPid(),
 		"DC").download(true).execute();
 	InputStream ds = response.getEntityInputStream();
 	readDcToNode(node, ds, "dc");
@@ -369,7 +369,7 @@ public class DublinCoreHandler {
 	try {
 	    String result = preamble + update.toString() + fazit;
 
-	    new ModifyDatastream(node.getPID(), "DC").mimeType("text/xml")
+	    new ModifyDatastream(node.getPid(), "DC").mimeType("text/xml")
 		    .formatURI("http://www.openarchives.org/OAI/2.0/oai_dc/")
 		    .versionable(true).content(result).execute();
 

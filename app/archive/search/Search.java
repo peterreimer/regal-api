@@ -77,7 +77,7 @@ public class Search {
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
 	    logger.debug("", e);
 	} catch (Exception e) {
-	    throw new SearchException(e);
+	    logger.debug("", e);
 	}
     }
 
@@ -107,7 +107,7 @@ public class Search {
 	return response.getHits();
     }
 
-    List<String> listIds(String index, String type, int from, int until) {
+    List<String> list(String index, String type, int from, int until) {
 	SearchHits hits = listResources(index, type, from, until);
 	Iterator<SearchHit> it = hits.iterator();
 	List<String> list = new Vector<String>();

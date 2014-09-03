@@ -18,11 +18,13 @@ package controllers;
 
 import java.io.StringWriter;
 
+import models.Message;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
+import views.html.*;
 
 /**
  * 
@@ -34,22 +36,47 @@ public class MyController extends Controller {
     protected static ObjectMapper mapper = JsonUtil.mapper();
 
     /**
-     * @param obj
-     *            a string representation of this object will be retourned
-     * @return a json response for the passed object
+     * @return Html or Json Output
      */
-    public static Result JsonResponse(Object obj) {
-	return JsonResponse(obj, 200);
+    public static Result AccessDenied() {
+	Message msg = new Message("Access Denied!", 401);
+	if (request().accepts("text/html")) {
+	    return HtmlMessage(msg);
+	} else {
+	    return JsonMessage(msg);
+	}
     }
 
     /**
      * @param obj
-     *            a string representation of this object will be retourned
-     * @param code
-     *            http code
-     * @return JSON Standard Response
+     *            an arbitrary object
+     * @return json serialization of obj
      */
-    public static Result JsonResponse(Object obj, int code) {
+    public static Result json(Object obj) {
+	StringWriter w = new StringWriter();
+	try {
+	    mapper.writeValue(w, obj);
+	} catch (Exception e) {
+	    return internalServerError("Not able to create response!");
+	}
+	return ok(w.toString());
+    }
+
+    /**
+     * @param msg
+     *            the msg will be rendered as html using message view
+     * @return a html rendering of msg
+     */
+    public static Result HtmlMessage(Message msg) {
+	return status(msg.getCode(), message.render(msg.toString()));
+    }
+
+    /**
+     * @param msg
+     *            the msg will be rendered as json
+     * @return a json rendering of msg
+     */
+    public static Result JsonMessage(Message msg) {
 	response().setHeader("Access-Control-Allow-Methods",
 		"POST, GET, OPTIONS, PUT, DELETE");
 	response().setHeader("Access-Control-Max-Age", "3600");
@@ -58,13 +85,6 @@ public class MyController extends Controller {
 			"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
-
-	StringWriter w = new StringWriter();
-	try {
-	    mapper.writeValue(w, obj);
-	} catch (Exception e) {
-	    return internalServerError("Not able to create response!");
-	}
-	return status(code, w.toString());
+	return status(msg.getCode(), msg.toString());
     }
 }

@@ -16,9 +16,6 @@
  */
 package archive.fedora;
 
-import static archive.datatypes.Vocabulary.REL_ACCESS_SCHEME;
-import static archive.datatypes.Vocabulary.REL_CONTENT_TYPE;
-import static archive.datatypes.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.FedoraVocabulary.CM_CONTENTMODEL;
 import static archive.fedora.FedoraVocabulary.DS_COMPOSITE_MODEL;
 import static archive.fedora.FedoraVocabulary.DS_COMPOSITE_MODEL_URI;
@@ -37,6 +34,11 @@ import static archive.fedora.FedoraVocabulary.REL_IS_CONTRACTOR_OF;
 import static archive.fedora.FedoraVocabulary.REL_IS_DEPLOYMENT_OF;
 import static archive.fedora.FedoraVocabulary.SDEF_CONTENTMODEL;
 import static archive.fedora.FedoraVocabulary.SDEP_CONTENTMODEL;
+import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
+import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_CREATED_BY;
+import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -60,6 +62,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import models.Link;
+import models.Node;
+import models.Transformer;
+
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -78,10 +84,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import archive.datatypes.Link;
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
 
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.request.AddDatastream;
@@ -237,7 +239,7 @@ public class Utils {
 
     void createRelsExt(Node node) {
 
-	String pid = node.getPID();
+	String pid = node.getPid();
 
 	// IF DATASTREAM ! EXISTS
 	// CREATE DATASTREAM
@@ -294,13 +296,13 @@ public class Utils {
 	    String label = node.getFileLabel();
 	    if (label == null || label.isEmpty())
 		label = file.getName();
-	    new AddDatastream(node.getPID(), "data").versionable(true)
+	    new AddDatastream(node.getPid(), "data").versionable(true)
 		    .dsLabel(label).dsState("A").controlGroup("M")
 		    .mimeType(node.getMimeType()).dsLocation(location)
 		    .execute();
 
 	} catch (Exception e) {
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	}
     }
@@ -313,12 +315,12 @@ public class Utils {
 	    UploadResponse response = request.execute();
 	    String location = response.getUploadLocation();
 
-	    new AddDatastream(node.getPID(), "metadata").versionable(true)
+	    new AddDatastream(node.getPid(), "metadata").versionable(true)
 		    .dsState("A").dsLabel("n-triple rdf metadata")
 		    .controlGroup("M").mimeType("text/plain")
 		    .dsLocation(location).execute();
 	} catch (Exception e) {
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	}
     }
@@ -327,21 +329,21 @@ public class Utils {
 
 	try {
 	    File file = new File(node.getUploadFile());
-	    if (dataStreamExists(node.getPID(), "data")) {
+	    if (dataStreamExists(node.getPid(), "data")) {
 		System.out.println("ModifyDatastream " + node.getMimeType());
-		new ModifyDatastream(node.getPID(), "data").versionable(true)
+		new ModifyDatastream(node.getPid(), "data").versionable(true)
 			.dsState("A").dsLabel(node.getFileLabel())
 			.mimeType(node.getMimeType()).controlGroup("M")
 			.content(file).execute();
 	    } else {
-		new AddDatastream(node.getPID(), "data").versionable(true)
+		new AddDatastream(node.getPid(), "data").versionable(true)
 			.dsState("A").mimeType(node.getMimeType())
 			.dsLabel(node.getFileLabel()).content(file)
 			.controlGroup("M").execute();
 	    }
 	} catch (Exception e) {
 	    e.printStackTrace();
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	}
     }
@@ -349,19 +351,19 @@ public class Utils {
     void updateMetadataStream(Node node) {
 	try {
 	    File file = new File(node.getMetadataFile());
-	    if (dataStreamExists(node.getPID(), "metadata")) {
-		new ModifyDatastream(node.getPID(), "metadata")
+	    if (dataStreamExists(node.getPid(), "metadata")) {
+		new ModifyDatastream(node.getPid(), "metadata")
 			.versionable(true).dsLabel("n-triple rdf metadata")
 			.dsState("A").controlGroup("M").mimeType("text/plain")
 			.content(file).execute();
 	    } else {
-		new AddDatastream(node.getPID(), "metadata").versionable(true)
+		new AddDatastream(node.getPid(), "metadata").versionable(true)
 			.dsState("A").dsLabel("n-triple rdf metadata")
 			.controlGroup("M").mimeType("text/plain").content(file)
 			.execute();
 	    }
 	} catch (Exception e) {
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	}
     }
@@ -370,7 +372,7 @@ public class Utils {
 
 	try {
 	    FedoraResponse response = new GetDatastreamDissemination(
-		    node.getPID(), "RELS-EXT").download(true).execute();
+		    node.getPid(), "RELS-EXT").download(true).execute();
 	    InputStream ds = response.getEntityInputStream();
 
 	    Repository myRepository = new SailRepository(new MemoryStore());
@@ -381,7 +383,7 @@ public class Utils {
 
 	    try {
 		ValueFactory f = myRepository.getValueFactory();
-		URI objectId = f.createURI("info:fedora/" + node.getPID());
+		URI objectId = f.createURI("info:fedora/" + node.getPid());
 		con.add(new BufferedInputStream(ds), baseURI, RDFFormat.RDFXML);
 		RepositoryResult<Statement> statements = con.getStatements(
 			objectId, null, null, true);
@@ -409,6 +411,14 @@ public class Utils {
 				REL_ACCESS_SCHEME) == 0) {
 			    node.setAccessScheme(link.getObject());
 			    continue;
+			} else if (link.getPredicate().compareTo(
+				REL_IMPORTED_FROM) == 0) {
+			    node.setImportedFrom(link.getObject());
+			    continue;
+			} else if (link.getPredicate()
+				.compareTo(REL_CREATED_BY) == 0) {
+			    node.setCreatedBy(link.getObject());
+			    continue;
 			}
 
 			String object = link.getObject();
@@ -434,7 +444,7 @@ public class Utils {
 
 		    }
 		} catch (Exception e) {
-		    throw new ArchiveException(node.getPID()
+		    throw new ArchiveException(node.getPid()
 			    + " an unknown exception occured.", e);
 		}
 
@@ -449,19 +459,19 @@ public class Utils {
 
 	} catch (RepositoryException e) {
 
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	} catch (RemoteException e) {
 
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	} catch (RDFParseException e) {
 
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	} catch (IOException e) {
 
-	    throw new ArchiveException(node.getPID()
+	    throw new ArchiveException(node.getPid()
 		    + " an unknown exception occured.", e);
 	}
 
@@ -621,7 +631,7 @@ public class Utils {
     }
 
     void updateRelsExt(Node node) {
-	String pid = node.getPID();
+	String pid = node.getPid();
 	String type = node.getContentType();
 
 	if (!dataStreamExists(pid, "RELS-EXT")) {
@@ -641,6 +651,16 @@ public class Utils {
 	link = new Link();
 	link.setObject(node.getAccessScheme(), true);
 	link.setPredicate(REL_ACCESS_SCHEME);
+	node.addRelation(link);
+
+	link = new Link();
+	link.setObject(node.getImportedFrom(), false);
+	link.setPredicate(REL_IMPORTED_FROM);
+	node.addRelation(link);
+
+	link = new Link();
+	link.setObject(node.getCreatedBy(), false);
+	link.setPredicate(REL_CREATED_BY);
 	node.addRelation(link);
 
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());

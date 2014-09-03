@@ -19,8 +19,8 @@ package archive.fedora;
 import java.io.InputStream;
 import java.util.List;
 
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
+import models.Node;
+import models.Transformer;
 
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de

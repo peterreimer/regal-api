@@ -20,16 +20,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import models.Node;
 import models.ObjectType;
+import models.Transformer;
 
-import org.apache.commons.io.IOUtils;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
@@ -49,11 +48,8 @@ import org.openrdf.rio.helpers.JSONLDSettings;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stringtemplate.v4.ST;
 
 import play.Play;
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
 
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
@@ -67,8 +63,6 @@ import com.github.jsonldjava.utils.JSONUtils;
 public class OaiOreMaker {
 
     final static Logger logger = LoggerFactory.getLogger(OaiOreMaker.class);
-    String server = null;
-    String uriPrefix = null;
 
     Node node = null;
     String dcNamespace = "http://purl.org/dc/elements/1.1/";
@@ -85,9 +79,8 @@ public class OaiOreMaker {
     RepositoryConnection con = null;
 
     @SuppressWarnings("javadoc")
-    public OaiOreMaker(Node node, String server, String uriPrefix) {
-	this.server = server;
-	this.uriPrefix = "/resource/";
+    public OaiOreMaker(Node node) {
+
 	this.node = node;
 	try {
 	    con = createRdfRepository();
@@ -107,12 +100,11 @@ public class OaiOreMaker {
      *            transformers of the object
      * @return a oai_ore resource map
      */
-    public String getReM(String format, List<String> parents,
-	    List<String> children, List<Transformer> transformers) {
+    public String getReM(String format, List<Transformer> transformers) {
 
 	String result = null;
 	addDescriptiveMetadata();
-	addStructuralData(parents, children, transformers);
+	addStructuralData(transformers);
 	result = write(format);
 	closeRdfRepository();
 	return result;
@@ -121,7 +113,7 @@ public class OaiOreMaker {
 
     private void addDescriptiveMetadata() {
 	try {
-	    con.add(new StringReader(node.getMetadata()), node.getPID(),
+	    con.add(new StringReader(node.getMetadata()), node.getPid(),
 		    RDFFormat.N3);
 	} catch (Exception e) {
 	    logger.debug("", e);
@@ -130,9 +122,7 @@ public class OaiOreMaker {
 
     private String write(String format) {
 	try {
-	    if ("text/html".equals(format)) {
-		return getHtml();
-	    } else if ("application/json+compact".equals(format)) {
+	    if ("application/json+compact".equals(format)) {
 		InputStream contextUrl = Play.application().resourceAsStream(
 			"edoweb-resources.json");
 		StringWriter out = new StringWriter();
@@ -143,11 +133,11 @@ public class OaiOreMaker {
 		@SuppressWarnings("rawtypes")
 		Map context = (Map) JSONUtils.fromInputStream(contextUrl);
 		JsonLdOptions options = new JsonLdOptions();
+		@SuppressWarnings("unchecked")
 		Map<String, Object> normalized = (Map<String, Object>) expandSimpleValues((Map<String, Object>) JsonLdProcessor
 			.compact(json, context, options));
 		normalized.remove("@context");
-		normalized.put("@context", server
-			+ "/public/edoweb-resources.json");
+		normalized.put("@context", node.getContextDocumentUri());
 
 		return JSONUtils.toPrettyString(normalized);
 	    }
@@ -160,6 +150,7 @@ public class OaiOreMaker {
 	}
     }
 
+    @SuppressWarnings("unchecked")
     private Object expandSimpleValues(Object element) {
 
 	if (element instanceof String) {
@@ -252,23 +243,6 @@ public class OaiOreMaker {
 	return writer;
     }
 
-    private String getHtml() throws RDFHandlerException, RepositoryException {
-	StringWriter out = new StringWriter();
-	RDFWriter writer = null;
-	String result = null;
-	writer = Rio.createWriter(RDFFormat.NTRIPLES, out);
-	writer.startRDF();
-	RepositoryResult<Statement> statements = con.getStatements(null, null,
-		null, false);
-	while (statements.hasNext()) {
-	    Statement statement = statements.next();
-	    writer.handleStatement(statement);
-	}
-	writer.endRDF();
-	result = out.toString();
-	return getHtml(result, node.getMimeType(), node.getPID());
-    }
-
     private RepositoryConnection createRdfRepository()
 	    throws RepositoryException {
 	RepositoryConnection mycon = null;
@@ -287,32 +261,21 @@ public class OaiOreMaker {
 	}
     }
 
-    private void addStructuralData(List<String> parents, List<String> children,
-	    List<Transformer> transformers) {
+    private void addStructuralData(List<Transformer> transformers) {
 	try {
-	    String pid = node.getPID();
-	    Date lastModified = node.getLastModified();
-	    Date creationDate = node.getCreationDate();
-	    // Graph remGraph = new org.openrdf.model.impl.GraphImpl();
 	    ValueFactory f = con.getValueFactory();
-
 	    // Things
-	    URI aggregation = f.createURI(/* uriPrefix + */pid);
-	    URI rem = f.createURI(/* uriPrefix + */pid + ".rdf");
-	    URI data = f.createURI(aggregation.stringValue() + "/data");
-	    URI fulltext = f.createURI(aggregation.stringValue() + "/fulltext");
+	    URI aggregation = f.createURI(node.getAggregationUri());
+	    URI rem = f.createURI(node.getRemUri());
+	    URI data = f.createURI(node.getDataUri());
 	    Literal cType = f.createLiteral(node.getContentType());
-	    Literal lastTimeModified = f.createLiteral(lastModified);
-	    Literal firstTimeCreated = f.createLiteral(creationDate);
-	    String mime = node.getMimeType();
+	    Literal lastTimeModified = f.createLiteral(node.getLastModified());
+	    Literal firstTimeCreated = f.createLiteral(node.getCreationDate());
+	    String mime = node.getFileMimeType();
 	    String label = node.getFileLabel();
 	    String accessScheme = node.getAccessScheme();
-	    String fileSize = null;
-	    BigInteger fs = node.getFileSize();
-	    if (fs != null)
-		fileSize = fs.toString();
-	    String fileChecksum = node.getChecksum();
-
+	    String fileSize = node.getFileSizeAsString();
+	    String fileChecksum = node.getFileChecksum();
 	    // Predicates
 	    // ore
 	    URI describes = f.createURI(oreNamespace, "describes");
@@ -326,6 +289,7 @@ public class OaiOreMaker {
 	    URI modified = f.createURI(dctermsNamespace, "modified");
 	    URI created = f.createURI(dctermsNamespace, "created");
 	    URI dcFormat = f.createURI(dctermsNamespace, "format");
+	    @SuppressWarnings("unused")
 	    URI dcHasFormat = f.createURI(dctermsNamespace, "hasFormat");
 	    // rdfs
 	    URI rdfsLabel = f.createURI(rdfsNamespace, "label");
@@ -351,10 +315,6 @@ public class OaiOreMaker {
 		con.add(data, dcFormat, dataMime);
 		con.add(aggregation, aggregates, data);
 		con.add(aggregation, hasData, data);
-		if (dataMime.toString().compareTo("application/pdf") == 0) {
-		    con.add(aggregation, aggregates, fulltext);
-		    con.add(data, dcHasFormat, fulltext);
-		}
 	    }
 
 	    if (accessScheme != null && !accessScheme.isEmpty()) {
@@ -381,7 +341,7 @@ public class OaiOreMaker {
 		con.add(data, rdfsLabel, labelLiteral);
 	    }
 
-	    String str = getOriginalUri(pid);
+	    String str = getOriginalUri(node.getPid());
 	    if (str != null && !str.isEmpty()
 		    && !cType.stringValue().equals(ObjectType.file.toString())) {
 		URI originalObject = f.createURI(str);
@@ -398,7 +358,7 @@ public class OaiOreMaker {
 
 	    URI fedoraObject = f.createURI(Play.application().configuration()
 		    .getString("regal-api.fedoraIntern")
-		    + "/objects/" + pid);
+		    + "/objects/" + node.getPid());
 
 	    con.add(rem, describes, aggregation);
 	    con.add(rem, modified, lastTimeModified);
@@ -409,14 +369,14 @@ public class OaiOreMaker {
 	    con.add(aggregation, similarTo, fedoraObject);
 	    con.add(aggregation, contentType, cType);
 
-	    for (String relPid : parents) {
-		URI relUrl = f.createURI(relPid);
+	    for (String rel : node.getRelatives("IS_PART_OF")) {
+		URI relUrl = f.createURI(rel);
 		con.add(aggregation, isAggregatedBy, relUrl);
 		con.add(aggregation, isPartOf, relUrl);
 	    }
 
-	    for (String relPid : children) {
-		URI relUrl = f.createURI(relPid);
+	    for (String rel : node.getRelatives("HAS_PART")) {
+		URI relUrl = f.createURI(rel);
 		con.add(aggregation, aggregates, relUrl);
 		con.add(aggregation, hasPart, relUrl);
 
@@ -457,149 +417,6 @@ public class OaiOreMaker {
 
 	}
 	return originalUri;
-    }
-
-    private String getHtml(String rdf, String mime, String pid) {
-
-	String result = "";
-	RepositoryConnection mycon = null;
-	try {
-	    java.net.URL fileLocation = Thread.currentThread()
-		    .getContextClassLoader().getResource("html.html");
-
-	    StringWriter writer = new StringWriter();
-	    IOUtils.copy(fileLocation.openStream(), writer);
-	    String data = writer.toString();
-
-	    ST st = new ST(data, '$', '$');
-	    st.add("serverRoot", "");
-
-	    if (mime != null) {
-		String dataLink = uriPrefix + pid + "/data";
-		String logoLink = "";
-		if (mime.compareTo("application/pdf") == 0) {
-		    logoLink = "pdflogo.svg";
-		} else if (mime.compareTo("application/zip") == 0) {
-		    logoLink = "zip.png";
-		} else {
-		    logoLink = "data.png";
-		}
-		st.add("data", "<tr><td class=\"textlink\"><a	href=\""
-			+ dataLink + "\"><img src=\"/public/images/" + logoLink
-			+ "\" width=\"100\" /></a></td></tr>");
-	    } else {
-		st.add("data", "");
-	    }
-
-	    SailRepository myRepository = new SailRepository(new MemoryStore());
-
-	    myRepository.initialize();
-	    mycon = myRepository.getConnection();
-	    String baseURI = "";
-	    try {
-		mycon.add(new StringReader(rdf), baseURI, RDFFormat.N3);
-		RepositoryResult<Statement> statements = mycon.getStatements(
-			null, null, null, false);
-		while (statements.hasNext()) {
-		    Statement statement = statements.next();
-		    String subject = statement.getSubject().stringValue();
-		    String predicate = statement.getPredicate().stringValue();
-		    String object = statement.getObject().stringValue();
-
-		    MyTriple triple = new MyTriple(subject, predicate, object,
-			    pid);
-
-		    if (predicate.compareTo("http://purl.org/dc/terms/hasPart") == 0
-			    || predicate
-				    .compareTo("http://purl.org/dc/terms/isPartOf") == 0) {
-			st.add("relations", triple);
-		    } else if (predicate
-			    .compareTo("http://www.openarchives.org/ore/terms/aggregates") == 0
-			    || predicate
-				    .compareTo("http://www.openarchives.org/ore/terms/isAggregatedBy") == 0)
-
-		    {
-			// do nothing!;
-		    } else if (predicate
-			    .compareTo("http://www.openarchives.org/ore/terms/similarTo") == 0) {
-			st.add("links", triple);
-		    } else {
-			st.add("statements", triple);
-		    }
-
-		}
-		result = st.render();
-	    } catch (Exception e) {
-		logger.warn(e.getMessage());
-	    }
-
-	} catch (RepositoryException e) {
-
-	    logger.error(e.getMessage());
-	}
-
-	catch (IOException e) {
-	    logger.error(e.getMessage());
-	}
-
-	finally {
-	    if (con != null) {
-		try {
-		    mycon.close();
-		} catch (RepositoryException e) {
-		    logger.error(e.getMessage());
-		    e.printStackTrace();
-		}
-	    }
-	}
-	return result;
-
-    }
-
-    private class MyTriple {
-	String subject;
-	String predicate;
-	String object;
-	String pid;
-
-	public MyTriple(String subject, String predicate, String object,
-		String pid) {
-	    this.subject = subject;
-	    this.predicate = predicate;
-	    this.object = object;
-	    this.pid = pid;
-	}
-
-	public String toString() {
-	    String subjectLink = null;
-	    String objectLink = null;
-	    String namespace = pid.substring(0, pid.indexOf(":"));
-	    if (subject.startsWith(pid)) {
-		subjectLink = uriPrefix + subject;
-	    } else {
-		subjectLink = subject;
-	    }
-	    if (object.startsWith(namespace)) {
-		objectLink = uriPrefix + object;
-	    } else if (object.startsWith("http")) {
-		objectLink = object;
-	    }
-	    if (predicate.compareTo("http://hbz-nrw.de/regal#contentType") == 0) {
-		objectLink = "/resource?type=" + object;
-	    }
-	    if (objectLink != null) {
-		return "<tr><td><a href=\"" + subjectLink + "\">" + subject
-			+ "</a></td><td><a href=\"" + predicate + "\">"
-			+ predicate + "</a></td><td about=\"" + subject
-			+ "\"><a property=\"" + predicate + "\" href=\""
-			+ objectLink + "\">" + object + "</a></td></tr>";
-	    } else {
-		return "<tr><td><a href=\"" + subjectLink + "\">" + subject
-			+ "</a></td><td><a href=\"" + predicate + "\">"
-			+ predicate + "</a></td><td about=\"" + subject + "\">"
-			+ object + "</td></tr>";
-	    }
-	}
     }
 
     private class CreateRepositoryException extends RuntimeException {

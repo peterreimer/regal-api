@@ -19,7 +19,7 @@ package helper;
 import java.io.InputStream;
 import java.net.URL;
 
-import archive.datatypes.Node;
+import models.Node;
 import converter.mab.MabConverter;
 
 /**
@@ -50,11 +50,11 @@ public class AlephMabMaker {
      */
     public String aleph(Node node, String uriPrefix) {
 	try {
-	    String pid = node.getPID();
+	    String pid = node.getPid();
 	    String metadata = uriPrefix + "/resource/" + pid + "/metadata";
 	    InputStream input;
 	    input = new URL(metadata).openConnection().getInputStream();
-	    MabConverter converter = new MabConverter(node.getPID());
+	    MabConverter converter = new MabConverter(node.getPid());
 	    return new String(converter.convert(input).toByteArray(), "utf-8");
 
 	} catch (Exception e) {

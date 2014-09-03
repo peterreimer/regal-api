@@ -16,31 +16,31 @@
  */
 package helper;
 
-import static archive.datatypes.Vocabulary.REL_CONTENT_TYPE;
-import static archive.datatypes.Vocabulary.REL_IS_NODE_TYPE;
-import static archive.datatypes.Vocabulary.TYPE_OBJECT;
-import static archive.fedora.FedoraVocabulary.HAS_PART;
-import static archive.fedora.FedoraVocabulary.IS_PART_OF;
+import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.TYPE_OBJECT;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import models.DublinCoreData;
-import models.RegalObject;
+import models.Link;
+import models.Node;
+import models.Transformer;
 
+import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
-import archive.datatypes.Link;
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
 import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraFactory;
@@ -192,10 +192,10 @@ public class Actions {
 	try {
 	    String namespace = n.getNamespace();
 	    String m = removeFromIndex(namespace, n.getContentType(),
-		    n.getPID());
+		    n.getPid());
 	    msg.append("\n" + m);
 	    m = removeFromIndex("public_" + namespace, n.getContentType(),
-		    n.getPID());
+		    n.getPid());
 	    msg.append("\n" + m);
 	} catch (Exception e) {
 	    msg.append("\n" + e);
@@ -306,9 +306,7 @@ public class Actions {
     /**
      * @param pid
      *            The pid that must be updated
-     * @param json
-     *            dc as json object
-     * @param content
+     * @param dc
      *            A dublin core object
      * @return a short message
      */
@@ -358,7 +356,7 @@ public class Actions {
      */
     public String updateMetadata(Node node) {
 	fedora.updateNode(node);
-	String pid = node.getPID();
+	String pid = node.getPid();
 	index(node);
 	return pid + " metadata successfully updated!";
     }
@@ -452,7 +450,7 @@ public class Actions {
 	logger.debug("create " + type);
 	Node node = createNodeIfNotExists(type, parent, transformers,
 		accessScheme, rawPid, namespace);
-	removeFromIndex(namespace, node.getContentType(), node.getPID());
+	removeFromIndex(namespace, node.getContentType(), node.getPid());
 	node.setAccessScheme(accessScheme);
 	setNodeType(type, node);
 	linkWithParent(parent, node);
@@ -488,7 +486,7 @@ public class Actions {
     private void linkWithParent(String parentPid, Node node) {
 	fedora.unlinkParent(node);
 	fedora.linkToParent(node, parentPid);
-	fedora.linkParentToNode(parentPid, node.getPID());
+	fedora.linkParentToNode(parentPid, node.getPid());
 	index(node);
     }
 
@@ -579,58 +577,51 @@ public class Actions {
 	return p + " indexed!";
     }
 
+    /**
+     * @param p
+     *            The pid with namespace that must be indexed
+     * @param index
+     *            the name of the index. Convention is to use the namespace of
+     *            the pid.
+     * @param type
+     *            the type of the resource
+     * @return a short message.
+     */
+    public String publicIndex(String p, String index, String type) {
+	search.index(index, type, p, readNode(p).toString());
+	return p + " indexed!";
+    }
+
     private String index(Node n) {
 	String namespace = n.getNamespace();
-	String pid = n.getPID();
+	String pid = n.getPid();
 	return index(pid, namespace, n.getContentType());
     }
 
-    /**
-     * Returns a list of pids of related objects. Looks for other objects those
-     * are connected to the pid by a certain relation
-     * 
-     * @param pid
-     *            the pid to find relatives of
-     * @param relation
-     *            a relation that describes what kind of relatives you are
-     *            looking for
-     * @return list of pids of related objects
-     */
-    public List<String> getRelatives(String pid, String relation) {
-	List<String> result = new Vector<String>();
-	Node node = readNode(pid);
-	List<Link> links = node.getRelsExt();
-	for (Link l : links) {
-	    if (l.getPredicate().equals(relation))
-		result.add(l.getObject());
-	}
-	return result;
-    }
-
-    /**
-     * @param type
-     *            a contentType
-     * @param namespace
-     *            list only objects in this namespace
-     * @param from
-     *            show only hits starting at this index
-     * @param until
-     *            show only hits ending at this index
-     * @param getListingFrom
-     *            List Resources from elasticsearch or from fedora. Allowed
-     *            values: "repo" and "es"
-     * @return all objects of contentType type
-     */
-    public List<String> list(String type, String namespace, int from,
-	    int until, String getListingFrom) {
-	List<String> list = null;
-	if (!"es".equals(getListingFrom)) {
-	    list = listRepo(type, namespace, from, until);
-	} else {
-	    list = listSearch(type, namespace, from, until);
-	}
-	return list;
-    }
+    // /**
+    // * @param type
+    // * a contentType
+    // * @param namespace
+    // * list only objects in this namespace
+    // * @param from
+    // * show only hits starting at this index
+    // * @param until
+    // * show only hits ending at this index
+    // * @param getListingFrom
+    // * List Resources from elasticsearch or from fedora. Allowed
+    // * values: "repo" and "es"
+    // * @return all objects of contentType type
+    // */
+    // public List<String> list(String type, String namespace, int from,
+    // int until, String getListingFrom) {
+    // List<String> list = null;
+    // if (!"es".equals(getListingFrom)) {
+    // list = listRepo(type, namespace, from, until);
+    // } else {
+    // list = listSearch(type, namespace, from, until);
+    // }
+    // return list;
+    // }
 
     /**
      * @param type
@@ -643,12 +634,24 @@ public class Actions {
      *            show only hits ending at this index
      * @return A list of pids with type {@type}
      */
-    public List<String> listSearch(String type, String namespace, int from,
+    public List<SearchHit> listSearch(String type, String namespace, int from,
 	    int until) {
-	return search.listIds(namespace, type, from, until);
+	return Arrays.asList(search.list(namespace, type, from, until)
+		.getHits());
     }
 
-    private List<String> listRepo(String type, String namespace, int from,
+    /**
+     * @param type
+     *            The objectTyp
+     * @param namespace
+     *            list only objects in this namespace
+     * @param from
+     *            show only hits starting at this index
+     * @param until
+     *            show only hits ending at this index
+     * @return a list of nodes
+     */
+    public List<Node> listRepo(String type, String namespace, int from,
 	    int until) {
 	List<String> list = null;
 	if (from < 0 || until <= from) {
@@ -656,17 +659,22 @@ public class Actions {
 		    "until and from not sensible. choose a valid range, please.");
 	} else if (type == null || type.isEmpty() && namespace != null
 		&& !namespace.isEmpty()) {
-	    return listRepoNamespace(namespace, from, until);
+	    return getNodes(listRepoNamespace(namespace, from, until));
 	} else if (namespace == null || namespace.isEmpty() && type != null
 		&& !type.isEmpty()) {
-	    return listRepoType(type, from, until);
+	    return getNodes(listRepoType(type, from, until));
 	} else if ((namespace == null || namespace.isEmpty())
 		&& (type == null || type.isEmpty())) {
 	    list = listRepoAll();
 	} else {
 	    list = listRepo(type, namespace);
 	}
-	return sublist(list, from, until);
+	return getNodes(sublist(list, from, until));
+    }
+
+    private List<Node> getNodes(List<String> ids) {
+	return ids.stream().map((String id) -> readNode(id))
+		.collect(Collectors.toList());
     }
 
     private List<String> listRepo(String type, String namespace) {
@@ -690,6 +698,7 @@ public class Actions {
 	InputStream in = fedora.findTriples(query, FedoraVocabulary.SPO,
 		FedoraVocabulary.N3);
 	typedList = RdfUtils.getFedoraSubject(in);
+
 	return typedList;
     }
 
@@ -740,35 +749,26 @@ public class Actions {
 	}
     }
 
-    /**
-     * @param type
-     *            the type to be displaye
-     * @param namespace
-     *            list only objects in this namespace
-     * @param from
-     *            show only hits starting at this index
-     * @param until
-     *            show only hits ending at this index
-     * @param getListingFrom
-     *            List Resources from elasticsearch or from fedora. Allowed
-     *            values: "repo" and "es"
-     * @return html listing of all objects
-     */
-    public String listAsHtml(String type, String namespace, int from,
-	    int until, String getListingFrom) {
-	List<String> list = list(type, namespace, from, until, getListingFrom);
-	return representations.getAllOfTypeAsHtml(list, type, namespace, from,
-		until, getListingFrom);
-    }
-
-    /**
-     * @param pid
-     *            the pid to read from
-     * @return the parentPid and contentType as json
-     */
-    public RegalObject getRegalObject(String pid) {
-	return representations.getRegalObject(pid);
-    }
+    // /**
+    // * @param type
+    // * the type to be displaye
+    // * @param namespace
+    // * list only objects in this namespace
+    // * @param from
+    // * show only hits starting at this index
+    // * @param until
+    // * show only hits ending at this index
+    // * @param getListingFrom
+    // * List Resources from elasticsearch or from fedora. Allowed
+    // * values: "repo" and "es"
+    // * @return html listing of all objects
+    // */
+    // public String listAsHtml(String type, String namespace, int from,
+    // int until, String getListingFrom) {
+    // List<String> list = list(type, namespace, from, until, getListingFrom);
+    // return representations.getAllOfTypeAsHtml(list, type, namespace, from,
+    // until, getListingFrom);
+    // }
 
     /**
      * @param pid
@@ -776,7 +776,13 @@ public class Actions {
      * @return a Node containing the data from the repository
      */
     public Node readNode(String pid) {
-	return fedora.readNode(pid);
+	Node n = fedora.readNode(pid);
+	n.setAggregationUri("http://" + server + "/resource/" + n.getPid());
+	n.setRemUri(n.getAggregationUri() + ".rdf");
+	n.setDataUri(n.getAggregationUri() + "/data");
+	n.setContextDocumentUri("http://" + server
+		+ "/public/edoweb-resources.json");
+	return n;
     }
 
     /**
@@ -863,7 +869,7 @@ public class Actions {
      */
     public String aleph(Node node) {
 	AlephMabMaker am = new AlephMabMaker();
-	return am.aleph(node, server);
+	return am.aleph(node, "http://" + server);
     }
 
     /**
@@ -947,12 +953,29 @@ public class Actions {
      * @return a oai_ore resource map
      */
     public String oaiore(String pid, String format) {
-	List<String> parents = getRelatives(pid, IS_PART_OF);
-	List<String> children = getRelatives(pid, HAS_PART);
-	return representations.getReM(pid, format, fedoraIntern, parents,
-		children);
+	return representations.getReM(pid, format, fedoraIntern);
     }
 
+    // /**
+    // * @param pid
+    // * the pid
+    // * @param format
+    // * application/rdf+xml text/plain application/json
+    // * @return a oai_ore resource map
+    // */
+    // public Map<String, Object> oaioreAsMap(String pid, String format) {
+    // try {
+    // HashMap<String, Object> result = new ObjectMapper().readValue(
+    // oaiore(pid, format), HashMap.class);
+    // return result;
+    // } catch (IOException e) {
+    // throw new RuntimeException(e);
+    // }
+    // }
+
+    /**
+     * @return address of fedora installation
+     */
     public String getFedoraIntern() {
 	return fedoraIntern;
     }

@@ -21,6 +21,9 @@ import java.io.StringWriter;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
+
 /**
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
@@ -67,6 +70,19 @@ public class Message {
 
     public void setCode(int code) {
 	this.code = code;
+    }
+
+    @Override
+    public String toString() {
+	ObjectMapper mapper = JsonUtil.mapper();
+	StringWriter w = new StringWriter();
+	try {
+	    mapper.writeValue(w, this);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    return super.toString();
+	}
+	return w.toString();
     }
 
 }

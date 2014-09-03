@@ -16,7 +16,6 @@
  */
 package archive.search;
 
-import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.action.ActionResponse;
@@ -106,8 +105,8 @@ public class SearchFacade {
      *            use from and until to page through the results
      * @return a list of ids
      */
-    public List<String> listIds(String index, String type, int from, int until) {
-	return search.listIds(index, type, from, until);
+    public SearchHits list(String index, String type, int from, int until) {
+	return search.listResources(index, type, from, until);
     }
 
     /**

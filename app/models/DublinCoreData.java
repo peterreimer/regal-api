@@ -20,8 +20,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
 
-import archive.datatypes.Node;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 

@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 
 import models.Message;
 import models.ObjectList;
+import models.Transformer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import play.mvc.Http;
 import play.mvc.Result;
 import actions.BasicAuth;
-import archive.datatypes.Transformer;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -65,11 +65,11 @@ public class MyUtils extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
 	    String result = actions.index(pid, curIndex, type);
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (HttpArchiveException e) {
-	    return JsonResponse(new Message(e, e.getCode()), e.getCode());
+	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
 
     }
@@ -84,9 +84,9 @@ public class MyUtils extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.removeFromIndex(pid.split(":")[0], type,
 		    pid);
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 
@@ -100,10 +100,11 @@ public class MyUtils extends MyController {
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
-	    String result = actions.index(pid, "public_" + curIndex, type);
-	    return JsonResponse(new Message(result));
+	    String result = actions
+		    .publicIndex(pid, "public_" + curIndex, type);
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 
@@ -117,9 +118,9 @@ public class MyUtils extends MyController {
 	    Actions actions = Actions.getInstance();
 	    String result = actions.removeFromIndex("public_"
 		    + pid.split(":")[0], type, pid);
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 
@@ -131,9 +132,9 @@ public class MyUtils extends MyController {
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.lobidify(pid);
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 
@@ -147,9 +148,9 @@ public class MyUtils extends MyController {
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.addUrn(id, namespace, snid);
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 
@@ -163,9 +164,9 @@ public class MyUtils extends MyController {
 		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.replaceUrn(id, namespace, snid);
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 
@@ -197,9 +198,9 @@ public class MyUtils extends MyController {
 	    String result = "Reinit contentModels " + namespace + "epicur, "
 		    + namespace + "oaidc, " + namespace + "pdfa, " + namespace
 		    + "pdfbox, " + namespace + "aleph";
-	    return JsonResponse(new Message(result));
+	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
-	    return JsonResponse(new Message(e, 500), 500);
+	    return JsonMessage(new Message(e, 500));
 	}
     }
 

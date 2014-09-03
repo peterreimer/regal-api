@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package archive.datatypes;
+package models;
 
 import java.util.List;
 import java.util.Vector;

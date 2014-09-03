@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import models.Node;
+import models.Transformer;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,9 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
-import archive.datatypes.Node;
-import archive.datatypes.Transformer;
-import archive.datatypes.Vocabulary;
 import base.BaseModelTest;
 
 /**
@@ -85,23 +85,23 @@ public class FedoraFacadeTest extends BaseModelTest {
     @Test
     public void createNode() {
 	facade.createNode(object);
-	Assert.assertTrue(facade.nodeExists(object.getPID()));
+	Assert.assertTrue(facade.nodeExists(object.getPid()));
     }
 
     @Test(expected = FedoraFacade.NodeNotFoundException.class)
     public void testNodeNotFoundException() {
-	facade.readNode(object.getPID());
+	facade.readNode(object.getPid());
     }
 
     @Test
     public void readNode() {
 
 	facade.createNode(object);
-	Node node = facade.readNode(object.getPID());
+	Node node = facade.readNode(object.getPid());
 
 	Assert.assertEquals(0,
 		node.getNodeType().compareTo(object.getNodeType()));
-	Assert.assertEquals("test:234", node.getPID());
+	Assert.assertEquals("test:234", node.getPid());
 	Assert.assertEquals("test", node.getNamespace());
 	Assert.assertEquals("Jan Schnasse",
 		node.dublinCoreData.getFirstCreator());
@@ -190,7 +190,7 @@ public class FedoraFacadeTest extends BaseModelTest {
 	    facade.deleteNode(pid);
 	Assert.assertEquals(0,
 		facade.findPids("test:*", FedoraVocabulary.SIMPLE).size());
-	if (!facade.nodeExists(object.getPID()))
+	if (!facade.nodeExists(object.getPid()))
 
 	    facade.createNode(object);
 
@@ -200,16 +200,16 @@ public class FedoraFacadeTest extends BaseModelTest {
 
     @Test
     public void deleteNodeSimple() {
-	if (!facade.nodeExists(object.getPID()))
+	if (!facade.nodeExists(object.getPid()))
 	    facade.createNode(object);
 
-	facade.deleteNode(object.getPID());
-	Assert.assertFalse(facade.nodeExists(object.getPID()));
+	facade.deleteNode(object.getPid());
+	Assert.assertFalse(facade.nodeExists(object.getPid()));
     }
 
     @Test
     public void deleteNodeComplex() throws InterruptedException {
-	if (!facade.nodeExists(object.getPID()))
+	if (!facade.nodeExists(object.getPid()))
 	    facade.createNode(object);
 
 	Node child = new Node().setNamespace("test").setPID("test:2345")
@@ -218,8 +218,8 @@ public class FedoraFacadeTest extends BaseModelTest {
 	child.setContentType("monograph");
 	facade.createNode(child);
 	facade.unlinkParent(child);
-	facade.linkToParent(child, object.getPID());
-	facade.linkParentToNode(object.getPID(), child.getPID());
+	facade.linkToParent(child, object.getPid());
+	facade.linkParentToNode(object.getPid(), child.getPid());
 
 	Node grandchild = new Node().setNamespace("test").setPID("test:23456")
 		.setLabel("Ein Testobjekt").setFileLabel("test")
@@ -227,17 +227,17 @@ public class FedoraFacadeTest extends BaseModelTest {
 	grandchild.setContentType("monograph");
 	facade.createNode(grandchild);
 	facade.unlinkParent(grandchild);
-	facade.linkToParent(grandchild, child.getPID());
-	facade.linkParentToNode(child.getPID(), grandchild.getPID());
+	facade.linkToParent(grandchild, child.getPid());
+	facade.linkParentToNode(child.getPid(), grandchild.getPid());
 
-	System.out.println(facade.deleteComplexObject(object.getPID()));
+	System.out.println(facade.deleteComplexObject(object.getPid()));
 
-	Assert.assertFalse(facade.nodeExists(object.getPID()));
-	System.out.println("Deleted: " + object.getPID());
-	Assert.assertFalse(facade.nodeExists(child.getPID()));
-	System.out.println("Deleted: " + child.getPID());
-	Assert.assertFalse(facade.nodeExists(grandchild.getPID()));
-	System.out.println("Deleted: " + grandchild.getPID());
+	Assert.assertFalse(facade.nodeExists(object.getPid()));
+	System.out.println("Deleted: " + object.getPid());
+	Assert.assertFalse(facade.nodeExists(child.getPid()));
+	System.out.println("Deleted: " + child.getPid());
+	Assert.assertFalse(facade.nodeExists(grandchild.getPid()));
+	System.out.println("Deleted: " + grandchild.getPid());
     }
 
     @Test
@@ -258,18 +258,18 @@ public class FedoraFacadeTest extends BaseModelTest {
 	facade.createNode(object);
 	object.removeTransformer("testepicur");
 
-	List<Transformer> ts = object.getContentModels();
+	List<Transformer> ts = object.getTransformer();
 	Assert.assertEquals(2, ts.size());
 	for (Transformer t : ts) {
 	    Assert.assertFalse(t.getId().equals("testepicur"));
 	}
 	facade.updateNode(object);
-	object = facade.readNode(object.getPID());
+	object = facade.readNode(object.getPid());
 
 	HashMap<String, String> map = new HashMap<String, String>();
 	map.put("testoaidc", "testoaidc");
 	map.put("testpdfa", "testpdfa");
-	ts = object.getContentModels();
+	ts = object.getTransformer();
 	Assert.assertEquals(2, ts.size());
 	for (Transformer t : ts) {
 	    Assert.assertTrue(map.containsKey(t.getId()));
@@ -282,8 +282,8 @@ public class FedoraFacadeTest extends BaseModelTest {
     @Test
     public void readNodesTransformer() {
 	facade.createNode(object);
-	object = facade.readNode(object.getPID());
-	List<Transformer> ts = object.getContentModels();
+	object = facade.readNode(object.getPid());
+	List<Transformer> ts = object.getTransformer();
 	HashMap<String, String> map = new HashMap<String, String>();
 	map.put("testepicur", "testepicur");
 	map.put("testoaidc", "testoaidc");
@@ -297,9 +297,9 @@ public class FedoraFacadeTest extends BaseModelTest {
 
     @Test
     public void nodeExists() {
-	Assert.assertTrue(!facade.nodeExists(object.getPID()));
+	Assert.assertTrue(!facade.nodeExists(object.getPid()));
 	facade.createNode(object);
-	Assert.assertTrue(facade.nodeExists(object.getPID()));
+	Assert.assertTrue(facade.nodeExists(object.getPid()));
     }
 
     @After

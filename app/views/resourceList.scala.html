@@ -1,0 +1,32 @@
+@(nodes: List[models.Node], servername: String)
+
+@import org.elasticsearch.search.SearchHit
+@import play.api.libs.json._
+@import models.Node
+
+@main("Search") {
+
+     <form role="form" action="" method="get" class="form-inline" accept-charset="UTF-8">
+     <div class="form-group">
+ 		<input title="Enter your search term here. You may use quotes to search for phrases as in &quot;The quick brown fox&quot;, and also boolean operators as in This AND that OR those." 
+ 			placeholder="Bitte Suchbegriff eingeben"
+ 			class="edoweb_live_search form-text" 
+ 			type="text" 
+ 			id="edit-query-0-term" 
+ 			name="" 
+ 			value="" 
+ 			size="60" 
+ 			maxlength="128" />
+		<input type="submit" id="edit-query-0-submit" name="" value="Search" class="form-submit" />
+		</div>
+	</form>
+
+	<ol class="resourceList">
+	@for(node <- nodes) {
+	@* <li>@resource("http://edoweb-admin:nopassword@"+servername+"/resource",hit.id(), hit)</li>*@
+	 
+	 <li><div class="resource">@resource(node.toString(),servername+node.getPid())</div></li>
+	 
+	} 
+	</ul>
+}

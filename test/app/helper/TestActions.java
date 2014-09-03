@@ -19,9 +19,10 @@ package app.helper;
 import helper.Actions;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import models.DublinCoreData;
-import models.RegalObject;
+import models.Node;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,8 +49,10 @@ public class TestActions extends BaseModelTest {
     }
 
     private void cleanUp() {
-	actions.deleteAll(actions.list(null, "test", 0, 10000, "repo"));
-	actions.deleteAll(actions.list(null, "testCM", 0, 10000, "repo"));
+	actions.deleteAll(actions.listRepo(null, "test", 0, 10000).stream()
+		.map((Node n) -> n.getPid()).collect(Collectors.toList()));
+	actions.deleteAll(actions.listRepo(null, "testCM", 0, 10000).stream()
+		.map((Node n) -> n.getPid()).collect(Collectors.toList()));
     }
 
     //
@@ -65,7 +68,7 @@ public class TestActions extends BaseModelTest {
 
     public void createTestObject(String pid) throws IOException {
 	// actions.contentModelsInit("test");
-	RegalObject input = new RegalObject();
+	Node input = new Node();
 	input.setType("monograph");
 	actions.createResource("monograph", null, null, "lbz-wide", pid, "test");
 	DublinCoreData dc = new DublinCoreData();
