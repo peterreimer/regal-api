@@ -20,7 +20,7 @@
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
-public class TestResource {
+public class ResourceTest {
     //
     // Properties properties;
     // Client c;

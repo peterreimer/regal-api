@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * 
  */
 @SuppressWarnings("javadoc")
-public class TestSearch extends BaseModelTest {
+public class SearchTest extends BaseModelTest {
 
     String edoweb2606976 = null;
     String query1 = null;

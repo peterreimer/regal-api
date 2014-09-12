@@ -234,7 +234,7 @@ public class Actions {
     public DublinCoreData readDC(String pid) {
 	Node node = fedora.readNode(pid);
 	if (node != null)
-	    return new DublinCoreData(node);
+	    return node.getDublinCoreData();
 	return null;
     }
 

@@ -38,7 +38,7 @@ import base.BaseModelTest;
  * 
  */
 @SuppressWarnings("javadoc")
-public class TestActions extends BaseModelTest {
+public class ActionsTest extends BaseModelTest {
 
     Actions actions;
 

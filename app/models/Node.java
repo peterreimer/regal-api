@@ -843,7 +843,7 @@ public class Node {
 	result = 31 * result
 		+ (creationDate != null ? creationDate.hashCode() : 0);
 	result = 31 * result
-		+ (creationDate != null ? aggregationUri.hashCode() : 0);
+		+ (aggregationUri != null ? aggregationUri.hashCode() : 0);
 	result = 31 * result + (remUri != null ? remUri.hashCode() : 0);
 	result = 31 * result + (dataUri != null ? dataUri.hashCode() : 0);
 	result = 31 * result
