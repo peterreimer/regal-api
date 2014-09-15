@@ -73,19 +73,16 @@ public class Search {
 		client.admin().indices().prepareCreate(i)
 			.setSource(indexConfig).execute().actionGet();
 	    }
-
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
 	    logger.debug("", e);
 	} catch (Exception e) {
-	    logger.debug("", e);
+	    logger.warn("", e);
 	}
     }
 
     ActionResponse index(String index, String type, String id, String data) {
-
 	return client.prepareIndex(index, type, id).setSource(data).execute()
 		.actionGet();
-
     }
 
     SearchHits listResources(String index, String type, int from, int until) {
@@ -99,11 +96,8 @@ public class Search {
 	    builder = client.prepareSearch(index);
 	if (type != null && !type.equals(""))
 	    builder.setTypes(type);
-
 	builder.setFrom(from).setSize(until - from);
-
 	SearchResponse response = builder.execute().actionGet();
-
 	return response.getHits();
     }
 
@@ -134,7 +128,6 @@ public class Search {
 
     Map<String, Object> getSettings(String index, String type) {
 	try {
-
 	    client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	    ClusterState clusterState = client.admin().cluster().prepareState()
 		    .setIndices(index).execute().actionGet().getState();
@@ -144,7 +137,6 @@ public class Search {
 	} catch (IOException e) {
 	    throw new SearchException(e);
 	}
-
     }
 
 }

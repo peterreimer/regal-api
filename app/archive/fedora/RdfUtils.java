@@ -627,23 +627,25 @@ public class RdfUtils {
     public static RdfResource createRdfResource(InputStream stream,
 	    RDFFormat format, String uri) {
 	try {
-	    Map<String, RdfResource> parents;
+
 	    RepositoryConnection con = readRdfInputStreamToRepository(stream,
 		    format);
 	    RepositoryResult<Statement> statements = con.getStatements(null,
 		    null, null, true);
-	    parents = fetchSubjects(statements);
-	    RdfResource me = parents.get(uri);
+	    Map<String, RdfResource> subjects = fetchSubjects(statements);
+	    RdfResource me = subjects.get(uri);
 	    for (Link l : me.getLinks()) {
 		if (!l.getObject().equals(uri) && !l.isLiteral()
-			&& parents.containsKey(l.getObject())) {
-		    RdfResource c = parents.get(l.getObject());
+			&& subjects.containsKey(l.getObject())) {
+		    RdfResource c = subjects.get(l.getObject());
 		    me.addResolvedLink(c);
 		}
 	    }
 	    return me;
 	} catch (RepositoryException e) {
 	    throw new RdfException(e);
+	} catch (NullPointerException e) {
+	    return new RdfResource();
 	}
     }
 

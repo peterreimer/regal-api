@@ -757,13 +757,17 @@ public class Node {
     }
 
     private List<Link> getLinks() {
-	InputStream stream = new ByteArrayInputStream(
-		metadata.getBytes(StandardCharsets.UTF_8));
-	RdfResource rdf = RdfUtils.createRdfResource(stream,
-		RDFFormat.NTRIPLES, pid);
-	rdf.resolve();
-	rdf.addLinks(getRelsExt());
-	return ApplicationProfile.addLabels(rdf).getLinks();
+	try {
+	    InputStream stream = new ByteArrayInputStream(
+		    metadata.getBytes(StandardCharsets.UTF_8));
+	    RdfResource rdf = RdfUtils.createRdfResource(stream,
+		    RDFFormat.NTRIPLES, pid);
+	    rdf.resolve();
+	    rdf.addLinks(getRelsExt());
+	    return ApplicationProfile.addLabels(rdf).getLinks();
+	} catch (NullPointerException e) {
+	    return new ArrayList<Link>();
+	}
     }
 
     /**
