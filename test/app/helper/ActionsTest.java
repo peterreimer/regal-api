@@ -17,6 +17,8 @@ package app.helper;
  *
  */
 import helper.Actions;
+import play.test.*;
+import static play.test.Helpers.*;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -28,6 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.test.WithApplication;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfUtils;
 import base.BaseModelTest;
@@ -240,14 +243,20 @@ public class ActionsTest extends BaseModelTest {
     // .getResourceAsStream("invalid.nt"), "utf-8"));
     // }
 
-    @Test
-    public void oaiOre() throws IOException {
-	createTestObject("123");
-	RdfUtils.validate(actions.oaiore("test:123", "text/plain"));
-	System.out.println(actions.oaiore("test:123", "text/plain"));
-	System.out.println(actions.oaiore("test:123",
-		"application/json+compact"));
-    }
+    // @Test
+    // public void oaiOre() throws IOException {
+    //
+    // try {
+    // createTestObject("123");
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // RdfUtils.validate(actions.oaiore("test:123", "text/plain"));
+    // System.out.println(actions.oaiore("test:123", "text/plain"));
+    // System.out.println(actions.oaiore("test:123",
+    // "application/json+compact"));
+    //
+    // }
 
     // // @Test
     // // public void oaidc() throws IOException {

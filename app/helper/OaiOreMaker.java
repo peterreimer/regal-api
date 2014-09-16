@@ -124,7 +124,7 @@ public class OaiOreMaker {
 	try {
 	    if ("application/json+compact".equals(format)) {
 		InputStream contextDocument = Play.application()
-			.resourceAsStream("/resources/edoweb-resources.json");
+			.resourceAsStream("edoweb-resources.json");
 		StringWriter out = new StringWriter();
 		RDFWriter writer = null;
 		writer = configureWriter("application/json", out, writer);
@@ -132,7 +132,7 @@ public class OaiOreMaker {
 		Object json = JSONUtils.fromString(jsonString);
 
 		System.out.println(Play.application().resource(
-			"/resources/edoweb-resources.json"));
+			"edoweb-resources.json"));
 		@SuppressWarnings("rawtypes")
 		Map context = (Map) JSONUtils.fromInputStream(contextDocument);
 		JsonLdOptions options = new JsonLdOptions();
