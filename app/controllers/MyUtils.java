@@ -58,10 +58,11 @@ public class MyUtils extends MyController {
     public static Result index(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String index) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
 	    String result = actions.index(pid, curIndex, type);
@@ -77,10 +78,11 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
     public static Result removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.removeFromIndex(pid.split(":")[0], type,
 		    pid);
@@ -94,10 +96,11 @@ public class MyUtils extends MyController {
     public static Result publicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String index) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
 	    String result = actions
@@ -111,10 +114,11 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
     public static Result removeFromPublicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.removeFromIndex("public_"
 		    + pid.split(":")[0], type, pid);
@@ -126,10 +130,11 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", response = ObjectList.class, httpMethod = "POST")
     public static Result lobidify(@PathParam("pid") String pid) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.lobidify(pid);
 	    return JsonMessage(new Message(result));
@@ -142,10 +147,11 @@ public class MyUtils extends MyController {
     public static Result addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.addUrn(id, namespace, snid);
 	    return JsonMessage(new Message(result));
@@ -158,10 +164,11 @@ public class MyUtils extends MyController {
     public static Result replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
 	    Actions actions = Actions.getInstance();
 	    String result = actions.replaceUrn(id, namespace, snid);
 	    return JsonMessage(new Message(result));
@@ -173,10 +180,12 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", response = ObjectList.class, httpMethod = "POST")
     public static Result initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
+	String role = (String) Http.Context.current().args.get("role");
+	if (!Resource.modifyingAccessIsAllowed(role)) {
+	    return AccessDenied();
+	}
 	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
+
 	    Actions actions = Actions.getInstance();
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
@@ -200,6 +209,7 @@ public class MyUtils extends MyController {
 		    + "pdfbox, " + namespace + "aleph";
 	    return JsonMessage(new Message(result));
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    return JsonMessage(new Message(e, 500));
 	}
     }
