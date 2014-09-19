@@ -17,16 +17,21 @@ package app.helper;
  *
  */
 import helper.Actions;
+import helper.HttpArchiveException;
+import helper.Md5Checksum;
+import helper.Services;
 import play.test.*;
 import static play.test.Helpers.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
 import models.Node;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,7 +63,6 @@ public class ActionsTest extends BaseModelTest {
 		.map((Node n) -> n.getPid()).collect(Collectors.toList()));
     }
 
-    //
     // @Test
     // public void testFindByType() throws IOException {
     // createTestObject("123");
@@ -73,7 +77,8 @@ public class ActionsTest extends BaseModelTest {
 	// actions.contentModelsInit("test");
 	Node input = new Node();
 	input.setType("monograph");
-	actions.createResource("monograph", null, null, "lbz-wide", pid, "test");
+	actions.createResource("monograph", null, null, "restricted", pid,
+		"test");
 	DublinCoreData dc = new DublinCoreData();
 	dc.addIdentifier("HT015702837");
 	// actions.updateDC("test:" + pid, json);
@@ -93,16 +98,16 @@ public class ActionsTest extends BaseModelTest {
     // Assert.assertEquals(1, pids.size());
     // System.out.println(pids);
     // }
-    //
-    // // @Test(expected = HttpArchiveException.class)
-    // // public void deleteMetadata() throws IOException {
-    // // createTestObject("123");
-    // // actions.readMetadata("test:123");
-    // // actions.deleteMetadata("test:123");
-    // // actions.deleteData("test:123");
-    // // actions.readMetadata("test:123");
-    // // }
-    //
+
+    // @Test(expected = HttpArchiveException.class)
+    // public void deleteMetadata() throws IOException {
+    // createTestObject("123");
+    // actions.readMetadata("test:123");
+    // actions.deleteMetadata("test:123");
+    // actions.deleteData("test:123");
+    // actions.readMetadata("test:123");
+    // }
+
     // @Test
     // public void epicurAddAndReplace() throws IOException {
     // createTestObject("123");
@@ -163,6 +168,7 @@ public class ActionsTest extends BaseModelTest {
     // Assert.assertEquals(assumed2, response);
     // response = actions.readMetadata("test:123");
     // }
+
     //
     // @Test(expected = ArchiveException.class)
     // public void epicurAddAndAdd() throws IOException {
