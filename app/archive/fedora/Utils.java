@@ -691,6 +691,10 @@ public class Utils {
 
 	try {
 	    deleteContentModel(m);
+	} catch (FedoraClientException e) {
+	    // throw new ContentModelException(e);
+	}
+	try {
 	    createContentModel(m);
 	} catch (FedoraClientException e) {
 	    throw new ContentModelException(e);
