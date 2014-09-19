@@ -1,7 +1,14 @@
 package controllers;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.ws.rs.PathParam;
+
+import models.Message;
 
 import org.elasticsearch.search.SearchHit;
 
@@ -27,7 +34,7 @@ public class Portal extends MyController {
     /**
      * @return search page
      */
-    static public Result search() {
+    static public Result opensearch() {
 	String escluster = Play.application().configuration()
 		.getString("regal-api.escluster");
 	SearchFacade s = new SearchFacade(escluster);
@@ -43,4 +50,19 @@ public class Portal extends MyController {
 		"http://edoweb-anonymous:nopassword@localhost:9000/resource/"));
     }
 
+    /**
+     * @return search page
+     */
+    static public Result search(@PathParam("path") String path) {
+	try {
+	    URL url = new URL("http://localhost:9200/" + path);
+	    HttpURLConnection connection = (HttpURLConnection) url
+		    .openConnection();
+	    InputStream is = connection.getInputStream();
+	    response().setContentType(connection.getContentType());
+	    return ok(is);
+	} catch (Exception e) {
+	    return JsonMessage(new Message(e, 500));
+	}
+    }
 }

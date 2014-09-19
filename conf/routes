@@ -7,7 +7,7 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 
-GET     /public/docs               controllers.Application.index()
+GET     /public/docs                controllers.Application.index()
 GET     /public/docs/               controllers.Application.index()
 GET     /public/*file               controllers.Assets.at(path="/public", file)
 
@@ -46,7 +46,7 @@ POST /resource/:pid/oaisets			controllers.Resource.updateOaiSets(pid)
 # Swagger - Root Resources Listing
 GET /api-docs 						controllers.ApiHelpController.getResources
 
-# OPTIONS to support hosting UI off domain
+#OPTIONS to support hosting UI off domain
 #OPTIONS /*wholepath controllers.Resource.getOptions(wholepath)
 
 GET /api-docs/utils 				controllers.ApiHelpController.getResource(path = "/utils")
@@ -62,4 +62,5 @@ POST /utils/replaceUrn 				controllers.MyUtils.replaceUrn(id,namespace, snid)
 POST /utils/initContentModels  		controllers.MyUtils.initContentModels(namespace)
 
 GET /portal							controllers.Portal.index()
-GET /portal/opensearch							controllers.Portal.search()
+GET /portal/opensearch				controllers.Portal.opensearch()
+GET /search*path					controllers.Portal.search(path: String)
