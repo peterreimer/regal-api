@@ -62,30 +62,31 @@
 		</div>
 		<div class="longTitle">
 		@table("resource"){
-		@for((k,v) <- (js \ "context").as[JsObject].fieldSet ){		
-			@resourceProperty(k,v,js)
-		}
-		@resourceField("ID",""){
-			<li>@((js \ "pid").as[String])</li>
-		}
-		@resourceField("Bearbeitet am",""){
-			<li>@((js \ "lastModified").asOpt[String])</li>
-		}
-		@resourceField("Erstellt am",""){
-			<li>@((js \ "creationDate").asOpt[String])</li>
-		}
-		@resourceField("Uri",""){
-			<li>@((js \ "aggregationUri").asOpt[String])</li>
-		}
-		@resourceField("Sichtbarkeit",""){
-			<li>@((js \ "accessScheme").asOpt[String])</li>
-		}
-		@resourceField("Transformer",""){
-			@for(i <- (js \ "transformer" ).asOpt[JsArray]){
-				<li>@((i \ "id").asOpt[String].getOrElse("-"))</li>
+			@if(( js \ "context").asOpt[JsObject] != None){
+				@for((k,v) <- (js \ "context").as[JsObject].fieldSet ){		
+					@resourceProperty(k,v,js)
+				}
 			}
+			@resourceField("ID",""){
+				<li>@((js \ "pid").as[String])</li>
+			}
+			@resourceField("Bearbeitet am",""){
+				<li>@((js \ "lastModified").asOpt[String])</li>
+			}
+			@resourceField("Erstellt am",""){
+				<li>@((js \ "creationDate").asOpt[String])</li>
+			}
+			@resourceField("Uri",""){
+				<li>@((js \ "aggregationUri").asOpt[String])</li>
+			}
+			@resourceField("Sichtbarkeit",""){
+				<li>@((js \ "accessScheme").asOpt[String])</li>
+			}
+			@resourceField("Transformer",""){
+				@for(i <- (js \ "transformer" ).asOpt[JsArray]){
+					<li>@((i \ "id").asOpt[String].getOrElse("-"))</li>
+				}
+			}
+			</div>
 		}
-		</div>
-	}
 }
-
