@@ -953,7 +953,7 @@ public class Actions {
      * @return a oai_ore resource map
      */
     public String oaiore(String pid, String format) {
-	return representations.getReM(pid, format, fedoraIntern);
+	return representations.getReM(readNode(pid), format, fedoraIntern);
     }
 
     // /**

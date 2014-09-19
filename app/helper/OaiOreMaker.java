@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,16 +124,15 @@ public class OaiOreMaker {
     private String write(String format) {
 	try {
 	    if ("application/json+compact".equals(format)) {
-		InputStream contextDocument = Play.application()
-			.resourceAsStream("edoweb-resources.json");
+		System.out.println(node.getContextDocumentUri());
+		URL contextUrl = new URL(node.getContextDocumentUri());
+		InputStream contextDocument = contextUrl.openStream();
 		StringWriter out = new StringWriter();
 		RDFWriter writer = null;
 		writer = configureWriter("application/json", out, writer);
 		String jsonString = write(out, writer);
 		Object json = JSONUtils.fromString(jsonString);
 
-		System.out.println(Play.application().resource(
-			"edoweb-resources.json"));
 		@SuppressWarnings("rawtypes")
 		Map context = (Map) JSONUtils.fromInputStream(contextDocument);
 		JsonLdOptions options = new JsonLdOptions();

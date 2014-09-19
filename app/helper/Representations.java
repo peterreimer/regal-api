@@ -100,8 +100,7 @@ class Representations {
 	return result;
     }
 
-    public String getReM(String pid, String format, String fedoraExtern) {
-	Node node = fedora.readNode(pid);
+    public String getReM(Node node, String format, String fedoraExtern) {
 	OaiOreMaker ore = new OaiOreMaker(node);
 	return ore.getReM(format, node.getTransformer());
     }
