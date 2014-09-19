@@ -216,7 +216,7 @@ public class Resource extends MyController {
 	    HttpURLConnection connection = (HttpURLConnection) url
 		    .openConnection();
 	    InputStream is = connection.getInputStream();
-	    response().setContentType("application/pdf");
+	    response().setContentType(connection.getContentType());
 	    return ok(is);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
