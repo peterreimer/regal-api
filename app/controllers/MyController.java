@@ -57,6 +57,7 @@ public class MyController extends Controller {
 	try {
 	    mapper.writeValue(w, obj);
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    return internalServerError("Not able to create response!");
 	}
 	return ok(w.toString());

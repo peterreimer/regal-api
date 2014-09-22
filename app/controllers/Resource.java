@@ -20,12 +20,16 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.Actions;
 import helper.HttpArchiveException;
+import helper.OaiOreMaker;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.PathParam;
@@ -41,6 +45,7 @@ import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.api.libs.json.Json;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
@@ -50,6 +55,7 @@ import views.html.*;
 import actions.BasicAuth;
 import archive.fedora.ArchiveException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -96,15 +102,28 @@ public class Resource extends MyController {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response().setContentType("application/json");
 		Actions actions = Actions.getInstance();
-		List<Node> nodes = actions.listRepo(contentType, namespace,
-			from, until);
+
+		List<Map<String, Object>> nodes = new ArrayList<Map<String, Object>>();
+		for (Node node : actions.listRepo(contentType, namespace, from,
+			until)) {
+		    Map<String, Object> map = new ObjectMapper().readValue(
+			    actions.oaiore(node, "application/json+compact"),
+			    HashMap.class);
+		    map.put("primaryTopic", node.getPid());
+		    nodes.add(map);
+		}
 		return json(nodes);
 	    } else {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response().setContentType("application/json");
 		Actions actions = Actions.getInstance();
-		List<SearchHit> hits = actions.listSearch(contentType,
-			namespace, from, until);
+		List<Map<String, Object>> hits = new ArrayList<Map<String, Object>>();
+		for (SearchHit hit : actions.listSearch(contentType, namespace,
+			from, until)) {
+		    Map<String, Object> map = hit.getSource();
+		    map.put("primaryTopic", hit.getId());
+		    hits.add(map);
+		}
 		return json(hits);
 	    }
 	} catch (HttpArchiveException e) {
@@ -128,13 +147,9 @@ public class Resource extends MyController {
 		return ok(resourceList.render(nodes, "http://" + servername
 			+ "/resource/"));
 	    } else {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		response().setContentType("application/json");
-		Actions actions = Actions.getInstance();
-		List<SearchHit> hits = actions.listSearch(contentType,
-			namespace, from, until);
-		return ok(search.render(hits, "http://" + servername
-			+ "/resource/"));
+		return HtmlMessage(new Message(
+			"Not able to render data from elasticsearch as HTML. Elasticsearch output is only supported as application/json !",
+			415));
 	    }
 	} catch (HttpArchiveException e) {
 	    return HtmlMessage(new Message(e, e.getCode()));
@@ -505,17 +520,18 @@ public class Resource extends MyController {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    Actions actions = Actions.getInstance();
-	    String accessScheme = actions.readNode(pid).getAccessScheme();
+	    Node node = actions.readNode(pid);
+	    String accessScheme = node.getAccessScheme();
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
 	    String result = "";
 	    if (request().accepts("application/rdf+xml")) {
-		result = actions.oaiore(pid, "application/rdf+xml");
+		result = actions.oaiore(node, "application/rdf+xml");
 		response().setContentType("application/rdf+xml");
 		return ok(result);
 	    } else if (request().accepts("text/plain")) {
-		result = actions.oaiore(pid, "text/plain");
+		result = actions.oaiore(node, "text/plain");
 		response().setContentType("text/plain");
 		return ok(result);
 	    }
@@ -532,15 +548,16 @@ public class Resource extends MyController {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
 	    Actions actions = Actions.getInstance();
-	    String accessScheme = actions.readNode(pid).getAccessScheme();
+	    Node node = actions.readNode(pid);
+	    String accessScheme = node.getAccessScheme();
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
 	    String result = "ERROR";
 	    if ("compact".equals(style))
-		result = actions.oaiore(pid, "application/json+compact");
+		result = actions.oaiore(node, "application/json+compact");
 	    else
-		result = actions.oaiore(pid, "application/json");
+		result = actions.oaiore(node, "application/json");
 	    response().setContentType("application/json");
 	    return ok(result);
 	} catch (HttpArchiveException e) {

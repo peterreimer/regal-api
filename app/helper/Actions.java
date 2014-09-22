@@ -961,22 +961,16 @@ public class Actions {
 	return representations.getReM(readNode(pid), format, fedoraIntern);
     }
 
-    // /**
-    // * @param pid
-    // * the pid
-    // * @param format
-    // * application/rdf+xml text/plain application/json
-    // * @return a oai_ore resource map
-    // */
-    // public Map<String, Object> oaioreAsMap(String pid, String format) {
-    // try {
-    // HashMap<String, Object> result = new ObjectMapper().readValue(
-    // oaiore(pid, format), HashMap.class);
-    // return result;
-    // } catch (IOException e) {
-    // throw new RuntimeException(e);
-    // }
-    // }
+    /**
+     * @param pid
+     *            the pid
+     * @param format
+     *            application/rdf+xml text/plain application/json
+     * @return a oai_ore resource map
+     */
+    public String oaiore(Node node, String format) {
+	return representations.getReM(node, format, fedoraIntern);
+    }
 
     /**
      * @return address of fedora installation
