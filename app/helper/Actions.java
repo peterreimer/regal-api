@@ -91,6 +91,7 @@ public class Actions {
     private String urnbase = null;
     private SearchFacade search = null;
     private String escluster = null;
+    private boolean useHttpUris = false;
 
     // String namespace = null;
 
@@ -232,7 +233,7 @@ public class Actions {
      * @return A DCBeanAnnotated java object.
      */
     public DublinCoreData readDC(String pid) {
-	Node node = fedora.readNode(pid);
+	Node node = readNode(pid);
 	if (node != null)
 	    return node.getDublinCoreData();
 	return null;
@@ -280,7 +281,7 @@ public class Actions {
 	File tmp = File.createTempFile(name, "tmp");
 	tmp.deleteOnExit();
 	CopyUtils.copy(content, tmp);
-	Node node = fedora.readNode(pid);
+	Node node = readNode(pid);
 	if (node != null) {
 	    node.setUploadData(tmp.getAbsolutePath(), mimeType);
 	    node.setFileLabel(name);
@@ -292,7 +293,7 @@ public class Actions {
 	}
 	index(node);
 	if (md5Hash != null && !md5Hash.isEmpty()) {
-	    node = fedora.readNode(pid);
+	    node = readNode(pid);
 	    String fedoraHash = node.getChecksum();
 	    if (!md5Hash.equals(fedoraHash)) {
 		throw new HttpArchiveException(417, pid + " expected a MD5 of "
@@ -311,7 +312,7 @@ public class Actions {
      * @return a short message
      */
     public String updateDC(String pid, DublinCoreData dc) {
-	Node node = fedora.readNode(pid);
+	Node node = readNode(pid);
 	node.setDublinCoreData(dc);
 	fedora.updateNode(node);
 	index(node);
@@ -335,7 +336,7 @@ public class Actions {
 	    }
 	    RdfUtils.validate(content);
 	    File file = CopyUtils.copyStringToFile(content);
-	    Node node = fedora.readNode(pid);
+	    Node node = readNode(pid);
 	    if (node != null) {
 		node.setMetadataFile(file.getAbsolutePath());
 		fedora.updateNode(node);
@@ -369,7 +370,7 @@ public class Actions {
      * @return a short message
      */
     public String addLinks(String pid, List<Link> links) {
-	Node node = fedora.readNode(pid);
+	Node node = readNode(pid);
 	for (Link link : links) {
 	    node.addRelation(link);
 	}
@@ -423,7 +424,7 @@ public class Actions {
      * @return the last modified date
      */
     public Date getLastModified(String pid) {
-	Node node = fedora.readNode(pid);
+	Node node = readNode(pid);
 	return node.getLastModified();
     }
 
@@ -466,7 +467,7 @@ public class Actions {
 	String pid = namespace + ":" + rawPid;
 	Node node = null;
 	if (fedora.nodeExists(pid)) {
-	    node = fedora.readNode(pid);
+	    node = readNode(pid);
 	} else {
 	    node = new Node();
 	    node.setNamespace(namespace).setPID(pid);
@@ -506,7 +507,7 @@ public class Actions {
      * @return a message
      */
     public String lobidify(String pid) {
-	Node node = fedora.readNode(pid);
+	Node node = readNode(pid);
 	node = services.lobidify(node);
 	index(node);
 	return updateMetadata(node);
@@ -777,12 +778,16 @@ public class Actions {
      */
     public Node readNode(String pid) {
 	Node n = fedora.readNode(pid);
-	n.setAggregationUri("http://" + server + "/resource/" + n.getPid());
+	n.setAggregationUri(createAggregationUri(n.getPid()));
 	n.setRemUri(n.getAggregationUri() + ".rdf");
 	n.setDataUri(n.getAggregationUri() + "/data");
 	n.setContextDocumentUri("http://" + server
 		+ "/public/edoweb-resources.json");
 	return n;
+    }
+
+    private String createAggregationUri(String pid) {
+	return useHttpUris ? "http://" + server + "/resource/" + pid : pid;
     }
 
     /**
