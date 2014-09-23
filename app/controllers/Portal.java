@@ -51,6 +51,8 @@ public class Portal extends MyController {
     }
 
     /**
+     * @param path
+     *            path to past forward to 9200
      * @return search page
      */
     static public Result search(@PathParam("path") String path) {

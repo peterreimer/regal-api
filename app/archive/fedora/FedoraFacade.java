@@ -75,7 +75,7 @@ import com.yourmediashelf.fedora.generated.management.PidList;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  */
 class FedoraFacade implements FedoraInterface {
-
+    @SuppressWarnings("serial")
     private class DeleteException extends HttpArchiveException {
 
 	public DeleteException(int httpCode, Exception e) {
@@ -88,6 +88,7 @@ class FedoraFacade implements FedoraInterface {
 
     }
 
+    @SuppressWarnings("serial")
     private class ReadNodeException extends HttpArchiveException {
 
 	public ReadNodeException(int httpCode, Exception e) {
@@ -99,6 +100,7 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    @SuppressWarnings("serial")
     private class InitializeFedoraFacadeException extends HttpArchiveException {
 	public InitializeFedoraFacadeException(int httpCode, Exception e) {
 	    super(httpCode, e);
@@ -110,24 +112,28 @@ class FedoraFacade implements FedoraInterface {
 
     }
 
+    @SuppressWarnings("serial")
     class UpdateContentModel extends HttpArchiveException {
 	public UpdateContentModel(int httpCode, Exception e) {
 	    super(httpCode, e);
 	}
     }
 
+    @SuppressWarnings("serial")
     class DeleteDatastreamException extends HttpArchiveException {
 	public DeleteDatastreamException(int httpCode, Exception e) {
 	    super(httpCode, e);
 	}
     }
 
+    @SuppressWarnings("serial")
     class GetPidException extends HttpArchiveException {
 	public GetPidException(int httpCode, Exception e) {
 	    super(httpCode, e);
 	}
     }
 
+    @SuppressWarnings("serial")
     class CreateNodeException extends HttpArchiveException {
 	public CreateNodeException(int httpCode, Exception e) {
 	    super(httpCode, e);
@@ -139,12 +145,14 @@ class FedoraFacade implements FedoraInterface {
 
     }
 
+    @SuppressWarnings("serial")
     class SearchException extends HttpArchiveException {
 	public SearchException(int httpCode, Exception e) {
 	    super(httpCode, e);
 	}
     }
 
+    @SuppressWarnings("serial")
     class NodeNotFoundException extends HttpArchiveException {
 	public NodeNotFoundException(int httpCode, Exception e) {
 	    super(httpCode, e);

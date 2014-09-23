@@ -42,8 +42,6 @@ import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.Play;
@@ -674,8 +672,18 @@ public class Actions {
 	return getNodes(sublist(list, from, until));
     }
 
+    /**
+     * @param ids
+     *            a list of ids to get objects for
+     * @return a list of nodes
+     */
     public List<Node> getNodes(List<String> ids) {
 	return ids.stream().map((String id) -> readNode(id))
+		.collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> getNodesFromIndex(List<String> ids) {
+	return ids.stream().map((String id) -> readNodeFromIndex(id))
 		.collect(Collectors.toList());
     }
 
@@ -785,6 +793,10 @@ public class Actions {
 	n.setContextDocumentUri("http://" + server
 		+ "/public/edoweb-resources.json");
 	return n;
+    }
+
+    public Map<String, Object> readNodeFromIndex(String pid) {
+	return search.get(pid);
     }
 
     private String createAggregationUri(String pid) {
@@ -963,8 +975,8 @@ public class Actions {
     }
 
     /**
-     * @param pid
-     *            the pid
+     * @param node
+     *            a node to get a oai-ore representation from
      * @param format
      *            application/rdf+xml text/plain application/json
      * @return a oai_ore resource map
@@ -980,6 +992,12 @@ public class Actions {
 	return fedoraIntern;
     }
 
+    /**
+     * @param list
+     *            a list of nodes to create a json like map for
+     * @return a map with objects
+     */
+    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> nodelistToMap(List<Node> list) {
 	try {
 
@@ -997,6 +1015,11 @@ public class Actions {
 	}
     }
 
+    /**
+     * @param list
+     *            a list of nodes to create a json like map for
+     * @return a map with objects
+     */
     public List<Map<String, Object>> hitlistToMap(List<SearchHit> list) {
 	List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
 	for (SearchHit hit : list) {
@@ -1006,4 +1029,5 @@ public class Actions {
 	}
 	return map;
     }
+
 }

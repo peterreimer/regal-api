@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -137,6 +138,15 @@ public class Search {
 	} catch (IOException e) {
 	    throw new SearchException(e);
 	}
+    }
+
+    public Map<String, Object> get(String pid) {
+	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	GetResponse response = client
+		.prepareGet(pid.split(":")[0], "_all", pid).execute()
+		.actionGet();
+	return response.getSource();
+
     }
 
 }

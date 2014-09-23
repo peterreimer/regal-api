@@ -26,7 +26,19 @@ GET /resource/:pid.pdfa				controllers.Resource.asPdfa(pid)
 GET /resource/:pid.pdfbox			controllers.Resource.asPdfboxTxt(pid)
 GET /resource/:pid.aleph			controllers.Resource.asAleph(pid)
 GET /resource/:pid					controllers.Resource.listResource(pid)
-GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",src?="repo",from: Int ?=0, until: Int?=10)
+GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
+GET /resource/:pid/parts			controllers.Resource.listParts(pid)
+GET /resource/:pid/parents			controllers.Resource.listParents(pid)
+
+# list
+GET /listIndex 							controllers.ResourceIndex.listNodes(ids: String)
+# Resource
+GET /resourceIndex/:pid.json			controllers.ResourceIndex.listResource(pid)	
+GET /resourceIndex/:pid					controllers.ResourceIndex.listResource(pid)
+GET /resourceIndex 						controllers.ResourceIndex.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
+GET /resourceIndex/:pid/parts			controllers.ResourceIndex.listParts(pid)
+GET /resourceIndex/:pid/parents			controllers.ResourceIndex.listParents(pid)
+
 
 PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)
 PUT /resource/:pid/data				controllers.Resource.updateData(pid,md5?="")
@@ -44,8 +56,6 @@ DELETE /resource/:pid/dc			controllers.Resource.deleteDc(pid)
 DELETE /resource/:pid				controllers.Resource.deleteResource(pid)
 DELETE /resource 					controllers.Resource.deleteResources(namespace?="",contentType?="",src?="repo",from: Int ?=0, until: Int?=10)
 
-GET /resource/:pid/parts			controllers.Resource.listParts(pid)
-GET /resource/:pid/parents			controllers.Resource.listParents(pid)
 
 POST /resource/:pid/oaisets			controllers.Resource.updateOaiSets(pid)
 	

@@ -91,13 +91,12 @@ public class Resource extends MyController {
     public static Result listResources(
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
-	    @QueryParam("src") String src, @QueryParam("from") int from,
-	    @QueryParam("until") int until) {
+	    @QueryParam("from") int from, @QueryParam("until") int until) {
 	try {
 	    if (request().accepts("text/html")) {
-		return htmlList(namespace, contentType, src, from, until);
+		return htmlList(namespace, contentType, from, until);
 	    } else {
-		return jsonList(namespace, contentType, src, from, until);
+		return jsonList(namespace, contentType, from, until);
 	    }
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
@@ -107,19 +106,12 @@ public class Resource extends MyController {
     }
 
     private static Result jsonList(String namespace, String contentType,
-	    String src, int from, int until) {
+	    int from, int until) {
 	try {
-	    if ("repo".equals(src)) {
-		Actions actions = Actions.getInstance();
-		List<Map<String, Object>> nodes = actions.nodelistToMap(actions
-			.listRepo(contentType, namespace, from, until));
-		return json(nodes);
-	    } else {
-		Actions actions = Actions.getInstance();
-		List<Map<String, Object>> hits = actions.hitlistToMap(actions
-			.listSearch(contentType, namespace, from, until));
-		return json(hits);
-	    }
+	    Actions actions = Actions.getInstance();
+	    List<Map<String, Object>> nodes = actions.nodelistToMap(actions
+		    .listRepo(contentType, namespace, from, until));
+	    return json(nodes);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -128,23 +120,17 @@ public class Resource extends MyController {
     }
 
     private static Result htmlList(String namespace, String contentType,
-	    String src, int from, int until) {
+	    int from, int until) {
 	try {
 	    String servername = Play.application().configuration()
 		    .getString("regal-api.serverName");
-	    if ("repo".equals(src)) {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		response().setContentType("text/html");
-		Actions actions = Actions.getInstance();
-		List<Node> nodes = actions.listRepo(contentType, namespace,
-			from, until);
-		return ok(resourceList.render(nodes, "http://" + servername
-			+ "/resource/"));
-	    } else {
-		return HtmlMessage(new Message(
-			"Not able to render data from elasticsearch as HTML. Elasticsearch output is only supported as application/json !",
-			415));
-	    }
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setContentType("text/html");
+	    Actions actions = Actions.getInstance();
+	    List<Node> nodes = actions.listRepo(contentType, namespace, from,
+		    until);
+	    return ok(resourceList.render(nodes, "http://" + servername
+		    + "/resource/"));
 	} catch (HttpArchiveException e) {
 	    return HtmlMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {

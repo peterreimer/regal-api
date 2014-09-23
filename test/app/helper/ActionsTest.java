@@ -45,7 +45,7 @@ import base.BaseModelTest;
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings({ "javadoc", "unused" })
 public class ActionsTest extends BaseModelTest {
 
     Actions actions;
