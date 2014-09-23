@@ -20,14 +20,12 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.Actions;
 import helper.HttpArchiveException;
-import helper.OaiOreMaker;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,11 +38,9 @@ import models.Message;
 import models.Node;
 import models.RegalObject;
 
-import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.api.libs.json.Json;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
@@ -54,7 +50,6 @@ import views.html.*;
 import actions.BasicAuth;
 import archive.fedora.ArchiveException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -74,6 +69,19 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class Resource extends MyController {
 
     final static Logger logger = LoggerFactory.getLogger(Resource.class);
+
+    @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
+    public static Result listNodes(@QueryParam("ids") String ids) {
+	try {
+	    Actions actions = Actions.getInstance();
+	    List<String> is = Arrays.asList(ids.split(","));
+	    return json(actions.getNodes(is));
+	} catch (HttpArchiveException e) {
+	    return JsonMessage(new Message(e, e.getCode()));
+	} catch (Exception e) {
+	    return JsonMessage(new Message(e, 500));
+	}
+    }
 
     @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", httpMethod = "GET")
     public static Result listResources(
@@ -98,31 +106,14 @@ public class Resource extends MyController {
 	    String src, int from, int until) {
 	try {
 	    if ("repo".equals(src)) {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		response().setContentType("application/json");
 		Actions actions = Actions.getInstance();
-
-		List<Map<String, Object>> nodes = new ArrayList<Map<String, Object>>();
-		for (Node node : actions.listRepo(contentType, namespace, from,
-			until)) {
-		    Map<String, Object> map = new ObjectMapper().readValue(
-			    actions.oaiore(node, "application/json+compact"),
-			    HashMap.class);
-		    map.put("primaryTopic", node.getPid());
-		    nodes.add(map);
-		}
+		List<Map<String, Object>> nodes = actions.nodelistToMap(actions
+			.listRepo(contentType, namespace, from, until));
 		return json(nodes);
 	    } else {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		response().setContentType("application/json");
 		Actions actions = Actions.getInstance();
-		List<Map<String, Object>> hits = new ArrayList<Map<String, Object>>();
-		for (SearchHit hit : actions.listSearch(contentType, namespace,
-			from, until)) {
-		    Map<String, Object> map = hit.getSource();
-		    map.put("primaryTopic", hit.getId());
-		    hits.add(map);
-		}
+		List<Map<String, Object>> hits = actions.hitlistToMap(actions
+			.listSearch(contentType, namespace, from, until));
 		return json(hits);
 	    }
 	} catch (HttpArchiveException e) {
@@ -163,13 +154,9 @@ public class Resource extends MyController {
 	    String role = (String) Http.Context.current().args.get("role");
 	    Actions actions = Actions.getInstance();
 	    String accessScheme = actions.readNode(pid).getAccessScheme();
-
-	    System.out.println(actions.readNode(pid).toString());
-
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
-
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    if (request().accepts("text/html"))
 		return asHtml(pid);
@@ -189,7 +176,6 @@ public class Resource extends MyController {
 	} catch (ArchiveException e) {
 	    response().setContentType("application/json");
 	    return JsonMessage(new Message(e, 404));
-
 	} catch (Exception e) {
 	    response().setContentType("application/json");
 	    return JsonMessage(new Message(e, 500));
@@ -248,8 +234,6 @@ public class Resource extends MyController {
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
-
-	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    DublinCoreData dc = actions.readDC(pid);
 	    return json(dc);
 	} catch (HttpArchiveException e) {
@@ -463,8 +447,9 @@ public class Resource extends MyController {
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
-	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    List<String> result = actions.readNode(pid).getRelatives(HAS_PART);
+	    List<String> nodeIds = actions.readNode(pid).getRelatives(HAS_PART);
+	    List<Map<String, Object>> result = actions.nodelistToMap(actions
+		    .getNodes(nodeIds));
 	    return json(result);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
@@ -482,9 +467,10 @@ public class Resource extends MyController {
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
-	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    List<String> result = actions.readNode(pid)
-		    .getRelatives(IS_PART_OF);
+	    List<String> nodeIds = actions.readNode(pid).getRelatives(
+		    IS_PART_OF);
+	    List<Map<String, Object>> result = actions.nodelistToMap(actions
+		    .getNodes(nodeIds));
 	    return json(result);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
@@ -497,14 +483,12 @@ public class Resource extends MyController {
     public static Result asHtml(@PathParam("pid") String pid) {
 	try {
 	    String role = (String) Http.Context.current().args.get("role");
-	    System.out.println(role);
 	    Actions actions = Actions.getInstance();
 	    Node node = actions.readNode(pid);
 	    String accessScheme = node.getAccessScheme();
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
-	    // String result = actions.oaiore(pid, "text/html");
 	    return ok(resourceLong.render(node.toString()));
 	} catch (HttpArchiveException e) {
 	    return HtmlMessage(new Message(e, e.getCode()));
@@ -558,25 +542,6 @@ public class Resource extends MyController {
 		result = actions.oaiore(node, "application/json");
 	    response().setContentType("application/json");
 	    return ok(result);
-	} catch (HttpArchiveException e) {
-	    return JsonMessage(new Message(e, e.getCode()));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
-    }
-
-    @ApiOperation(produces = "application/json", nickname = "asJsonCompact", value = "asJsonCompact", notes = "Returns a json compacted display of the resource", response = Message.class, httpMethod = "GET")
-    public static Result asJsonCompact(@PathParam("pid") String pid) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    Actions actions = Actions.getInstance();
-	    String accessScheme = actions.readNode(pid).getAccessScheme();
-	    if (!readAccessIsAllowed(accessScheme, role)) {
-		return AccessDenied();
-	    }
-	    String result = actions.oaiore(pid, "application/json+compact");
-	    response().setContentType("application/json");
-	    return JsonMessage(new Message(result));
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -650,9 +615,7 @@ public class Resource extends MyController {
 	    if (!readAccessIsAllowed(accessScheme, role)) {
 		return AccessDenied();
 	    }
-	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    Node result = actions.readNode(pid);
-	    response().setContentType("application/json");
 	    return json(result);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));

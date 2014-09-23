@@ -26,7 +26,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,10 @@ import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.Play;
 import archive.fedora.ArchiveException;
@@ -673,7 +679,7 @@ public class Actions {
 	return getNodes(sublist(list, from, until));
     }
 
-    private List<Node> getNodes(List<String> ids) {
+    public List<Node> getNodes(List<String> ids) {
 	return ids.stream().map((String id) -> readNode(id))
 		.collect(Collectors.toList());
     }
@@ -977,5 +983,28 @@ public class Actions {
      */
     public String getFedoraIntern() {
 	return fedoraIntern;
+    }
+
+    public List<Map<String, Object>> nodelistToMap(List<Node> list)
+	    throws JsonParseException, JsonMappingException, IOException {
+	List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
+	for (Node node : list) {
+	    Map<String, Object> m = new ObjectMapper().readValue(
+		    actions.oaiore(node, "application/json+compact"),
+		    HashMap.class);
+	    m.put("primaryTopic", node.getPid());
+	    map.add(m);
+	}
+	return map;
+    }
+
+    public List<Map<String, Object>> hitlistToMap(List<SearchHit> list) {
+	List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
+	for (SearchHit hit : list) {
+	    Map<String, Object> m = hit.getSource();
+	    m.put("primaryTopic", hit.getId());
+	    map.add(m);
+	}
+	return map;
     }
 }

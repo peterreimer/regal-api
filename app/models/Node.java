@@ -829,7 +829,6 @@ public class Node {
      */
     public List<String> getRelatives(String relation) {
 	List<String> result = new Vector<String>();
-
 	for (Link l : links) {
 	    if (l.getPredicate().equals(relation))
 		result.add(l.getObject());

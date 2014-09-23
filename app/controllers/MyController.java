@@ -47,12 +47,18 @@ public class MyController extends Controller {
 	}
     }
 
+    private static void setJsonHeader() {
+	response().setHeader("Access-Control-Allow-Origin", "*");
+	response().setContentType("application/json");
+    }
+
     /**
      * @param obj
      *            an arbitrary object
      * @return json serialization of obj
      */
     public static Result json(Object obj) {
+	setJsonHeader();
 	StringWriter w = new StringWriter();
 	try {
 	    mapper.writeValue(w, obj);
@@ -79,7 +85,7 @@ public class MyController extends Controller {
      */
     public static Result JsonMessage(Message msg) {
 	response().setHeader("Access-Control-Allow-Methods",
-		"POST, GET, OPTIONS, PUT, DELETE");
+		"POST, GET, PUT, DELETE");
 	response().setHeader("Access-Control-Max-Age", "3600");
 	response()
 		.setHeader("Access-Control-Allow-Headers",
