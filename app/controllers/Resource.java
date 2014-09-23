@@ -38,7 +38,6 @@ import javax.ws.rs.QueryParam;
 import models.DublinCoreData;
 import models.Message;
 import models.Node;
-import models.ObjectList;
 import models.RegalObject;
 
 import org.elasticsearch.search.SearchHit;
@@ -76,7 +75,7 @@ public class Resource extends MyController {
 
     final static Logger logger = LoggerFactory.getLogger(Resource.class);
 
-    @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", response = ObjectList.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", httpMethod = "GET")
     public static Result listResources(
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
@@ -465,8 +464,7 @@ public class Resource extends MyController {
 		return AccessDenied();
 	    }
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    ObjectList result = new ObjectList(actions.readNode(pid)
-		    .getRelatives(HAS_PART));
+	    List<String> result = actions.readNode(pid).getRelatives(HAS_PART);
 	    return json(result);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
@@ -485,8 +483,8 @@ public class Resource extends MyController {
 		return AccessDenied();
 	    }
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    ObjectList result = new ObjectList(actions.readNode(pid)
-		    .getRelatives(IS_PART_OF));
+	    List<String> result = actions.readNode(pid)
+		    .getRelatives(IS_PART_OF);
 	    return json(result);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));

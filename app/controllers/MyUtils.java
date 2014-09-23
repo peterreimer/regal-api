@@ -27,7 +27,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.Message;
-import models.ObjectList;
 import models.Transformer;
 
 import org.slf4j.Logger;
@@ -54,7 +53,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class MyUtils extends MyController {
     final static Logger logger = LoggerFactory.getLogger(MyUtils.class);
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = ObjectList.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Result index(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String index) {
@@ -75,7 +74,7 @@ public class MyUtils extends MyController {
 
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
+    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
     public static Result removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
 	String role = (String) Http.Context.current().args.get("role");
@@ -92,7 +91,7 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", response = ObjectList.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", httpMethod = "POST")
     public static Result publicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String index) {
@@ -111,7 +110,7 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
+    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", httpMethod = "DELETE")
     public static Result removeFromPublicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
 	String role = (String) Http.Context.current().args.get("role");
@@ -128,7 +127,7 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", response = ObjectList.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
     public static Result lobidify(@PathParam("pid") String pid) {
 	String role = (String) Http.Context.current().args.get("role");
 	if (!Resource.modifyingAccessIsAllowed(role)) {
@@ -143,7 +142,7 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", response = ObjectList.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", httpMethod = "POST")
     public static Result addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
@@ -160,7 +159,7 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "replaceUrn", value = "replaceUrn", notes = "Replaces a urn on the /metadata of the resource.", response = ObjectList.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json,application/html", nickname = "replaceUrn", value = "replaceUrn", notes = "Replaces a urn on the /metadata of the resource.", httpMethod = "POST")
     public static Result replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
@@ -177,7 +176,7 @@ public class MyUtils extends MyController {
 	}
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", response = ObjectList.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
     public static Result initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
 	String role = (String) Http.Context.current().args.get("role");
