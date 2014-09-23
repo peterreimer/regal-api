@@ -39,6 +39,7 @@ import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
 import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import helper.HttpArchiveException;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -301,28 +302,24 @@ public class Utils {
 		    .mimeType(node.getMimeType()).dsLocation(location)
 		    .execute();
 
-	} catch (Exception e) {
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 
     void createMetadataStream(Node node) {
-
 	try {
-
 	    Upload request = new Upload(new File(node.getMetadataFile()));
 	    UploadResponse response = request.execute();
 	    String location = response.getUploadLocation();
-
 	    new AddDatastream(node.getPid(), "metadata").versionable(true)
 		    .dsState("A").dsLabel("n-triple rdf metadata")
 		    .controlGroup("M").mimeType("text/plain")
 		    .dsLocation(location).execute();
-	} catch (Exception e) {
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
+
     }
 
     void updateManagedStream(Node node) {
@@ -341,10 +338,8 @@ public class Utils {
 			.dsLabel(node.getFileLabel()).content(file)
 			.controlGroup("M").execute();
 	    }
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 
@@ -362,9 +357,8 @@ public class Utils {
 			.controlGroup("M").mimeType("text/plain").content(file)
 			.execute();
 	    }
-	} catch (Exception e) {
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 
@@ -444,8 +438,7 @@ public class Utils {
 
 		    }
 		} catch (Exception e) {
-		    throw new ArchiveException(node.getPid()
-			    + " an unknown exception occured.", e);
+		    throw new HttpArchiveException(500, e);
 		}
 
 		finally {
@@ -458,21 +451,13 @@ public class Utils {
 	    }
 
 	} catch (RepositoryException e) {
-
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	} catch (RemoteException e) {
-
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	} catch (RDFParseException e) {
-
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	} catch (IOException e) {
-
-	    throw new ArchiveException(node.getPid()
-		    + " an unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	}
 
     }
@@ -496,8 +481,8 @@ public class Utils {
 		    .formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
 		    .versionable(true).content(initialContent).execute();
 
-	} catch (Exception e) {
-	    throw new ArchiveException(e.getMessage(), e);
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 
@@ -513,8 +498,8 @@ public class Utils {
 		    .formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
 		    .versionable(true).content(initialContent).execute();
 
-	} catch (Exception e) {
-	    throw new ArchiveException(initialContent, e);
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 

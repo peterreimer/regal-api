@@ -16,6 +16,8 @@
  */
 package archive.fedora;
 
+import helper.HttpArchiveException;
+
 import java.util.List;
 
 import models.Node;
@@ -84,7 +86,7 @@ public class ContentModelBuilder {
 
 	catch (FedoraClientException e) {
 	    e.printStackTrace();
-	    throw new ArchiveException(e.getMessage(), e);
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
 
     }

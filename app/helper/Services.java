@@ -43,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraInterface;
 import archive.fedora.RdfUtils;
@@ -203,11 +202,11 @@ public class Services {
 		    "url=" + metadata, "out=" + outfile.getAbsolutePath() });
 	    return FileUtils.readFileToString(outfile);
 	} catch (IOException e) {
-	    throw new ArchiveException(pid + " " + e.getMessage(), e);
+	    throw new HttpArchiveException(500, e);
 	} catch (URISyntaxException e) {
-	    throw new ArchiveException(pid + " " + e.getMessage(), e);
+	    throw new HttpArchiveException(500, e);
 	} catch (RecognitionException e) {
-	    throw new ArchiveException(pid + " " + e.getMessage(), e);
+	    throw new HttpArchiveException(500, e);
 	}
 
     }
@@ -421,7 +420,7 @@ public class Services {
 	    List<Element> elements = XmlUtils.getElements("//resultFileUrl",
 		    root, null);
 	    if (elements.size() != 1) {
-		throw new ArchiveException(
+		throw new HttpArchiveException(500,
 			"PDFa conversion returns wrong numbers of resultFileUrls: "
 				+ elements.size());
 	    }

@@ -23,6 +23,7 @@ import static archive.fedora.FedoraVocabulary.SIMPLE;
 import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import helper.HttpArchiveException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,102 +76,82 @@ import com.yourmediashelf.fedora.generated.management.PidList;
  */
 class FedoraFacade implements FedoraInterface {
 
-    private class DeleteException extends ArchiveException {
+    private class DeleteException extends HttpArchiveException {
 
-	private static final long serialVersionUID = -7879667636793687166L;
+	public DeleteException(int httpCode, Exception e) {
+	    super(httpCode, e);
+	}
 
-	public DeleteException(final String message, final Throwable cause) {
-	    super(message, cause);
+	public DeleteException(int httpCode, String msg) {
+	    super(httpCode, msg);
 	}
 
     }
 
-    private class ReadNodeException extends ArchiveException {
+    private class ReadNodeException extends HttpArchiveException {
 
-	private static final long serialVersionUID = 7338818611992590876L;
+	public ReadNodeException(int httpCode, Exception e) {
+	    super(httpCode, e);
+	}
 
-	public ReadNodeException(final String message, final Throwable cause) {
-	    super(message, cause);
+	public ReadNodeException(int httpCode, String msg) {
+	    super(httpCode, msg);
+	}
+    }
+
+    private class InitializeFedoraFacadeException extends HttpArchiveException {
+	public InitializeFedoraFacadeException(int httpCode, Exception e) {
+	    super(httpCode, e);
+	}
+
+	public InitializeFedoraFacadeException(int httpCode, String msg) {
+	    super(httpCode, msg);
 	}
 
     }
 
-    private class InitializeFedoraFacadeException extends ArchiveException {
+    class UpdateContentModel extends HttpArchiveException {
+	public UpdateContentModel(int httpCode, Exception e) {
+	    super(httpCode, e);
+	}
+    }
 
-	private static final long serialVersionUID = 5357635794214927895L;
+    class DeleteDatastreamException extends HttpArchiveException {
+	public DeleteDatastreamException(int httpCode, Exception e) {
+	    super(httpCode, e);
+	}
+    }
 
-	public InitializeFedoraFacadeException(final String message,
-		final Throwable cause) {
-	    super(message, cause);
+    class GetPidException extends HttpArchiveException {
+	public GetPidException(int httpCode, Exception e) {
+	    super(httpCode, e);
+	}
+    }
+
+    class CreateNodeException extends HttpArchiveException {
+	public CreateNodeException(int httpCode, Exception e) {
+	    super(httpCode, e);
 	}
 
-	public InitializeFedoraFacadeException(final Throwable cause) {
-	    super(cause);
+	public CreateNodeException(int httpCode, String msg) {
+	    super(httpCode, msg);
 	}
 
     }
 
-    class UpdateContentModel extends ArchiveException {
-
-	private static final long serialVersionUID = 1794883693210840141L;
-
-	public UpdateContentModel(final String message, final Throwable cause) {
-	    super(message, cause);
+    class SearchException extends HttpArchiveException {
+	public SearchException(int httpCode, Exception e) {
+	    super(httpCode, e);
 	}
     }
 
-    class DeleteDatastreamException extends ArchiveException {
-
-	private static final long serialVersionUID = 128120359698836741L;
-
-	public DeleteDatastreamException(final String message,
-		final Throwable cause) {
-	    super(message, cause);
-	}
-    }
-
-    class GetPidException extends ArchiveException {
-
-	private static final long serialVersionUID = 5316657644921457520L;
-
-	public GetPidException(final String message, final Throwable cause) {
-	    super(message, cause);
-	}
-    }
-
-    class CreateNodeException extends ArchiveException {
-
-	private static final long serialVersionUID = 8569995140758544941L;
-
-	public CreateNodeException(final String message, final Throwable cause) {
-	    super(message, cause);
+    class NodeNotFoundException extends HttpArchiveException {
+	public NodeNotFoundException(int httpCode, Exception e) {
+	    super(httpCode, e);
 	}
 
-	public CreateNodeException(final Throwable cause) {
-	    super(cause);
-	}
-
-    }
-
-    class SearchException extends ArchiveException {
-
-	private static final long serialVersionUID = -276889477323963368L;
-
-	public SearchException(final String message, final Throwable cause) {
-	    super(message, cause);
-	}
-    }
-
-    class NodeNotFoundException extends ArchiveException {
-
-	private static final long serialVersionUID = 8851350561350951329L;
-
-	public NodeNotFoundException(String message, Throwable cause) {
-	    super(message, cause);
-	}
-
-	public NodeNotFoundException(String message) {
-	    super(message);
+	public NodeNotFoundException(int httpCode, String msg) {
+	    super(httpCode, msg);
 	}
 
     }
@@ -198,7 +179,7 @@ class FedoraFacade implements FedoraInterface {
 	    FedoraRequest.setDefaultClient(fedora);
 
 	} catch (MalformedURLException e) {
-	    throw new InitializeFedoraFacadeException(e);
+	    throw new InitializeFedoraFacadeException(500, e);
 	}
 
     }
@@ -249,7 +230,7 @@ class FedoraFacade implements FedoraInterface {
 	    utils.createRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();
-	    throw new CreateNodeException(e);
+	    throw new CreateNodeException(500, e);
 	}
     }
 
@@ -268,7 +249,7 @@ class FedoraFacade implements FedoraInterface {
     @Override
     public Node readNode(String pid) {
 	if (!nodeExists(pid))
-	    throw new NodeNotFoundException(pid);
+	    throw new NodeNotFoundException(404, pid);
 	Node node = new Node();
 	node.setPID(pid);
 	node.setNamespace(pid.substring(0, pid.indexOf(':')));
@@ -281,7 +262,7 @@ class FedoraFacade implements FedoraInterface {
 	    node.setLastModified(prof.getLastModifiedDate());
 	    node.setCreationDate(prof.getCreateDate());
 	} catch (FedoraClientException e) {
-	    throw new ReadNodeException(pid, e);
+	    throw new ReadNodeException(500, e);
 	}
 	try {
 	    GetDatastreamResponse response = new GetDatastream(pid, "data")
@@ -336,7 +317,7 @@ class FedoraFacade implements FedoraInterface {
 		    .execute();
 	    return response.getPid();
 	} catch (FedoraClientException e) {
-	    throw new GetPidException(namespace, e);
+	    throw new GetPidException(e.getStatus(), e);
 	}
     }
 
@@ -350,7 +331,7 @@ class FedoraFacade implements FedoraInterface {
 	    list.getPid().toArray(arr);
 	    return arr;
 	} catch (FedoraClientException e) {
-	    throw new GetPidException(namespace, e);
+	    throw new GetPidException(e.getStatus(), e);
 	}
     }
 
@@ -361,7 +342,7 @@ class FedoraFacade implements FedoraInterface {
 	    new PurgeObject(rootPID).execute();
 	} catch (FedoraClientException e) {
 
-	    throw new DeleteException(rootPID, e);
+	    throw new DeleteException(e.getStatus(), e);
 	}
     }
 
@@ -370,7 +351,7 @@ class FedoraFacade implements FedoraInterface {
 	try {
 	    new ModifyDatastream(pid, datastream).dsState("D").execute();
 	} catch (FedoraClientException e) {
-	    throw new DeleteDatastreamException(pid, e);
+	    throw new DeleteDatastreamException(e.getStatus(), e);
 	}
     }
 
@@ -392,7 +373,7 @@ class FedoraFacade implements FedoraInterface {
 		    .lang(queryFormat).type("triples").execute();
 	    return response.getEntityInputStream();
 	} catch (Exception e) {
-	    throw new SearchException(query, e);
+	    throw new SearchException(500, e);
 	}
     }
 
@@ -419,7 +400,7 @@ class FedoraFacade implements FedoraInterface {
     @Override
     public List<Node> deleteComplexObject(String rootPID) {
 	if (!nodeExists(rootPID)) {
-	    throw new NodeNotFoundException(rootPID);
+	    throw new NodeNotFoundException(404, "Can not find: " + rootPID);
 	}
 	List<Node> list = listComplexObject(rootPID);
 	for (Node n : list) {
@@ -431,7 +412,7 @@ class FedoraFacade implements FedoraInterface {
     @Override
     public List<Node> listComplexObject(String rootPID) {
 	if (!nodeExists(rootPID)) {
-	    throw new NodeNotFoundException(rootPID);
+	    throw new NodeNotFoundException(404, "Can not find: " + rootPID);
 	}
 	Node root = readNode(rootPID);
 	List<Node> result = new ArrayList<Node>();

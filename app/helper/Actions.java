@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.Play;
-import archive.fedora.ArchiveException;
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraFactory;
 import archive.fedora.FedoraInterface;
@@ -406,12 +405,8 @@ public class Actions {
      * @return a message
      */
     public String contentModelsInit(List<Transformer> cms) {
-	try {
-	    fedora.updateContentModels(cms);
-	    return "Success!";
-	} catch (ArchiveException e) {
-	    throw new HttpArchiveException(500, e);
-	}
+	fedora.updateContentModels(cms);
+	return "Success!";
     }
 
     // /**
@@ -844,7 +839,7 @@ public class Actions {
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = readMetadata(subject);
 	if (RdfUtils.hasTriple(subject, hasUrn, urn, metadata))
-	    throw new ArchiveException(subject + "already has a urn: "
+	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
 	updateMetadata(namespace + ":" + pid, metadata);
@@ -985,17 +980,21 @@ public class Actions {
 	return fedoraIntern;
     }
 
-    public List<Map<String, Object>> nodelistToMap(List<Node> list)
-	    throws JsonParseException, JsonMappingException, IOException {
-	List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
-	for (Node node : list) {
-	    Map<String, Object> m = new ObjectMapper().readValue(
-		    actions.oaiore(node, "application/json+compact"),
-		    HashMap.class);
-	    m.put("primaryTopic", node.getPid());
-	    map.add(m);
+    public List<Map<String, Object>> nodelistToMap(List<Node> list) {
+	try {
+
+	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
+	    for (Node node : list) {
+		Map<String, Object> m = new ObjectMapper().readValue(
+			actions.oaiore(node, "application/json+compact"),
+			HashMap.class);
+		m.put("primaryTopic", node.getPid());
+		map.add(m);
+	    }
+	    return map;
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
 	}
-	return map;
     }
 
     public List<Map<String, Object>> hitlistToMap(List<SearchHit> list) {

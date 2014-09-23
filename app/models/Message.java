@@ -46,7 +46,7 @@ public class Message {
     }
 
     public Message(Throwable t, int code) {
-	text = getStackTrace(t);
+	text = t.getMessage() + "\n" + getStackTrace(t);
 	this.code = code;
     }
 
