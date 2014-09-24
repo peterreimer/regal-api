@@ -36,15 +36,19 @@ public class SearchFacade {
      * @param cluster
      *            the name must match to the one provided in
      *            elasticsearch/conf/elasticsearch.yml elasticsearch mapping
+     * @param index
+     *            a list of indexes to configure
+     * @param config
+     *            configuration
      */
-    public SearchFacade(String cluster) {
+    public SearchFacade(String cluster, String[] index, String config) {
 	InetSocketTransportAddress server = new InetSocketTransportAddress(
 		"localhost", 9300);
 	Client client = new TransportClient(ImmutableSettings.settingsBuilder()
 		.put("cluster.name", cluster).build())
 		.addTransportAddress(server);
 	search = new Search(client);
-
+	init(index, config);
     }
 
     /**

@@ -327,7 +327,6 @@ public class Utils {
 	try {
 	    File file = new File(node.getUploadFile());
 	    if (dataStreamExists(node.getPid(), "data")) {
-		System.out.println("ModifyDatastream " + node.getMimeType());
 		new ModifyDatastream(node.getPid(), "data").versionable(true)
 			.dsState("A").dsLabel(node.getFileLabel())
 			.mimeType(node.getMimeType()).controlGroup("M")
@@ -363,32 +362,25 @@ public class Utils {
     }
 
     void readRelsExt(Node node) throws FedoraClientException {
-
 	try {
 	    FedoraResponse response = new GetDatastreamDissemination(
 		    node.getPid(), "RELS-EXT").download(true).execute();
 	    InputStream ds = response.getEntityInputStream();
-
 	    Repository myRepository = new SailRepository(new MemoryStore());
 	    myRepository.initialize();
-
 	    RepositoryConnection con = myRepository.getConnection();
 	    String baseURI = "";
-
 	    try {
 		ValueFactory f = myRepository.getValueFactory();
 		URI objectId = f.createURI("info:fedora/" + node.getPid());
 		con.add(new BufferedInputStream(ds), baseURI, RDFFormat.RDFXML);
 		RepositoryResult<Statement> statements = con.getStatements(
 			objectId, null, null, true);
-
 		try {
 		    while (statements.hasNext()) {
 			Statement st = statements.next();
-
 			URI predUri = st.getPredicate();
 			Value objUri = st.getObject();
-
 			Link link = new Link();
 			link.setObject(objUri.stringValue(), false);
 			link.setPredicate(predUri.stringValue());
@@ -414,7 +406,6 @@ public class Utils {
 			    node.setCreatedBy(link.getObject());
 			    continue;
 			}
-
 			String object = link.getObject();
 			try {
 			    if (object == null)
@@ -426,24 +417,17 @@ public class Utils {
 			    if (!object.contains(":") && !object.contains("/"))
 				throw new URISyntaxException(object,
 					"Contains no namespace and no Slash", 0);
-
 			    new java.net.URI(object);
-
 			    link.setLiteral(false);
 			} catch (URISyntaxException e) {
 			    logger.debug("", e);
 			}
-
 			node.addRelation(link);
-
 		    }
 		} catch (Exception e) {
 		    throw new HttpArchiveException(500, e);
-		}
-
-		finally {
-		    statements.close(); // make sure the result object is closed
-					// properly
+		} finally {
+		    statements.close();
 		}
 
 	    } finally {
@@ -459,7 +443,6 @@ public class Utils {
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
 	}
-
     }
 
     /**
@@ -471,7 +454,6 @@ public class Utils {
      */
     void createFedoraXmlForRelsExt(String pid) {
 	try {
-
 	    String initialContent = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:rel=\"info:fedora/fedora-system:def/relations-external#\">"
 		    + "    <rdf:Description rdf:about=\"info:fedora/"
 		    + pid
@@ -480,31 +462,25 @@ public class Utils {
 	    new AddDatastream(pid, "RELS-EXT").mimeType("application/rdf+xml")
 		    .formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
 		    .versionable(true).content(initialContent).execute();
-
 	} catch (FedoraClientException e) {
 	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 
     void updateFedoraXmlForRelsExt(String pid, List<Link> statements) {
-	// System.out.println("Create new REL-EXT "+pid);
 	String initialContent = null;
 	try {
-
 	    initialContent = RdfUtils.getFedoraRelsExt(pid, statements);
-
 	    new ModifyDatastream(pid, "RELS-EXT")
 		    .mimeType("application/rdf+xml")
 		    .formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
 		    .versionable(true).content(initialContent).execute();
-
 	} catch (FedoraClientException e) {
 	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 
     List<String> findPidsSimple(String rdfQuery) {
-
 	FindObjectsResponse response = null;
 	List<String> result = null;
 	try {
@@ -528,9 +504,7 @@ public class Utils {
 	} catch (FedoraClientException e) {
 	    throw new NoPidFoundException(rdfQuery, e);
 	}
-
 	return result;
-
     }
 
     String setOwnerToXMLString(String objXML) {
@@ -541,17 +515,13 @@ public class Utils {
 		    new ByteArrayInputStream(objXML.getBytes())));
 	    Element root = doc.getDocumentElement();
 	    root.normalize();
-
 	    NodeList properties = root.getElementsByTagName("foxml:property");
 	    for (int i = 0; i < properties.getLength(); i++) {
 		Element n = (Element) properties.item(i);
 		String attribute = n.getAttribute("NAME");
-
 		if (attribute
 			.compareTo("info:fedora/fedora-system:def/model#ownerId") == 0) {
-
 		    n.setAttribute("VALUE", user);
-
 		    break;
 		}
 	    }
@@ -561,14 +531,11 @@ public class Utils {
 		Source source = new DOMSource(doc);
 		StringWriter stringWriter = new StringWriter();
 		Result result = new StreamResult(stringWriter);
-
 		TransformerFactory fac = TransformerFactory.newInstance();
 		javax.xml.transform.Transformer transformer = fac
 			.newTransformer();
 		transformer.transform(source, result);
-
 		return stringWriter.toString();
-
 	    } catch (TransformerConfigurationException e) {
 		e.printStackTrace();
 	    } catch (TransformerException e) {
@@ -576,7 +543,6 @@ public class Utils {
 	    }
 
 	} catch (ParserConfigurationException e) {
-
 	    e.printStackTrace();
 	} catch (SAXException e) {
 
@@ -585,7 +551,6 @@ public class Utils {
 
 	    e.printStackTrace();
 	}
-
 	return null;
     }
 
@@ -618,11 +583,9 @@ public class Utils {
     void updateRelsExt(Node node) {
 	String pid = node.getPid();
 	String type = node.getContentType();
-
 	if (!dataStreamExists(pid, "RELS-EXT")) {
 	    createFedoraXmlForRelsExt(pid);
 	}
-
 	Link link = new Link();
 	link.setPredicate(REL_CONTENT_TYPE);
 	link.setObject(type, true);
@@ -802,7 +765,6 @@ public class Utils {
     }
 
     private void addContentModel(Link link, Node node) {
-
 	try {
 	    Transformer t = readTransformer(link.getObject());
 	    node.addTransformer(t);

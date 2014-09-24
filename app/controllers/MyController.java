@@ -16,7 +16,7 @@
  */
 package controllers;
 
-import helper.Actions;
+import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
@@ -26,6 +26,12 @@ import models.Node;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import actions.CreateNode;
+import actions.DeleteNode;
+import actions.IndexNode;
+import actions.ModifyNode;
+import actions.ReadNode;
+import actions.TransformNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -40,6 +46,13 @@ import views.html.*;
 public class MyController extends Controller {
 
     protected static ObjectMapper mapper = JsonUtil.mapper();
+
+    static ReadNode read = new ReadNode();
+    static CreateNode create = new CreateNode();
+    static IndexNode index = new IndexNode();
+    static ModifyNode modify = new ModifyNode();
+    static DeleteNode delete = new DeleteNode();
+    static TransformNode transform = new TransformNode();
 
     /**
      * @return Html or Json Output
@@ -139,7 +152,7 @@ public class MyController extends Controller {
     }
 
     interface ControllerAction {
-	Result exec(Node node, Actions actions);
+	Result exec(Node node);
     }
 
     /**
@@ -149,14 +162,13 @@ public class MyController extends Controller {
     public static class ReadAction {
 	Result call(String pid, ControllerAction ca) {
 	    try {
-		Actions actions = Actions.getInstance();
-		Node node = actions.readNode(pid);
+		Node node = read.readNode(pid);
 		String role = (String) Http.Context.current().args.get("role");
 		String accessScheme = node.getAccessScheme();
 		if (!readAccessIsAllowed(accessScheme, role)) {
 		    return AccessDenied();
 		}
-		return ca.exec(node, actions);
+		return ca.exec(node);
 	    } catch (HttpArchiveException e) {
 		return JsonMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
@@ -172,13 +184,17 @@ public class MyController extends Controller {
     public static class ModifyAction {
 	Result call(String pid, ControllerAction ca) {
 	    try {
-		Actions actions = Actions.getInstance();
-		Node node = actions.readNode(pid);
 		String role = (String) Http.Context.current().args.get("role");
 		if (!modifyingAccessIsAllowed(role)) {
 		    return AccessDenied();
 		}
-		return ca.exec(node, actions);
+		Node node = null;
+		try {
+		    node = read.readNode(pid);
+		} catch (HttpArchiveException e) {
+
+		}
+		return ca.exec(node);
 	    } catch (HttpArchiveException e) {
 		return JsonMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {

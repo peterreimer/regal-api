@@ -18,7 +18,7 @@ package controllers;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import helper.Actions;
+import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.FileInputStream;
@@ -44,10 +44,9 @@ import models.RegalObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
-import play.mvc.Result;
-import play.*;
 import play.mvc.*;
 import views.html.*;
 import actions.BasicAuth;
@@ -77,9 +76,8 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Result listNodes(@QueryParam("ids") String ids) {
 	try {
-	    Actions actions = Actions.getInstance();
 	    List<String> is = Arrays.asList(ids.split(","));
-	    return json(actions.getNodes(is));
+	    return json(read.getNodes(is));
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -108,9 +106,8 @@ public class Resource extends MyController {
     private static Result jsonList(String namespace, String contentType,
 	    int from, int until) {
 	try {
-	    Actions actions = Actions.getInstance();
-	    List<Map<String, Object>> nodes = actions.nodelistToMap(actions
-		    .listRepo(contentType, namespace, from, until));
+	    List<Map<String, Object>> nodes = read.nodelistToMap(read.listRepo(
+		    contentType, namespace, from, until));
 	    return json(nodes);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
@@ -126,8 +123,7 @@ public class Resource extends MyController {
 		    .getString("regal-api.serverName");
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    response().setContentType("text/html");
-	    Actions actions = Actions.getInstance();
-	    List<Node> nodes = actions.listRepo(contentType, namespace, from,
+	    List<Node> nodes = read.listRepo(contentType, namespace, from,
 		    until);
 	    return ok(resourceList.render(nodes, "http://" + servername
 		    + "/resource/"));
@@ -142,7 +138,7 @@ public class Resource extends MyController {
     public static Result listResource(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		try {
 		    response().setHeader("Access-Control-Allow-Origin", "*");
 		    if (request().accepts("text/html"))
@@ -172,9 +168,9 @@ public class Resource extends MyController {
     public static Result listMetadata(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
-		String result = actions.readMetadata(pid);
+		String result = read.readMetadata(pid);
 		return ok(result);
 	    }
 	});
@@ -184,11 +180,11 @@ public class Resource extends MyController {
     public static Result listData(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		try {
 		    response().setHeader("Access-Control-Allow-Origin", "*");
-		    URL url = new URL(actions.getFedoraIntern() + "/objects/"
-			    + pid + "/datastreams/data/content");
+		    URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
+			    + "/datastreams/data/content");
 		    HttpURLConnection connection = (HttpURLConnection) url
 			    .openConnection();
 		    InputStream is = connection.getInputStream();
@@ -209,8 +205,8 @@ public class Resource extends MyController {
     public static Result listDc(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		DublinCoreData dc = actions.readDC(pid);
+	    public Result exec(Node node) {
+		DublinCoreData dc = read.readDC(pid);
 		return json(dc);
 	    }
 	});
@@ -221,7 +217,7 @@ public class Resource extends MyController {
     public static Result updateResource(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		try {
 		    String[] p = pid.split(":");
 		    Object o = request().body().asJson();
@@ -233,7 +229,7 @@ public class Resource extends MyController {
 			throw new NullPointerException(
 				"Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
 		    }
-		    Node newnode = actions.createResource(object.getType(),
+		    Node newnode = create.createResource(object.getType(),
 			    object.getParentPid(), object.getTransformer(),
 			    object.getAccessScheme(), p[1], p[0]);
 		    String result = newnode.getPid() + " created/updated!";
@@ -254,8 +250,8 @@ public class Resource extends MyController {
     public static Result updateMetadata(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.updateMetadata(pid, request().body()
+	    public Result exec(Node node) {
+		String result = modify.updateMetadata(pid, request().body()
 			.asText());
 		return JsonMessage(new Message(result));
 	    }
@@ -268,7 +264,7 @@ public class Resource extends MyController {
 	    @QueryParam("md5") String md5) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		try {
 		    MultipartFormData body = request().body()
 			    .asMultipartFormData();
@@ -279,7 +275,7 @@ public class Resource extends MyController {
 		    String mimeType = d.getContentType();
 		    String name = d.getFilename();
 		    FileInputStream content = new FileInputStream(d.getFile());
-		    actions.updateData(pid, content, mimeType, name, md5);
+		    modify.updateData(pid, content, mimeType, name, md5);
 		    return JsonMessage(new Message("File uploaded! Type: "
 			    + mimeType + ", Name: " + name));
 		} catch (IOException e) {
@@ -294,7 +290,7 @@ public class Resource extends MyController {
     public static Result updateDc(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		try {
 		    Object o = request().body().asJson();
 		    DublinCoreData dc;
@@ -304,7 +300,7 @@ public class Resource extends MyController {
 		    } else {
 			dc = new DublinCoreData();
 		    }
-		    String result = actions.updateDC(pid, dc);
+		    String result = modify.updateDC(pid, dc);
 		    return JsonMessage(new Message(result, 200));
 		} catch (IOException e) {
 		    throw new HttpArchiveException(500, e);
@@ -317,8 +313,8 @@ public class Resource extends MyController {
     public static Result deleteResource(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.delete(pid);
+	    public Result exec(Node node) {
+		String result = delete.delete(pid);
 		return JsonMessage(new Message(result));
 	    }
 	});
@@ -328,8 +324,8 @@ public class Resource extends MyController {
     public static Result deleteMetadata(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.deleteMetadata(pid);
+	    public Result exec(Node node) {
+		String result = delete.deleteMetadata(pid);
 		return JsonMessage(new Message(result));
 	    }
 	});
@@ -339,8 +335,8 @@ public class Resource extends MyController {
     public static Result deleteData(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.deleteData(pid);
+	    public Result exec(Node node) {
+		String result = delete.deleteData(pid);
 		return JsonMessage(new Message(result));
 	    }
 	});
@@ -356,8 +352,8 @@ public class Resource extends MyController {
 	    String src, int from, int until) {
 	ModifyAction action = new ModifyAction();
 	return action.call(null, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.deleteAll(actions
+	    public Result exec(Node node) {
+		String result = delete.deleteAll(read
 			.listRepo(type, namespace, from, until).stream()
 			.map((Node n) -> n.getPid())
 			.collect(Collectors.toList()));
@@ -370,11 +366,11 @@ public class Resource extends MyController {
     public static Result listParts(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		List<String> nodeIds = actions.readNode(pid).getRelatives(
-			HAS_PART);
-		List<Map<String, Object>> result = actions
-			.nodelistToMap(actions.getNodes(nodeIds));
+	    public Result exec(Node node) {
+		List<String> nodeIds = read.readNode(pid)
+			.getRelatives(HAS_PART);
+		List<Map<String, Object>> result = read.nodelistToMap(read
+			.getNodes(nodeIds));
 		return json(result);
 	    }
 	});
@@ -384,11 +380,11 @@ public class Resource extends MyController {
     public static Result listParents(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		List<String> nodeIds = actions.readNode(pid).getRelatives(
+	    public Result exec(Node node) {
+		List<String> nodeIds = read.readNode(pid).getRelatives(
 			IS_PART_OF);
-		List<Map<String, Object>> result = actions
-			.nodelistToMap(actions.getNodes(nodeIds));
+		List<Map<String, Object>> result = read.nodelistToMap(read
+			.getNodes(nodeIds));
 		return json(result);
 	    }
 	});
@@ -398,7 +394,7 @@ public class Resource extends MyController {
     public static Result asHtml(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		return ok(resourceLong.render(node.toString()));
 	    }
 	});
@@ -408,14 +404,14 @@ public class Resource extends MyController {
     public static Result asRdf(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		String result = "";
 		if (request().accepts("application/rdf+xml")) {
-		    result = actions.oaiore(node, "application/rdf+xml");
+		    result = transform.oaiore(node, "application/rdf+xml");
 		    response().setContentType("application/rdf+xml");
 		    return ok(result);
 		} else if (request().accepts("text/plain")) {
-		    result = actions.oaiore(node, "text/plain");
+		    result = transform.oaiore(node, "text/plain");
 		    response().setContentType("text/plain");
 		    return ok(result);
 		}
@@ -428,12 +424,12 @@ public class Resource extends MyController {
     public static Result asJson(@PathParam("pid") String pid, String style) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		String result = "ERROR";
 		if ("compact".equals(style))
-		    result = actions.oaiore(node, "application/json+compact");
+		    result = transform.oaiore(node, "application/json+compact");
 		else
-		    result = actions.oaiore(node, "application/json");
+		    result = transform.oaiore(node, "application/json");
 		response().setContentType("application/json");
 		return ok(result);
 	    }
@@ -444,8 +440,8 @@ public class Resource extends MyController {
     public static Result asOaiDc(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.oaidc(pid);
+	    public Result exec(Node node) {
+		String result = transform.oaidc(pid);
 		response().setContentType("application/xml");
 		return ok(result);
 	    }
@@ -456,8 +452,8 @@ public class Resource extends MyController {
     public static Result asEpicur(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.epicur(pid);
+	    public Result exec(Node node) {
+		String result = transform.epicur(pid);
 		response().setContentType("application/xml");
 		return ok(result);
 	    }
@@ -468,8 +464,8 @@ public class Resource extends MyController {
     public static Result asAleph(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.aleph(pid);
+	    public Result exec(Node node) {
+		String result = transform.aleph(pid);
 		response().setContentType("application/xml");
 		return ok(result);
 	    }
@@ -478,29 +474,25 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")
     public static Result asRegalObject(@PathParam("pid") String pid) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    Actions actions = Actions.getInstance();
-	    String accessScheme = actions.readNode(pid).getAccessScheme();
-	    if (!readAccessIsAllowed(accessScheme, role)) {
-		return AccessDenied();
+	ReadAction action = new ReadAction();
+	return action.call(pid, new ControllerAction() {
+	    public Result exec(Node node) {
+		response().setHeader("Access-Control-Allow-Origin", "*");
+		response().setContentType("application/json");
+		Node result = read.readNode(pid);
+		return json(result);
 	    }
-	    Node result = actions.readNode(pid);
-	    return json(result);
-	} catch (HttpArchiveException e) {
-	    return JsonMessage(new Message(e, e.getCode()));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
+
     }
 
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")
     public static Result asPdfa(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
+	    public Result exec(Node node) {
 		try {
-		    String redirectUrl = actions.getPdfaUrl(pid);
+		    String redirectUrl = transform.getPdfaUrl(pid);
 		    URL url;
 		    url = new URL(redirectUrl);
 		    HttpURLConnection connection = (HttpURLConnection) url
@@ -521,8 +513,8 @@ public class Resource extends MyController {
     public static Result asPdfboxTxt(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.pdfbox(pid);
+	    public Result exec(Node node) {
+		String result = transform.pdfbox(pid);
 		response().setContentType("text/plain");
 		return ok(result);
 	    }
@@ -533,8 +525,8 @@ public class Resource extends MyController {
     public static Result updateOaiSets(@PathParam("pid") String pid) {
 	ModifyAction action = new ModifyAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		String result = actions.makeOAISet(pid);
+	    public Result exec(Node node) {
+		String result = modify.makeOAISet(pid);
 		response().setContentType("text/plain");
 		return ok(result);
 	    }

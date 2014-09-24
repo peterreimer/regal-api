@@ -124,7 +124,6 @@ public class OaiOreMaker {
     private String write(String format) {
 	try {
 	    if ("application/json+compact".equals(format)) {
-		System.out.println(node.getContextDocumentUri());
 		URL contextUrl = new URL(node.getContextDocumentUri());
 		InputStream contextDocument = contextUrl.openStream();
 		StringWriter out = new StringWriter();

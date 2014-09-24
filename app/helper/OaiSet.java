@@ -20,7 +20,7 @@ package helper;
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
-class OaiSet {
+public class OaiSet {
     String name = null;
     String spec = null;
     String pid = null;

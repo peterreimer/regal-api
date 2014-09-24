@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
-class OaiSetBuilder {
+public class OaiSetBuilder {
     final static Logger logger = LoggerFactory.getLogger(OaiSetBuilder.class);
 
     /**
@@ -63,7 +63,6 @@ class OaiSetBuilder {
 	    if (object.startsWith("http://dewey.info/class/")) {
 		String ddc = object.subSequence(object.length() - 4,
 			object.length() - 1).toString();
-		// System.out.println("Found rdf ddc: " + ddc);
 
 		name = ddcmap(ddc);
 		spec = "ddc:" + ddc;

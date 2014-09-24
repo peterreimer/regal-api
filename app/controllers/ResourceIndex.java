@@ -2,7 +2,6 @@ package controllers;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import helper.Actions;
 import helper.HttpArchiveException;
 
 import java.util.Arrays;
@@ -28,9 +27,8 @@ public class ResourceIndex extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Result listNodes(@QueryParam("ids") String ids) {
 	try {
-	    Actions actions = Actions.getInstance();
 	    List<String> is = Arrays.asList(ids.split(","));
-	    return json(actions.getNodesFromIndex(is));
+	    return json(read.getNodesFromIndex(is));
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -59,9 +57,8 @@ public class ResourceIndex extends MyController {
     private static Result jsonList(String namespace, String contentType,
 	    int from, int until) {
 	try {
-	    Actions actions = Actions.getInstance();
-	    List<Map<String, Object>> hits = actions.hitlistToMap(actions
-		    .listSearch(contentType, namespace, from, until));
+	    List<Map<String, Object>> hits = read.hitlistToMap(read.listSearch(
+		    contentType, namespace, from, until));
 	    return json(hits);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
@@ -89,8 +86,8 @@ public class ResourceIndex extends MyController {
     public static Result listResource(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		return json(actions.readNodeFromIndex(pid));
+	    public Result exec(Node node) {
+		return json(read.readNodeFromIndex(pid));
 	    }
 	});
     }
@@ -99,10 +96,10 @@ public class ResourceIndex extends MyController {
     public static Result listParts(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		List<String> nodeIds = actions.readNode(pid).getRelatives(
-			HAS_PART);
-		List<Map<String, Object>> result = actions
+	    public Result exec(Node nodes) {
+		List<String> nodeIds = read.readNode(pid)
+			.getRelatives(HAS_PART);
+		List<Map<String, Object>> result = read
 			.getNodesFromIndex(nodeIds);
 		return json(result);
 	    }
@@ -113,10 +110,10 @@ public class ResourceIndex extends MyController {
     public static Result listParents(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
-	    public Result exec(Node node, Actions actions) {
-		List<String> nodeIds = actions.readNode(pid).getRelatives(
+	    public Result exec(Node node) {
+		List<String> nodeIds = read.readNode(pid).getRelatives(
 			IS_PART_OF);
-		List<Map<String, Object>> result = actions
+		List<Map<String, Object>> result = read
 			.getNodesFromIndex(nodeIds);
 		return json(result);
 	    }

@@ -201,7 +201,6 @@ public class ApplicationProfile {
      * @return a label or, if not available the key itself
      */
     public static String getPredicateLabel(String key) {
-
 	String value = pMap.get(key);
 	if (value != null && !value.isEmpty())
 	    return value;

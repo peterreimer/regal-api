@@ -16,9 +16,6 @@
  */
 package helper;
 
-import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
-import static archive.fedora.FedoraVocabulary.ITEM_ID;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -26,26 +23,17 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import models.DublinCoreData;
-import models.Link;
 import models.Node;
 
 import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
 import org.culturegraph.mf.Flux;
-import org.openrdf.model.Statement;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.FedoraInterface;
-import archive.fedora.RdfUtils;
 import archive.fedora.XmlUtils;
 
 /**
@@ -59,22 +47,18 @@ public class Services {
     public class MetadataNotFoundException extends RuntimeException {
 
 	public MetadataNotFoundException() {
-	    // TODO Auto-generated constructor stub
 	}
 
 	public MetadataNotFoundException(String arg0) {
 	    super(arg0);
-	    // TODO Auto-generated constructor stub
 	}
 
 	public MetadataNotFoundException(Throwable arg0) {
 	    super(arg0);
-	    // TODO Auto-generated constructor stub
 	}
 
 	public MetadataNotFoundException(String arg0, Throwable arg1) {
 	    super(arg0, arg1);
-	    // TODO Auto-generated constructor stub
 	}
 
     }
@@ -92,59 +76,6 @@ public class Services {
     public Services(FedoraInterface fedora, String server) {
 	this.fedora = fedora;
 	uriPrefix = server + "/" + "resource" + "/";
-    }
-
-    /**
-     * @param node
-     *            generate metadatafile with lobid data for this node
-     * @return a short message
-     */
-    public Node lobidify(Node node) {
-
-	String pid = node.getPid();
-
-	List<String> identifier = node.getDublinCoreData().getIdentifier();
-	String alephid = "";
-	for (String id : identifier) {
-	    if (id.startsWith("TT") || id.startsWith("HT")) {
-		alephid = id;
-		break;
-	    }
-	}
-	if (alephid.isEmpty()) {
-	    throw new HttpArchiveException(500, pid + " no Catalog-Id found");
-	}
-
-	String lobidUri = "http://lobid.org/resource/" + alephid;
-	try {
-	    URL lobidUrl = new URL("http://api.lobid.org/resource?id="
-		    + alephid);
-
-	    RDFFormat inFormat = RDFFormat.TURTLE;
-	    String accept = "text/turtle";
-	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
-		    RDFFormat.NTRIPLES, accept);
-
-	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
-		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat,
-			accept);
-	    }
-	    str = Pattern.compile(lobidUri).matcher(str)
-		    .replaceAll(Matcher.quoteReplacement(pid))
-		    + "<"
-		    + pid
-		    + "> <http://www.umbel.org/specifications/vocabulary#isLike> <"
-		    + lobidUri + "> .";
-	    File metadataFile = CopyUtils.copyStringToFile(str);
-
-	    node.setMetadataFile(metadataFile.getAbsolutePath());
-	    return node;
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	}
-
     }
 
     /**
@@ -250,70 +181,6 @@ public class Services {
     }
 
     /**
-     * @param pid
-     *            the pid of a node that must be published on the oai interface
-     * @param fedoraExtern
-     *            the fedora endpoint for external users
-     * @return A short message.
-     */
-    public String makeOAISet(String pid, String fedoraExtern) {
-
-	Node node = fedora.readNode(pid);
-	try {
-	    URL metadata = new URL(fedoraExtern + "/objects/" + pid
-		    + "/datastreams/metadata/content");
-
-	    OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-
-	    RepositoryResult<Statement> statements = RdfUtils
-		    .getStatements(metadata);
-
-	    while (statements.hasNext()) {
-		Statement st = statements.next();
-		String subject = st.getSubject().stringValue();
-		String predicate = st.getPredicate().stringValue();
-		String object = st.getObject().stringValue();
-
-		OaiSet set = oaiSetBuilder.getSet(subject, predicate, object);
-		if (set == null) {
-		    continue;
-		}
-		if (!fedora.nodeExists(set.getPid())) {
-		    createOAISet(set.getName(), set.getSpec(), set.getPid());
-		}
-		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
-	    }
-	    String name = "open_access";
-	    String spec = "open_access";
-	    String namespace = "oai";
-	    String oaipid = namespace + ":" + "open_access";
-	    if (!fedora.nodeExists(oaipid)) {
-		createOAISet(name, spec, oaipid);
-	    }
-	    linkObjectToOaiSet(node, spec, oaipid);
-
-	    return pid + " successfully created oai sets!";
-
-	} catch (Exception e) {
-	    throw new MetadataNotFoundException(e);
-	}
-    }
-
-    /**
-     * Generates a urn
-     * 
-     * @param niss
-     *            usually the pid of an object
-     * @param snid
-     *            usually the namespace
-     * @return the urn
-     */
-    public String generateUrn(String niss, String snid) {
-	URN urn = new URN(snid, niss);
-	return urn.toString();
-    }
-
-    /**
      * @param node
      *            the node with pdf data
      * @param fedoraExtern
@@ -349,52 +216,6 @@ public class Services {
 
 	}
 
-    }
-
-    private void linkObjectToOaiSet(Node node, String spec, String pid) {
-	node.removeRelations(ITEM_ID);
-	node.removeRelation(IS_MEMBER_OF, "info:fedora/" + pid);
-	Link link = new Link();
-	link.setPredicate(IS_MEMBER_OF);
-	link.setObject("info:fedora/" + pid, false);
-	node.addRelation(link);
-
-	link = new Link();
-	link.setPredicate(ITEM_ID);
-	link.setObject(uriPrefix + node.getPid(), false);
-	node.addRelation(link);
-
-	fedora.updateNode(node);
-    }
-
-    private void createOAISet(String name, String spec, String pid) {
-	String setSpecPred = "http://www.openarchives.org/OAI/2.0/setSpec";
-	String setNamePred = "http://www.openarchives.org/OAI/2.0/setName";
-
-	Link setSpecLink = new Link();
-	setSpecLink.setPredicate(setSpecPred);
-
-	Link setNameLink = new Link();
-	setNameLink.setPredicate(setNamePred);
-
-	String namespace = "oai";
-	{
-	    Node oaiset = new Node();
-	    oaiset.setNamespace(namespace);
-	    oaiset.setPID(pid);
-
-	    setSpecLink.setObject(spec, true);
-	    oaiset.addRelation(setSpecLink);
-
-	    setNameLink.setObject(name, true);
-	    oaiset.addRelation(setNameLink);
-
-	    DublinCoreData dc = oaiset.getDublinCoreData();
-	    dc.addTitle(name);
-
-	    oaiset.setDublinCoreData(dc);
-	    fedora.createNode(oaiset);
-	}
     }
 
     /**
