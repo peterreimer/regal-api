@@ -23,7 +23,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
 /**
@@ -154,6 +153,11 @@ public class SearchFacade {
 	return search.toString();
     }
 
+    /**
+     * @param pid
+     *            a nodes pid
+     * @return a map that represents the node
+     */
     public Map<String, Object> get(String pid) {
 	return search.get(pid);
     }

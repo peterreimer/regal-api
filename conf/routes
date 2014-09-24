@@ -30,14 +30,14 @@ GET /resource 						controllers.Resource.listResources(namespace?="",contentType
 GET /resource/:pid/parts			controllers.Resource.listParts(pid)
 GET /resource/:pid/parents			controllers.Resource.listParents(pid)
 
-# list
-GET /listIndex 							controllers.ResourceIndex.listNodes(ids: String)
-# Resource
-GET /resourceIndex/:pid.json			controllers.ResourceIndex.listResource(pid)	
-GET /resourceIndex/:pid					controllers.ResourceIndex.listResource(pid)
-GET /resourceIndex 						controllers.ResourceIndex.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
-GET /resourceIndex/:pid/parts			controllers.ResourceIndex.listParts(pid)
-GET /resourceIndex/:pid/parents			controllers.ResourceIndex.listParents(pid)
+# list from elasticsearch index
+GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
+# list resource from elasticsearch index
+GET /resourceIndex/:pid.json		controllers.ResourceIndex.listResourcegit (pid)	
+GET /resourceIndex/:pid				controllers.ResourceIndex.listResource(pid)
+GET /resourceIndex 					controllers.ResourceIndex.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
+GET /resourceIndex/:pid/parts		controllers.ResourceIndex.listParts(pid)
+GET /resourceIndex/:pid/parents		controllers.ResourceIndex.listParents(pid)
 
 
 PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)

@@ -140,6 +140,11 @@ public class Search {
 	}
     }
 
+    /**
+     * @param pid
+     *            a pid of a node
+     * @return a map that represents the node
+     */
     public Map<String, Object> get(String pid) {
 	client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	GetResponse response = client

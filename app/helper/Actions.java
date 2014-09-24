@@ -407,16 +407,6 @@ public class Actions {
 	return "Success!";
     }
 
-    // /**
-    // * @param query
-    // * a query to define objects that must be deleted
-    // * @return a message
-    // */
-    // public String deleteByQuery(String query) {
-    // List<String> objects = listByQuery(query);
-    // return deleteAll(objects);
-    // }
-
     /**
      * @param pid
      *            the pid
@@ -598,31 +588,6 @@ public class Actions {
 	return index(pid, namespace, n.getContentType());
     }
 
-    // /**
-    // * @param type
-    // * a contentType
-    // * @param namespace
-    // * list only objects in this namespace
-    // * @param from
-    // * show only hits starting at this index
-    // * @param until
-    // * show only hits ending at this index
-    // * @param getListingFrom
-    // * List Resources from elasticsearch or from fedora. Allowed
-    // * values: "repo" and "es"
-    // * @return all objects of contentType type
-    // */
-    // public List<String> list(String type, String namespace, int from,
-    // int until, String getListingFrom) {
-    // List<String> list = null;
-    // if (!"es".equals(getListingFrom)) {
-    // list = listRepo(type, namespace, from, until);
-    // } else {
-    // list = listSearch(type, namespace, from, until);
-    // }
-    // return list;
-    // }
-
     /**
      * @param type
      *            The objectTyp
@@ -682,6 +647,11 @@ public class Actions {
 		.collect(Collectors.toList());
     }
 
+    /**
+     * @param ids
+     *            a list of ids to get objects for
+     * @return a list of Maps each represents a node
+     */
     public List<Map<String, Object>> getNodesFromIndex(List<String> ids) {
 	return ids.stream().map((String id) -> readNodeFromIndex(id))
 		.collect(Collectors.toList());
@@ -759,27 +729,6 @@ public class Actions {
 	}
     }
 
-    // /**
-    // * @param type
-    // * the type to be displaye
-    // * @param namespace
-    // * list only objects in this namespace
-    // * @param from
-    // * show only hits starting at this index
-    // * @param until
-    // * show only hits ending at this index
-    // * @param getListingFrom
-    // * List Resources from elasticsearch or from fedora. Allowed
-    // * values: "repo" and "es"
-    // * @return html listing of all objects
-    // */
-    // public String listAsHtml(String type, String namespace, int from,
-    // int until, String getListingFrom) {
-    // List<String> list = list(type, namespace, from, until, getListingFrom);
-    // return representations.getAllOfTypeAsHtml(list, type, namespace, from,
-    // until, getListingFrom);
-    // }
-
     /**
      * @param pid
      *            the will be read to the node
@@ -795,6 +744,11 @@ public class Actions {
 	return n;
     }
 
+    /**
+     * @param pid
+     *            the pid of the node
+     * @return a Map that represents the node
+     */
     public Map<String, Object> readNodeFromIndex(String pid) {
 	return search.get(pid);
     }

@@ -14,18 +14,11 @@ import javax.ws.rs.QueryParam;
 
 import models.Message;
 import models.Node;
-import play.Play;
-import play.mvc.Http;
 import play.mvc.Result;
-import views.html.resourceList;
-import views.html.resourceLong;
 import actions.BasicAuth;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
-import controllers.Resource.Doer;
-import controllers.Resource.ReadAction;
 
 @BasicAuth
 @Api(value = "/resourceIndex", description = "The resourceIndex endpoint reads resources from elasticsearch")
@@ -66,12 +59,10 @@ public class ResourceIndex extends MyController {
     private static Result jsonList(String namespace, String contentType,
 	    int from, int until) {
 	try {
-
 	    Actions actions = Actions.getInstance();
 	    List<Map<String, Object>> hits = actions.hitlistToMap(actions
 		    .listSearch(contentType, namespace, from, until));
 	    return json(hits);
-
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -82,13 +73,11 @@ public class ResourceIndex extends MyController {
     private static Result htmlList(String namespace, String contentType,
 	    int from, int until) {
 	try {
-	    String servername = Play.application().configuration()
-		    .getString("regal-api.serverName");
-
+	    // String servername = Play.application().configuration()
+	    // .getString("regal-api.serverName");
 	    return HtmlMessage(new Message(
 		    "Not able to render data from elasticsearch as HTML. Elasticsearch output is only supported as application/json !",
 		    415));
-
 	} catch (HttpArchiveException e) {
 	    return HtmlMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -99,7 +88,7 @@ public class ResourceIndex extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Result listResource(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
-	return action.call(pid, new Doer() {
+	return action.call(pid, new ControllerAction() {
 	    public Result exec(Node node, Actions actions) {
 		return json(actions.readNodeFromIndex(pid));
 	    }
@@ -109,7 +98,7 @@ public class ResourceIndex extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Result listParts(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
-	return action.call(pid, new Doer() {
+	return action.call(pid, new ControllerAction() {
 	    public Result exec(Node node, Actions actions) {
 		List<String> nodeIds = actions.readNode(pid).getRelatives(
 			HAS_PART);
@@ -123,7 +112,7 @@ public class ResourceIndex extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Result listParents(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
-	return action.call(pid, new Doer() {
+	return action.call(pid, new ControllerAction() {
 	    public Result exec(Node node, Actions actions) {
 		List<String> nodeIds = actions.readNode(pid).getRelatives(
 			IS_PART_OF);

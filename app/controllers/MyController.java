@@ -16,14 +16,20 @@
  */
 package controllers;
 
+import helper.Actions;
+import helper.HttpArchiveException;
+
 import java.io.StringWriter;
 
 import models.Message;
+import models.Node;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
+
 import views.html.*;
 
 /**
@@ -93,5 +99,91 @@ public class MyController extends Controller {
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
 	return status(msg.getCode(), msg.toString());
+    }
+
+    /**
+     * @param accessScheme
+     *            the accessScheme of the object
+     * @param role
+     *            the role of the user
+     * @return true if the user is allowed to read the object
+     */
+    public static boolean readAccessIsAllowed(String accessScheme, String role) {
+	if (!"edoweb-admin".equals(role)) {
+	    if ("public".equals(accessScheme)) {
+		return true;
+	    } else if ("restricted".equals(accessScheme)) {
+		if ("edoweb-editor".equals(role)
+			|| "edoweb-reader".equals(role)) {
+		    return true;
+		}
+	    } else if ("private".equals(accessScheme)) {
+		if ("edoweb-editor".equals(role))
+		    return true;
+	    }
+	} else {
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * @param role
+     *            the role of the user
+     * @return true if the user is allowed to modify the object
+     */
+    public static boolean modifyingAccessIsAllowed(String role) {
+	if ("edoweb-admin".equals(role) || "edoweb-editor".equals(role))
+	    return true;
+	return false;
+    }
+
+    interface ControllerAction {
+	Result exec(Node node, Actions actions);
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
+    public static class ReadAction {
+	Result call(String pid, ControllerAction ca) {
+	    try {
+		Actions actions = Actions.getInstance();
+		Node node = actions.readNode(pid);
+		String role = (String) Http.Context.current().args.get("role");
+		String accessScheme = node.getAccessScheme();
+		if (!readAccessIsAllowed(accessScheme, role)) {
+		    return AccessDenied();
+		}
+		return ca.exec(node, actions);
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	}
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
+    public static class ModifyAction {
+	Result call(String pid, ControllerAction ca) {
+	    try {
+		Actions actions = Actions.getInstance();
+		Node node = actions.readNode(pid);
+		String role = (String) Http.Context.current().args.get("role");
+		if (!modifyingAccessIsAllowed(role)) {
+		    return AccessDenied();
+		}
+		return ca.exec(node, actions);
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	}
     }
 }
