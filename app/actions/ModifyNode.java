@@ -398,8 +398,7 @@ public class ModifyNode {
 	}
 	String lobidUri = "http://lobid.org/resource/" + alephid;
 	try {
-	    URL lobidUrl = new URL("http://api.lobid.org/resource?id="
-		    + alephid);
+	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid);
 	    RDFFormat inFormat = RDFFormat.TURTLE;
 	    String accept = "text/turtle";
 	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
