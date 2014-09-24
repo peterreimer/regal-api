@@ -16,7 +16,6 @@
  */
 package controllers;
 
-import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;

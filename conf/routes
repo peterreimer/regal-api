@@ -67,6 +67,7 @@ GET /api-docs 						controllers.ApiHelpController.getResources
 
 GET /api-docs/utils 				controllers.ApiHelpController.getResource(path = "/utils")
 GET /api-docs/resource 				controllers.ApiHelpController.getResource(path = "/resource")
+GET /api-docs/resourceIndex 		controllers.ApiHelpController.getResource(path = "/resourceIndex")
 
 POST /utils/index/:pid 				controllers.MyUtils.index(pid,contentType,index?="")
 DELETE /utils/removeFromIndex/:pid 	controllers.MyUtils.removeFromIndex(pid,contentType)
