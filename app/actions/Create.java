@@ -31,9 +31,9 @@ import models.Transformer;
  * @author Jan Schnasse
  *
  */
-public class CreateNode {
+public class Create {
 
-    final static Logger logger = LoggerFactory.getLogger(CreateNode.class);
+    final static Logger logger = LoggerFactory.getLogger(Create.class);
 
     /**
      * @param type
@@ -58,14 +58,14 @@ public class CreateNode {
 	logger.debug("create " + type);
 	Node node = createNodeIfNotExists(type, parent, transformers,
 		accessScheme, rawPid, namespace);
-	new IndexNode().removeFromIndex(namespace, node.getContentType(),
+	new Index().removeFromIndex(namespace, node.getContentType(),
 		node.getPid());
 	node.setAccessScheme(accessScheme);
 	setNodeType(type, node);
 	linkWithParent(parent, node);
 	updateTransformer(transformers, node);
 	Globals.fedora.updateNode(node);
-	new IndexNode().index(node);
+	new Index().index(node);
 	return node;
     }
 
@@ -75,7 +75,7 @@ public class CreateNode {
 	String pid = namespace + ":" + rawPid;
 	Node node = null;
 	if (Globals.fedora.nodeExists(pid)) {
-	    node = new ReadNode().readNode(pid);
+	    node = new Read().readNode(pid);
 	} else {
 	    node = new Node();
 	    node.setNamespace(namespace).setPID(pid);
@@ -89,14 +89,14 @@ public class CreateNode {
     private void setNodeType(String type, Node node) {
 	node.setType(TYPE_OBJECT);
 	node.setContentType(type);
-	new IndexNode().index(node);
+	new Index().index(node);
     }
 
     private void linkWithParent(String parentPid, Node node) {
 	Globals.fedora.unlinkParent(node);
 	Globals.fedora.linkToParent(node, parentPid);
 	Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	new IndexNode().index(node);
+	new Index().index(node);
     }
 
     private void updateTransformer(List<String> transformers, Node node) {

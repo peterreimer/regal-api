@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package helper;
+package actions;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,70 +23,102 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import models.Node;
 
 import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
 import org.culturegraph.mf.Flux;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
-import archive.fedora.FedoraInterface;
 import archive.fedora.XmlUtils;
+import helper.AlephMabMaker;
+import helper.Globals;
+import helper.HttpArchiveException;
+import helper.OaiOreMaker;
+import helper.PdfText;
+import models.Node;
 
 /**
- * 
- * @author Jan Schnasse, schnasse@hbz-nrw.de
- * 
+ * @author Jan Schnasse
+ *
  */
-public class Services {
-
-    @SuppressWarnings({ "serial", "javadoc" })
-    public class MetadataNotFoundException extends RuntimeException {
-
-	public MetadataNotFoundException() {
-	}
-
-	public MetadataNotFoundException(String arg0) {
-	    super(arg0);
-	}
-
-	public MetadataNotFoundException(Throwable arg0) {
-	    super(arg0);
-	}
-
-	public MetadataNotFoundException(String arg0, Throwable arg1) {
-	    super(arg0, arg1);
-	}
-
-    }
-
-    final static Logger logger = LoggerFactory.getLogger(Services.class);
-    FedoraInterface fedora = null;
-    String uriPrefix = null;
+public class Transform {
 
     /**
-     * @param fedora
-     *            a fedora connection
-     * @param server
-     *            the server where the app runs
+     * @param node
+     *            pid with namespace:pid
+     * @return a aleph mab xml representation
      */
-    public Services(FedoraInterface fedora, String server) {
-	this.fedora = fedora;
-	uriPrefix = server + "/" + "resource" + "/";
+    public String aleph(Node node) {
+	AlephMabMaker am = new AlephMabMaker();
+	return am.aleph(node, "http://" + Globals.server);
     }
 
     /**
-     * @param url
-     *            the url the urn must point to
-     * @param urn
-     *            the urn
-     * 
+     * @param pid
+     *            pid with namespace:pid
+     * @return a aleph mab xml representation
+     */
+    public String aleph(String pid) {
+	return aleph(new Read().readNode(pid));
+    }
+
+    /**
+     * @param pid
+     *            pid with namespace:pid
+     * @return a URL to a pdfa conversion
+     */
+    public String getPdfaUrl(String pid) {
+	return getPdfaUrl(new Read().readNode(pid));
+    }
+
+    /**
+     * @param node
+     *            a node with a pdf data stream
+     * @return a URL to a PDF/A Conversion
+     */
+    public String getPdfaUrl(Node node) {
+	String redirectUrl = null;
+	try {
+	    String dataUri = getHttpDataUri(node);
+	    URL pdfaConverter = new URL(
+		    "http://nyx.hbz-nrw.de/pdfa/api/convertFromUrl?inputFile="
+			    + dataUri);
+	    HttpURLConnection connection = (HttpURLConnection) pdfaConverter
+		    .openConnection();
+	    connection.setRequestMethod("POST");
+	    connection.setRequestProperty("Accept", "application/xml");
+	    Element root = XmlUtils.getDocument(connection.getInputStream());
+	    List<Element> elements = XmlUtils.getElements("//resultFileUrl",
+		    root, null);
+	    if (elements.size() != 1) {
+		throw new HttpArchiveException(500,
+			"PDFa conversion returns wrong numbers of resultFileUrls: "
+				+ elements.size());
+	    }
+	    redirectUrl = elements.get(0).getTextContent();
+	    return redirectUrl;
+	} catch (MalformedURLException e) {
+	    throw new HttpArchiveException(500, e);
+	} catch (IOException e) {
+	    throw new HttpArchiveException(500, e);
+	}
+
+    }
+
+    private String getHttpDataUri(Node node) {
+	return Globals.useHttpUris ? node.getDataUri() : Globals.server
+		+ "/resource/" + node.getDataUri();
+    }
+
+    /**
+     * @param pid
+     *            the pid of the object
      * @return a epicur display for the pid
      */
-    public String epicur(String url, String urn) {
+    public String epicur(String pid) {
+	String url = Globals.urnbase + pid;
+	String urn = new Read().getUrn(pid);
 	String status = "urn_new";
 	String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<epicur xmlns=\"urn:nbn:de:1111-2004033116\" xsi:schemaLocation=\"urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd\">\n"
 		+ "\t<administrative_data>\n"
@@ -116,13 +148,11 @@ public class Services {
      * @return The metadata a oaidc-xml
      */
     public String oaidc(String pid) {
-
-	Node node = fedora.readNode(pid);
+	Node node = new Read().readNode(pid);
 	if (node == null)
 	    return "No node with pid " + pid + " found";
-
-	String metadata = this.uriPrefix + pid + "/metadata";
-
+	String metadata = Globals.server + "/" + "resource" + "/" + pid
+		+ "/metadata";
 	try {
 	    File outfile = File.createTempFile("oaidc", "xml");
 	    outfile.deleteOnExit();
@@ -139,19 +169,24 @@ public class Services {
 	} catch (RecognitionException e) {
 	    throw new HttpArchiveException(500, e);
 	}
+    }
 
+    /**
+     * @param pid
+     *            the pid of a node with pdf data
+     * @return the plain text content of the pdf
+     */
+    public String pdfbox(String pid) {
+	return pdfbox(new Read().readNode(pid));
     }
 
     /**
      * @param node
      *            the node with pdf data
-     * @param fedoraExtern
-     *            the fedora endpoint for external users
      * @return the plain text content of the pdf
      */
-    public String pdfbox(Node node, String fedoraExtern) {
+    public String pdfbox(Node node) {
 	String pid = node.getPid();
-
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
 	    throw new HttpArchiveException(
@@ -162,12 +197,9 @@ public class Services {
 	if (mimeType.compareTo("application/pdf") != 0)
 	    throw new HttpArchiveException(406,
 		    "Wrong mime type. Cannot extract text from " + mimeType);
-
 	URL content = null;
 	try {
-	    content = new URL(fedoraExtern + "/objects/" + pid
-		    + "/datastreams/data/content");
-
+	    content = new URL(getHttpDataUri(node));
 	    File pdfFile = CopyUtils.download(content);
 	    PdfText pdf = new PdfText();
 	    return pdf.toString(pdfFile);
@@ -175,19 +207,15 @@ public class Services {
 	    throw new HttpArchiveException(500, e);
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
-
 	}
-
     }
 
     /**
      * @param node
      *            the node with pdf data
-     * @param fedoraExtern
-     *            the fedora endpoint for external users
      * @return the plain text content of the pdf
      */
-    public String itext(Node node, String fedoraExtern) {
+    public String itext(Node node) {
 	String pid = node.getPid();
 
 	String mimeType = node.getMimeType();
@@ -200,12 +228,9 @@ public class Services {
 	if (mimeType.compareTo("application/pdf") != 0)
 	    throw new HttpArchiveException(406,
 		    "Wrong mime type. Cannot extract text from " + mimeType);
-
 	URL content = null;
 	try {
-	    content = new URL(fedoraExtern + "/objects/" + pid
-		    + "/datastreams/data/content");
-
+	    content = new URL(getHttpDataUri(node));
 	    File pdfFile = CopyUtils.download(content);
 	    PdfText pdf = new PdfText();
 	    return pdf.itext(pdfFile);
@@ -213,47 +238,30 @@ public class Services {
 	    throw new HttpArchiveException(500, e);
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
-
 	}
+    }
 
+    /**
+     * @param pid
+     *            the pid
+     * @param format
+     *            application/rdf+xml text/plain application/json
+     * @return a oai_ore resource map
+     */
+    public String oaiore(String pid, String format) {
+	return oaiore(new Read().readNode(pid), format);
     }
 
     /**
      * @param node
-     *            to create a pdfa from.
-     * @param fedoraExtern
-     *            the url of the datastream
-     * @return a url to the generated Pdfa
+     *            a node to get a oai-ore representation from
+     * @param format
+     *            application/rdf+xml text/plain application/json
+     * @return a oai_ore resource map
      */
-    public String getPdfaUrl(Node node, String fedoraExtern) {
-	String redirectUrl = null;
-	try {
-	    URL pdfaConverter = new URL(
-		    "http://nyx.hbz-nrw.de/pdfa/api/convertFromUrl?inputFile="
-			    + fedoraExtern + "/objects/" + node.getPid()
-			    + "/datastreams/data/content");
-
-	    HttpURLConnection connection = (HttpURLConnection) pdfaConverter
-		    .openConnection();
-	    connection.setRequestMethod("POST");
-	    connection.setRequestProperty("Accept", "application/xml");
-	    Element root = XmlUtils.getDocument(connection.getInputStream());
-	    List<Element> elements = XmlUtils.getElements("//resultFileUrl",
-		    root, null);
-	    if (elements.size() != 1) {
-		throw new HttpArchiveException(500,
-			"PDFa conversion returns wrong numbers of resultFileUrls: "
-				+ elements.size());
-	    }
-	    redirectUrl = elements.get(0).getTextContent();
-
-	    return redirectUrl;
-
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	}
-
+    public String oaiore(Node node, String format) {
+	OaiOreMaker ore = new OaiOreMaker(node);
+	return ore.getReM(format, node.getTransformer());
     }
+
 }

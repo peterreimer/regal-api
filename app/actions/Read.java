@@ -50,7 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Jan Schnasse
  *
  */
-public class ReadNode {
+public class Read {
 
     /**
      * @param pid
@@ -88,7 +88,7 @@ public class ReadNode {
 	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
 	    for (Node node : list) {
 		Map<String, Object> m = new ObjectMapper().readValue(
-			new TransformNode().oaiore(node,
+			new Transform().oaiore(node,
 				"application/json+compact"), HashMap.class);
 		m.put("primaryTopic", node.getPid());
 		map.add(m);

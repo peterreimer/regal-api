@@ -25,12 +25,12 @@ import models.Node;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import actions.CreateNode;
-import actions.DeleteNode;
-import actions.IndexNode;
-import actions.ModifyNode;
-import actions.ReadNode;
-import actions.TransformNode;
+import actions.Create;
+import actions.Delete;
+import actions.Index;
+import actions.Modify;
+import actions.Read;
+import actions.Transform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -46,12 +46,12 @@ public class MyController extends Controller {
 
     protected static ObjectMapper mapper = JsonUtil.mapper();
 
-    static ReadNode read = new ReadNode();
-    static CreateNode create = new CreateNode();
-    static IndexNode index = new IndexNode();
-    static ModifyNode modify = new ModifyNode();
-    static DeleteNode delete = new DeleteNode();
-    static TransformNode transform = new TransformNode();
+    static Read read = new Read();
+    static Create create = new Create();
+    static Index index = new Index();
+    static Modify modify = new Modify();
+    static Delete delete = new Delete();
+    static Transform transform = new Transform();
 
     /**
      * @return Html or Json Output

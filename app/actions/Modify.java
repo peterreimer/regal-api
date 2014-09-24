@@ -52,9 +52,9 @@ import archive.fedora.RdfUtils;
  * @author Jan Schnasse
  *
  */
-public class ModifyNode {
+public class Modify {
 
-    final static Logger logger = LoggerFactory.getLogger(ModifyNode.class);
+    final static Logger logger = LoggerFactory.getLogger(Modify.class);
 
     /**
      * @param pid
@@ -81,7 +81,7 @@ public class ModifyNode {
 	File tmp = File.createTempFile(name, "tmp");
 	tmp.deleteOnExit();
 	CopyUtils.copy(content, tmp);
-	Node node = new ReadNode().readNode(pid);
+	Node node = new Read().readNode(pid);
 	if (node != null) {
 	    node.setUploadData(tmp.getAbsolutePath(), mimeType);
 	    node.setFileLabel(name);
@@ -90,9 +90,9 @@ public class ModifyNode {
 	} else {
 	    throw new HttpArchiveException(500, "Lost Node!");
 	}
-	new IndexNode().index(node);
+	new Index().index(node);
 	if (md5Hash != null && !md5Hash.isEmpty()) {
-	    node = new ReadNode().readNode(pid);
+	    node = new Read().readNode(pid);
 	    String fedoraHash = node.getChecksum();
 	    if (!md5Hash.equals(fedoraHash)) {
 		throw new HttpArchiveException(417, pid + " expected a MD5 of "
@@ -111,10 +111,10 @@ public class ModifyNode {
      * @return a short message
      */
     public String updateDC(String pid, DublinCoreData dc) {
-	Node node = new ReadNode().readNode(pid);
+	Node node = new Read().readNode(pid);
 	node.setDublinCoreData(dc);
 	Globals.fedora.updateNode(node);
-	new IndexNode().index(node);
+	new Index().index(node);
 	return pid + " dc successfully updated!";
     }
 
@@ -135,12 +135,12 @@ public class ModifyNode {
 	    }
 	    RdfUtils.validate(content);
 	    File file = CopyUtils.copyStringToFile(content);
-	    Node node = new ReadNode().readNode(pid);
+	    Node node = new Read().readNode(pid);
 	    if (node != null) {
 		node.setMetadataFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    new IndexNode().index(node);
+	    new Index().index(node);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400);
@@ -157,7 +157,7 @@ public class ModifyNode {
     public String updateMetadata(Node node) {
 	Globals.fedora.updateNode(node);
 	String pid = node.getPid();
-	new IndexNode().index(node);
+	new Index().index(node);
 	return pid + " metadata successfully updated!";
     }
 
@@ -169,12 +169,12 @@ public class ModifyNode {
      * @return a short message
      */
     public String addLinks(String pid, List<Link> links) {
-	Node node = new ReadNode().readNode(pid);
+	Node node = new Read().readNode(pid);
 	for (Link link : links) {
 	    node.addRelation(link);
 	}
 	Globals.fedora.updateNode(node);
-	new IndexNode().index(node);
+	new Index().index(node);
 	return pid + " " + links + " links successfully added.";
     }
 
@@ -207,7 +207,7 @@ public class ModifyNode {
 	String subject = namespace + ":" + pid;
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = new ReadNode().readMetadata(subject);
+	String metadata = new Read().readMetadata(subject);
 	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
 	updateMetadata(namespace + ":" + pid, metadata);
 	return "Update " + subject + " metadata " + metadata;
@@ -223,7 +223,7 @@ public class ModifyNode {
      */
     public void addTransformer(String p, String namespace, String transformerId) {
 	String pid = namespace + ":" + p;
-	Node node = new ReadNode().readNode(pid);
+	Node node = new Read().readNode(pid);
 	node.addTransformer(new Transformer(transformerId));
 	Globals.fedora.updateNode(node);
     }
@@ -243,7 +243,7 @@ public class ModifyNode {
 	String subject = namespace + ":" + pid;
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = new ReadNode().readMetadata(subject);
+	String metadata = new Read().readMetadata(subject);
 	if (RdfUtils.hasTriple(subject, hasUrn, urn, metadata))
 	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
@@ -266,9 +266,9 @@ public class ModifyNode {
      * @return a message
      */
     public String lobidify(String pid) {
-	Node node = new ReadNode().readNode(pid);
+	Node node = new Read().readNode(pid);
 	node = lobidify(node);
-	new IndexNode().index(node);
+	new Index().index(node);
 	return updateMetadata(node);
     }
 

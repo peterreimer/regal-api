@@ -23,7 +23,7 @@ import models.Node;
  * @author Jan Schnasse
  *
  */
-public class IndexNode {
+public class Index {
 
     /**
      * @param index
@@ -51,7 +51,7 @@ public class IndexNode {
      * @return a short message.
      */
     public String index(String p, String index, String type) {
-	String jsonCompactStr = new TransformNode().oaiore(p,
+	String jsonCompactStr = new Transform().oaiore(p,
 		"application/json+compact");
 	Globals.search.index(index, type, p, jsonCompactStr);
 	return p + " indexed!";
@@ -68,7 +68,7 @@ public class IndexNode {
      * @return a short message.
      */
     public String publicIndex(String p, String index, String type) {
-	Globals.search.index(index, type, p, new ReadNode().readNode(p)
+	Globals.search.index(index, type, p, new Read().readNode(p)
 		.toString());
 	return p + " indexed!";
     }

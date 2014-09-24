@@ -26,9 +26,9 @@ import models.Node;
  * @author Jan Schnasse
  *
  */
-public class DeleteNode {
+public class Delete {
 
-    final static Logger logger = LoggerFactory.getLogger(DeleteNode.class);
+    final static Logger logger = LoggerFactory.getLogger(Delete.class);
 
     /**
      * @param pids
@@ -79,10 +79,10 @@ public class DeleteNode {
 	StringBuffer msg = new StringBuffer();
 	try {
 	    String namespace = n.getNamespace();
-	    String m = new IndexNode().removeFromIndex(namespace,
+	    String m = new Index().removeFromIndex(namespace,
 		    n.getContentType(), n.getPid());
 	    msg.append("\n" + m);
-	    m = new IndexNode().removeFromIndex("public_" + namespace,
+	    m = new Index().removeFromIndex("public_" + namespace,
 		    n.getContentType(), n.getPid());
 	    msg.append("\n" + m);
 	} catch (Exception e) {
@@ -99,7 +99,7 @@ public class DeleteNode {
     public String deleteMetadata(String pid) {
 
 	Globals.fedora.deleteDatastream(pid, "metadata");
-	new IndexNode().index(new ReadNode().readNode(pid));
+	new Index().index(new Read().readNode(pid));
 	return pid + ": metadata - datastream successfully deleted! ";
     }
 
@@ -110,7 +110,7 @@ public class DeleteNode {
      */
     public String deleteData(String pid) {
 	Globals.fedora.deleteDatastream(pid, "data");
-	new IndexNode().index(new ReadNode().readNode(pid));
+	new Index().index(new Read().readNode(pid));
 	return pid + ": data - datastream successfully deleted! ";
     }
 }
