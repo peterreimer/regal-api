@@ -17,13 +17,18 @@
 package archive.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import models.Node;
+
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -39,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
+import actions.Transform;
 import archive.fedora.CopyUtils;
 
 /**
@@ -152,6 +158,28 @@ public class Search {
 		.actionGet();
 	return response.getSource();
 
+    }
+
+    public List<String> indexAll(List<Node> list, String index) {
+	List<String> result = new ArrayList<String>();
+	Transform t = new Transform();
+	BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+	for (Node node : list) {
+	    try {
+		bulkRequest.add(client.prepareIndex(index,
+			node.getContentType(), node.getPid()).setSource(
+			t.oaiore(node, "application/json+compact")));
+		result.add(node.getPid());
+	    } catch (Exception e) {
+		result.add("A problem occured");
+	    }
+	}
+	BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+	if (bulkResponse.hasFailures()) {
+	    result.add(bulkResponse.buildFailureMessage());
+	}
+	return result;
     }
 
 }

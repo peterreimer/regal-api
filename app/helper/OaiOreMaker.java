@@ -16,6 +16,8 @@
  */
 package helper;
 
+import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -371,13 +373,13 @@ public class OaiOreMaker {
 	    con.add(aggregation, similarTo, fedoraObject);
 	    con.add(aggregation, contentType, cType);
 
-	    for (String rel : node.getRelatives("IS_PART_OF")) {
+	    for (String rel : node.getRelatives(IS_PART_OF)) {
 		URI relUrl = f.createURI(rel);
 		con.add(aggregation, isAggregatedBy, relUrl);
 		con.add(aggregation, isPartOf, relUrl);
 	    }
 
-	    for (String rel : node.getRelatives("HAS_PART")) {
+	    for (String rel : node.getRelatives(HAS_PART)) {
 		URI relUrl = f.createURI(rel);
 		con.add(aggregation, aggregates, relUrl);
 		con.add(aggregation, hasPart, relUrl);

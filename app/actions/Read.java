@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
@@ -39,6 +40,7 @@ import models.Urn;
 import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
 
+import play.Logger;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -171,8 +173,14 @@ public class Read {
      * @return a list of nodes
      */
     public List<Node> getNodes(List<String> ids) {
-	return ids.stream().map((String id) -> readNode(id))
-		.collect(Collectors.toList());
+	return ids.stream().map((String id) -> {
+	    try {
+		return readNode(id);
+	    } catch (Exception e) {
+		Logger.warn("", e);
+		return null;
+	    }
+	}).filter(n -> n != null).collect(Collectors.toList());
     }
 
     /**
@@ -345,4 +353,5 @@ public class Read {
 	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
 		+ Globals.server + "/resource/" + node.getAggregationUri();
     }
+
 }

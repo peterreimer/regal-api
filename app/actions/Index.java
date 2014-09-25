@@ -16,6 +16,11 @@
  */
 package actions;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import helper.Globals;
 import models.Node;
 
@@ -68,8 +73,7 @@ public class Index {
      * @return a short message.
      */
     public String publicIndex(String p, String index, String type) {
-	Globals.search.index(index, type, p, new Read().readNode(p)
-		.toString());
+	Globals.search.index(index, type, p, new Read().readNode(p).toString());
 	return p + " indexed!";
     }
 
@@ -77,5 +81,19 @@ public class Index {
 	String namespace = n.getNamespace();
 	String pid = n.getPid();
 	return index(pid, namespace, n.getContentType());
+    }
+
+    public List<String> indexAll(String indexName) {
+	Read read = new Read();
+	List<String> msgs = Globals.search.indexAll(
+		read.getNodes(read.listRepoNamespace(indexName)), indexName
+			+ "-" + getCurrentDate());
+	return msgs;
+    }
+
+    private String getCurrentDate() {
+	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	Date date = new Date();
+	return dateFormat.format(date);
     }
 }

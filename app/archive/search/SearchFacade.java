@@ -16,7 +16,10 @@
  */
 package archive.search;
 
+import java.util.List;
 import java.util.Map;
+
+import models.Node;
 
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
@@ -164,6 +167,10 @@ public class SearchFacade {
      */
     public Map<String, Object> get(String pid) {
 	return search.get(pid);
+    }
+
+    public List<String> indexAll(List<Node> list, String index) {
+	return search.indexAll(list, index);
     }
 
 }
