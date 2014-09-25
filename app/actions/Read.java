@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import models.DublinCoreData;
 import models.Node;
+import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
@@ -88,8 +89,9 @@ public class Read {
 	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
 	    for (Node node : list) {
 		Map<String, Object> m = new ObjectMapper().readValue(
-			new Transform().oaiore(node,
-				"application/json+compact"), HashMap.class);
+			new Transform()
+				.oaiore(node, "application/json+compact"),
+			HashMap.class);
 		m.put("primaryTopic", node.getPid());
 		map.add(m);
 	    }
@@ -294,46 +296,53 @@ public class Read {
 	return node.getLastModified();
     }
 
-    String createAggregationUri(String pid) {
+    /**
+     * @param node
+     *            the node to read a urn from
+     * @return a urn object that describes the status of the urn
+     */
+    public Urn getUrnStatus(Node node) {
+
+	String urn = getUrn(node);
+	Urn result = new Urn(urn);
+	result.init(getHttpUriOfResource(node));
+	return result;
+    }
+
+    String getUrn(Node node) {
+	List<String> urns = getNodeLdProperty(node,
+		"http://purl.org/lobid/lv#urn");
+	if (urns == null || urns.isEmpty()) {
+	    throw new HttpArchiveException(500, "No urn fount at: "
+		    + node.getPid());
+	}
+	if (urns.size() > 1) {
+	    throw new HttpArchiveException(500, "Found multiple urns at: "
+		    + node.getPid());
+	}
+	return urns.get(0);
+    }
+
+    /**
+     * @param node
+     *            the node to fetch a certain property from
+     * @param predicate
+     *            the property in its long form
+     * @return all objects that are referenced using the predicate
+     */
+    public List<String> getNodeLdProperty(Node node, String predicate) {
+	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
+		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
+	return linkedObjects;
+    }
+
+    private String createAggregationUri(String pid) {
 	return Globals.useHttpUris ? "http://" + Globals.server + "/resource/"
 		+ pid : pid;
     }
 
-    /**
-     * Returns an existing urn. Throws UrnException if found 0 urn or more than
-     * 1 urns.
-     * 
-     * @param pid
-     *            the pid of an object
-     * @return the urn
-     */
-    public String getUrn(String pid) {
-	try {
-	    String newUrn = "http://purl.org/lobid/lv#urn";
-	    List<String> urns = RdfUtils.findRdfObjects(pid, newUrn,
-		    readMetadata(pid), RDFFormat.NTRIPLES, "text/plain");
-	    if (urns == null || urns.isEmpty()) {
-		throw new UrnException("Found no urn!");
-	    }
-	    if (urns.size() != 1) {
-		throw new UrnException("Found " + urns.size() + " urns. "
-			+ urns + "\n Expected exactly one urn.");
-	    }
-	    return urns.get(0);
-	} catch (Exception e) {
-	    throw new UrnException(e);
-	}
-    }
-
-    @SuppressWarnings({ "serial" })
-    private class UrnException extends RuntimeException {
-	public UrnException(String arg0) {
-	    super(arg0);
-	}
-
-	public UrnException(Throwable arg0) {
-	    super(arg0);
-	}
-
+    private String getHttpUriOfResource(Node node) {
+	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
+		+ Globals.server + "/resource/" + node.getAggregationUri();
     }
 }

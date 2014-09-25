@@ -16,6 +16,8 @@
  */
 package models;
 
+import helper.HttpArchiveException;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -65,7 +67,6 @@ public class Node {
     private String pid = null;
     private String alephId = null;
 
-    private String urn = null;
     private Date lastModified = null;
     private Date creationDate = null;
     private String aggregationUri = null;
@@ -552,22 +553,6 @@ public class Node {
      */
     public Node setAlephId(String alephId) {
 	this.alephId = alephId;
-	return this;
-    }
-
-    /**
-     * @return urn
-     */
-    public String getUrn() {
-	return urn;
-    }
-
-    /**
-     * @param urn
-     * @return this
-     */
-    public Node setUrn(String urn) {
-	this.urn = urn;
 	return this;
     }
 

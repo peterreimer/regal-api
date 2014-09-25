@@ -73,6 +73,17 @@ public class Resource extends MyController {
 
     final static Logger logger = LoggerFactory.getLogger(Resource.class);
 
+    @ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
+    public static Result listUrn(@PathParam("pid") String pid) {
+	ReadAction action = new ReadAction();
+	return action.call(pid, new ControllerAction() {
+	    public Result exec(Node node) {
+		response().setHeader("Access-Control-Allow-Origin", "*");
+		return json(read.getUrnStatus(node));
+	    }
+	});
+    }
+
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Result listNodes(@QueryParam("ids") String ids) {
 	try {

@@ -13,6 +13,7 @@ GET     /public/*file               controllers.Assets.at(path="/public", file)
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
+GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid)
 GET /resource/:pid/data				controllers.Resource.listData(pid)
 GET /resource/:pid/dc				controllers.Resource.listDc(pid)

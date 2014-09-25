@@ -406,7 +406,7 @@ public class RdfUtils {
      * @return a list of rdf objects
      */
     public static List<String> findRdfObjects(String subject, String predicate,
-	    String metadata, RDFFormat inf, String accept) {
+	    String metadata, RDFFormat inf) {
 	RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
 		new ByteArrayInputStream(metadata
 			.getBytes(StandardCharsets.UTF_8)), inf);

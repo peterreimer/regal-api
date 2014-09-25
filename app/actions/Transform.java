@@ -118,7 +118,8 @@ public class Transform {
      */
     public String epicur(String pid) {
 	String url = Globals.urnbase + pid;
-	String urn = new Read().getUrn(pid);
+	Read ra = new Read();
+	String urn = ra.getUrn(ra.readNode(pid));
 	String status = "urn_new";
 	String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<epicur xmlns=\"urn:nbn:de:1111-2004033116\" xsi:schemaLocation=\"urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd\">\n"
 		+ "\t<administrative_data>\n"
