@@ -61,6 +61,17 @@ public class MyUtils extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
+    public static Result indexAll(@QueryParam("index") final String indexName) {
+	ModifyAction action = new ModifyAction();
+	return action.call(null, new ControllerAction() {
+	    public Result exec(Node node) {
+		String result = index.indexAll(indexName);
+		return JsonMessage(new Message(result));
+	    }
+	});
+    }
+
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
     public static Result removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
