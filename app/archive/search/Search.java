@@ -16,6 +16,8 @@
  */
 package archive.search;
 
+import helper.Globals;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,7 +83,35 @@ public class Search {
 			.setSource(indexConfig).execute().actionGet();
 	    }
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    logger.debug("", e);
+	    logger.warn("", e);
+	} catch (Exception e) {
+	    logger.warn("", e);
+	}
+    }
+
+    void init(String[] index) {
+	try {
+	    String indexConfig = CopyUtils.copyToString(Play.application()
+		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
+	    for (String i : index) {
+		client.admin().indices().prepareCreate(i)
+			.setSource(indexConfig).execute().actionGet();
+	    }
+	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
+	    logger.warn("", e);
+	} catch (Exception e) {
+	    logger.warn("", e);
+	}
+    }
+
+    void init(String index) {
+	try {
+	    String indexConfig = CopyUtils.copyToString(Play.application()
+		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
+	    client.admin().indices().prepareCreate(index)
+		    .setSource(indexConfig).execute().actionGet();
+	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
+	    logger.warn("", e);
 	} catch (Exception e) {
 	    logger.warn("", e);
 	}
@@ -160,7 +190,15 @@ public class Search {
 
     }
 
+    /**
+     * @param list
+     *            list of nodes to index
+     * @param index
+     *            name of a index
+     * @return list of messages
+     */
     public List<String> indexAll(List<Node> list, String index) {
+	init(index);
 	List<String> result = new ArrayList<String>();
 	Transform t = new Transform();
 	BulkRequestBuilder bulkRequest = client.prepareBulk();
@@ -171,13 +209,16 @@ public class Search {
 			node.getContentType(), node.getPid()).setSource(
 			t.oaiore(node, "application/json+compact")));
 		result.add(node.getPid());
+		play.Logger.debug("Add " + node.getPid() + "to bulk action");
 	    } catch (Exception e) {
 		result.add("A problem occured");
 	    }
 	}
+	play.Logger.debug("Start building Index " + index);
 	BulkResponse bulkResponse = bulkRequest.execute().actionGet();
 	if (bulkResponse.hasFailures()) {
 	    result.add(bulkResponse.buildFailureMessage());
+	    play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
 	}
 	return result;
     }

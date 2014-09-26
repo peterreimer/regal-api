@@ -18,9 +18,11 @@ package actions;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import play.mvc.Results.Chunks;
 import helper.Globals;
 import models.Node;
 
@@ -29,6 +31,7 @@ import models.Node;
  *
  */
 public class Index {
+    Chunks.Out<String> messageOut;
 
     /**
      * @param index
@@ -83,17 +86,51 @@ public class Index {
 	return index(pid, namespace, n.getContentType());
     }
 
-    public List<String> indexAll(String indexName) {
+    /**
+     * @param indexName
+     */
+    public void indexAll(String indexName) {
 	Read read = new Read();
-	List<String> msgs = Globals.search.indexAll(
-		read.getNodes(read.listRepoNamespace(indexName)), indexName
-			+ "-" + getCurrentDate());
-	return msgs;
+	String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
+	int until = 0;
+	int stepSize = 10;
+	int from = 0 - stepSize;
+	List<String> nodes = new ArrayList<String>();
+	do {
+	    until += stepSize;
+	    from += stepSize;
+	    nodes = read.listRepoNamespace(indexName, from, until);
+	    if (nodes.isEmpty())
+		break;
+	    messageOut.write(Globals.search.indexAll(read.getNodes(nodes),
+		    indexNameWithDatestamp).toString());
+
+	} while (nodes.size() == stepSize);
+	messageOut.write("\nSuccessfuly Finished\n");
+	messageOut.close();
+
     }
 
     private String getCurrentDate() {
 	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 	Date date = new Date();
 	return dateFormat.format(date);
+    }
+
+    /**
+     * @param out
+     *            messages for chunked responses
+     */
+    public void setMessageQueue(Chunks.Out<String> out) {
+	messageOut = out;
+    }
+
+    /**
+     * Close messageQueue for chunked responses
+     * 
+     */
+    public void closeMessageQueue() {
+	if (messageOut != null)
+	    messageOut.close();
     }
 }

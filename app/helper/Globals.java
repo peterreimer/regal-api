@@ -81,10 +81,15 @@ public class Globals {
 	    .getString("regal-api.fedoraUser");
 
     /**
+     * A config file for elasticsearch. Must be located at conf/ directory
+     */
+    public static String elasticsearchSettings = "public-index-config.json";
+
+    /**
      * a globally available entry to elasticsearch
      */
     public static SearchFacade search = new SearchFacade(Globals.escluster,
-	    Globals.namespaces, Globals.contextDocument);
+	    Globals.namespaces);
 
     /**
      * a globally available entry to Fedora

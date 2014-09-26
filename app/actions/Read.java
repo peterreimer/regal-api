@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
@@ -243,7 +242,16 @@ public class Read {
 	return listByQuery(namespace + ":*");
     }
 
-    private List<String> listRepoNamespace(String namespace, int from, int until) {
+    /**
+     * @param namespace
+     *            list only objects in this namespace
+     * @param from
+     *            show only hits starting at this index
+     * @param until
+     *            show only hits ending at this index
+     * @return a list of nodes
+     */
+    public List<String> listRepoNamespace(String namespace, int from, int until) {
 	List<String> list = listRepoNamespace(namespace);
 	return sublist(list, from, until);
     }

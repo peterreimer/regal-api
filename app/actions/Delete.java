@@ -17,9 +17,10 @@
 package actions;
 
 import helper.Globals;
+
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import play.mvc.Results.Chunks;
 import models.Node;
 
 /**
@@ -28,7 +29,7 @@ import models.Node;
  */
 public class Delete {
 
-    final static Logger logger = LoggerFactory.getLogger(Delete.class);
+    Chunks.Out<String> messageOut;
 
     /**
      * @param pids
@@ -39,40 +40,41 @@ public class Delete {
 	if (pids == null || pids.isEmpty()) {
 	    return "Nothing to delete!";
 	}
-	StringBuffer msg = new StringBuffer();
 	for (String pid : pids) {
 	    try {
-		msg.append(delete(pid) + "\n");
+		delete(pid);
 	    } catch (Exception e) {
-		logger.warn(pid + " " + e.getMessage());
+		play.Logger.warn(pid + " " + e.getMessage());
 	    }
 	}
-	return msg.toString();
+	messageOut.close();
+	return "Successfuly finished\n";
     }
 
     /**
      * @param pid
      *            The pid that must be deleted
-     * @return A short Message
      */
-    public String delete(String pid) {
+    public void delete(String pid) {
 	StringBuffer msg = new StringBuffer();
 	List<Node> pids = null;
 	try {
 	    pids = Globals.fedora.deleteComplexObject(pid);
 	} catch (Exception e) {
-	    msg.append("\n" + e);
+	    messageOut.write("\n" + e);
 	}
 	try {
 	    if (pids != null) {
 		for (Node n : pids) {
-		    msg.append("\n" + removeIdFromPublicAndPrivateIndex(n));
+		    messageOut.write("\n"
+			    + removeIdFromPublicAndPrivateIndex(n));
 		}
 	    }
 	} catch (Exception e) {
-	    msg.append("\n" + e);
+	    messageOut.write("\n" + e);
 	}
-	return pid + " successfully deleted! \n" + msg + "\n";
+	messageOut.write(pid + " successfully deleted! \n" + msg + "\n");
+
     }
 
     private String removeIdFromPublicAndPrivateIndex(Node n) {
@@ -112,5 +114,22 @@ public class Delete {
 	Globals.fedora.deleteDatastream(pid, "data");
 	new Index().index(new Read().readNode(pid));
 	return pid + ": data - datastream successfully deleted! ";
+    }
+
+    /**
+     * @param out
+     *            messages for chunked responses
+     */
+    public void setMessageQueue(Chunks.Out<String> out) {
+	messageOut = out;
+    }
+
+    /**
+     * Close messageQueue for chunked responses
+     * 
+     */
+    public void closeMessageQueue() {
+	if (messageOut != null)
+	    messageOut.close();
     }
 }

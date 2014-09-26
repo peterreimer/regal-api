@@ -17,18 +17,27 @@
 package controllers;
 
 import helper.Globals;
+
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+
 import models.Message;
 import models.Node;
 import models.Transformer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.libs.F.Promise;
 import play.mvc.Result;
 import actions.BasicAuth;
+
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -47,11 +56,10 @@ public class MyUtils extends MyController {
     final static Logger logger = LoggerFactory.getLogger(MyUtils.class);
 
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
-    public static Result index(@PathParam("pid") String pid,
+    public static Promise<Result> index(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String indexName) {
-	ModifyAction action = new ModifyAction();
-	return action.call(pid, new ControllerAction() {
+	return new ModifyAction().call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
 		String curIndex = indexName.isEmpty() ? pid.split(":")[0]
 			: indexName;
@@ -62,21 +70,32 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "indexAll", value = "indexAll", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
-    public static Result indexAll(@QueryParam("index") final String indexName) {
-	ModifyAction action = new ModifyAction();
-	return action.call(null, new ControllerAction() {
+    public static Promise<Result> indexAll(
+	    @QueryParam("index") final String indexName) {
+	return new ModifyAction().call(null, new ControllerAction() {
 	    public Result exec(Node node) {
-		List<String> result = index.indexAll(indexName);
-		return JsonMessage(new Message(result.toString()));
+		Chunks<String> chunks = new StringChunks() {
+		    public void onReady(Chunks.Out<String> out) {
+			index.setMessageQueue(out);
+		    }
+		};
+		ExecutorService executorService = Executors
+			.newSingleThreadExecutor();
+		executorService.execute(new Runnable() {
+		    public void run() {
+			index.indexAll(indexName);
+		    }
+		});
+		executorService.shutdown();
+		return ok(chunks);
 	    }
 	});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
-    public static Result removeFromIndex(@PathParam("pid") String pid,
+    public static Promise<Result> removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	ModifyAction action = new ModifyAction();
-	return action.call(pid, new ControllerAction() {
+	return new ModifyAction().call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
 		String result = index.removeFromIndex(pid.split(":")[0], type,
 			pid);
@@ -86,11 +105,10 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", httpMethod = "POST")
-    public static Result publicIndex(@PathParam("pid") String pid,
+    public static Promise<Result> publicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String indexName) {
-	ModifyAction action = new ModifyAction();
-	return action.call(pid, new ControllerAction() {
+	return new ModifyAction().call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
 		String curIndex = indexName.isEmpty() ? pid.split(":")[0]
 			: indexName;
@@ -102,10 +120,10 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", httpMethod = "DELETE")
-    public static Result removeFromPublicIndex(@PathParam("pid") String pid,
+    public static Promise<Result> removeFromPublicIndex(
+	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	ModifyAction action = new ModifyAction();
-	return action.call(pid, new ControllerAction() {
+	return new ModifyAction().call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
 		String result = index.removeFromIndex(
 			"public_" + pid.split(":")[0], type, pid);
@@ -115,9 +133,8 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
-    public static Result lobidify(@PathParam("pid") String pid) {
-	ModifyAction action = new ModifyAction();
-	return action.call(pid, new ControllerAction() {
+    public static Promise<Result> lobidify(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
 		String result = modify.lobidify(pid);
 		return JsonMessage(new Message(result));
@@ -126,11 +143,10 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", httpMethod = "POST")
-    public static Result addUrn(@QueryParam("id") final String id,
+    public static Promise<Result> addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	ModifyAction action = new ModifyAction();
-	return action.call(null, new ControllerAction() {
+	return new ModifyAction().call(null, new ControllerAction() {
 	    public Result exec(Node node) {
 		String result = modify.addUrn(id, namespace, snid);
 		return JsonMessage(new Message(result));
@@ -139,11 +155,10 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "replaceUrn", value = "replaceUrn", notes = "Replaces a urn on the /metadata of the resource.", httpMethod = "POST")
-    public static Result replaceUrn(@QueryParam("id") final String id,
+    public static Promise<Result> replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	ModifyAction action = new ModifyAction();
-	return action.call(null, new ControllerAction() {
+	return new ModifyAction().call(null, new ControllerAction() {
 	    public Result exec(Node node) {
 		String result = modify.replaceUrn(id, namespace, snid);
 		return JsonMessage(new Message(result));
@@ -152,10 +167,9 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
-    public static Result initContentModels(
+    public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
-	ModifyAction action = new ModifyAction();
-	return action.call(null, new ControllerAction() {
+	return new ModifyAction().call(null, new ControllerAction() {
 	    public Result exec(Node node) {
 		List<Transformer> transformers = new Vector<Transformer>();
 		transformers.add(new Transformer(namespace + "epicur",

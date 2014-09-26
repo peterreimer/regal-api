@@ -44,14 +44,14 @@ public class SearchFacade {
      * @param config
      *            configuration
      */
-    public SearchFacade(String cluster, String[] index, String config) {
+    public SearchFacade(String cluster, String[] index) {
 	InetSocketTransportAddress server = new InetSocketTransportAddress(
 		"localhost", 9300);
 	Client client = new TransportClient(ImmutableSettings.settingsBuilder()
 		.put("cluster.name", cluster).build())
 		.addTransportAddress(server);
 	search = new Search(client);
-	init(index, config);
+	init(index);
     }
 
     /**
@@ -60,8 +60,8 @@ public class SearchFacade {
      * @param config
      *            an elasticsearch mapping
      */
-    public void init(String[] index, String config) {
-	search.init(index, config);
+    public void init(String[] index) {
+	search.init(index);
     }
 
     /**
@@ -169,6 +169,11 @@ public class SearchFacade {
 	return search.get(pid);
     }
 
+    /**
+     * @param list
+     * @param index
+     * @return list of messages
+     */
     public List<String> indexAll(List<Node> list, String index) {
 	return search.indexAll(list, index);
     }

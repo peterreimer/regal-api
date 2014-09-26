@@ -13,6 +13,7 @@ import javax.ws.rs.QueryParam;
 
 import models.Message;
 import models.Node;
+import play.libs.F.Promise;
 import play.mvc.Result;
 import actions.BasicAuth;
 
@@ -25,33 +26,41 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class ResourceIndex extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
-    public static Result listNodes(@QueryParam("ids") String ids) {
-	try {
-	    List<String> is = Arrays.asList(ids.split(","));
-	    return json(read.getNodesFromIndex(is));
-	} catch (HttpArchiveException e) {
-	    return JsonMessage(new Message(e, e.getCode()));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+    public static Promise<Result> listNodes(@QueryParam("ids") String ids) {
+	return new ReadAction().call(null, new ControllerAction() {
+	    public Result exec(Node nodes) {
+		try {
+		    List<String> is = Arrays.asList(ids.split(","));
+		    return json(read.getNodesFromIndex(is));
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
+		}
+	    }
+	});
     }
 
     @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", httpMethod = "GET")
-    public static Result listResources(
+    public static Promise<Result> listResources(
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
 	    @QueryParam("from") int from, @QueryParam("until") int until) {
-	try {
-	    if (request().accepts("text/html")) {
-		return htmlList(namespace, contentType, from, until);
-	    } else {
-		return jsonList(namespace, contentType, from, until);
+	return new ReadAction().call(null, new ControllerAction() {
+	    public Result exec(Node nodes) {
+		try {
+		    if (request().accepts("text/html")) {
+			return htmlList(namespace, contentType, from, until);
+		    } else {
+			return jsonList(namespace, contentType, from, until);
+		    }
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
+		}
 	    }
-	} catch (HttpArchiveException e) {
-	    return JsonMessage(new Message(e, e.getCode()));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
     }
 
     private static Result jsonList(String namespace, String contentType,
@@ -83,7 +92,7 @@ public class ResourceIndex extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
-    public static Result listResource(@PathParam("pid") String pid) {
+    public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
@@ -93,9 +102,8 @@ public class ResourceIndex extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Result listParts(@PathParam("pid") String pid) {
-	ReadAction action = new ReadAction();
-	return action.call(pid, new ControllerAction() {
+    public static Promise<Result> listParts(@PathParam("pid") String pid) {
+	return new ReadAction().call(pid, new ControllerAction() {
 	    public Result exec(Node nodes) {
 		List<String> nodeIds = read.readNode(pid)
 			.getRelatives(HAS_PART);
@@ -107,7 +115,7 @@ public class ResourceIndex extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Result listParents(@PathParam("pid") String pid) {
+    public static Promise<Result> listParents(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
 	return action.call(pid, new ControllerAction() {
 	    public Result exec(Node node) {
