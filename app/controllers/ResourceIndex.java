@@ -27,7 +27,7 @@ public class ResourceIndex extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Promise<Result> listNodes(@QueryParam("ids") String ids) {
-	return new ReadAction().call(null, new ControllerAction() {
+	return new ReadAction().call(null, new NodeAction() {
 	    public Result exec(Node nodes) {
 		try {
 		    List<String> is = Arrays.asList(ids.split(","));
@@ -46,7 +46,7 @@ public class ResourceIndex extends MyController {
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
 	    @QueryParam("from") int from, @QueryParam("until") int until) {
-	return new ReadAction().call(null, new ControllerAction() {
+	return new ReadAction().call(null, new NodeAction() {
 	    public Result exec(Node nodes) {
 		try {
 		    if (request().accepts("text/html")) {
@@ -94,7 +94,7 @@ public class ResourceIndex extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
-	return action.call(pid, new ControllerAction() {
+	return action.call(pid, new NodeAction() {
 	    public Result exec(Node node) {
 		return json(read.readNodeFromIndex(pid));
 	    }
@@ -103,7 +103,7 @@ public class ResourceIndex extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
+	return new ReadAction().call(pid, new NodeAction() {
 	    public Result exec(Node nodes) {
 		List<String> nodeIds = read.readNode(pid)
 			.getRelatives(HAS_PART);
@@ -117,7 +117,7 @@ public class ResourceIndex extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParents(@PathParam("pid") String pid) {
 	ReadAction action = new ReadAction();
-	return action.call(pid, new ControllerAction() {
+	return action.call(pid, new NodeAction() {
 	    public Result exec(Node node) {
 		List<String> nodeIds = read.readNode(pid).getRelatives(
 			IS_PART_OF);

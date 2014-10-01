@@ -79,7 +79,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
     public static Promise<Result> listUrn(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
+	return new ReadAction().call(pid, new NodeAction() {
 	    public Result exec(Node node) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		return json(read.getUrnStatus(node));
@@ -89,18 +89,17 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Promise<Result> listNodes(@QueryParam("ids") String ids) {
-	return new ReadAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    List<String> is = Arrays.asList(ids.split(","));
-		    return json(read.getNodes(is));
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
-		}
+	return new ListAction().call(() -> {
+	    try {
+		List<String> is = Arrays.asList(ids.split(","));
+		return json(read.getNodes(is));
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
 	    }
 	});
+
     }
 
     @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", httpMethod = "GET")
@@ -131,41 +130,38 @@ public class Resource extends MyController {
 
     private static Promise<Result> jsonList(String namespace,
 	    String contentType, int from, int until) {
-	return new ReadAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    List<Map<String, Object>> nodes = read.nodelistToMap(read
-			    .listRepo(contentType, namespace, from, until));
-		    return json(nodes);
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
-		}
+	return new ListAction().call(() -> {
+	    try {
+		List<Map<String, Object>> nodes = read.nodelistToMap(read
+			.listRepo(contentType, namespace, from, until));
+		return json(nodes);
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
 	    }
 	});
     }
 
     private static Promise<Result> htmlList(String namespace,
 	    String contentType, int from, int until) {
-	return new ReadAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    String servername = Play.application().configuration()
-			    .getString("regal-api.serverName");
-		    response().setHeader("Access-Control-Allow-Origin", "*");
-		    response().setContentType("text/html");
-		    List<Node> nodes = read.listRepo(contentType, namespace,
-			    from, until);
-		    return ok(resourceList.render(nodes, "http://" + servername
-			    + "/resource/"));
-		} catch (HttpArchiveException e) {
-		    return HtmlMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return HtmlMessage(new Message(e, 500));
-		}
+	return new ListAction().call(() -> {
+	    try {
+		String servername = Play.application().configuration()
+			.getString("regal-api.serverName");
+		response().setHeader("Access-Control-Allow-Origin", "*");
+		response().setContentType("text/html");
+		List<Node> nodes = read.listRepo(contentType, namespace, from,
+			until);
+		return ok(resourceList.render(nodes, "http://" + servername
+			+ "/resource/"));
+	    } catch (HttpArchiveException e) {
+		return HtmlMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return HtmlMessage(new Message(e, 500));
 	    }
 	});
+
     }
 
     @ApiOperation(produces = "application/json+regal-v0.4.0,application/json,text/html,application/json+compact,application/rdf+xml,text/plain", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
@@ -204,380 +200,356 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "text/plain", nickname = "listMetadata", value = "listMetadata", notes = "Shows Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listMetadata(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		String result = read.readMetadata(pid);
-		return ok(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    String result = read.readMetadata(pid);
+	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    response().setHeader("Access-Control-Allow-Origin", "*");
-		    URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
-			    + "/datastreams/data/content");
-		    HttpURLConnection connection = (HttpURLConnection) url
-			    .openConnection();
-		    InputStream is = connection.getInputStream();
-		    response().setContentType(connection.getContentType());
-		    return ok(is);
-		} catch (FileNotFoundException e) {
-		    throw new HttpArchiveException(404, e);
-		} catch (MalformedURLException e) {
-		    throw new HttpArchiveException(500, e);
-		} catch (IOException e) {
-		    throw new HttpArchiveException(500, e);
-		}
-	    }
-	});
+	return new ReadAction().call(
+		pid,
+		node -> {
+		    try {
+			response()
+				.setHeader("Access-Control-Allow-Origin", "*");
+			URL url = new URL(Globals.fedoraIntern + "/objects/"
+				+ pid + "/datastreams/data/content");
+			HttpURLConnection connection = (HttpURLConnection) url
+				.openConnection();
+			InputStream is = connection.getInputStream();
+			response().setContentType(connection.getContentType());
+			return ok(is);
+		    } catch (FileNotFoundException e) {
+			throw new HttpArchiveException(404, e);
+		    } catch (MalformedURLException e) {
+			throw new HttpArchiveException(500, e);
+		    } catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		    }
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listDc", value = "listDc", notes = "Shows internal dublin core stream", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listDc(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		DublinCoreData dc = read.readDC(pid);
-		return json(dc);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    DublinCoreData dc = read.readDC(pid);
+	    return json(dc);
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> updateResource(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    String[] p = pid.split(":");
-		    Object o = request().body().asJson();
-		    RegalObject object;
-		    if (o != null) {
-			object = (RegalObject) MyController.mapper.readValue(
-				o.toString(), RegalObject.class);
-		    } else {
-			throw new NullPointerException(
-				"Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
-		    }
-		    Node newnode = create.createResource(object.getType(),
-			    object.getParentPid(), object.getTransformer(),
-			    object.getAccessScheme(), p[1], p[0]);
-		    String result = newnode.getPid() + " created/updated!";
-		    return JsonMessage(new Message(result, 200));
-		} catch (JsonMappingException e) {
-		    throw new HttpArchiveException(500, e);
-		} catch (JsonParseException e) {
-		    throw new HttpArchiveException(500, e);
-		} catch (IOException e) {
-		    throw new HttpArchiveException(500, e);
-		}
-	    }
-	});
+	return new ModifyAction()
+		.call(pid,
+			node -> {
+			    try {
+				String[] p = pid.split(":");
+				Object o = request().body().asJson();
+				RegalObject object;
+				if (o != null) {
+				    object = (RegalObject) MyController.mapper
+					    .readValue(o.toString(),
+						    RegalObject.class);
+				} else {
+				    throw new NullPointerException(
+					    "Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
+				}
+				Node newnode = create.createResource(
+					object.getType(),
+					object.getParentPid(),
+					object.getTransformer(),
+					object.getAccessScheme(), p[1], p[0]);
+				String result = newnode.getPid()
+					+ " created/updated!";
+				return JsonMessage(new Message(result, 200));
+			    } catch (JsonMappingException e) {
+				throw new HttpArchiveException(500, e);
+			    } catch (JsonParseException e) {
+				throw new HttpArchiveException(500, e);
+			    } catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateMetadata", value = "updateMetadata", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
     public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = modify.updateMetadata(pid, request().body()
-			.asText());
-		return JsonMessage(new Message(result));
-	    }
-	});
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    String result = modify.updateMetadata(pid, request().body()
+			    .asText());
+		    return JsonMessage(new Message(result));
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateData", value = "updateData", notes = "Updates the data of a resource", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
     public static Promise<Result> updateData(@PathParam("pid") String pid,
 	    @QueryParam("md5") String md5) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    MultipartFormData body = request().body()
-			    .asMultipartFormData();
-		    FilePart d = body.getFile("data");
-		    if (d == null) {
-			return JsonMessage(new Message("Missing File.", 400));
-		    }
-		    String mimeType = d.getContentType();
-		    String name = d.getFilename();
-		    FileInputStream content = new FileInputStream(d.getFile());
-		    modify.updateData(pid, content, mimeType, name, md5);
-		    return JsonMessage(new Message("File uploaded! Type: "
-			    + mimeType + ", Name: " + name));
-		} catch (IOException e) {
-		    throw new HttpArchiveException(500, e);
-		}
-	    }
-	});
+	return new ModifyAction()
+		.call(pid,
+			node -> {
+			    try {
+				MultipartFormData body = request().body()
+					.asMultipartFormData();
+				FilePart d = body.getFile("data");
+				if (d == null) {
+				    return JsonMessage(new Message(
+					    "Missing File.", 400));
+				}
+				String mimeType = d.getContentType();
+				String name = d.getFilename();
+				FileInputStream content = new FileInputStream(d
+					.getFile());
+				modify.updateData(pid, content, mimeType, name,
+					md5);
+				return JsonMessage(new Message(
+					"File uploaded! Type: " + mimeType
+						+ ", Name: " + name));
+			    } catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateDc", value = "updateDc", notes = "Updates the dc data of a resource", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "Add Dublin Core", required = true, dataType = "DublinCoreData", paramType = "body") })
     public static Promise<Result> updateDc(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    Object o = request().body().asJson();
-		    DublinCoreData dc;
-		    if (o != null) {
-			dc = (DublinCoreData) MyController.mapper.readValue(
-				o.toString(), DublinCoreData.class);
-		    } else {
-			dc = new DublinCoreData();
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    try {
+			Object o = request().body().asJson();
+			DublinCoreData dc;
+			if (o != null) {
+			    dc = (DublinCoreData) MyController.mapper
+				    .readValue(o.toString(),
+					    DublinCoreData.class);
+			} else {
+			    dc = new DublinCoreData();
+			}
+			String result = modify.updateDC(pid, dc);
+			return JsonMessage(new Message(result, 200));
+		    } catch (IOException e) {
+			throw new HttpArchiveException(500, e);
 		    }
-		    String result = modify.updateDC(pid, dc);
-		    return JsonMessage(new Message(result, 200));
-		} catch (IOException e) {
-		    throw new HttpArchiveException(500, e);
-		}
-	    }
-	});
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResource(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		Chunks<String> chunks = new StringChunks() {
-		    public void onReady(Chunks.Out<String> out) {
-			delete.setMessageQueue(out);
-		    }
-		};
-		ExecutorService executorService = Executors
-			.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-		    public void run() {
-			delete.delete(pid);
-			delete.closeMessageQueue();
-		    }
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    Chunks<String> chunks = new StringChunks() {
+			public void onReady(Chunks.Out<String> out) {
+			    delete.setMessageQueue(out);
+			}
+		    };
+		    ExecutorService executorService = Executors
+			    .newSingleThreadExecutor();
+		    executorService.execute(new Runnable() {
+			public void run() {
+			    delete.delete(pid);
+			    delete.closeMessageQueue();
+			}
+		    });
+		    executorService.shutdown();
+		    return ok(chunks);
 		});
-		executorService.shutdown();
-		return ok(chunks);
-	    }
-	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteMetadata", value = "deleteMetadata", notes = "Deletes a resources metadata", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteMetadata(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = delete.deleteMetadata(pid);
-		return JsonMessage(new Message(result));
-	    }
+	return new ModifyAction().call(pid, node -> {
+	    String result = delete.deleteMetadata(pid);
+	    return JsonMessage(new Message(result));
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteData", value = "deleteData", notes = "Deletes a resources data", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteData(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = delete.deleteData(pid);
-		return JsonMessage(new Message(result));
-	    }
+	return new ModifyAction().call(pid, node -> {
+	    String result = delete.deleteData(pid);
+	    return JsonMessage(new Message(result));
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteDc", value = "deleteDc", notes = "Not implemented", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteDc(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		return JsonMessage(new Message("Not implemented!", 500));
-	    }
-	});
+	return new ReadAction().call(pid, node -> JsonMessage(new Message(
+		"Not implemented!", 500)));
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteResources", value = "deleteResources", notes = "Deletes a set of resources", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResources(String namespace,
 	    String type, String src, int from, int until) {
-	return new ModifyAction().call(null, new ControllerAction() {
+	return new BulkAction().call(() -> {
+	    Chunks<String> chunks = new StringChunks() {
+		public void onReady(Chunks.Out<String> out) {
+		    delete.setMessageQueue(out);
+		}
+	    };
+	    ExecutorService executorService = Executors
+		    .newSingleThreadExecutor();
+	    executorService.execute(new Runnable() {
+		public void run() {
+		    delete.deleteAll(read
+			    .listRepo(type, namespace, from, until).stream()
+			    .map((Node n) -> n.getPid())
+			    .collect(Collectors.toList()));
+		}
+	    });
+	    executorService.shutdown();
 
-	    public Result exec(Node node) {
-		Chunks<String> chunks = new StringChunks() {
-		    public void onReady(Chunks.Out<String> out) {
-			delete.setMessageQueue(out);
-		    }
-		};
-
-		ExecutorService executorService = Executors
-			.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-		    public void run() {
-			delete.deleteAll(read
-				.listRepo(type, namespace, from, until)
-				.stream().map((Node n) -> n.getPid())
-				.collect(Collectors.toList()));
-		    }
-		});
-		executorService.shutdown();
-
-		return ok(chunks);
-	    }
+	    return ok(chunks);
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		List<String> nodeIds = read.readNode(pid)
-			.getRelatives(HAS_PART);
-		List<Map<String, Object>> result = read.nodelistToMap(read
-			.getNodes(nodeIds));
-		return json(result);
-	    }
-	});
+	return new ReadAction().call(
+		pid,
+		node -> {
+		    List<String> nodeIds = read.readNode(pid).getRelatives(
+			    HAS_PART);
+		    List<Map<String, Object>> result = read.nodelistToMap(read
+			    .getNodes(nodeIds));
+		    return json(result);
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParents(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		List<String> nodeIds = read.readNode(pid).getRelatives(
-			IS_PART_OF);
-		List<Map<String, Object>> result = read.nodelistToMap(read
-			.getNodes(nodeIds));
-		return json(result);
-	    }
-	});
+	return new ReadAction().call(
+		pid,
+		node -> {
+		    List<String> nodeIds = read.readNode(pid).getRelatives(
+			    IS_PART_OF);
+		    List<Map<String, Object>> result = read.nodelistToMap(read
+			    .getNodes(nodeIds));
+		    return json(result);
+		});
     }
 
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asHtml(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		return ok(resourceLong.render(node.toString()));
-	    }
-	});
+	return new ReadAction().call(pid,
+		node -> ok(resourceLong.render(node.toString())));
     }
 
     @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asRdf(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = "";
-		if (request().accepts("application/rdf+xml")) {
-		    result = transform.oaiore(node, "application/rdf+xml");
-		    response().setContentType("application/rdf+xml");
-		    return ok(result);
-		} else if (request().accepts("text/plain")) {
-		    result = transform.oaiore(node, "text/plain");
-		    response().setContentType("text/plain");
-		    return ok(result);
-		}
-		return JsonMessage(new Message(result));
+	return new ReadAction().call(pid, node -> {
+	    String result = "";
+	    if (request().accepts("application/rdf+xml")) {
+		result = transform.oaiore(node, "application/rdf+xml");
+		response().setContentType("application/rdf+xml");
+		return ok(result);
+	    } else if (request().accepts("text/plain")) {
+		result = transform.oaiore(node, "text/plain");
+		response().setContentType("text/plain");
+		return ok(result);
 	    }
+	    return JsonMessage(new Message(result));
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asJson(@PathParam("pid") String pid,
 	    String style) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = "ERROR";
-		if ("compact".equals(style))
-		    result = transform.oaiore(node, "application/json+compact");
-		else
-		    result = transform.oaiore(node, "application/json");
-		response().setContentType("application/json");
-		return ok(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    String result = "ERROR";
+	    if ("compact".equals(style))
+		result = transform.oaiore(node, "application/json+compact");
+	    else
+		result = transform.oaiore(node, "application/json");
+	    response().setContentType("application/json");
+	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asOaiDc(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = transform.oaidc(pid);
-		response().setContentType("application/xml");
-		return ok(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    String result = transform.oaidc(pid);
+	    response().setContentType("application/xml");
+	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asEpicur", value = "asEpicur", notes = "Returns a epicur display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asEpicur(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = transform.epicur(pid);
-		response().setContentType("application/xml");
-		return ok(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    String result = transform.epicur(pid);
+	    response().setContentType("application/xml");
+	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asAleph", value = "asAleph", notes = "Returns a aleph xml display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asAleph(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = transform.aleph(pid);
-		response().setContentType("application/xml");
-		return ok(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    String result = transform.aleph(pid);
+	    response().setContentType("application/xml");
+	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")
     public static Promise<Result> asRegalObject(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		response().setContentType("application/json");
-		Node result = read.readNode(pid);
-		return json(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setContentType("application/json");
+	    Node result = read.readNode(pid);
+	    return json(result);
 	});
 
     }
 
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")
     public static Promise<Result> asPdfa(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		try {
-		    String redirectUrl = transform.getPdfaUrl(pid);
-		    URL url;
-		    url = new URL(redirectUrl);
-		    HttpURLConnection connection = (HttpURLConnection) url
-			    .openConnection();
-		    InputStream is = connection.getInputStream();
-		    response().setContentType("application/pdf");
-		    return ok(is);
-		} catch (MalformedURLException e) {
-		    return JsonMessage(new Message(e, 500));
-		} catch (IOException e) {
-		    return JsonMessage(new Message(e, 500));
-		}
-	    }
-	});
+	return new ReadAction().call(
+		pid,
+		node -> {
+		    try {
+			String redirectUrl = transform.getPdfaUrl(pid);
+			URL url;
+			url = new URL(redirectUrl);
+			HttpURLConnection connection = (HttpURLConnection) url
+				.openConnection();
+			InputStream is = connection.getInputStream();
+			response().setContentType("application/pdf");
+			return ok(is);
+		    } catch (MalformedURLException e) {
+			return JsonMessage(new Message(e, 500));
+		    } catch (IOException e) {
+			return JsonMessage(new Message(e, 500));
+		    }
+		});
     }
 
     @ApiOperation(produces = "text/plain", nickname = "asPdfboxTxt", value = "asPdfboxTxt", notes = "Returns text display of a pdf datastream.", response = String.class, httpMethod = "GET")
     public static Promise<Result> asPdfboxTxt(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = transform.pdfbox(pid);
-		response().setContentType("text/plain");
-		return ok(result);
-	    }
+	return new ReadAction().call(pid, node -> {
+	    String result = transform.pdfbox(pid);
+	    response().setContentType("text/plain");
+	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "text/plain", nickname = "updateOaiSets", value = "updateOaiSets", notes = "Links resource to oai sets and creates new sets if needed", response = String.class, httpMethod = "POST")
     public static Promise<Result> updateOaiSets(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = modify.makeOAISet(pid);
-		response().setContentType("text/plain");
-		return ok(result);
-	    }
+	return new ModifyAction().call(pid, node -> {
+	    String result = modify.makeOAISet(pid);
+	    response().setContentType("text/plain");
+	    return ok(result);
 	});
     }
 

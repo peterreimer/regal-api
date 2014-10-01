@@ -22,7 +22,6 @@ import java.io.StringWriter;
 
 import models.Message;
 import models.Node;
-import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -152,8 +151,12 @@ public class MyController extends Controller {
 	return false;
     }
 
-    interface ControllerAction {
+    interface NodeAction {
 	Result exec(Node node);
+    }
+
+    interface Action {
+	Result exec();
     }
 
     /**
@@ -161,26 +164,24 @@ public class MyController extends Controller {
      *
      */
     public static class ReadAction {
-	Promise<Result> call(String pid, ControllerAction ca) {
-	    return Promise.promise(new Function0<Result>() {
-		public Result apply() {
-		    try {
-			Node node = null;
-			if (pid != null) {
-			    node = read.readNode(pid);
-			    String role = (String) Http.Context.current().args
-				    .get("role");
-			    String accessScheme = node.getAccessScheme();
-			    if (!readAccessIsAllowed(accessScheme, role)) {
-				return AccessDenied();
-			    }
+	Promise<Result> call(String pid, NodeAction ca) {
+	    return Promise.promise(() -> {
+		try {
+		    Node node = null;
+		    if (pid != null) {
+			node = read.readNode(pid);
+			String role = (String) Http.Context.current().args
+				.get("role");
+			String accessScheme = node.getAccessScheme();
+			if (!readAccessIsAllowed(accessScheme, role)) {
+			    return AccessDenied();
 			}
-			return ca.exec(node);
-		    } catch (HttpArchiveException e) {
-			return JsonMessage(new Message(e, e.getCode()));
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
 		    }
+		    return ca.exec(node);
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
 		}
 	    });
 	}
@@ -191,28 +192,72 @@ public class MyController extends Controller {
      * @author Jan Schnasse
      *
      */
-    public static class ModifyAction {
-	Promise<Result> call(String pid, ControllerAction ca) {
-	    return Promise.promise(new Function0<Result>() {
-		public Result apply() {
-		    try {
-			String role = (String) Http.Context.current().args
-				.get("role");
-			if (!modifyingAccessIsAllowed(role)) {
-			    return AccessDenied();
-			}
-			Node node = null;
-			try {
-			    node = read.readNode(pid);
-			} catch (HttpArchiveException e) {
-
-			}
-			return ca.exec(node);
-		    } catch (HttpArchiveException e) {
-			return JsonMessage(new Message(e, e.getCode()));
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
+    public static class ListAction {
+	Promise<Result> call(Action ca) {
+	    return Promise.promise(() -> {
+		try {
+		    String role = (String) Http.Context.current().args
+			    .get("role");
+		    if (!readAccessIsAllowed("public", role)) {
+			return AccessDenied();
 		    }
+		    return ca.exec();
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
+		}
+	    });
+	}
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
+    public static class ModifyAction {
+	Promise<Result> call(String pid, NodeAction ca) {
+	    return Promise.promise(() -> {
+		try {
+		    String role = (String) Http.Context.current().args
+			    .get("role");
+		    if (!modifyingAccessIsAllowed(role)) {
+			return AccessDenied();
+		    }
+		    Node node = null;
+		    try {
+			node = read.readNode(pid);
+		    } catch (HttpArchiveException e) {
+
+		    }
+		    return ca.exec(node);
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
+		}
+	    });
+	}
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
+    public static class BulkAction {
+	Promise<Result> call(Action ca) {
+	    return Promise.promise(() -> {
+		try {
+		    String role = (String) Http.Context.current().args
+			    .get("role");
+		    if (!modifyingAccessIsAllowed(role)) {
+			return AccessDenied();
+		    }
+		    return ca.exec();
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
 		}
 	    });
 	}

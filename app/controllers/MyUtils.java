@@ -28,7 +28,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.Message;
-import models.Node;
 import models.Transformer;
 
 import org.slf4j.Logger;
@@ -59,63 +58,56 @@ public class MyUtils extends MyController {
     public static Promise<Result> index(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String indexName) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String curIndex = indexName.isEmpty() ? pid.split(":")[0]
-			: indexName;
-		String result = index.index(pid, curIndex, type);
-		return JsonMessage(new Message(result));
-	    }
+	return new ModifyAction().call(pid, node -> {
+	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
+		    : indexName;
+	    String result = index.index(pid, curIndex, type);
+	    return JsonMessage(new Message(result));
 	});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "indexAll", value = "indexAll", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Promise<Result> indexAll(
 	    @QueryParam("index") final String indexName) {
-	return new ModifyAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		Chunks<String> chunks = new StringChunks() {
-		    public void onReady(Chunks.Out<String> out) {
-			index.setMessageQueue(out);
-		    }
-		};
-		ExecutorService executorService = Executors
-			.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-		    public void run() {
-			index.indexAll(indexName);
-		    }
-		});
-		executorService.shutdown();
-		return ok(chunks);
-	    }
+	return new BulkAction().call(() -> {
+	    Chunks<String> chunks = new StringChunks() {
+		public void onReady(Chunks.Out<String> out) {
+		    index.setMessageQueue(out);
+		}
+	    };
+	    ExecutorService executorService = Executors
+		    .newSingleThreadExecutor();
+	    executorService.execute(new Runnable() {
+		public void run() {
+		    index.indexAll(indexName);
+		}
+	    });
+	    executorService.shutdown();
+	    return ok(chunks);
 	});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
     public static Promise<Result> removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = index.removeFromIndex(pid.split(":")[0], type,
-			pid);
-		return JsonMessage(new Message(result));
-	    }
-	});
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    String result = index.removeFromIndex(pid.split(":")[0],
+			    type, pid);
+		    return JsonMessage(new Message(result));
+		});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", httpMethod = "POST")
     public static Promise<Result> publicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String indexName) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String curIndex = indexName.isEmpty() ? pid.split(":")[0]
-			: indexName;
-		String result = index.publicIndex(pid, "public_" + curIndex,
-			type);
-		return JsonMessage(new Message(result));
-	    }
+	return new ModifyAction().call(pid, node -> {
+	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
+		    : indexName;
+	    String result = index.publicIndex(pid, "public_" + curIndex, type);
+	    return JsonMessage(new Message(result));
 	});
     }
 
@@ -123,22 +115,20 @@ public class MyUtils extends MyController {
     public static Promise<Result> removeFromPublicIndex(
 	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = index.removeFromIndex(
-			"public_" + pid.split(":")[0], type, pid);
-		return JsonMessage(new Message(result));
-	    }
-	});
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    String result = index.removeFromIndex(
+			    "public_" + pid.split(":")[0], type, pid);
+		    return JsonMessage(new Message(result));
+		});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
     public static Promise<Result> lobidify(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = modify.lobidify(pid);
-		return JsonMessage(new Message(result));
-	    }
+	return new ModifyAction().call(pid, node -> {
+	    String result = modify.lobidify(pid);
+	    return JsonMessage(new Message(result));
 	});
     }
 
@@ -146,11 +136,9 @@ public class MyUtils extends MyController {
     public static Promise<Result> addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	return new ModifyAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = modify.addUrn(id, namespace, snid);
-		return JsonMessage(new Message(result));
-	    }
+	return new BulkAction().call(() -> {
+	    String result = modify.addUrn(id, namespace, snid);
+	    return JsonMessage(new Message(result));
 	});
     }
 
@@ -158,42 +146,39 @@ public class MyUtils extends MyController {
     public static Promise<Result> replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	return new ModifyAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		String result = modify.replaceUrn(id, namespace, snid);
-		return JsonMessage(new Message(result));
-	    }
+	return new BulkAction().call(() -> {
+	    String result = modify.replaceUrn(id, namespace, snid);
+	    return JsonMessage(new Message(result));
 	});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
     public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
-	return new ModifyAction().call(null, new ControllerAction() {
-	    public Result exec(Node node) {
-		List<Transformer> transformers = new Vector<Transformer>();
-		transformers.add(new Transformer(namespace + "epicur",
-			"epicur", Globals.server + "/resource/(pid)."
-				+ namespace + "epicur"));
-		transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-			Globals.server + "/resource/(pid)." + namespace
-				+ "oaidc"));
-		transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-			Globals.server + "/resource/(pid)." + namespace
-				+ "pdfa"));
-		transformers.add(new Transformer(namespace + "pdfbox",
-			"pdfbox", Globals.server + "/resource/(pid)."
-				+ namespace + "pdfbox"));
-		transformers.add(new Transformer(namespace + "aleph", "aleph",
-			Globals.server + "/resource/(pid)." + namespace
-				+ "aleph"));
-		create.contentModelsInit(transformers);
-		String result = "Reinit contentModels " + namespace
-			+ "epicur, " + namespace + "oaidc, " + namespace
-			+ "pdfa, " + namespace + "pdfbox, " + namespace
-			+ "aleph";
-		return JsonMessage(new Message(result));
-	    }
-	});
+	return new BulkAction()
+		.call(() -> {
+		    List<Transformer> transformers = new Vector<Transformer>();
+		    transformers.add(new Transformer(namespace + "epicur",
+			    "epicur", Globals.server + "/resource/(pid)."
+				    + namespace + "epicur"));
+		    transformers.add(new Transformer(namespace + "oaidc",
+			    "oaidc", Globals.server + "/resource/(pid)."
+				    + namespace + "oaidc"));
+		    transformers.add(new Transformer(namespace + "pdfa",
+			    "pdfa", Globals.server + "/resource/(pid)."
+				    + namespace + "pdfa"));
+		    transformers.add(new Transformer(namespace + "pdfbox",
+			    "pdfbox", Globals.server + "/resource/(pid)."
+				    + namespace + "pdfbox"));
+		    transformers.add(new Transformer(namespace + "aleph",
+			    "aleph", Globals.server + "/resource/(pid)."
+				    + namespace + "aleph"));
+		    create.contentModelsInit(transformers);
+		    String result = "Reinit contentModels " + namespace
+			    + "epicur, " + namespace + "oaidc, " + namespace
+			    + "pdfa, " + namespace + "pdfbox, " + namespace
+			    + "aleph";
+		    return JsonMessage(new Message(result));
+		});
     }
 }
