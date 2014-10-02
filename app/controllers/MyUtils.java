@@ -90,13 +90,10 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
     public static Promise<Result> removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	return new ModifyAction().call(
-		pid,
-		node -> {
-		    String result = index.removeFromIndex(pid.split(":")[0],
-			    type, pid);
-		    return JsonMessage(new Message(result));
-		});
+	return new ModifyAction().call(pid, node -> {
+	    String result = index.remove(pid, pid.split(":")[0], type);
+	    return JsonMessage(new Message(result));
+	});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", httpMethod = "POST")
@@ -118,8 +115,8 @@ public class MyUtils extends MyController {
 	return new ModifyAction().call(
 		pid,
 		node -> {
-		    String result = index.removeFromIndex(
-			    "public_" + pid.split(":")[0], type, pid);
+		    String result = index.remove(pid,
+			    "public_" + pid.split(":")[0], type);
 		    return JsonMessage(new Message(result));
 		});
     }

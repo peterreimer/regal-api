@@ -81,11 +81,11 @@ public class Delete {
 	StringBuffer msg = new StringBuffer();
 	try {
 	    String namespace = n.getNamespace();
-	    String m = new Index().removeFromIndex(namespace,
-		    n.getContentType(), n.getPid());
+	    String m = new Index().remove(n.getPid(), namespace,
+		    n.getContentType());
 	    msg.append("\n" + m);
-	    m = new Index().removeFromIndex("public_" + namespace,
-		    n.getContentType(), n.getPid());
+	    m = new Index().remove(n.getPid(), "public_" + namespace,
+		    n.getContentType());
 	    msg.append("\n" + m);
 	} catch (Exception e) {
 	    msg.append("\n" + e);

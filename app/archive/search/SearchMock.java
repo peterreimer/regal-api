@@ -86,8 +86,8 @@ class SearchMock {
 	return search.list(index, type, from, until);
     }
 
-    public ActionResponse delete(String index, String type, String id) {
-	return search.delete(index, type, id);
+    public ActionResponse delete(String id, String index, String type) {
+	return search.delete(id, index, type);
     }
 
     public SearchHits query(String index, String fieldName, String fieldValue) {

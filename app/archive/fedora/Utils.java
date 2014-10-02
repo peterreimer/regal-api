@@ -35,6 +35,7 @@ import static archive.fedora.FedoraVocabulary.REL_IS_DEPLOYMENT_OF;
 import static archive.fedora.FedoraVocabulary.SDEF_CONTENTMODEL;
 import static archive.fedora.FedoraVocabulary.SDEP_CONTENTMODEL;
 import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
+import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
 import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
@@ -405,6 +406,11 @@ public class Utils {
 				.compareTo(REL_CREATED_BY) == 0) {
 			    node.setCreatedBy(link.getObject());
 			    continue;
+
+			} else if (link.getPredicate().compareTo(
+				REL_PUBLISH_SCHEME) == 0) {
+			    node.setPublishScheme(link.getObject());
+			    continue;
 			}
 			String object = link.getObject();
 			try {
@@ -599,6 +605,11 @@ public class Utils {
 	link = new Link();
 	link.setObject(node.getAccessScheme(), true);
 	link.setPredicate(REL_ACCESS_SCHEME);
+	node.addRelation(link);
+
+	link = new Link();
+	link.setObject(node.getPublishScheme(), true);
+	link.setPredicate(REL_PUBLISH_SCHEME);
 	node.addRelation(link);
 
 	link = new Link();

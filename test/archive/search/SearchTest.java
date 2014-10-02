@@ -106,9 +106,9 @@ public class SearchTest extends BaseModelTest {
 
     @After
     public void tearDown() {
-	search.delete("test", "type", "edoweb:123");
+	search.delete("edoweb:123", "test", "type");
 	for (int i = 100; i > 0; i--) {
-	    search.delete("test", "monograph", "edoweb:" + i);
+	    search.delete("edoweb:" + i, "test", "monograph");
 	}
 	search.down();
     }

@@ -121,7 +121,8 @@ public class MyController extends Controller {
      *            the role of the user
      * @return true if the user is allowed to read the object
      */
-    public static boolean readAccessIsAllowed(String accessScheme, String role) {
+    public static boolean readData_accessIsAllowed(String accessScheme,
+	    String role) {
 	if (!"edoweb-admin".equals(role)) {
 	    if ("public".equals(accessScheme)) {
 		return true;
@@ -133,6 +134,30 @@ public class MyController extends Controller {
 	    } else if ("private".equals(accessScheme)) {
 		if ("edoweb-editor".equals(role))
 		    return true;
+	    }
+	} else {
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * @param publishScheme
+     *            the publishScheme of the object
+     * @param role
+     *            the role of the user
+     * @return true if the user is allowed to read the object
+     */
+    public static boolean readMetadata_accessIsAllowed(String publishScheme,
+	    String role) {
+	if (!"edoweb-admin".equals(role)) {
+	    if ("public".equals(publishScheme)) {
+		return true;
+	    } else if ("private".equals(publishScheme)) {
+		if ("edoweb-editor".equals(role)
+			|| "edoweb-reader".equals(role)) {
+		    return true;
+		}
 	    }
 	} else {
 	    return true;
@@ -163,7 +188,38 @@ public class MyController extends Controller {
      * @author Jan Schnasse
      *
      */
-    public static class ReadAction {
+    public static class ReadMetadataAction {
+	Promise<Result> call(String pid, NodeAction ca) {
+	    return Promise
+		    .promise(() -> {
+			try {
+			    Node node = null;
+			    if (pid != null) {
+				node = read.readNode(pid);
+				String role = (String) Http.Context.current().args
+					.get("role");
+				String publishScheme = node.getPublishScheme();
+				if (!readMetadata_accessIsAllowed(
+					publishScheme, role)) {
+				    return AccessDenied();
+				}
+			    }
+			    return ca.exec(node);
+			} catch (HttpArchiveException e) {
+			    return JsonMessage(new Message(e, e.getCode()));
+			} catch (Exception e) {
+			    return JsonMessage(new Message(e, 500));
+			}
+		    });
+	}
+
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
+    public static class ReadDataAction {
 	Promise<Result> call(String pid, NodeAction ca) {
 	    return Promise.promise(() -> {
 		try {
@@ -173,7 +229,7 @@ public class MyController extends Controller {
 			String role = (String) Http.Context.current().args
 				.get("role");
 			String accessScheme = node.getAccessScheme();
-			if (!readAccessIsAllowed(accessScheme, role)) {
+			if (!readData_accessIsAllowed(accessScheme, role)) {
 			    return AccessDenied();
 			}
 		    }
@@ -198,7 +254,7 @@ public class MyController extends Controller {
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
-		    if (!readAccessIsAllowed("public", role)) {
+		    if (!readMetadata_accessIsAllowed("public", role)) {
 			return AccessDenied();
 		    }
 		    return ca.exec();

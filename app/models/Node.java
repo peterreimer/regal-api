@@ -73,6 +73,7 @@ public class Node {
     private String contentType = null;
     private String accessScheme = null;
     private String parentPid = null;
+    private String publishScheme = null;
 
     private String fileLabel = null;
     private String fileMimeType = null;
@@ -497,7 +498,7 @@ public class Node {
     }
 
     /**
-     * @return a string that signals who is allowed to access this node
+     * @return a string that signals who is allowed to access this node's data
      */
     public String getAccessScheme() {
 	return accessScheme;
@@ -505,10 +506,28 @@ public class Node {
 
     /**
      * @param accessScheme
-     *            a string that signals who is allowed to access this node
+     *            a string that signals who is allowed to access this node's
+     *            data
      */
     public void setAccessScheme(String accessScheme) {
 	this.accessScheme = accessScheme;
+    }
+
+    /**
+     * @return a string that signals who is allowed to access this node's
+     *         metadata
+     */
+    public String getPublishScheme() {
+	return publishScheme;
+    }
+
+    /**
+     * @param publishScheme
+     *            a string that signals who is allowed to access this node's
+     *            metadata
+     */
+    public void setPublishScheme(String publishScheme) {
+	this.publishScheme = publishScheme;
     }
 
     /**

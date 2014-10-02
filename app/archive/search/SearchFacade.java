@@ -118,18 +118,18 @@ public class SearchFacade {
 
     /**
      * Deletes a certain item
-     * 
+     * @param id
+     *            the item's id
      * @param index
      *            name of the elasticsearch index. will be created, if not
      *            exists.
      * @param type
      *            the type of the indexed item
-     * @param id
-     *            the item's id
+     * 
      * @return the response
      */
-    public ActionResponse delete(String index, String type, String id) {
-	return search.delete(index, type, id);
+    public ActionResponse delete(String id, String index, String type) {
+	return search.delete(id, index, type);
     }
 
     /**

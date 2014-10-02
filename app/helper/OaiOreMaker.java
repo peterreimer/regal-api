@@ -278,6 +278,7 @@ public class OaiOreMaker {
 	    String mime = node.getFileMimeType();
 	    String label = node.getFileLabel();
 	    String accessScheme = node.getAccessScheme();
+	    String publishScheme = node.getPublishScheme();
 	    String fileSize = node.getFileSizeAsString();
 	    String fileChecksum = node.getFileChecksum();
 	    // Predicates
@@ -303,6 +304,7 @@ public class OaiOreMaker {
 	    URI hasData = f.createURI(regalNamespace, "hasData");
 	    URI hasTransformer = f.createURI(regalNamespace, "hasTransformer");
 	    URI hasAccessScheme = f.createURI(regalNamespace, "accessScheme");
+	    URI hasPublishScheme = f.createURI(regalNamespace, "publishScheme");
 	    // FileProperties
 	    URI fpSize = f.createURI(fpNamespace, "size");
 	    BNode theChecksumBlankNode = f.createBNode();
@@ -324,6 +326,11 @@ public class OaiOreMaker {
 	    if (accessScheme != null && !accessScheme.isEmpty()) {
 		Literal a = f.createLiteral(accessScheme);
 		con.add(aggregation, hasAccessScheme, a);
+	    }
+
+	    if (publishScheme != null && !publishScheme.isEmpty()) {
+		Literal a = f.createLiteral(publishScheme);
+		con.add(aggregation, hasPublishScheme, a);
 	    }
 
 	    if (fileSize != null && !fileSize.isEmpty()) {

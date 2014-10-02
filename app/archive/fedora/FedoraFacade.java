@@ -21,6 +21,7 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
 import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
+import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import helper.HttpArchiveException;
@@ -235,6 +236,11 @@ class FedoraFacade implements FedoraInterface {
 	    link.setObject(node.getAccessScheme(), true);
 	    link.setPredicate(REL_ACCESS_SCHEME);
 	    node.addRelation(link);
+	    link = new Link();
+	    link.setObject(node.getPublishScheme(), true);
+	    link.setPredicate(REL_PUBLISH_SCHEME);
+	    node.addRelation(link);
+
 	    utils.createRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();

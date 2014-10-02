@@ -34,17 +34,17 @@ public class Index {
     Chunks.Out<String> messageOut;
 
     /**
+     * @param pid
+     *            The namespaced pid to remove from index
      * @param index
      *            the elasticsearch index
      * @param type
      *            the type of the resource
-     * @param pid
-     *            The namespaced pid to remove from index
      * @return A short message
      */
-    public String removeFromIndex(String index, String type, String pid) {
+    public String remove(String pid, String index, String type) {
 
-	Globals.search.delete(index, type, pid);
+	Globals.search.delete(pid, index, type);
 	return pid + " of type " + type + " removed from index " + index + "!";
     }
 
@@ -62,7 +62,7 @@ public class Index {
 	String jsonCompactStr = new Transform().oaiore(p,
 		"application/json+compact");
 	Globals.search.index(index, type, p, jsonCompactStr);
-	return p + " indexed!";
+	return p + " indexed in " + index + "!";
     }
 
     /**
@@ -83,7 +83,13 @@ public class Index {
     protected String index(Node n) {
 	String namespace = n.getNamespace();
 	String pid = n.getPid();
-	return index(pid, namespace, n.getContentType());
+	String msg = "";
+	if ("public".equals(n.getPublishScheme())) {
+	    msg = index(pid, "public_" + namespace, n.getContentType());
+	} else {
+	    msg = remove(pid, "public_" + namespace, n.getContentType());
+	}
+	return msg + "\n" + index(pid, namespace, n.getContentType());
     }
 
     /**

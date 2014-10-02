@@ -149,7 +149,7 @@ public class Search {
 	return list;
     }
 
-    ActionResponse delete(String index, String type, String id) {
+    ActionResponse delete(String id, String index, String type) {
 	return client.prepareDelete(index, type, id)
 		.setOperationThreaded(false).execute().actionGet();
     }
@@ -201,26 +201,50 @@ public class Search {
 	init(index);
 	List<String> result = new ArrayList<String>();
 	Transform t = new Transform();
-	BulkRequestBuilder bulkRequest = client.prepareBulk();
+	BulkRequestBuilder internalIndexBulk = client.prepareBulk();
+	BulkRequestBuilder publicIndexBulk = client.prepareBulk();
 
 	for (Node node : list) {
 	    try {
-		bulkRequest.add(client.prepareIndex(index,
+		StringBuffer msg = new StringBuffer("Index " + node.getPid()
+			+ " to ");
+		internalIndexBulk.add(client.prepareIndex(index,
 			node.getContentType(), node.getPid()).setSource(
 			t.oaiore(node, "application/json+compact")));
-		result.add(node.getPid());
+		msg.append(index);
+		if ("public".equals(node.getPublishScheme())) {
+		    publicIndexBulk.add(client.prepareIndex("public_" + index,
+			    node.getContentType(), node.getPid()).setSource(
+			    t.oaiore(node, "application/json+compact")));
+		    msg.append(" and public_" + index);
+		}
+		msg.append("\n");
+		result.add(msg.toString());
 		play.Logger.debug("Add " + node.getPid() + "to bulk action");
 	    } catch (Exception e) {
 		result.add("A problem occured");
 	    }
 	}
-	play.Logger.debug("Start building Index " + index);
-	BulkResponse bulkResponse = bulkRequest.execute().actionGet();
-	if (bulkResponse.hasFailures()) {
-	    result.add(bulkResponse.buildFailureMessage());
-	    play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+	try {
+	    play.Logger.debug("Start building internal Index " + index);
+	    BulkResponse bulkResponse = internalIndexBulk.execute().actionGet();
+	    if (bulkResponse.hasFailures()) {
+		result.add(bulkResponse.buildFailureMessage());
+		play.Logger
+			.debug("FAIL: " + bulkResponse.buildFailureMessage());
+	    }
+
+	    play.Logger.debug("Start building public Index " + index);
+
+	    bulkResponse = publicIndexBulk.execute().actionGet();
+	    if (bulkResponse.hasFailures()) {
+		result.add(bulkResponse.buildFailureMessage());
+		play.Logger
+			.debug("FAIL: " + bulkResponse.buildFailureMessage());
+	    }
+	} catch (Exception e) {
+	    // e.printStackTrace();
 	}
 	return result;
     }
-
 }

@@ -170,6 +170,10 @@ public class ApplicationProfile {
 		"Elternobjekt");
 	map.put("http://purl.org/vocab/frbr/core#exemplar", "Exemplar");
 	map.put("info:hbz/hbz-ingest:def/model#contentType", "Regal Typ");
+	map.put("info:hbz/hbz-ingest:def/model#accessScheme",
+		"Sichtbarkeit Daten");
+	map.put("info:hbz/hbz-ingest:def/model#publishScheme",
+		"Sichtbarkeit Metadaten");
 	map.put("http://purl.org/dc/terms/bibliographicCitation",
 		"Veröffentlichungs Details");
 

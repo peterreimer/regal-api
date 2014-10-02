@@ -79,7 +79,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
     public static Promise<Result> listUrn(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, new NodeAction() {
+	return new ReadMetadataAction().call(pid, new NodeAction() {
 	    public Result exec(Node node) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		return json(read.getUrnStatus(node));
@@ -200,7 +200,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "text/plain", nickname = "listMetadata", value = "listMetadata", notes = "Shows Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listMetadata(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    String result = read.readMetadata(pid);
 	    return ok(result);
@@ -209,7 +209,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
-	return new ReadAction().call(
+	return new ReadDataAction().call(
 		pid,
 		node -> {
 		    try {
@@ -234,7 +234,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listDc", value = "listDc", notes = "Shows internal dublin core stream", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listDc(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    DublinCoreData dc = read.readDC(pid);
 	    return json(dc);
 	});
@@ -262,7 +262,8 @@ public class Resource extends MyController {
 					object.getType(),
 					object.getParentPid(),
 					object.getTransformer(),
-					object.getAccessScheme(), p[1], p[0]);
+					object.getAccessScheme(),
+					object.getPublishScheme(), p[1], p[0]);
 				String result = newnode.getPid()
 					+ " created/updated!";
 				return JsonMessage(new Message(result, 200));
@@ -383,8 +384,8 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "deleteDc", value = "deleteDc", notes = "Not implemented", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteDc(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> JsonMessage(new Message(
-		"Not implemented!", 500)));
+	return new ReadMetadataAction().call(pid,
+		node -> JsonMessage(new Message("Not implemented!", 500)));
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteResources", value = "deleteResources", notes = "Deletes a set of resources", response = Message.class, httpMethod = "DELETE")
@@ -414,7 +415,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid) {
-	return new ReadAction().call(
+	return new ReadMetadataAction().call(
 		pid,
 		node -> {
 		    List<String> nodeIds = read.readNode(pid).getRelatives(
@@ -427,7 +428,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParents(@PathParam("pid") String pid) {
-	return new ReadAction().call(
+	return new ReadMetadataAction().call(
 		pid,
 		node -> {
 		    List<String> nodeIds = read.readNode(pid).getRelatives(
@@ -440,13 +441,13 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asHtml(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid,
+	return new ReadMetadataAction().call(pid,
 		node -> ok(resourceLong.render(node.toString())));
     }
 
     @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asRdf(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    String result = "";
 	    if (request().accepts("application/rdf+xml")) {
 		result = transform.oaiore(node, "application/rdf+xml");
@@ -464,7 +465,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asJson(@PathParam("pid") String pid,
 	    String style) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    String result = "ERROR";
 	    if ("compact".equals(style))
 		result = transform.oaiore(node, "application/json+compact");
@@ -477,7 +478,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asOaiDc(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    String result = transform.oaidc(pid);
 	    response().setContentType("application/xml");
 	    return ok(result);
@@ -486,7 +487,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/xml", nickname = "asEpicur", value = "asEpicur", notes = "Returns a epicur display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asEpicur(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    String result = transform.epicur(pid);
 	    response().setContentType("application/xml");
 	    return ok(result);
@@ -495,7 +496,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/xml", nickname = "asAleph", value = "asAleph", notes = "Returns a aleph xml display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asAleph(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    String result = transform.aleph(pid);
 	    response().setContentType("application/xml");
 	    return ok(result);
@@ -504,7 +505,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")
     public static Promise<Result> asRegalObject(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    response().setContentType("application/json");
 	    Node result = read.readNode(pid);
@@ -515,7 +516,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")
     public static Promise<Result> asPdfa(@PathParam("pid") String pid) {
-	return new ReadAction().call(
+	return new ReadMetadataAction().call(
 		pid,
 		node -> {
 		    try {
@@ -537,7 +538,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "text/plain", nickname = "asPdfboxTxt", value = "asPdfboxTxt", notes = "Returns text display of a pdf datastream.", response = String.class, httpMethod = "GET")
     public static Promise<Result> asPdfboxTxt(@PathParam("pid") String pid) {
-	return new ReadAction().call(pid, node -> {
+	return new ReadMetadataAction().call(pid, node -> {
 	    String result = transform.pdfbox(pid);
 	    response().setContentType("text/plain");
 	    return ok(result);

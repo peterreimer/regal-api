@@ -34,6 +34,7 @@ public class RegalObject {
     List<String> transformer = null;
     List<String> indexes = null;
     String accessScheme = null;
+    String publishScheme = null;
     String createdBy = null;
     String importedFrom = null;
 
@@ -117,7 +118,7 @@ public class RegalObject {
     }
 
     /**
-     * @return a string that signals who is allowed to access this node
+     * @return a string that signals who is allowed to access the data node
      */
     public String getAccessScheme() {
 	return accessScheme;
@@ -125,10 +126,28 @@ public class RegalObject {
 
     /**
      * @param accessScheme
-     *            a string that signals who is allowed to access this node
+     *            a string that signals who is allowed to access the data of
+     *            node
      */
     public void setAccessScheme(String accessScheme) {
 	this.accessScheme = accessScheme;
+    }
+
+    /**
+     * @return a string that signals who is allowed to access the metadata of
+     *         node
+     */
+    public String getPublishScheme() {
+	return publishScheme;
+    }
+
+    /**
+     * @param publishScheme
+     *            a string that signals who is allowed to access the metadata
+     *            node
+     */
+    public void setPublishScheme(String publishScheme) {
+	this.publishScheme = publishScheme;
     }
 
     /**

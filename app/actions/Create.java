@@ -43,7 +43,11 @@ public class Create {
      * @param transformers
      *            transformers connected to the resource
      * @param accessScheme
-     *            a string that signals who is allowed to access this node
+     *            a string that signals who is allowed to access this node's
+     *            data
+     * @param publishScheme
+     *            a string that signals who is allowed to access this node's
+     *            metadata
      * @param input
      *            the input defines the contenttype and a optional parent
      * @param rawPid
@@ -53,14 +57,14 @@ public class Create {
      * @return the Node representing the resource
      */
     public Node createResource(String type, String parent,
-	    List<String> transformers, String accessScheme, String rawPid,
-	    String namespace) {
+	    List<String> transformers, String accessScheme,
+	    String publishScheme, String rawPid, String namespace) {
 	logger.debug("create " + type);
 	Node node = createNodeIfNotExists(type, parent, transformers,
-		accessScheme, rawPid, namespace);
-	new Index().removeFromIndex(namespace, node.getContentType(),
-		node.getPid());
+		accessScheme, publishScheme, rawPid, namespace);
+	new Index().remove(node.getPid(), namespace, node.getContentType());
 	node.setAccessScheme(accessScheme);
+	node.setPublishScheme(publishScheme);
 	setNodeType(type, node);
 	linkWithParent(parent, node);
 	updateTransformer(transformers, node);
@@ -70,8 +74,8 @@ public class Create {
     }
 
     private Node createNodeIfNotExists(String type, String parent,
-	    List<String> transformers, String accessScheme, String rawPid,
-	    String namespace) {
+	    List<String> transformers, String accessScheme,
+	    String publishScheme, String rawPid, String namespace) {
 	String pid = namespace + ":" + rawPid;
 	Node node = null;
 	if (Globals.fedora.nodeExists(pid)) {
@@ -81,6 +85,7 @@ public class Create {
 	    node.setNamespace(namespace).setPID(pid);
 	    node.setContentType(type);
 	    node.setAccessScheme(accessScheme);
+	    node.setPublishScheme(publishScheme);
 	    Globals.fedora.createNode(node);
 	}
 	return node;
