@@ -71,9 +71,9 @@ public class Node {
     private String remUri = null;
     private String dataUri = null;
     private String contentType = null;
-    private String accessScheme = null;
+    private String accessScheme = "private";
     private String parentPid = null;
-    private String publishScheme = null;
+    private String publishScheme = "private";
 
     private String fileLabel = null;
     private String fileMimeType = null;
