@@ -33,7 +33,7 @@ import play.Play;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  * @see <a
- *      href="http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation">digitalsanctum</a>
+ *      href="http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/">digitalsanctum</a>
  *      and http://stackoverflow.com/a/4412867/1485527
  */
 @SuppressWarnings("javadoc")
@@ -53,6 +53,7 @@ public class LdapUser implements User {
      */
     @Override
     public User authenticate(String username, String password) {
+	InitialDirContext context = null;
 	try {
 
 	    Properties properties = new Properties();
@@ -66,12 +67,22 @@ public class LdapUser implements User {
 	    /*
 	     * the next call ends in an exception if credentials are not valid
 	     */
-	    @SuppressWarnings("unused")
-	    InitialDirContext context = new InitialDirContext(properties);
+
+	    context = new InitialDirContext(properties);
 	    String group = groupFromUser(username);
 	    role = group;
 	} catch (Exception e) {
+	    play.Logger.info("", e);
 	    return null;
+	} finally {
+	    if (context != null)
+		try {
+		    context.close();
+		} catch (NamingException e) {
+		    play.Logger
+			    .error("This one is serious! LDAP connection not closed. This can result in to many open connections.",
+				    e);
+		}
 	}
 	return this;
     }
@@ -114,6 +125,7 @@ public class LdapUser implements User {
 		+ groupNumber + ")", ctrls);
 	result = answers.next().getAttributes();
 	String groupName = result.get("cn").get().toString();
+	context.close();
 	return groupName;
     }
 
