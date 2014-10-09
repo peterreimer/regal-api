@@ -124,4 +124,8 @@ public class Create {
 	return "Success!";
     }
 
+    public String pid(String namespace) {
+	return Globals.fedora.getPid(namespace);
+    }
+
 }

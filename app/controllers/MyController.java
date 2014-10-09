@@ -300,6 +300,29 @@ public class MyController extends Controller {
      * @author Jan Schnasse
      *
      */
+    public static class CreateAction {
+	Promise<Result> call(Action ca) {
+	    return Promise.promise(() -> {
+		try {
+		    String role = (String) Http.Context.current().args
+			    .get("role");
+		    if (!modifyingAccessIsAllowed(role)) {
+			return AccessDenied();
+		    }
+		    return ca.exec();
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
+		}
+	    });
+	}
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
     public static class BulkAction {
 	Promise<Result> call(Action ca) {
 	    return Promise.promise(() -> {

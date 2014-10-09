@@ -357,7 +357,7 @@ public class Read {
 		+ pid : pid;
     }
 
-    private String getHttpUriOfResource(Node node) {
+    public String getHttpUriOfResource(Node node) {
 	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
 		+ Globals.server + "/resource/" + node.getAggregationUri();
     }

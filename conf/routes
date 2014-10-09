@@ -49,7 +49,9 @@ PUT /resource/:pid					controllers.Resource.updateResource(pid)
 POST /resource/:pid/metadata		controllers.Resource.updateMetadata(pid)
 POST /resource/:pid/data			controllers.Resource.updateData(pid,md5?="")
 POST /resource/:pid/dc				controllers.Resource.updateDc(pid)
-POST /resource/:pid					controllers.Resource.updateResource(pid)
+POST /resource/:namespace			controllers.Resource.createResource(namespace)
+
+
 
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)
 DELETE /resource/:pid/data			controllers.Resource.deleteData(pid)

@@ -243,38 +243,60 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> updateResource(@PathParam("pid") String pid) {
-	return new ModifyAction()
-		.call(pid,
-			node -> {
-			    try {
-				String[] p = pid.split(":");
-				Object o = request().body().asJson();
-				RegalObject object;
-				if (o != null) {
-				    object = (RegalObject) MyController.mapper
-					    .readValue(o.toString(),
-						    RegalObject.class);
-				} else {
-				    throw new NullPointerException(
-					    "Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
-				}
-				Node newnode = create.createResource(
-					object.getType(),
-					object.getParentPid(),
-					object.getTransformer(),
-					object.getAccessScheme(),
-					object.getPublishScheme(), p[1], p[0]);
-				String result = newnode.getPid()
-					+ " created/updated!";
-				return JsonMessage(new Message(result, 200));
-			    } catch (JsonMappingException e) {
-				throw new HttpArchiveException(500, e);
-			    } catch (JsonParseException e) {
-				throw new HttpArchiveException(500, e);
-			    } catch (IOException e) {
-				throw new HttpArchiveException(500, e);
-			    }
-			});
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		String[] p = pid.split(":");
+		return createResource(p[1], p[0]);
+	    } catch (JsonMappingException e) {
+		throw new HttpArchiveException(500, e);
+	    } catch (JsonParseException e) {
+		throw new HttpArchiveException(500, e);
+	    } catch (IOException e) {
+		throw new HttpArchiveException(500, e);
+	    }
+	});
+    }
+
+    private static Result createResource(String id, String namespace)
+	    throws IOException, JsonParseException, JsonMappingException {
+	Object o = request().body().asJson();
+	RegalObject object;
+	if (o != null) {
+	    object = (RegalObject) MyController.mapper.readValue(o.toString(),
+		    RegalObject.class);
+	} else {
+	    throw new NullPointerException(
+		    "Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
+	}
+	Node newnode = create.createResource(object.getType(),
+		object.getParentPid(), object.getTransformer(),
+		object.getAccessScheme(), object.getPublishScheme(), id,
+		namespace);
+	String result = newnode.getPid() + " created/updated!";
+	return JsonMessage(new Message(result, 200));
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+    public static Promise<Result> createResource(
+	    @PathParam("namespace") String namespace) {
+	return new CreateAction().call(() -> {
+	    try {
+		String pid = create.pid(namespace);
+		String[] p = pid.split(":");
+		createResource(p[1], p[0]);
+		Node node = read.readNode(pid);
+		response().setHeader("Location",
+			read.getHttpUriOfResource(node));
+		return status(201, jsonString(node, "compact"));
+	    } catch (JsonMappingException e) {
+		throw new HttpArchiveException(500, e);
+	    } catch (JsonParseException e) {
+		throw new HttpArchiveException(500, e);
+	    } catch (IOException e) {
+		throw new HttpArchiveException(500, e);
+	    }
+	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateMetadata", value = "updateMetadata", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
@@ -466,14 +488,19 @@ public class Resource extends MyController {
     public static Promise<Result> asJson(@PathParam("pid") String pid,
 	    String style) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = "ERROR";
-	    if ("compact".equals(style))
-		result = transform.oaiore(node, "application/json+compact");
-	    else
-		result = transform.oaiore(node, "application/json");
+	    String result = jsonString(node, style);
 	    response().setContentType("application/json");
 	    return ok(result);
 	});
+    }
+
+    private static String jsonString(Node node, String style) {
+	String result = "ERROR";
+	if ("compact".equals(style))
+	    result = transform.oaiore(node, "application/json+compact");
+	else
+	    result = transform.oaiore(node, "application/json");
+	return result;
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
