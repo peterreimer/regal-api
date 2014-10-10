@@ -16,7 +16,6 @@
  */
 package controllers;
 
-import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.Globals;
 import helper.HttpArchiveException;
@@ -299,6 +298,18 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json", nickname = "updateSeq", value = "updateSeq", notes = "Updates the ordering of child objects using a n-triple list.", response = Message.class, httpMethod = "PUT")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+    public static Promise<Result> updateSeq(@PathParam("pid") String pid) {
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    String result = modify.updateSeq(pid, request().body()
+			    .asJson().toString());
+		    return JsonMessage(new Message(result));
+		});
+    }
+
     @ApiOperation(produces = "application/json", nickname = "updateMetadata", value = "updateMetadata", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
     public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
@@ -388,6 +399,14 @@ public class Resource extends MyController {
 		});
     }
 
+    @ApiOperation(produces = "application/json", nickname = "deleteSeq", value = "deleteSeq", notes = "Deletes a resources ordering definition for it's children objects", response = Message.class, httpMethod = "DELETE")
+    public static Promise<Result> deleteSeq(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    String result = delete.deleteSeq(pid);
+	    return JsonMessage(new Message(result));
+	});
+    }
+
     @ApiOperation(produces = "application/json", nickname = "deleteMetadata", value = "deleteMetadata", notes = "Deletes a resources metadata", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteMetadata(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
@@ -436,12 +455,15 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Promise<Result> listParts(@PathParam("pid") String pid) {
+    public static Promise<Result> listParts(@PathParam("pid") String pid,
+	    @QueryParam("style") String style) {
 	return new ReadMetadataAction().call(
 		pid,
 		node -> {
-		    List<String> nodeIds = read.readNode(pid).getRelatives(
-			    HAS_PART);
+		    List<String> nodeIds = read.getSeq(node);
+		    if ("short".equals(style)) {
+			return json(nodeIds);
+		    }
 		    List<Map<String, Object>> result = read.nodelistToMap(read
 			    .getNodes(nodeIds));
 		    return json(result);
@@ -449,12 +471,15 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Promise<Result> listParents(@PathParam("pid") String pid) {
+    public static Promise<Result> listParents(@PathParam("pid") String pid,
+	    @QueryParam("style") String style) {
 	return new ReadMetadataAction().call(
 		pid,
 		node -> {
-		    List<String> nodeIds = read.readNode(pid).getRelatives(
-			    IS_PART_OF);
+		    List<String> nodeIds = node.getRelatives(IS_PART_OF);
+		    if ("short".equals(style)) {
+			return json(nodeIds);
+		    }
 		    List<Map<String, Object>> result = read.nodelistToMap(read
 			    .getNodes(nodeIds));
 		    return json(result);

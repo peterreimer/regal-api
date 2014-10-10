@@ -16,6 +16,7 @@
  */
 package actions;
 
+import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
@@ -293,7 +294,6 @@ public class Read {
     public String readMetadata(String pid) {
 	try {
 	    Node node = readNode(pid);
-
 	    return node.getMetadata();
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(500, e);
@@ -357,9 +357,45 @@ public class Read {
 		+ pid : pid;
     }
 
+    /**
+     * @param node
+     *            the node
+     * @return the http address of the resource
+     */
     public String getHttpUriOfResource(Node node) {
 	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
 		+ Globals.server + "/resource/" + node.getAggregationUri();
+    }
+
+    /**
+     * @param node
+     * @return an ordered list of the nodes Children taking the information
+     *         provided by seq datastream into accoutn
+     */
+    public List<String> getSeq(Node node) {
+	return sort(node.getRelatives(HAS_PART), getSeqArray(node));
+    }
+
+    private List<String> sort(List<String> nodeIds, String[] seq) {
+	List<String> sorted = new ArrayList<String>();
+	for (String i : seq) {
+	    int j = -1;
+	    if ((j = nodeIds.indexOf(i)) != -1) {
+		sorted.add(i);
+		nodeIds.remove(j);
+	    }
+	}
+	sorted.addAll(nodeIds);
+	return sorted;
+    }
+
+    private String[] getSeqArray(Node node) {
+	try {
+	    ObjectMapper mapper = new ObjectMapper();
+	    return mapper.readValue(node.getSeq(), String[].class);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
 }

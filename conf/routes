@@ -28,8 +28,8 @@ GET /resource/:pid.pdfbox			controllers.Resource.asPdfboxTxt(pid)
 GET /resource/:pid.aleph			controllers.Resource.asAleph(pid)
 GET /resource/:pid					controllers.Resource.listResource(pid)
 GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
-GET /resource/:pid/parts			controllers.Resource.listParts(pid)
-GET /resource/:pid/parents			controllers.Resource.listParents(pid)
+GET /resource/:pid/parts			controllers.Resource.listParts(pid,style?="")
+GET /resource/:pid/parents			controllers.Resource.listParents(pid,style?="")
 
 # list from elasticsearch index
 GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
@@ -37,22 +37,23 @@ GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
 GET /resourceIndex/:pid.json		controllers.ResourceIndex.listResource(pid)	
 GET /resourceIndex/:pid				controllers.ResourceIndex.listResource(pid)
 GET /resourceIndex 					controllers.ResourceIndex.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
-GET /resourceIndex/:pid/parts		controllers.ResourceIndex.listParts(pid)
-GET /resourceIndex/:pid/parents		controllers.ResourceIndex.listParents(pid)
+GET /resourceIndex/:pid/parts		controllers.ResourceIndex.listParts(pid,style?="")
+GET /resourceIndex/:pid/parents		controllers.ResourceIndex.listParents(pid,style?="")
 
-
+PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)
 PUT /resource/:pid/data				controllers.Resource.updateData(pid,md5?="")
 PUT /resource/:pid/dc				controllers.Resource.updateDc(pid)
 PUT /resource/:pid					controllers.Resource.updateResource(pid)
 
+POST /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 POST /resource/:pid/metadata		controllers.Resource.updateMetadata(pid)
 POST /resource/:pid/data			controllers.Resource.updateData(pid,md5?="")
 POST /resource/:pid/dc				controllers.Resource.updateDc(pid)
 POST /resource/:namespace			controllers.Resource.createResource(namespace)
 
 
-
+DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)
 DELETE /resource/:pid/data			controllers.Resource.deleteData(pid)
 DELETE /resource/:pid/dc			controllers.Resource.deleteDc(pid)

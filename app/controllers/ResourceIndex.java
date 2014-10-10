@@ -1,6 +1,5 @@
 package controllers;
 
-import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
 
@@ -102,11 +101,14 @@ public class ResourceIndex extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Promise<Result> listParts(@PathParam("pid") String pid) {
+    public static Promise<Result> listParts(@PathParam("pid") String pid,
+	    @QueryParam("style") String style) {
 	return new ReadMetadataAction().call(pid, new NodeAction() {
-	    public Result exec(Node nodes) {
-		List<String> nodeIds = read.readNode(pid)
-			.getRelatives(HAS_PART);
+	    public Result exec(Node node) {
+		List<String> nodeIds = read.getSeq(node);
+		if ("short".equals(style)) {
+		    return json(nodeIds);
+		}
 		List<Map<String, Object>> result = read
 			.getNodesFromIndex(nodeIds);
 		return json(result);
@@ -115,12 +117,16 @@ public class ResourceIndex extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Promise<Result> listParents(@PathParam("pid") String pid) {
+    public static Promise<Result> listParents(@PathParam("pid") String pid,
+	    @QueryParam("style") String style) {
 	ReadMetadataAction action = new ReadMetadataAction();
 	return action.call(pid, new NodeAction() {
 	    public Result exec(Node node) {
 		List<String> nodeIds = read.readNode(pid).getRelatives(
 			IS_PART_OF);
+		if ("short".equals(style)) {
+		    return json(nodeIds);
+		}
 		List<Map<String, Object>> result = read
 			.getNodesFromIndex(nodeIds);
 		return json(result);

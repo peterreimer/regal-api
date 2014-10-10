@@ -120,6 +120,39 @@ public class Modify {
 
     /**
      * @param pid
+     *            the node's pid
+     * @param content
+     *            a json array to provide ordering information about the
+     *            object's children
+     * @return a message
+     */
+    public String updateSeq(String pid, String content) {
+	try {
+	    if (content == null) {
+		throw new HttpArchiveException(406, pid
+			+ " You've tried to upload an empty string."
+			+ " This action is not supported."
+			+ " Use HTTP DELETE instead.\n");
+	    }
+	    // RdfUtils.validate(content);
+	    play.Logger.info(content);
+	    File file = CopyUtils.copyStringToFile(content);
+	    Node node = new Read().readNode(pid);
+	    if (node != null) {
+		node.setSeqFile(file.getAbsolutePath());
+		Globals.fedora.updateNode(node);
+	    }
+	    new Index().index(node);
+	    return pid + " sequence of child objects updated!";
+	} catch (RdfException e) {
+	    throw new HttpArchiveException(400, e);
+	} catch (IOException e) {
+	    throw new UpdateNodeException(e);
+	}
+    }
+
+    /**
+     * @param pid
      *            The pid that must be updated
      * @param content
      *            The metadata as rdf string
@@ -129,9 +162,9 @@ public class Modify {
 	try {
 	    if (content == null) {
 		throw new HttpArchiveException(406, pid
-			+ "You've tried to upload an empty string."
+			+ " You've tried to upload an empty string."
 			+ " This action is not supported."
-			+ " Use HTTP DELETE instead.");
+			+ " Use HTTP DELETE instead.\n");
 	    }
 	    RdfUtils.validate(content);
 	    File file = CopyUtils.copyStringToFile(content);
@@ -430,4 +463,5 @@ public class Modify {
 	    super(e);
 	}
     }
+
 }

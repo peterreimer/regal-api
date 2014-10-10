@@ -60,8 +60,8 @@ public class Create {
 	    List<String> transformers, String accessScheme,
 	    String publishScheme, String rawPid, String namespace) {
 	logger.debug("create " + type);
-	Node node = createNodeIfNotExists(type, parent, transformers,
-		accessScheme, publishScheme, rawPid, namespace);
+	Node node = createNodeIfNotExists(type, parent, accessScheme,
+		publishScheme, rawPid, namespace);
 	new Index().remove(node.getPid(), namespace, node.getContentType());
 	node.setAccessScheme(accessScheme);
 	node.setPublishScheme(publishScheme);
@@ -74,8 +74,8 @@ public class Create {
     }
 
     private Node createNodeIfNotExists(String type, String parent,
-	    List<String> transformers, String accessScheme,
-	    String publishScheme, String rawPid, String namespace) {
+	    String accessScheme, String publishScheme, String rawPid,
+	    String namespace) {
 	String pid = namespace + ":" + rawPid;
 	Node node = null;
 	if (Globals.fedora.nodeExists(pid)) {
@@ -124,6 +124,12 @@ public class Create {
 	return "Success!";
     }
 
+    /**
+     * @param namespace
+     *            a namespace in fedora , corresponds to an index in
+     *            elasticsearch
+     * @return a new pid in the namespace
+     */
     public String pid(String namespace) {
 	return Globals.fedora.getPid(namespace);
     }

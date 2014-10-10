@@ -95,6 +95,17 @@ public class Delete {
 
     /**
      * @param pid
+     *            the id of a resource.
+     * @return a message
+     */
+    public String deleteSeq(String pid) {
+	Globals.fedora.deleteDatastream(pid, "seq");
+	new Index().index(new Read().readNode(pid));
+	return pid + ": seq - datastream successfully deleted! ";
+    }
+
+    /**
+     * @param pid
      *            a namespace qualified id
      * @return a message
      */
@@ -132,4 +143,5 @@ public class Delete {
 	if (messageOut != null)
 	    messageOut.close();
     }
+
 }

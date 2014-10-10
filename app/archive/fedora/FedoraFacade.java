@@ -224,6 +224,9 @@ class FedoraFacade implements FedoraInterface {
 	    if (node.getMetadataFile() != null) {
 		utils.createMetadataStream(node);
 	    }
+	    if (node.getSeqFile() != null) {
+		utils.createSeqStream(node);
+	    }
 	    Link link = new Link();
 	    link.setObject(node.getContentType(), true);
 	    link.setPredicate(REL_CONTENT_TYPE);
@@ -296,6 +299,14 @@ class FedoraFacade implements FedoraInterface {
 	} catch (Exception e) {
 	    // datastream with name metadata is optional
 	}
+	try {
+	    FedoraResponse response = new GetDatastreamDissemination(pid, "seq")
+		    .execute();
+	    node.setSeq(CopyUtils.copyToString(response.getEntityInputStream(),
+		    "utf-8"));
+	} catch (Exception e) {
+	    // datastream with name metadata is optional
+	}
 	return node;
     }
 
@@ -310,6 +321,9 @@ class FedoraFacade implements FedoraInterface {
 	}
 	if (node.getMetadataFile() != null) {
 	    utils.updateMetadataStream(node);
+	}
+	if (node.getSeqFile() != null) {
+	    utils.updateSeqStream(node);
 	}
 	utils.linkContentModels(models, node);
 	utils.updateRelsExt(node);

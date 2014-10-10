@@ -56,11 +56,13 @@ public class Node {
     public DublinCoreData dublinCoreData = new DublinCoreData();
 
     private String metadataFile = null;
+    private String seqFile = null;
     private String uploadFile = null;
     private List<Link> links = new Vector<Link>();
     private List<Transformer> transformer = new Vector<Transformer>();
 
     private String metadata = null;
+    private String seq = null;
 
     private String pid = null;
     private String alephId = null;
@@ -89,7 +91,7 @@ public class Node {
 
     private String createdBy;
 
-    private String importedFrom;;
+    private String importedFrom;
 
     /**
      * Creates a new Node.
@@ -282,6 +284,24 @@ public class Node {
      */
     public void setMetadataFile(String metadataFile) {
 	this.metadataFile = metadataFile;
+    }
+
+    /**
+     * The metadata file
+     * 
+     * @return the absolute path to file
+     */
+    public String getSeqFile() {
+	return seqFile;
+    }
+
+    /**
+     * @param seqFile
+     *            The absolutepath to a file that provides ordering information
+     *            for the object's children
+     */
+    public void setSeqFile(String seqFile) {
+	this.seqFile = seqFile;
     }
 
     /**
@@ -545,6 +565,24 @@ public class Node {
      */
     public Node setMetadata(String metadata) {
 	this.metadata = metadata;
+	return this;
+    }
+
+    /**
+     * @return the content of seq datastream in a string
+     */
+    @JsonIgnore()
+    public String getSeq() {
+	return seq;
+    }
+
+    /**
+     * @param seq
+     *            datastream as string
+     * @return this
+     */
+    public Node setSeq(String seq) {
+	this.seq = seq;
 	return this;
     }
 
@@ -927,5 +965,4 @@ public class Node {
 	}
 	return w.toString();
     }
-
 }

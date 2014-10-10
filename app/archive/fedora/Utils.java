@@ -308,18 +308,23 @@ public class Utils {
 	}
     }
 
-    void createMetadataStream(Node node) {
+    @SuppressWarnings("javadoc")
+    public void createSeqStream(Node node) {
 	try {
-	    Upload request = new Upload(new File(node.getMetadataFile()));
+	    Upload request = new Upload(new File(node.getSeqFile()));
 	    UploadResponse response = request.execute();
 	    String location = response.getUploadLocation();
-	    new AddDatastream(node.getPid(), "metadata").versionable(true)
-		    .dsState("A").dsLabel("n-triple rdf metadata")
-		    .controlGroup("M").mimeType("text/plain")
+	    new AddDatastream(node.getPid(), "seq").versionable(true)
+		    .dsState("A")
+		    .dsLabel("json array to define the order of child objects")
+		    .controlGroup("M").mimeType("application/json")
 		    .dsLocation(location).execute();
 	} catch (FedoraClientException e) {
 	    throw new HttpArchiveException(e.getStatus(), e);
 	}
+    }
+
+    void createMetadataStream(Node node) {
 
     }
 
@@ -337,6 +342,31 @@ public class Utils {
 			.dsState("A").mimeType(node.getMimeType())
 			.dsLabel(node.getFileLabel()).content(file)
 			.controlGroup("M").execute();
+	    }
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
+	}
+    }
+
+    @SuppressWarnings("javadoc")
+    public void updateSeqStream(Node node) {
+	try {
+	    File file = new File(node.getSeqFile());
+	    if (dataStreamExists(node.getPid(), "seq")) {
+		new ModifyDatastream(node.getPid(), "seq")
+			.versionable(true)
+			.dsLabel(
+				"json array to define the order of child objects")
+			.dsState("A").controlGroup("M")
+			.mimeType("application/json").content(file).execute();
+	    } else {
+		new AddDatastream(node.getPid(), "seq")
+			.versionable(true)
+			.dsState("A")
+			.dsLabel(
+				"json array to define the order of child objects")
+			.controlGroup("M").mimeType("application/json")
+			.content(file).execute();
 	    }
 	} catch (FedoraClientException e) {
 	    throw new HttpArchiveException(e.getStatus(), e);
@@ -572,13 +602,13 @@ public class Utils {
 				.predicate(curHBZLink.getPredicate())
 				.object(curHBZLink.getObject(),
 					curHBZLink.isLiteral()).execute();
+
 		    } else {
 
 			new AddRelationship(pid)
 				.predicate(curHBZLink.getPredicate())
 				.object(addUriPrefix(curHBZLink.getObject()),
 					curHBZLink.isLiteral()).execute();
-
 		    }
 		} catch (Exception e) {
 		    logger.debug("", e);
@@ -791,4 +821,5 @@ public class Utils {
 	Transformer t = new Transformer(id);
 	return t;
     }
+
 }
