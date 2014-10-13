@@ -53,7 +53,7 @@
 				<version>1.2.5</version>
 				<extensions>true</extensions>
 				<configuration>
-					<play2Home>${user.home}/opt/regal/play-${play2.version}</play2Home>
+					<play2Home>${user.home}/local/opt/regal/play-${play2.version}</play2Home>
 				</configuration>
 				<executions>
 					<execution>
@@ -64,7 +64,7 @@
 						<phase>validate</phase>
 						<configuration>
 							<play2version>${play2.version}</play2version>
-							<play2basedir>${user.home}/opt</play2basedir>
+							<play2basedir>${user.home}/local/opt</play2basedir>
 						</configuration>
 					</execution>
 				</executions>
