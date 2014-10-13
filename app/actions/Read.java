@@ -295,10 +295,25 @@ public class Read {
 	try {
 	    Node node = readNode(pid);
 	    return node.getMetadata();
-	} catch (RdfException e) {
-	    throw new HttpArchiveException(500, e);
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    /**
+     * @param node
+     *            the pid of the object
+     * @return ordered json array of parts
+     */
+    public String readSeq(Node node) {
+	try {
+	    return node.getSeq();
+	} catch (UrlConnectionException e) {
+	    throw new HttpArchiveException(404, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
 	}
     }
 

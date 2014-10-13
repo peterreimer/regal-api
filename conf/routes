@@ -30,6 +30,7 @@ GET /resource/:pid					controllers.Resource.listResource(pid)
 GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
 GET /resource/:pid/parts			controllers.Resource.listParts(pid,style?="")
 GET /resource/:pid/parents			controllers.Resource.listParents(pid,style?="")
+GET /resource/:pid/seq				controllers.Resource.listSeq(pid)
 
 # list from elasticsearch index
 GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)

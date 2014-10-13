@@ -304,6 +304,7 @@ public class Resource extends MyController {
 	return new ModifyAction().call(
 		pid,
 		node -> {
+		    play.Logger.debug("Update Seq: " + pid);
 		    String result = modify.updateSeq(pid, request().body()
 			    .asJson().toString());
 		    return JsonMessage(new Message(result));
@@ -468,6 +469,15 @@ public class Resource extends MyController {
 			    .getNodes(nodeIds));
 		    return json(result);
 		});
+    }
+
+    @ApiOperation(produces = "applicatio/json", nickname = "listSeq", value = "listSeq", notes = "Shows seq data for ordered print of parts.", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> listSeq(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    String result = read.readSeq(node);
+	    return ok(result);
+	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
