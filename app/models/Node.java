@@ -16,6 +16,9 @@
  */
 package models;
 
+import static archive.fedora.FedoraVocabulary.HAS_PART;
+import helper.HttpArchiveException;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -874,6 +877,37 @@ public class Node {
 		result.add(l.getObject());
 	}
 	return result;
+    }
+
+    /**
+     * @param node
+     * @return an ordered list of the nodes Children taking the information
+     *         provided by seq datastream into accoutn
+     */
+    public List<String> getPartsSorted() {
+	return sort(getRelatives(HAS_PART), getSeqArray());
+    }
+
+    private List<String> sort(List<String> nodeIds, String[] seq) {
+	List<String> sorted = new ArrayList<String>();
+	for (String i : seq) {
+	    int j = -1;
+	    if ((j = nodeIds.indexOf(i)) != -1) {
+		sorted.add(i);
+		nodeIds.remove(j);
+	    }
+	}
+	sorted.addAll(nodeIds);
+	return sorted;
+    }
+
+    private String[] getSeqArray() {
+	try {
+	    ObjectMapper mapper = new ObjectMapper();
+	    return mapper.readValue(getSeq(), String[].class);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     @Override

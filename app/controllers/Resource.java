@@ -461,7 +461,7 @@ public class Resource extends MyController {
 	return new ReadMetadataAction().call(
 		pid,
 		node -> {
-		    List<String> nodeIds = read.getSeq(node);
+		    List<String> nodeIds = node.getPartsSorted();
 		    if ("short".equals(style)) {
 			return json(nodeIds);
 		    }

@@ -386,11 +386,10 @@ public class OaiOreMaker {
 		con.add(aggregation, isPartOf, relUrl);
 	    }
 
-	    for (String rel : node.getRelatives(HAS_PART)) {
+	    for (String rel : node.getPartsSorted()) {
 		URI relUrl = f.createURI(rel);
 		con.add(aggregation, aggregates, relUrl);
 		con.add(aggregation, hasPart, relUrl);
-
 	    }
 	} catch (Exception e) {
 	    logger.debug("", e);

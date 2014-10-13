@@ -382,35 +382,4 @@ public class Read {
 		+ Globals.server + "/resource/" + node.getAggregationUri();
     }
 
-    /**
-     * @param node
-     * @return an ordered list of the nodes Children taking the information
-     *         provided by seq datastream into accoutn
-     */
-    public List<String> getSeq(Node node) {
-	return sort(node.getRelatives(HAS_PART), getSeqArray(node));
-    }
-
-    private List<String> sort(List<String> nodeIds, String[] seq) {
-	List<String> sorted = new ArrayList<String>();
-	for (String i : seq) {
-	    int j = -1;
-	    if ((j = nodeIds.indexOf(i)) != -1) {
-		sorted.add(i);
-		nodeIds.remove(j);
-	    }
-	}
-	sorted.addAll(nodeIds);
-	return sorted;
-    }
-
-    private String[] getSeqArray(Node node) {
-	try {
-	    ObjectMapper mapper = new ObjectMapper();
-	    return mapper.readValue(node.getSeq(), String[].class);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	}
-    }
-
 }

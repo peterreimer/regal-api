@@ -105,7 +105,7 @@ public class ResourceIndex extends MyController {
 	    @QueryParam("style") String style) {
 	return new ReadMetadataAction().call(pid, new NodeAction() {
 	    public Result exec(Node node) {
-		List<String> nodeIds = read.getSeq(node);
+		List<String> nodeIds = node.getPartsSorted();
 		if ("short".equals(style)) {
 		    return json(nodeIds);
 		}
