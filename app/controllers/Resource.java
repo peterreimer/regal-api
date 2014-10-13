@@ -304,7 +304,6 @@ public class Resource extends MyController {
 	return new ModifyAction().call(
 		pid,
 		node -> {
-		    play.Logger.debug("Update Seq: " + pid);
 		    String result = modify.updateSeq(pid, request().body()
 			    .asJson().toString());
 		    return JsonMessage(new Message(result));
