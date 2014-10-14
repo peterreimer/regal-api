@@ -890,6 +890,8 @@ public class Node {
 
     private List<String> sort(List<String> nodeIds, String[] seq) {
 	List<String> sorted = new ArrayList<String>();
+	if (nodeIds == null || nodeIds.isEmpty())
+	    return null;
 	for (String i : seq) {
 	    int j = -1;
 	    if ((j = nodeIds.indexOf(i)) != -1) {
@@ -903,6 +905,8 @@ public class Node {
 
     private String[] getSeqArray() {
 	try {
+	    if (this.seq == null || this.seq.isEmpty())
+		return new String[] {};
 	    ObjectMapper mapper = new ObjectMapper();
 	    return mapper.readValue(getSeq(), String[].class);
 	} catch (Exception e) {
