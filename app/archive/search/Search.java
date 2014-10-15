@@ -220,7 +220,7 @@ public class Search {
 		}
 		msg.append("\n");
 		result.add(msg.toString());
-		play.Logger.debug("Add " + node.getPid() + "to bulk action");
+		play.Logger.debug("Add " + node.getPid() + " to bulk action");
 	    } catch (Exception e) {
 		result.add("A problem occured");
 	    }
@@ -243,7 +243,7 @@ public class Search {
 			.debug("FAIL: " + bulkResponse.buildFailureMessage());
 	    }
 	} catch (Exception e) {
-	    // e.printStackTrace();
+	    play.Logger.warn("", e);
 	}
 	return result;
     }

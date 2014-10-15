@@ -18,7 +18,6 @@ package actions;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -96,23 +95,28 @@ public class Index {
      * @param indexName
      */
     public void indexAll(String indexName) {
-	Read read = new Read();
-	String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
-	int until = 0;
-	int stepSize = 10;
-	int from = 0 - stepSize;
-	List<String> nodes = read.listRepoNamespace(indexName);
-	do {
-	    until += stepSize;
-	    from += stepSize;
-	    if (nodes.isEmpty())
-		break;
-	    messageOut.write(Globals.search.indexAll(
-		    read.getNodes(nodes.subList(from, until)),
-		    indexNameWithDatestamp).toString());
-	} while (until < nodes.size());
-	messageOut.write("\nSuccessfuly Finished\n");
-	messageOut.close();
+	try {
+	    Read read = new Read();
+	    String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
+	    int until = 0;
+	    int stepSize = 100;
+	    int from = 0 - stepSize;
+	    List<String> nodes = read.listRepoNamespace(indexName);
+	    do {
+		until += stepSize;
+		from += stepSize;
+		if (nodes.isEmpty())
+		    break;
+		if (until > nodes.size())
+		    until = nodes.size();
+		messageOut.write(Globals.search.indexAll(
+			read.getNodes(nodes.subList(from, until)),
+			indexNameWithDatestamp).toString());
+	    } while (until < nodes.size());
+	    messageOut.write("\nSuccessfuly Finished\n");
+	} finally {
+	    messageOut.close();
+	}
     }
 
     private String getCurrentDate() {
