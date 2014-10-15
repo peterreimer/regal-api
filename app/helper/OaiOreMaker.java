@@ -16,7 +16,6 @@
  */
 package helper;
 
-import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import java.io.IOException;
 import java.io.InputStream;

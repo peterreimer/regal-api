@@ -16,7 +16,6 @@
  */
 package actions;
 
-import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
@@ -42,7 +41,6 @@ import org.openrdf.rio.RDFFormat;
 
 import play.Logger;
 import archive.fedora.FedoraVocabulary;
-import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
 
