@@ -101,20 +101,18 @@ public class Index {
 	int until = 0;
 	int stepSize = 10;
 	int from = 0 - stepSize;
-	List<String> nodes = new ArrayList<String>();
+	List<String> nodes = read.listRepoNamespace(indexName);
 	do {
 	    until += stepSize;
 	    from += stepSize;
-	    nodes = read.listRepoNamespace(indexName, from, until);
 	    if (nodes.isEmpty())
 		break;
-	    messageOut.write(Globals.search.indexAll(read.getNodes(nodes),
+	    messageOut.write(Globals.search.indexAll(
+		    read.getNodes(nodes.subList(from, until)),
 		    indexNameWithDatestamp).toString());
-
-	} while (nodes.size() == stepSize);
+	} while (until < nodes.size());
 	messageOut.write("\nSuccessfuly Finished\n");
 	messageOut.close();
-
     }
 
     private String getCurrentDate() {
