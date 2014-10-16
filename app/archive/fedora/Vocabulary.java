@@ -50,10 +50,16 @@ public abstract class Vocabulary {
     public final static String TYPE_OBJECT = HBZ_MODEL_NAMESPACE + "HBZ_OBJECT";
 
     /**
-     * The access scheme rules the access to a node
+     * The access scheme rules the access to a node's data
      */
     public final static String REL_ACCESS_SCHEME = HBZ_MODEL_NAMESPACE
 	    + "accessScheme";
+
+    /**
+     * The publish scheme rules the access to a node's metadata
+     */
+    public final static String REL_PUBLISH_SCHEME = HBZ_MODEL_NAMESPACE
+	    + "publishScheme";
 
     /**
      * Used to point to a legacy system which originally created the resource

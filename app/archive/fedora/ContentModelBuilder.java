@@ -16,6 +16,8 @@
  */
 package archive.fedora;
 
+import helper.HttpArchiveException;
+
 import java.util.List;
 
 import models.Node;
@@ -33,7 +35,6 @@ public class ContentModelBuilder {
     void createFedoraXMLForContentModels(Node node) {
 	StringBuffer infoStream = new StringBuffer();
 	List<Transformer> models = node.getTransformer();
-
 	infoStream.append("<ContentModelInfoStream>");
 	for (Transformer model : models) {
 	    infoStream.append("<ContentModel>");
@@ -56,7 +57,6 @@ public class ContentModelBuilder {
 		infoStream.append("</PrescribedDS>");
 	    }
 	    infoStream.append("</PrescribedDSs>");
-
 	    List<String> names = model.getMethodNames();
 	    List<String> locs = model.getMethodLocations();
 	    infoStream.append("<Methods>");
@@ -80,13 +80,10 @@ public class ContentModelBuilder {
 		    .formatURI(
 			    "info:hbz/hbz-system:HBZContentModelInfoStream1.0")
 		    .versionable(true).content(infoStream.toString()).execute();
-	}
-
-	catch (FedoraClientException e) {
+	} catch (FedoraClientException e) {
 	    e.printStackTrace();
-	    throw new ArchiveException(e.getMessage(), e);
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
-
     }
 
     /**
@@ -96,22 +93,17 @@ public class ContentModelBuilder {
      */
     String getDsCompositeModel(Transformer cm) {
 	String start = " <dsCompositeModel xmlns=\"info:fedora/fedora-system:def/dsCompositeModel#\">";
-
 	StringBuffer middle = new StringBuffer();
 	List<String> prescribedDSIds = cm.getPrescribedDSIds();
-
 	for (int i = 0; i < prescribedDSIds.size(); i++) {
 	    String dsid = prescribedDSIds.get(i);
 	    String furi = cm.getPrescribedDSformatURIs().get(i);
 	    String mtype = cm.getPrescribedDSMimeTypes().get(i);
-
 	    middle.append("<dsTypeModel ID=\"" + dsid + "\">"
 		    + "<form FORMAT_URI=\"" + furi + "\" MIME=\"" + mtype
 		    + "\"/>" + "</dsTypeModel>");
 	}
-
 	String end = "</dsCompositeModel>";
-
 	return start + middle.toString() + end;
     }
 
@@ -122,16 +114,13 @@ public class ContentModelBuilder {
      */
     String getMethodMap(Transformer cm) {
 	String start = "<fmm:MethodMap name=\"MethodMap\" xmlns:fmm=\"http://fedora.comm.nsdlib.org/service/methodmap\">";
-
 	StringBuffer middle = new StringBuffer();
 	for (int i = 0; i < cm.getMethodNames().size(); i++) {
 	    String methodName = cm.getMethodNames().get(i);
 	    middle.append("<fmm:Method label=\"" + methodName
 		    + "\" operationName=\"" + methodName + "\"/>");
 	}
-
 	String end = "</fmm:MethodMap>";
-
 	return start + middle.toString() + end;
     }
 
@@ -141,9 +130,7 @@ public class ContentModelBuilder {
      * @return the fedora-like method map to wsdl mapping as string
      */
     String getMethodMapToWsdl(Transformer cm) {
-
 	String start = "<fmm:MethodMap name=\"MethodMap\" xmlns:fmm=\"http://fedora.comm.nsdlib.org/service/methodmap\">";
-
 	StringBuffer middle = new StringBuffer();
 	for (int i = 0; i < cm.getMethodNames().size(); i++) {
 	    String methodName = cm.getMethodNames().get(i);
@@ -160,9 +147,7 @@ public class ContentModelBuilder {
 		    + "<fmm:DefaultInputParm defaultValue=\"$pid\" parmName=\"pid\" passBy=\"VALUE\" required=\"true\"/>"
 		    + "    </fmm:Method>");
 	}
-
 	String end = "</fmm:MethodMap>";
-
 	return start + middle.toString() + end;
     }
 
@@ -226,7 +211,6 @@ public class ContentModelBuilder {
 		    + "</wsdl:operation>");
 	}
 	String end = " </wsdl:binding>" + "</wsdl:definitions>";
-
 	return start + middle.toString() + end;
     }
 

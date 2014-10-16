@@ -7,11 +7,13 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 
-GET     /public/docs               controllers.Application.index()
+GET     /public/docs                controllers.Application.index()
 GET     /public/docs/               controllers.Application.index()
 GET     /public/*file               controllers.Assets.at(path="/public", file)
-
+# list
+GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
+GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid)
 GET /resource/:pid/data				controllers.Resource.listData(pid)
 GET /resource/:pid/dc				controllers.Resource.listDc(pid)
@@ -25,34 +27,55 @@ GET /resource/:pid.pdfa				controllers.Resource.asPdfa(pid)
 GET /resource/:pid.pdfbox			controllers.Resource.asPdfboxTxt(pid)
 GET /resource/:pid.aleph			controllers.Resource.asAleph(pid)
 GET /resource/:pid					controllers.Resource.listResource(pid)
-GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",src?="repo",from: Int ?=0, until: Int?=10)
+GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
+GET /resource/:pid/parts			controllers.Resource.listParts(pid,style?="")
+GET /resource/:pid/parents			controllers.Resource.listParents(pid,style?="")
+GET /resource/:pid/seq				controllers.Resource.listSeq(pid)
 
+# list from elasticsearch index
+GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
+# list resource from elasticsearch index
+GET /resourceIndex/:pid.json		controllers.ResourceIndex.listResource(pid)	
+GET /resourceIndex/:pid				controllers.ResourceIndex.listResource(pid)
+GET /resourceIndex 					controllers.ResourceIndex.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
+GET /resourceIndex/:pid/parts		controllers.ResourceIndex.listParts(pid,style?="")
+GET /resourceIndex/:pid/parents		controllers.ResourceIndex.listParents(pid,style?="")
+
+PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)
 PUT /resource/:pid/data				controllers.Resource.updateData(pid,md5?="")
 PUT /resource/:pid/dc				controllers.Resource.updateDc(pid)
 PUT /resource/:pid					controllers.Resource.updateResource(pid)
 
+POST /resource/:pid/parts			controllers.Resource.updateSeq(pid)
+POST /resource/:pid/metadata		controllers.Resource.updateMetadata(pid)
+POST /resource/:pid/data			controllers.Resource.updateData(pid,md5?="")
+POST /resource/:pid/dc				controllers.Resource.updateDc(pid)
+POST /resource/:namespace			controllers.Resource.createResource(namespace)
+
+
+DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)
 DELETE /resource/:pid/data			controllers.Resource.deleteData(pid)
 DELETE /resource/:pid/dc			controllers.Resource.deleteDc(pid)
 DELETE /resource/:pid				controllers.Resource.deleteResource(pid)
 DELETE /resource 					controllers.Resource.deleteResources(namespace?="",contentType?="",src?="repo",from: Int ?=0, until: Int?=10)
 
-GET /resource/:pid/parts			controllers.Resource.listParts(pid)
-GET /resource/:pid/parents			controllers.Resource.listParents(pid)
 
 POST /resource/:pid/oaisets			controllers.Resource.updateOaiSets(pid)
 	
 # Swagger - Root Resources Listing
 GET /api-docs 						controllers.ApiHelpController.getResources
 
-# OPTIONS to support hosting UI off domain
+#OPTIONS to support hosting UI off domain
 #OPTIONS /*wholepath controllers.Resource.getOptions(wholepath)
 
 GET /api-docs/utils 				controllers.ApiHelpController.getResource(path = "/utils")
 GET /api-docs/resource 				controllers.ApiHelpController.getResource(path = "/resource")
+GET /api-docs/resourceIndex 		controllers.ApiHelpController.getResource(path = "/resourceIndex")
 
 POST /utils/index/:pid 				controllers.MyUtils.index(pid,contentType,index?="")
+POST /utils/indexAll 				controllers.MyUtils.indexAll(index?="")
 DELETE /utils/removeFromIndex/:pid 	controllers.MyUtils.removeFromIndex(pid,contentType)
 POST /utils/publicIndex/:pid 		controllers.MyUtils.publicIndex(pid,contentType,index?="")
 DELETE /utils/removeFromPublicIndex/:pid controllers.MyUtils.removeFromPublicIndex(pid,contentType)
@@ -62,4 +85,5 @@ POST /utils/replaceUrn 				controllers.MyUtils.replaceUrn(id,namespace, snid)
 POST /utils/initContentModels  		controllers.MyUtils.initContentModels(namespace)
 
 GET /portal							controllers.Portal.index()
-GET /portal/opensearch							controllers.Portal.search()
+GET /portal/opensearch				controllers.Portal.opensearch()
+GET /search*path					controllers.Portal.search(path: String)

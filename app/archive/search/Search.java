@@ -16,14 +16,22 @@
  */
 package archive.search;
 
+import helper.Globals;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import models.Node;
+
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -38,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
+import actions.Transform;
 import archive.fedora.CopyUtils;
 
 /**
@@ -73,19 +82,44 @@ public class Search {
 		client.admin().indices().prepareCreate(i)
 			.setSource(indexConfig).execute().actionGet();
 	    }
-
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    logger.debug("", e);
+	    logger.warn("", e);
 	} catch (Exception e) {
-	    logger.debug("", e);
+	    logger.warn("", e);
+	}
+    }
+
+    void init(String[] index) {
+	try {
+	    String indexConfig = CopyUtils.copyToString(Play.application()
+		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
+	    for (String i : index) {
+		client.admin().indices().prepareCreate(i)
+			.setSource(indexConfig).execute().actionGet();
+	    }
+	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
+	    logger.warn("", e);
+	} catch (Exception e) {
+	    logger.warn("", e);
+	}
+    }
+
+    void init(String index) {
+	try {
+	    String indexConfig = CopyUtils.copyToString(Play.application()
+		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
+	    client.admin().indices().prepareCreate(index)
+		    .setSource(indexConfig).execute().actionGet();
+	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
+	    logger.warn("", e);
+	} catch (Exception e) {
+	    logger.warn("", e);
 	}
     }
 
     ActionResponse index(String index, String type, String id, String data) {
-
 	return client.prepareIndex(index, type, id).setSource(data).execute()
 		.actionGet();
-
     }
 
     SearchHits listResources(String index, String type, int from, int until) {
@@ -99,11 +133,8 @@ public class Search {
 	    builder = client.prepareSearch(index);
 	if (type != null && !type.equals(""))
 	    builder.setTypes(type);
-
 	builder.setFrom(from).setSize(until - from);
-
 	SearchResponse response = builder.execute().actionGet();
-
 	return response.getHits();
     }
 
@@ -118,7 +149,7 @@ public class Search {
 	return list;
     }
 
-    ActionResponse delete(String index, String type, String id) {
+    ActionResponse delete(String id, String index, String type) {
 	return client.prepareDelete(index, type, id)
 		.setOperationThreaded(false).execute().actionGet();
     }
@@ -134,7 +165,6 @@ public class Search {
 
     Map<String, Object> getSettings(String index, String type) {
 	try {
-
 	    client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	    ClusterState clusterState = client.admin().cluster().prepareState()
 		    .setIndices(index).execute().actionGet().getState();
@@ -144,7 +174,77 @@ public class Search {
 	} catch (IOException e) {
 	    throw new SearchException(e);
 	}
+    }
+
+    /**
+     * @param pid
+     *            a pid of a node
+     * @return a map that represents the node
+     */
+    public Map<String, Object> get(String pid) {
+	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	GetResponse response = client
+		.prepareGet(pid.split(":")[0], "_all", pid).execute()
+		.actionGet();
+	return response.getSource();
 
     }
 
+    /**
+     * @param list
+     *            list of nodes to index
+     * @param index
+     *            name of a index
+     * @return list of messages
+     */
+    public List<String> indexAll(List<Node> list, String index) {
+	init(index);
+	List<String> result = new ArrayList<String>();
+	Transform t = new Transform();
+	BulkRequestBuilder internalIndexBulk = client.prepareBulk();
+	BulkRequestBuilder publicIndexBulk = client.prepareBulk();
+
+	for (Node node : list) {
+	    try {
+		StringBuffer msg = new StringBuffer("Index " + node.getPid()
+			+ " to ");
+		internalIndexBulk.add(client.prepareIndex(index,
+			node.getContentType(), node.getPid()).setSource(
+			t.oaiore(node, "application/json+compact")));
+		msg.append(index);
+		if ("public".equals(node.getPublishScheme())) {
+		    publicIndexBulk.add(client.prepareIndex("public_" + index,
+			    node.getContentType(), node.getPid()).setSource(
+			    t.oaiore(node, "application/json+compact")));
+		    msg.append(" and public_" + index);
+		}
+		msg.append("\n");
+		result.add(msg.toString());
+		play.Logger.debug("Add " + node.getPid() + " to bulk action");
+	    } catch (Exception e) {
+		result.add("A problem occured");
+	    }
+	}
+	try {
+	    play.Logger.debug("Start building internal Index " + index);
+	    BulkResponse bulkResponse = internalIndexBulk.execute().actionGet();
+	    if (bulkResponse.hasFailures()) {
+		result.add(bulkResponse.buildFailureMessage());
+		play.Logger
+			.debug("FAIL: " + bulkResponse.buildFailureMessage());
+	    }
+
+	    play.Logger.debug("Start building public Index " + index);
+
+	    bulkResponse = publicIndexBulk.execute().actionGet();
+	    if (bulkResponse.hasFailures()) {
+		result.add(bulkResponse.buildFailureMessage());
+		play.Logger
+			.debug("FAIL: " + bulkResponse.buildFailureMessage());
+	    }
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	}
+	return result;
+    }
 }

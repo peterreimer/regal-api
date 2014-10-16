@@ -16,10 +16,12 @@
  */
 package helper;
 
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,15 +125,16 @@ public class OaiOreMaker {
     private String write(String format) {
 	try {
 	    if ("application/json+compact".equals(format)) {
-		InputStream contextUrl = Play.application().resourceAsStream(
-			"edoweb-resources.json");
+		URL contextUrl = new URL(node.getContextDocumentUri());
+		InputStream contextDocument = contextUrl.openStream();
 		StringWriter out = new StringWriter();
 		RDFWriter writer = null;
 		writer = configureWriter("application/json", out, writer);
 		String jsonString = write(out, writer);
 		Object json = JSONUtils.fromString(jsonString);
+
 		@SuppressWarnings("rawtypes")
-		Map context = (Map) JSONUtils.fromInputStream(contextUrl);
+		Map context = (Map) JSONUtils.fromInputStream(contextDocument);
 		JsonLdOptions options = new JsonLdOptions();
 		@SuppressWarnings("unchecked")
 		Map<String, Object> normalized = (Map<String, Object>) expandSimpleValues((Map<String, Object>) JsonLdProcessor
@@ -274,6 +277,7 @@ public class OaiOreMaker {
 	    String mime = node.getFileMimeType();
 	    String label = node.getFileLabel();
 	    String accessScheme = node.getAccessScheme();
+	    String publishScheme = node.getPublishScheme();
 	    String fileSize = node.getFileSizeAsString();
 	    String fileChecksum = node.getFileChecksum();
 	    // Predicates
@@ -299,6 +303,7 @@ public class OaiOreMaker {
 	    URI hasData = f.createURI(regalNamespace, "hasData");
 	    URI hasTransformer = f.createURI(regalNamespace, "hasTransformer");
 	    URI hasAccessScheme = f.createURI(regalNamespace, "accessScheme");
+	    URI hasPublishScheme = f.createURI(regalNamespace, "publishScheme");
 	    // FileProperties
 	    URI fpSize = f.createURI(fpNamespace, "size");
 	    BNode theChecksumBlankNode = f.createBNode();
@@ -320,6 +325,11 @@ public class OaiOreMaker {
 	    if (accessScheme != null && !accessScheme.isEmpty()) {
 		Literal a = f.createLiteral(accessScheme);
 		con.add(aggregation, hasAccessScheme, a);
+	    }
+
+	    if (publishScheme != null && !publishScheme.isEmpty()) {
+		Literal a = f.createLiteral(publishScheme);
+		con.add(aggregation, hasPublishScheme, a);
 	    }
 
 	    if (fileSize != null && !fileSize.isEmpty()) {
@@ -369,17 +379,16 @@ public class OaiOreMaker {
 	    con.add(aggregation, similarTo, fedoraObject);
 	    con.add(aggregation, contentType, cType);
 
-	    for (String rel : node.getRelatives("IS_PART_OF")) {
+	    for (String rel : node.getRelatives(IS_PART_OF)) {
 		URI relUrl = f.createURI(rel);
 		con.add(aggregation, isAggregatedBy, relUrl);
 		con.add(aggregation, isPartOf, relUrl);
 	    }
 
-	    for (String rel : node.getRelatives("HAS_PART")) {
+	    for (String rel : node.getPartsSorted()) {
 		URI relUrl = f.createURI(rel);
 		con.add(aggregation, aggregates, relUrl);
 		con.add(aggregation, hasPart, relUrl);
-
 	    }
 	} catch (Exception e) {
 	    logger.debug("", e);

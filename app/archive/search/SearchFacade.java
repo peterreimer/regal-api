@@ -16,7 +16,10 @@
  */
 package archive.search;
 
+import java.util.List;
 import java.util.Map;
+
+import models.Node;
 
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
@@ -36,15 +39,19 @@ public class SearchFacade {
      * @param cluster
      *            the name must match to the one provided in
      *            elasticsearch/conf/elasticsearch.yml elasticsearch mapping
+     * @param index
+     *            a list of indexes to configure
+     * @param config
+     *            configuration
      */
-    public SearchFacade(String cluster) {
+    public SearchFacade(String cluster, String[] index) {
 	InetSocketTransportAddress server = new InetSocketTransportAddress(
 		"localhost", 9300);
 	Client client = new TransportClient(ImmutableSettings.settingsBuilder()
 		.put("cluster.name", cluster).build())
 		.addTransportAddress(server);
 	search = new Search(client);
-
+	init(index);
     }
 
     /**
@@ -53,8 +60,8 @@ public class SearchFacade {
      * @param config
      *            an elasticsearch mapping
      */
-    public void init(String[] index, String config) {
-	search.init(index, config);
+    public void init(String[] index) {
+	search.init(index);
     }
 
     /**
@@ -111,18 +118,18 @@ public class SearchFacade {
 
     /**
      * Deletes a certain item
-     * 
+     * @param id
+     *            the item's id
      * @param index
      *            name of the elasticsearch index. will be created, if not
      *            exists.
      * @param type
      *            the type of the indexed item
-     * @param id
-     *            the item's id
+     * 
      * @return the response
      */
-    public ActionResponse delete(String index, String type, String id) {
-	return search.delete(index, type, id);
+    public ActionResponse delete(String id, String index, String type) {
+	return search.delete(id, index, type);
     }
 
     /**
@@ -151,6 +158,24 @@ public class SearchFacade {
 
     public String toString() {
 	return search.toString();
+    }
+
+    /**
+     * @param pid
+     *            a nodes pid
+     * @return a map that represents the node
+     */
+    public Map<String, Object> get(String pid) {
+	return search.get(pid);
+    }
+
+    /**
+     * @param list
+     * @param index
+     * @return list of messages
+     */
+    public List<String> indexAll(List<Node> list, String index) {
+	return search.indexAll(list, index);
     }
 
 }

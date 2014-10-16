@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * 
  */
 @SuppressWarnings("javadoc")
-public class TestSearch extends BaseModelTest {
+public class SearchTest extends BaseModelTest {
 
     String edoweb2606976 = null;
     String query1 = null;
@@ -106,9 +106,9 @@ public class TestSearch extends BaseModelTest {
 
     @After
     public void tearDown() {
-	search.delete("test", "type", "edoweb:123");
+	search.delete("edoweb:123", "test", "type");
 	for (int i = 100; i > 0; i--) {
-	    search.delete("test", "monograph", "edoweb:" + i);
+	    search.delete("edoweb:" + i, "test", "monograph");
 	}
 	search.down();
     }

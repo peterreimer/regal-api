@@ -16,6 +16,9 @@
  */
 package models;
 
+import static archive.fedora.FedoraVocabulary.HAS_PART;
+import helper.HttpArchiveException;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -56,24 +59,26 @@ public class Node {
     public DublinCoreData dublinCoreData = new DublinCoreData();
 
     private String metadataFile = null;
+    private String seqFile = null;
     private String uploadFile = null;
     private List<Link> links = new Vector<Link>();
     private List<Transformer> transformer = new Vector<Transformer>();
 
     private String metadata = null;
+    private String seq = null;
 
     private String pid = null;
     private String alephId = null;
 
-    private String urn = null;
     private Date lastModified = null;
     private Date creationDate = null;
     private String aggregationUri = null;
     private String remUri = null;
     private String dataUri = null;
     private String contentType = null;
-    private String accessScheme = null;
+    private String accessScheme = "private";
     private String parentPid = null;
+    private String publishScheme = "private";
 
     private String fileLabel = null;
     private String fileMimeType = null;
@@ -89,7 +94,7 @@ public class Node {
 
     private String createdBy;
 
-    private String importedFrom;;
+    private String importedFrom;
 
     /**
      * Creates a new Node.
@@ -282,6 +287,24 @@ public class Node {
      */
     public void setMetadataFile(String metadataFile) {
 	this.metadataFile = metadataFile;
+    }
+
+    /**
+     * The metadata file
+     * 
+     * @return the absolute path to file
+     */
+    public String getSeqFile() {
+	return seqFile;
+    }
+
+    /**
+     * @param seqFile
+     *            The absolutepath to a file that provides ordering information
+     *            for the object's children
+     */
+    public void setSeqFile(String seqFile) {
+	this.seqFile = seqFile;
     }
 
     /**
@@ -498,7 +521,7 @@ public class Node {
     }
 
     /**
-     * @return a string that signals who is allowed to access this node
+     * @return a string that signals who is allowed to access this node's data
      */
     public String getAccessScheme() {
 	return accessScheme;
@@ -506,10 +529,28 @@ public class Node {
 
     /**
      * @param accessScheme
-     *            a string that signals who is allowed to access this node
+     *            a string that signals who is allowed to access this node's
+     *            data
      */
     public void setAccessScheme(String accessScheme) {
 	this.accessScheme = accessScheme;
+    }
+
+    /**
+     * @return a string that signals who is allowed to access this node's
+     *         metadata
+     */
+    public String getPublishScheme() {
+	return publishScheme;
+    }
+
+    /**
+     * @param publishScheme
+     *            a string that signals who is allowed to access this node's
+     *            metadata
+     */
+    public void setPublishScheme(String publishScheme) {
+	this.publishScheme = publishScheme;
     }
 
     /**
@@ -527,6 +568,24 @@ public class Node {
      */
     public Node setMetadata(String metadata) {
 	this.metadata = metadata;
+	return this;
+    }
+
+    /**
+     * @return the content of seq datastream in a string
+     */
+    @JsonIgnore()
+    public String getSeq() {
+	return seq;
+    }
+
+    /**
+     * @param seq
+     *            datastream as string
+     * @return this
+     */
+    public Node setSeq(String seq) {
+	this.seq = seq;
 	return this;
     }
 
@@ -552,22 +611,6 @@ public class Node {
      */
     public Node setAlephId(String alephId) {
 	this.alephId = alephId;
-	return this;
-    }
-
-    /**
-     * @return urn
-     */
-    public String getUrn() {
-	return urn;
-    }
-
-    /**
-     * @param urn
-     * @return this
-     */
-    public Node setUrn(String urn) {
-	this.urn = urn;
 	return this;
     }
 
@@ -757,13 +800,17 @@ public class Node {
     }
 
     private List<Link> getLinks() {
-	InputStream stream = new ByteArrayInputStream(
-		metadata.getBytes(StandardCharsets.UTF_8));
-	RdfResource rdf = RdfUtils.createRdfResource(stream,
-		RDFFormat.NTRIPLES, pid);
-	rdf.resolve();
-	rdf.addLinks(getRelsExt());
-	return ApplicationProfile.addLabels(rdf).getLinks();
+	try {
+	    InputStream stream = new ByteArrayInputStream(
+		    metadata.getBytes(StandardCharsets.UTF_8));
+	    RdfResource rdf = RdfUtils.createRdfResource(stream,
+		    RDFFormat.NTRIPLES, pid);
+	    rdf.resolve();
+	    rdf.addLinks(getRelsExt());
+	    return ApplicationProfile.addLabels(rdf).getLinks();
+	} catch (NullPointerException e) {
+	    return new ArrayList<Link>();
+	}
     }
 
     /**
@@ -825,12 +872,46 @@ public class Node {
      */
     public List<String> getRelatives(String relation) {
 	List<String> result = new Vector<String>();
-
 	for (Link l : links) {
 	    if (l.getPredicate().equals(relation))
 		result.add(l.getObject());
 	}
 	return result;
+    }
+
+    /**
+     * @param node
+     * @return an ordered list of the nodes Children taking the information
+     *         provided by seq datastream into accoutn
+     */
+    public List<String> getPartsSorted() {
+	return sort(getRelatives(HAS_PART), getSeqArray());
+    }
+
+    private List<String> sort(List<String> nodeIds, String[] seq) {
+	List<String> sorted = new ArrayList<String>();
+	if (nodeIds == null || nodeIds.isEmpty())
+	    return null;
+	for (String i : seq) {
+	    int j = -1;
+	    if ((j = nodeIds.indexOf(i)) != -1) {
+		sorted.add(i);
+		nodeIds.remove(j);
+	    }
+	}
+	sorted.addAll(nodeIds);
+	return sorted;
+    }
+
+    private String[] getSeqArray() {
+	try {
+	    if (this.seq == null || this.seq.isEmpty())
+		return new String[] {};
+	    ObjectMapper mapper = new ObjectMapper();
+	    return mapper.readValue(getSeq(), String[].class);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     @Override
@@ -843,7 +924,7 @@ public class Node {
 	result = 31 * result
 		+ (creationDate != null ? creationDate.hashCode() : 0);
 	result = 31 * result
-		+ (creationDate != null ? aggregationUri.hashCode() : 0);
+		+ (aggregationUri != null ? aggregationUri.hashCode() : 0);
 	result = 31 * result + (remUri != null ? remUri.hashCode() : 0);
 	result = 31 * result + (dataUri != null ? dataUri.hashCode() : 0);
 	result = 31 * result
@@ -922,5 +1003,4 @@ public class Node {
 	}
 	return w.toString();
     }
-
 }

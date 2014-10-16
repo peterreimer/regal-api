@@ -16,24 +16,24 @@
  */
 package controllers;
 
-import helper.Actions;
-import helper.HttpArchiveException;
+import helper.Globals;
 
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.Message;
-import models.ObjectList;
 import models.Transformer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.mvc.Http;
+import play.libs.F.Promise;
 import play.mvc.Result;
 import actions.BasicAuth;
 
@@ -54,154 +54,128 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class MyUtils extends MyController {
     final static Logger logger = LoggerFactory.getLogger(MyUtils.class);
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = ObjectList.class, httpMethod = "POST")
-    public static Result index(@PathParam("pid") String pid,
+    @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
+    public static Promise<Result> index(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
-	    @QueryParam("index") final String index) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
-	    String result = actions.index(pid, curIndex, type);
+	    @QueryParam("index") final String indexName) {
+	return new ModifyAction().call(pid, node -> {
+	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
+		    : indexName;
+	    String result = index.index(pid, curIndex, type);
 	    return JsonMessage(new Message(result));
-	} catch (HttpArchiveException e) {
-	    return JsonMessage(new Message(e, e.getCode()));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
-
+	});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
-    public static Result removeFromIndex(@PathParam("pid") String pid,
+    @ApiOperation(produces = "application/json,application/html", nickname = "indexAll", value = "indexAll", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
+    public static Promise<Result> indexAll(
+	    @QueryParam("index") final String indexName) {
+	return new BulkAction().call(() -> {
+	    Chunks<String> chunks = new StringChunks() {
+		public void onReady(Chunks.Out<String> out) {
+		    index.setMessageQueue(out);
+		}
+	    };
+	    ExecutorService executorService = Executors
+		    .newSingleThreadExecutor();
+	    executorService.execute(new Runnable() {
+		public void run() {
+		    index.indexAll(indexName);
+		}
+	    });
+	    executorService.shutdown();
+	    return ok(chunks);
+	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
+    public static Promise<Result> removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String result = actions.removeFromIndex(pid.split(":")[0], type,
-		    pid);
+	return new ModifyAction().call(pid, node -> {
+	    String result = index.remove(pid, pid.split(":")[0], type);
 	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", response = ObjectList.class, httpMethod = "POST")
-    public static Result publicIndex(@PathParam("pid") String pid,
+    @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", httpMethod = "POST")
+    public static Promise<Result> publicIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type,
-	    @QueryParam("index") final String index) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String curIndex = index.isEmpty() ? pid.split(":")[0] : index;
-	    String result = actions
-		    .publicIndex(pid, "public_" + curIndex, type);
+	    @QueryParam("index") final String indexName) {
+	return new ModifyAction().call(pid, node -> {
+	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
+		    : indexName;
+	    String result = index.publicIndex(pid, "public_" + curIndex, type);
 	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", response = ObjectList.class, httpMethod = "DELETE")
-    public static Result removeFromPublicIndex(@PathParam("pid") String pid,
+    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", httpMethod = "DELETE")
+    public static Promise<Result> removeFromPublicIndex(
+	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String result = actions.removeFromIndex("public_"
-		    + pid.split(":")[0], type, pid);
-	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    String result = index.remove(pid,
+			    "public_" + pid.split(":")[0], type);
+		    return JsonMessage(new Message(result));
+		});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", response = ObjectList.class, httpMethod = "POST")
-    public static Result lobidify(@PathParam("pid") String pid) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String result = actions.lobidify(pid);
+    @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
+    public static Promise<Result> lobidify(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    String result = modify.lobidify(pid);
 	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", response = ObjectList.class, httpMethod = "POST")
-    public static Result addUrn(@QueryParam("id") final String id,
+    @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", httpMethod = "POST")
+    public static Promise<Result> addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String result = actions.addUrn(id, namespace, snid);
+	return new BulkAction().call(() -> {
+	    String result = modify.addUrn(id, namespace, snid);
 	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "replaceUrn", value = "replaceUrn", notes = "Replaces a urn on the /metadata of the resource.", response = ObjectList.class, httpMethod = "POST")
-    public static Result replaceUrn(@QueryParam("id") final String id,
+    @ApiOperation(produces = "application/json,application/html", nickname = "replaceUrn", value = "replaceUrn", notes = "Replaces a urn on the /metadata of the resource.", httpMethod = "POST")
+    public static Promise<Result> replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    String result = actions.replaceUrn(id, namespace, snid);
+	return new BulkAction().call(() -> {
+	    String result = modify.replaceUrn(id, namespace, snid);
 	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	});
     }
 
-    @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", response = ObjectList.class, httpMethod = "POST")
-    public static Result initContentModels(
+    @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
+    public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
-	try {
-	    String role = (String) Http.Context.current().args.get("role");
-	    if (!Resource.modifyingAccessIsAllowed(role))
-		throw new HttpArchiveException(401);
-	    Actions actions = Actions.getInstance();
-	    List<Transformer> transformers = new Vector<Transformer>();
-	    transformers.add(new Transformer(namespace + "epicur", "epicur",
-		    actions.getServer() + "/resource/(pid)." + namespace
-			    + "epicur"));
-	    transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-		    actions.getServer() + "/resource/(pid)." + namespace
-			    + "oaidc"));
-	    transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-		    actions.getServer() + "/resource/(pid)." + namespace
-			    + "pdfa"));
-	    transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
-		    actions.getServer() + "/resource/(pid)." + namespace
-			    + "pdfbox"));
-	    transformers.add(new Transformer(namespace + "aleph", "aleph",
-		    actions.getServer() + "/resource/(pid)." + namespace
-			    + "aleph"));
-	    actions.contentModelsInit(transformers);
-	    String result = "Reinit contentModels " + namespace + "epicur, "
-		    + namespace + "oaidc, " + namespace + "pdfa, " + namespace
-		    + "pdfbox, " + namespace + "aleph";
-	    return JsonMessage(new Message(result));
-	} catch (Exception e) {
-	    return JsonMessage(new Message(e, 500));
-	}
+	return new BulkAction()
+		.call(() -> {
+		    List<Transformer> transformers = new Vector<Transformer>();
+		    transformers.add(new Transformer(namespace + "epicur",
+			    "epicur", Globals.server + "/resource/(pid)."
+				    + namespace + "epicur"));
+		    transformers.add(new Transformer(namespace + "oaidc",
+			    "oaidc", Globals.server + "/resource/(pid)."
+				    + namespace + "oaidc"));
+		    transformers.add(new Transformer(namespace + "pdfa",
+			    "pdfa", Globals.server + "/resource/(pid)."
+				    + namespace + "pdfa"));
+		    transformers.add(new Transformer(namespace + "pdfbox",
+			    "pdfbox", Globals.server + "/resource/(pid)."
+				    + namespace + "pdfbox"));
+		    transformers.add(new Transformer(namespace + "aleph",
+			    "aleph", Globals.server + "/resource/(pid)."
+				    + namespace + "aleph"));
+		    create.contentModelsInit(transformers);
+		    String result = "Reinit contentModels " + namespace
+			    + "epicur, " + namespace + "oaidc, " + namespace
+			    + "pdfa, " + namespace + "pdfbox, " + namespace
+			    + "aleph";
+		    return JsonMessage(new Message(result));
+		});
     }
-
 }

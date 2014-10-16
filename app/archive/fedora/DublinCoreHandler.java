@@ -16,6 +16,8 @@
  */
 package archive.fedora;
 
+import helper.HttpArchiveException;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -204,13 +206,13 @@ public class DublinCoreHandler {
 
 	} catch (ParserConfigurationException e) {
 
-	    throw new ArchiveException("An unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	} catch (SAXException e) {
 
-	    throw new ArchiveException("An unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	} catch (IOException e) {
 
-	    throw new ArchiveException("An unknown exception occured.", e);
+	    throw new HttpArchiveException(500, e);
 	}
     }
 
@@ -374,7 +376,7 @@ public class DublinCoreHandler {
 		    .versionable(true).content(result).execute();
 
 	} catch (FedoraClientException e) {
-	    throw new ArchiveException(e.getMessage(), e);
+	    throw new HttpArchiveException(e.getStatus(), e);
 	}
     }
 

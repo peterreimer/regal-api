@@ -29,7 +29,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  */
 
 public class DublinCoreData {
-    List<String> contributer = new Vector<String>();
+    List<String> contributor = new Vector<String>();
     List<String> coverage = new Vector<String>();
     List<String> creator = new Vector<String>();
     List<String> date = new Vector<String>();
@@ -46,115 +46,10 @@ public class DublinCoreData {
     List<String> type = new Vector<String>();
 
     /**
-     * An empty DCBean
-     * 
-     */
-    public DublinCoreData() {
-
-    }
-
-    /**
-     * @param node
-     *            a bean to initialise from
-     */
-    public DublinCoreData(DublinCoreData node) {
-	contributer = node.getContributer();
-	coverage = node.getCoverage();
-	creator = node.getCreator();
-	date = node.getDate();
-	description = node.getDescription();
-	format = node.getFormat();
-	identifier = node.getIdentifier();
-	language = node.getLanguage();
-	publisher = node.getPublisher();
-	relation = node.getRelation();
-	rights = node.getRights();
-	source = node.getSource();
-	subject = node.getSubject();
-	title = node.getTitle();
-	type = node.getType();
-    }
-
-    /**
-     * @param node
-     *            a node to initalise from
-     */
-    public DublinCoreData(Node node) {
-	DublinCoreData dc = node.getDublinCoreData();
-	contributer = dc.getContributer();
-	coverage = dc.getCoverage();
-	creator = dc.getCreator();
-	date = dc.getDate();
-	description = dc.getDescription();
-	format = dc.getFormat();
-	identifier = dc.getIdentifier();
-	language = dc.getLanguage();
-	publisher = dc.getPublisher();
-	relation = dc.getRelation();
-	rights = dc.getRights();
-	source = dc.getSource();
-	subject = dc.getSubject();
-	title = dc.getTitle();
-	type = dc.getType();
-    }
-
-    /**
-     * @param other
-     *            a bean to copy data from
-     */
-    public void add(DublinCoreData other) {
-	for (String str : other.getContributer()) {
-	    contributer.add(str);
-	}
-	for (String str : other.getCoverage()) {
-	    coverage.add(str);
-	}
-	for (String str : other.getCreator()) {
-	    creator.add(str);
-	}
-	for (String str : other.getDate()) {
-	    date.add(str);
-	}
-	for (String str : other.getDescription()) {
-	    description.add(str);
-	}
-	for (String str : other.getFormat()) {
-	    format.add(str);
-	}
-	for (String str : other.getIdentifier()) {
-	    identifier.add(str);
-	}
-	for (String str : other.getLanguage()) {
-	    language.add(str);
-	}
-	for (String str : other.getPublisher()) {
-	    publisher.add(str);
-	}
-	for (String str : other.getRelation()) {
-	    relation.add(str);
-	}
-	for (String str : other.getRights()) {
-	    rights.add(str);
-	}
-	for (String str : other.getSource()) {
-	    source.add(str);
-	}
-	for (String str : other.getSubject()) {
-	    subject.add(str);
-	}
-	for (String str : other.getTitle()) {
-	    title.add(str);
-	}
-	for (String str : other.getType()) {
-	    type.add(str);
-	}
-    }
-
-    /**
      * @return dc:contributer
      */
     public List<String> getContributer() {
-	return contributer;
+	return contributor;
     }
 
     /**
@@ -163,7 +58,7 @@ public class DublinCoreData {
      * @return this
      */
     public DublinCoreData setContributer(List<String> contributer) {
-	this.contributer = contributer;
+	this.contributor = contributer;
 	return this;
     }
 
@@ -173,7 +68,7 @@ public class DublinCoreData {
      * @return this
      */
     public DublinCoreData addContributer(String e) {
-	contributer.add(e);
+	contributor.add(e);
 	return this;
     }
 
@@ -185,7 +80,6 @@ public class DublinCoreData {
 	if (elements == null || elements.size() == 0) {
 	    return "";
 	}
-
 	return elements.get(0);
     }
 
@@ -731,7 +625,6 @@ public class DublinCoreData {
 	if (elements == null || elements.size() == 0) {
 	    return "";
 	}
-
 	return elements.get(0);
     }
 
@@ -739,8 +632,7 @@ public class DublinCoreData {
      * 
      */
     public void trim() {
-
-	while (contributer.remove(""))
+	while (contributor.remove(""))
 	    ;
 	while (coverage.remove(""))
 	    ;
