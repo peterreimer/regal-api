@@ -22,12 +22,18 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
 import org.culturegraph.mf.Flux;
 import org.w3c.dom.Element;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
@@ -263,6 +269,14 @@ public class Transform {
     public String oaiore(Node node, String format) {
 	OaiOreMaker ore = new OaiOreMaker(node);
 	return ore.getReM(format, node.getTransformer());
+    }
+
+    public Map<String, Object> getOaiOreJsonMap(Node node)
+	    throws JsonParseException, JsonMappingException, IOException {
+
+	return new ObjectMapper().readValue(
+		oaiore(node, "application/json+compact"), HashMap.class);
+
     }
 
 }

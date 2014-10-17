@@ -19,12 +19,14 @@ package actions;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
+import static archive.fedora.FedoraVocabulary.HAS_PART;
 import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Jan Schnasse
  *
  */
-public class Read {
+public class Read extends RegalAction {
 
     /**
      * @param pid
@@ -65,7 +67,22 @@ public class Read {
 	n.setDataUri(n.getAggregationUri() + "/data");
 	n.setContextDocumentUri("http://" + Globals.server
 		+ "/public/edoweb-resources.json");
+	writeNodeToCache(n);
 	return n;
+    }
+
+    /**
+     * @param pid
+     *            the will be read to the node
+     * @return a Node containing the data from the repository
+     */
+    public Node readCachedNode(String pid) {
+	Node c = readNodeFromCache(pid);
+	if (c == null) {
+	    updateIndexAndCache(readNode(pid));
+	    return readNodeFromCache(pid);
+	}
+	return c;
     }
 
     /**
@@ -85,20 +102,35 @@ public class Read {
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> nodelistToMap(List<Node> list) {
 	try {
-
 	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
 	    for (Node node : list) {
-		Map<String, Object> m = new ObjectMapper().readValue(
-			new Transform()
-				.oaiore(node, "application/json+compact"),
-			HashMap.class);
-		m.put("primaryTopic", node.getPid());
+		Map<String, Object> m = readJsonCompactFromCache(node.getPid());
+		if (m == null) {
+		    m = new Transform().getOaiOreJsonMap(node);
+		    m.put("primaryTopic", node.getPid());
+		    writeJsonCompactToCache(node.getPid(), m);
+		}
 		map.add(m);
 	    }
 	    return map;
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
+    }
+
+    public List<Map<String, Object>> getAllParts(Node node) {
+
+	return nodelistToMap(getParts(node));
+    }
+
+    private List<Node> getParts(Node node) {
+	List<Node> result = new ArrayList<Node>();
+	result.add(node);
+	List<Node> parts = getNodesFromCache(node.getRelatives(HAS_PART));
+	for (Node p : parts) {
+	    result.addAll(getParts(p));
+	}
+	return result;
     }
 
     /**
@@ -174,6 +206,22 @@ public class Read {
 	return ids.stream().map((String id) -> {
 	    try {
 		return readNode(id);
+	    } catch (Exception e) {
+		Logger.warn("", e);
+		return null;
+	    }
+	}).filter(n -> n != null).collect(Collectors.toList());
+    }
+
+    /**
+     * @param ids
+     *            a list of ids to get objects for
+     * @return a list of nodes
+     */
+    public List<Node> getNodesFromCache(List<String> ids) {
+	return ids.stream().map((String id) -> {
+	    try {
+		return readCachedNode(id);
 	    } catch (Exception e) {
 		Logger.warn("", e);
 		return null;

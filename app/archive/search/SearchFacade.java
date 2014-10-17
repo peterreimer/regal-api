@@ -28,6 +28,8 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.search.SearchHits;
 
+import play.cache.Cache;
+
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
@@ -118,6 +120,7 @@ public class SearchFacade {
 
     /**
      * Deletes a certain item
+     * 
      * @param id
      *            the item's id
      * @param index

@@ -212,7 +212,6 @@ public class MyController extends Controller {
 			}
 		    });
 	}
-
     }
 
     /**

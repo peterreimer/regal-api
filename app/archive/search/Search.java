@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
+
 import actions.Transform;
 import archive.fedora.CopyUtils;
 
@@ -208,14 +209,15 @@ public class Search {
 	    try {
 		StringBuffer msg = new StringBuffer("Index " + node.getPid()
 			+ " to ");
-		internalIndexBulk.add(client.prepareIndex(index,
-			node.getContentType(), node.getPid()).setSource(
-			t.oaiore(node, "application/json+compact")));
+		String source = t.oaiore(node, "application/json+compact");
+		internalIndexBulk
+			.add(client.prepareIndex(index, node.getContentType(),
+				node.getPid()).setSource(source));
 		msg.append(index);
 		if ("public".equals(node.getPublishScheme())) {
 		    publicIndexBulk.add(client.prepareIndex("public_" + index,
 			    node.getContentType(), node.getPid()).setSource(
-			    t.oaiore(node, "application/json+compact")));
+			    source));
 		    msg.append(" and public_" + index);
 		}
 		msg.append("\n");

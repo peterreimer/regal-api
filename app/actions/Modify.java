@@ -52,7 +52,7 @@ import archive.fedora.RdfUtils;
  * @author Jan Schnasse
  *
  */
-public class Modify {
+public class Modify extends RegalAction {
 
     final static Logger logger = LoggerFactory.getLogger(Modify.class);
 
@@ -100,6 +100,7 @@ public class Modify {
 			+ md5Hash);
 	    }
 	}
+	updateIndexAndCache(node);
 	return pid + " data successfully updated!";
     }
 
@@ -114,7 +115,7 @@ public class Modify {
 	Node node = new Read().readNode(pid);
 	node.setDublinCoreData(dc);
 	Globals.fedora.updateNode(node);
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
 	return pid + " dc successfully updated!";
     }
 
@@ -142,7 +143,7 @@ public class Modify {
 		node.setSeqFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    new Index().index(node);
+	    updateIndexAndCacheWithParents(node);
 	    return pid + " sequence of child objects updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
@@ -173,7 +174,7 @@ public class Modify {
 		node.setMetadataFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    new Index().index(node);
+	    updateIndexAndCacheWithParents(new Read().readNode(pid));
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400);
@@ -190,7 +191,7 @@ public class Modify {
     public String updateMetadata(Node node) {
 	Globals.fedora.updateNode(node);
 	String pid = node.getPid();
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
 	return pid + " metadata successfully updated!";
     }
 
@@ -207,7 +208,7 @@ public class Modify {
 	    node.addRelation(link);
 	}
 	Globals.fedora.updateNode(node);
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
 	return pid + " " + links + " links successfully added.";
     }
 
@@ -301,7 +302,7 @@ public class Modify {
     public String lobidify(String pid) {
 	Node node = new Read().readNode(pid);
 	node = lobidify(node);
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
 	return updateMetadata(node);
     }
 

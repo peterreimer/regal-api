@@ -31,7 +31,7 @@ import models.Transformer;
  * @author Jan Schnasse
  *
  */
-public class Create {
+public class Create extends RegalAction {
 
     final static Logger logger = LoggerFactory.getLogger(Create.class);
 
@@ -69,7 +69,7 @@ public class Create {
 	linkWithParent(parent, node);
 	updateTransformer(transformers, node);
 	Globals.fedora.updateNode(node);
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
 	return node;
     }
 
@@ -94,14 +94,14 @@ public class Create {
     private void setNodeType(String type, Node node) {
 	node.setType(TYPE_OBJECT);
 	node.setContentType(type);
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
     }
 
     private void linkWithParent(String parentPid, Node node) {
 	Globals.fedora.unlinkParent(node);
 	Globals.fedora.linkToParent(node, parentPid);
 	Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	new Index().index(node);
+	updateIndexAndCacheWithParents(node);
     }
 
     private void updateTransformer(List<String> transformers, Node node) {

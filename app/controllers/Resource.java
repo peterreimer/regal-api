@@ -78,11 +78,9 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
     public static Promise<Result> listUrn(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, new NodeAction() {
-	    public Result exec(Node node) {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		return json(read.getUrnStatus(node));
-	    }
+	return new ReadMetadataAction().call(pid, (Node node) -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    return json(read.getUrnStatus(node));
 	});
     }
 
@@ -465,7 +463,18 @@ public class Resource extends MyController {
 			return json(nodeIds);
 		    }
 		    List<Map<String, Object>> result = read.nodelistToMap(read
-			    .getNodes(nodeIds));
+			    .getNodesFromCache(nodeIds));
+		    return json(result);
+		});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    List<Map<String, Object>> result = read.getAllParts(read
+			    .readNode(pid));
 		    return json(result);
 		});
     }
@@ -490,7 +499,7 @@ public class Resource extends MyController {
 			return json(nodeIds);
 		    }
 		    List<Map<String, Object>> result = read.nodelistToMap(read
-			    .getNodes(nodeIds));
+			    .getNodesFromCache(nodeIds));
 		    return json(result);
 		});
     }
@@ -537,6 +546,16 @@ public class Resource extends MyController {
 	return result;
     }
 
+    @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")
+    public static Promise<Result> asRegalObject(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setContentType("application/json");
+	    Node result = read.readNode(pid);
+	    return json(result);
+	});
+    }
+
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asOaiDc(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
@@ -562,17 +581,6 @@ public class Resource extends MyController {
 	    response().setContentType("application/xml");
 	    return ok(result);
 	});
-    }
-
-    @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")
-    public static Promise<Result> asRegalObject(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    response().setContentType("application/json");
-	    Node result = read.readNode(pid);
-	    return json(result);
-	});
-
     }
 
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")
