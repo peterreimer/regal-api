@@ -73,7 +73,6 @@ public class LdapUser implements User {
 	    role = group;
 	} catch (Exception e) {
 	    play.Logger.info("", e);
-	    return null;
 	} finally {
 	    if (context != null)
 		try {
@@ -88,45 +87,68 @@ public class LdapUser implements User {
     }
 
     private String dnFromUser(String username) throws NamingException {
-	Properties props = new Properties();
-	props.put(Context.INITIAL_CONTEXT_FACTORY,
-		"com.sun.jndi.ldap.LdapCtxFactory");
-	props.put(Context.PROVIDER_URL, ldapServer);
-	props.put(Context.REFERRAL, "ignore");
-	InitialDirContext context = new InitialDirContext(props);
-	SearchControls ctrls = new SearchControls();
-	ctrls.setReturningAttributes(new String[] { "givenName", "sn",
-		"gidNumber", "cn", "ou", "dc" });
-	ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-	NamingEnumeration<SearchResult> answers = context.search(
-		"dc=edoweb-rlp,dc=de", "(cn=" + username + ")", ctrls);
-	SearchResult result = answers.next();
-	return result.getNameInNamespace();
+	InitialDirContext context = null;
+	try {
+	    Properties props = new Properties();
+	    props.put(Context.INITIAL_CONTEXT_FACTORY,
+		    "com.sun.jndi.ldap.LdapCtxFactory");
+	    props.put(Context.PROVIDER_URL, ldapServer);
+	    props.put(Context.REFERRAL, "ignore");
+	    context = new InitialDirContext(props);
+	    SearchControls ctrls = new SearchControls();
+	    ctrls.setReturningAttributes(new String[] { "givenName", "sn",
+		    "gidNumber", "cn", "ou", "dc" });
+	    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+	    NamingEnumeration<SearchResult> answers = context.search(
+		    "dc=edoweb-rlp,dc=de", "(cn=" + username + ")", ctrls);
+	    SearchResult result = answers.next();
+	    return result.getNameInNamespace();
+	} finally {
+	    if (context != null)
+		try {
+		    context.close();
+		} catch (NamingException e) {
+		    play.Logger
+			    .error("This one is serious! LDAP connection not closed. This can result in to many open connections.",
+				    e);
+		}
+	}
     }
 
     private String groupFromUser(String username) throws NamingException {
-	Properties props = new Properties();
-	props.put(Context.INITIAL_CONTEXT_FACTORY,
-		"com.sun.jndi.ldap.LdapCtxFactory");
-	props.put(Context.PROVIDER_URL, ldapServer);
-	props.put(Context.REFERRAL, "ignore");
-	InitialDirContext context = new InitialDirContext(props);
-	SearchControls ctrls = new SearchControls();
-	ctrls.setReturningAttributes(new String[] { "givenName", "sn",
-		"gidNumber", "cn", "ou", "dc" });
-	ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-	NamingEnumeration<SearchResult> answers = context.search(
-		"dc=edoweb-rlp,dc=de", "(cn=" + username + ")", ctrls);
-	Attributes result = answers.next().getAttributes();
-	String groupNumber = result.get("gidNumber").get().toString();
-	ctrls.setReturningAttributes(new String[] { "cn" });
-	ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-	answers = context.search("ou=groups,dc=edoweb-rlp,dc=de", "(gidNumber="
-		+ groupNumber + ")", ctrls);
-	result = answers.next().getAttributes();
-	String groupName = result.get("cn").get().toString();
-	context.close();
-	return groupName;
+	InitialDirContext context = null;
+	try {
+	    Properties props = new Properties();
+	    props.put(Context.INITIAL_CONTEXT_FACTORY,
+		    "com.sun.jndi.ldap.LdapCtxFactory");
+	    props.put(Context.PROVIDER_URL, ldapServer);
+	    props.put(Context.REFERRAL, "ignore");
+	    context = new InitialDirContext(props);
+	    SearchControls ctrls = new SearchControls();
+	    ctrls.setReturningAttributes(new String[] { "givenName", "sn",
+		    "gidNumber", "cn", "ou", "dc" });
+	    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+	    NamingEnumeration<SearchResult> answers = context.search(
+		    "dc=edoweb-rlp,dc=de", "(cn=" + username + ")", ctrls);
+	    Attributes result = answers.next().getAttributes();
+	    String groupNumber = result.get("gidNumber").get().toString();
+	    ctrls.setReturningAttributes(new String[] { "cn" });
+	    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+	    answers = context.search("ou=groups,dc=edoweb-rlp,dc=de",
+		    "(gidNumber=" + groupNumber + ")", ctrls);
+	    result = answers.next().getAttributes();
+	    String groupName = result.get("cn").get().toString();
+	    return groupName;
+	} finally {
+	    if (context != null)
+		try {
+		    context.close();
+		} catch (NamingException e) {
+		    play.Logger
+			    .error("This one is serious! LDAP connection not closed. This can result in to many open connections.",
+				    e);
+		}
+	}
     }
 
     /*
