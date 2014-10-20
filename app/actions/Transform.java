@@ -271,12 +271,18 @@ public class Transform {
 	return ore.getReM(format, node.getTransformer());
     }
 
+    /**
+     * @param node
+     * @return oai ore as json map
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getOaiOreJsonMap(Node node)
 	    throws JsonParseException, JsonMappingException, IOException {
-
 	return new ObjectMapper().readValue(
 		oaiore(node, "application/json+compact"), HashMap.class);
-
     }
 
 }

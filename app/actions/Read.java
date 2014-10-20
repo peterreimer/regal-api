@@ -26,9 +26,7 @@ import helper.HttpArchiveException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -45,8 +43,6 @@ import play.Logger;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -99,7 +95,6 @@ public class Read extends RegalAction {
      *            a list of nodes to create a json like map for
      * @return a map with objects
      */
-    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> nodelistToMap(List<Node> list) {
 	try {
 	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
@@ -118,8 +113,11 @@ public class Read extends RegalAction {
 	}
     }
 
+    /**
+     * @param node
+     * @return a list of all children and their children aso
+     */
     public List<Map<String, Object>> getAllParts(Node node) {
-
 	return nodelistToMap(getParts(node));
     }
 

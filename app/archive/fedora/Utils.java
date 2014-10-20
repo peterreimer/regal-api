@@ -34,7 +34,6 @@ import static archive.fedora.FedoraVocabulary.REL_IS_CONTRACTOR_OF;
 import static archive.fedora.FedoraVocabulary.REL_IS_DEPLOYMENT_OF;
 import static archive.fedora.FedoraVocabulary.SDEF_CONTENTMODEL;
 import static archive.fedora.FedoraVocabulary.SDEP_CONTENTMODEL;
-import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
 import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;

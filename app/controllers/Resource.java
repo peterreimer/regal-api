@@ -393,6 +393,7 @@ public class Resource extends MyController {
 			}
 		    });
 		    executorService.shutdown();
+		    response().setHeader("Transfer-Encoding", "Chunked");
 		    return ok(chunks);
 		});
     }
@@ -447,7 +448,7 @@ public class Resource extends MyController {
 		}
 	    });
 	    executorService.shutdown();
-
+	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(chunks);
 	});
     }

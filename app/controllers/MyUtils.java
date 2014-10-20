@@ -83,6 +83,7 @@ public class MyUtils extends MyController {
 		}
 	    });
 	    executorService.shutdown();
+	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(chunks);
 	});
     }
