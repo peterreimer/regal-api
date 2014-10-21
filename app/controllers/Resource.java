@@ -16,6 +16,7 @@
  */
 package controllers;
 
+import java.io.ByteArrayInputStream;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.Globals;
 import helper.HttpArchiveException;
@@ -29,7 +30,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -42,6 +42,7 @@ import models.Message;
 import models.Node;
 import models.RegalObject;
 
+import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.*;
 import views.html.*;
 import actions.BasicAuth;
+import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -129,8 +131,8 @@ public class Resource extends MyController {
 	    String contentType, int from, int until) {
 	return new ListAction().call(() -> {
 	    try {
-		List<Map<String, Object>> nodes = read.nodelistToMap(read
-			.listRepo(contentType, namespace, from, until));
+		List<Node> nodes = read.listRepo(contentType, namespace, from,
+			until);
 		return json(nodes);
 	    } catch (HttpArchiveException e) {
 		return JsonMessage(new Message(e, e.getCode()));
@@ -161,24 +163,16 @@ public class Resource extends MyController {
 
     }
 
-    @ApiOperation(produces = "application/json+regal-v0.4.0,application/json,text/html,application/json+compact,application/rdf+xml,text/plain", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    if (request().accepts("text/html"))
-		return asHtml(pid);
-	    if (request().accepts("application/json"))
-		return asJson(pid, null);
-	    if (request().accepts("application/json+compact"))
-		return asJson(pid, "compact");
 	    if (request().accepts("application/rdf+xml"))
 		return asRdf(pid);
 	    if (request().accepts("text/plain"))
 		return asRdf(pid);
-	    if (request().accepts("application/json+regal-v0.4.0"))
-		return asRegalObject(pid);
-	    return asRdf(pid);
+	    return asJson(pid);
 	} catch (HttpArchiveException e) {
 	    return Promise.promise(new Function0<Result>() {
 		public Result apply() {
@@ -193,6 +187,37 @@ public class Resource extends MyController {
 	    });
 	}
 
+    }
+
+    @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
+    public static Promise<Result> asRdf(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
+			String result = "";
+			if (request().accepts("application/rdf+xml")) {
+			    result = RdfUtils.readRdfToString(
+				    new ByteArrayInputStream(node.toString()
+					    .getBytes("utf-8")),
+				    RDFFormat.JSONLD, RDFFormat.RDFXML, node
+					    .getAggregationUri());
+			    response().setContentType("application/rdf+xml");
+			    return ok(result);
+			} else if (request().accepts("text/plain")) {
+			    result = RdfUtils.readRdfToString(
+				    new ByteArrayInputStream(node.toString()
+					    .getBytes("utf-8")),
+				    RDFFormat.JSONLD, RDFFormat.NTRIPLES, node
+					    .getAggregationUri());
+			    response().setContentType("text/plain");
+			    return ok(result);
+			}
+			return JsonMessage(new Message(result));
+		    } catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		    }
+		});
     }
 
     @ApiOperation(produces = "text/plain", nickname = "listMetadata", value = "listMetadata", notes = "Shows Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
@@ -285,7 +310,7 @@ public class Resource extends MyController {
 		Node node = read.readNode(pid);
 		response().setHeader("Location",
 			read.getHttpUriOfResource(node));
-		return status(201, jsonString(node, "compact"));
+		return status(201, node.toString());
 	    } catch (JsonMappingException e) {
 		throw new HttpArchiveException(500, e);
 	    } catch (JsonParseException e) {
@@ -456,28 +481,22 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid,
 	    @QueryParam("style") String style) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    List<String> nodeIds = node.getPartsSorted();
-		    if ("short".equals(style)) {
-			return json(nodeIds);
-		    }
-		    List<Map<String, Object>> result = read.nodelistToMap(read
-			    .getNodesFromCache(nodeIds));
-		    return json(result);
-		});
+	return new ReadMetadataAction().call(pid, node -> {
+	    List<String> nodeIds = node.getPartsSorted();
+	    if ("short".equals(style)) {
+		return json(nodeIds);
+	    }
+	    List<Node> result = read.getNodesFromCache(nodeIds);
+	    return json(result);
+	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    List<Map<String, Object>> result = read.getAllParts(read
-			    .readNode(pid));
-		    return json(result);
-		});
+	return new ReadMetadataAction().call(pid, node -> {
+	    List<Node> result = read.getParts(node);
+	    return json(result);
+	});
     }
 
     @ApiOperation(produces = "applicatio/json", nickname = "listSeq", value = "listSeq", notes = "Shows seq data for ordered print of parts.", response = play.mvc.Result.class, httpMethod = "GET")
@@ -492,17 +511,14 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParents(@PathParam("pid") String pid,
 	    @QueryParam("style") String style) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    List<String> nodeIds = node.getRelatives(IS_PART_OF);
-		    if ("short".equals(style)) {
-			return json(nodeIds);
-		    }
-		    List<Map<String, Object>> result = read.nodelistToMap(read
-			    .getNodesFromCache(nodeIds));
-		    return json(result);
-		});
+	return new ReadMetadataAction().call(pid, node -> {
+	    List<String> nodeIds = node.getRelatives(IS_PART_OF);
+	    if ("short".equals(style)) {
+		return json(nodeIds);
+	    }
+	    List<Node> result = read.getNodesFromCache(nodeIds);
+	    return json(result);
+	});
     }
 
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
@@ -511,40 +527,11 @@ public class Resource extends MyController {
 		node -> ok(resourceLong.render(node.toString())));
     }
 
-    @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
-    public static Promise<Result> asRdf(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    String result = "";
-	    if (request().accepts("application/rdf+xml")) {
-		result = transform.oaiore(node, "application/rdf+xml");
-		response().setContentType("application/rdf+xml");
-		return ok(result);
-	    } else if (request().accepts("text/plain")) {
-		result = transform.oaiore(node, "text/plain");
-		response().setContentType("text/plain");
-		return ok(result);
-	    }
-	    return JsonMessage(new Message(result));
-	});
-    }
-
     @ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
-    public static Promise<Result> asJson(@PathParam("pid") String pid,
-	    String style) {
+    public static Promise<Result> asJson(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = jsonString(node, style);
-	    response().setContentType("application/json");
-	    return ok(result);
+	    return json(node);
 	});
-    }
-
-    private static String jsonString(Node node, String style) {
-	String result = "ERROR";
-	if ("compact".equals(style))
-	    result = transform.oaiore(node, "application/json+compact");
-	else
-	    result = transform.oaiore(node, "application/json");
-	return result;
     }
 
     @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")

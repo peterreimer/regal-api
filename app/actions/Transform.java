@@ -22,25 +22,18 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FileUtils;
 import org.culturegraph.mf.Flux;
 import org.w3c.dom.Element;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
 import helper.AlephMabMaker;
 import helper.Globals;
 import helper.HttpArchiveException;
-import helper.OaiOreMaker;
 import helper.PdfText;
 import models.Node;
 
@@ -246,43 +239,6 @@ public class Transform {
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
 	}
-    }
-
-    /**
-     * @param pid
-     *            the pid
-     * @param format
-     *            application/rdf+xml text/plain application/json
-     * @return a oai_ore resource map
-     */
-    public String oaiore(String pid, String format) {
-	return oaiore(new Read().readNode(pid), format);
-    }
-
-    /**
-     * @param node
-     *            a node to get a oai-ore representation from
-     * @param format
-     *            application/rdf+xml text/plain application/json
-     * @return a oai_ore resource map
-     */
-    public String oaiore(Node node, String format) {
-	OaiOreMaker ore = new OaiOreMaker(node);
-	return ore.getReM(format, node.getTransformer());
-    }
-
-    /**
-     * @param node
-     * @return oai ore as json map
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     */
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getOaiOreJsonMap(Node node)
-	    throws JsonParseException, JsonMappingException, IOException {
-	return new ObjectMapper().readValue(
-		oaiore(node, "application/json+compact"), HashMap.class);
     }
 
 }

@@ -17,6 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -40,6 +41,7 @@ import archive.fedora.ApplicationProfile;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -150,7 +152,7 @@ public class Node {
 	while (it.hasNext()) {
 	    Transformer t = it.next();
 	    if (t.getId().compareTo(id) == 0) {
-		System.out.println("REMOVE: " + id);
+		play.Logger.info("REMOVE: " + id);
 		it.remove();
 	    }
 	}
@@ -168,7 +170,6 @@ public class Node {
      */
     public void removeRelation(String pred, String obj) {
 	Vector<Link> newRels = new Vector<Link>();
-
 	for (Link link : links) {
 	    if (link.getPredicate().compareTo(pred) == 0
 		    && link.getObject().compareTo(obj) == 0) {
@@ -230,7 +231,6 @@ public class Node {
      */
     public Node setType(String str) {
 	this.type = str;
-
 	return this;
     }
 
@@ -259,7 +259,6 @@ public class Node {
 	uploadFile = localLocation;
 	setMimeType(mimeType);
 	return this;
-
     }
 
     /**
@@ -379,7 +378,6 @@ public class Node {
      * characteristics. e.g. type is more about the abstract role within the
      * graph.
      * 
-     * 
      * @param type
      *            the actual content type
      */
@@ -427,12 +425,8 @@ public class Node {
 	Vector<Link> removed = new Vector<Link>();
 	for (Link rel : links) {
 	    if (rel.getPredicate().compareTo(predicate) == 0) {
-		// System.out.println("REMOVE: " + this.pid + " <"
-		// + rel.getPredicate() + "> " + rel.getObject());
 		removed.add(rel);
 	    } else {
-		// System.out.println("ADD: " + this.pid + " <"
-		// + rel.getPredicate() + "> " + rel.getObject());
 		newRels.add(rel);
 	    }
 	}
@@ -816,47 +810,92 @@ public class Node {
     /**
      * @return a map representing the rdf data on this object
      */
+    @JsonValue
     public Map<String, Object> getLd() {
 	List<Link> ls = getLinks();
 	Map<String, Object> rdf = new HashMap<String, Object>();
+	rdf.put("@id", getPid());
+	rdf.put("primaryTopic", getPid());
 	for (Link l : ls) {
-	    Map<String, Object> pmap = new HashMap<String, Object>();
-	    String label = l.getObjectLabel() == null ? l.getObject() : l
-		    .getObjectLabel();
-	    pmap.put("label", label);
-	    if (!l.isLiteral) {
-		pmap.put("uri", l.getObject());
-	    }
 	    if (rdf.containsKey(l.getShortName())) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) rdf.get(l.getShortName());
-		list.add(pmap);
+		list.add(l.getObject());
 	    } else {
 		List<Object> list = new ArrayList<Object>();
-		list.add(pmap);
+		list.add(l.getObject());
 		rdf.put(l.getShortName(), list);
 	    }
 	}
+	rdf.remove("isNodeType");
+	rdf.put("lastModified", getLastModified());
+	rdf.put("creationDate", getCreationDate());
+	rdf.put("contentType", getContentType());
+	rdf.put("accessScheme", getAccessScheme());
+	rdf.put("publishScheme", getPublishScheme());
+	rdf.put("transformer", getTransformer());
+	rdf.put("@context", getContext());
 	return rdf;
     }
 
     /**
-     * @return a Map representig additional information about the shortnames
+     * @return a Map representing additional information about the shortnames
      *         used in getLd
      */
     public Map<String, Object> getContext() {
 	List<Link> ls = getLinks();
+	Map<String, Object> pmap;
 	Map<String, Object> cmap = new HashMap<String, Object>();
 	for (Link l : ls) {
-
-	    Map<String, Object> pmap = new HashMap<String, Object>();
-	    pmap.put("uri", l.getPredicate());
-	    // if (!l.isLiteral) {
-	    // pmap.put("@type", "@id");
-	    // }
+	    pmap = new HashMap<String, Object>();
+	    pmap.put("@id", l.getPredicate());
 	    pmap.put("label", l.getPredicateLabel());
+	    if (!l.isLiteral) {
+		pmap.put("@type", "@id");
+	    }
 	    cmap.put(l.getShortName(), pmap);
 	}
+
+	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
+	cmap.put("nodeType", REL_IS_NODE_TYPE);
+	cmap.put("lastModified", "http://purl.org/dc/terms/modified");
+	cmap.put("creationDate", "http://purl.org/dc/terms/created");
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
+	pmap.put("label", "Regaltyp");
+	pmap.put("@type", "@id");
+	cmap.put("contentType", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
+	pmap.put("label", "Sichtbarkeit Daten");
+	pmap.put("@type", "@id");
+	cmap.put("accessScheme", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#publishScheme");
+	pmap.put("label", "Sichtbarkeit Metadaten");
+	pmap.put("@type", "@id");
+	cmap.put("publishScheme", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://xmlns.com/foaf/0.1/primaryTopic");
+	pmap.put("label", "Vgl.");
+	pmap.put("@type", "@id");
+	cmap.put("primaryTopic", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/hasPart");
+	pmap.put("label", "Kindobjekt");
+	pmap.put("@type", "@id");
+	cmap.put("hasPart", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
+	pmap.put("label", "Kindobjekt");
+	pmap.put("@type", "@id");
+	cmap.put("isPartOf", "http://purl.org/dc/terms/isPartOf");
 
 	return cmap;
     }
@@ -938,7 +977,6 @@ public class Node {
 		+ (fileChecksum != null ? fileChecksum.hashCode() : 0);
 	result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
 	result = 31 * result + (fileLabel != null ? fileLabel.hashCode() : 0);
-
 	return result;
     }
 

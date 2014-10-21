@@ -5,171 +5,174 @@
 		{
 			"properties": 
 			{
-				"@graph.isPartOf.@value": 
+				"@context":{
+					"index":"no"
+				},
+				"isPartOf": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.subject.@value": 
+				"subject": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hasUR.@value": 
+				"hasUR": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasPart.@value": 
+				"hasPart": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasVersion.@value": 
+				"hasVersion": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.issued.@value": 
+				"issued": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.language.@value": 
+				"language": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.fulltextOnline.@value": 
+				"fulltextOnline": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hbzId.@value": 
+				"hbzId": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.urn.@value": 
+				"urn": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.exemplar.@value": 
+				"exemplar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similar.@value": 
+				"similar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.aggregates.@value": 
+				"aggregates": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isDescribedBy.@value": 
+				"isDescribedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similarTo.@value": 
+				"similarTo": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isLike.@value": 
+				"isLike": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.sameAs.@value": 
+				"sameAs": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.describedBy.@value": 
+				"describedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.isPrimaryTopic.@value": 
+				"isPrimaryTopic": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.created.@value": 
+				"created": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.modified.@value": 
+				"modified": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.contributorName.@value": 
+				"contributorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creatorName.@value": 
+				"creatorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.contributor.@value": 
+				"contributor": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creator.@value": 
+				"creator": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePerson.@value": 
+				"preferredNameForThePerson": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheSubjectHeading.@value": 
+				"preferredNameForTheSubjectHeading": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePlaceOrGeographicName.@value": 
+				"preferredNameForThePlaceOrGeographicName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.prefLabel.@value": 
+				"prefLabel": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.publisher.@value": 
+				"publisher": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheCorporateBody.@value": 
+				"preferredNameForTheCorporateBody": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.dateOfBirth.@value":
+				"dateOfBirth":
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
 
-				"@graph.dateOfDeath.@value": 
+				"dateOfDeath": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
@@ -181,171 +184,174 @@
 		{
 			"properties": 
 			{
-				"@graph.isPartOf.@value": 
+				"@context":{
+					"index":"no"
+				},
+				"isPartOf": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.subject.@value": 
+				"subject": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hasURN.@value": 
+				"hasURN": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasPart.@value": 
+				"hasPart": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasVersion.@value": 
+				"hasVersion": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.issued.@value": 
+				"issued": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.language.@value": 
+				"language": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.fulltextOnline.@value": 
+				"fulltextOnline": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hbzId.@value": 
+				"hbzId": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.urn.@value": 
+				"urn": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.exemplar.@value": 
+				"exemplar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similar.@value": 
+				"similar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.aggregates.@value": 
+				"aggregates": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isDescribedBy.@value": 
+				"isDescribedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similarTo.@value": 
+				"similarTo": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isLike.@value": 
+				"isLike": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.sameAs.@value": 
+				"sameAs": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.describedBy.@value": 
+				"describedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.isPrimaryTopic.@value": 
+				"isPrimaryTopic": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.created.@value": 
+				"created": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.modified.@value": 
+				"modified": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.contributorName.@value": 
+				"contributorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creatorName.@value": 
+				"creatorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.contributor.@value": 
+				"contributor": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creator.@value": 
+				"creator": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePerson.@value": 
+				"preferredNameForThePerson": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheSubjectHeading.@value": 
+				"preferredNameForTheSubjectHeading": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePlaceOrGeographicName.@value": 
+				"preferredNameForThePlaceOrGeographicName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.prefLabel.@value": 
+				"prefLabel": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.publisher.@value": 
+				"publisher": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheCorporateBody.@value": 
+				"preferredNameForTheCorporateBody": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.dateOfBirth.@value":
+				"dateOfBirth":
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
 
-				"@graph.dateOfDeath.@value": 
+				"dateOfDeath": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
@@ -357,171 +363,174 @@
 		{
 			"properties": 
 			{
-				"@graph.isPartOf.@value": 
+				"@context":{
+				"index":"no"
+				},
+				"isPartOf": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.subject.@value": 
+				"subject": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hasURN.@value": 
+				"hasURN": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasPart.@value": 
+				"hasPart": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasVersion.@value": 
+				"hasVersion": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.issued.@value": 
+				"issued": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.language.@value": 
+				"language": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.fulltextOnline.@value": 
+				"fulltextOnline": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hbzId.@value": 
+				"hbzId": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.urn.@value": 
+				"urn": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.exemplar.@value": 
+				"exemplar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similar.@value": 
+				"similar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.aggregates.@value": 
+				"aggregates": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isDescribedBy.@value": 
+				"isDescribedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similarTo.@value": 
+				"similarTo": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isLike.@value": 
+				"isLike": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.sameAs.@value": 
+				"sameAs": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.describedBy.@value": 
+				"describedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.isPrimaryTopic.@value": 
+				"isPrimaryTopic": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.created.@value": 
+				"created": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.modified.@value": 
+				"modified": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.contributorName.@value": 
+				"contributorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creatorName.@value": 
+				"creatorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.contributor.@value": 
+				"contributor": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creator.@value": 
+				"creator": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePerson.@value": 
+				"preferredNameForThePerson": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheSubjectHeading.@value": 
+				"preferredNameForTheSubjectHeading": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePlaceOrGeographicName.@value": 
+				"preferredNameForThePlaceOrGeographicName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.prefLabel.@value": 
+				"prefLabel": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.publisher.@value": 
+				"publisher": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheCorporateBody.@value": 
+				"preferredNameForTheCorporateBody": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.dateOfBirth.@value":
+				"dateOfBirth":
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
 
-				"@graph.dateOfDeath.@value": 
+				"dateOfDeath": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
@@ -533,171 +542,174 @@
 		{
 			"properties": 
 			{
-				"@graph.isPartOf.@value": 
+				"@context":{
+					"index":"no"
+				},
+				"isPartOf": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.subject.@value": 
+				"subject": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hasURN.@value": 
+				"hasURN": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasPart.@value": 
+				"hasPart": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasVersion.@value": 
+				"hasVersion": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.issued.@value": 
+				"issued": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.language.@value": 
+				"language": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.fulltextOnline.@value": 
+				"fulltextOnline": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hbzId.@value": 
+				"hbzId": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.urn.@value": 
+				"urn": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.exemplar.@value": 
+				"exemplar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similar.@value": 
+				"similar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.aggregates.@value": 
+				"aggregates": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isDescribedBy.@value": 
+				"isDescribedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similarTo.@value": 
+				"similarTo": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isLike.@value": 
+				"isLike": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.sameAs.@value": 
+				"sameAs": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.describedBy.@value": 
+				"describedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.isPrimaryTopic.@value": 
+				"isPrimaryTopic": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.created.@value": 
+				"created": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.modified.@value": 
+				"modified": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				}	,
-				"@graph.contributorName.@value": 
+				"contributorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creatorName.@value": 
+				"creatorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.contributor.@value": 
+				"contributor": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creator.@value": 
+				"creator": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePerson.@value": 
+				"preferredNameForThePerson": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheSubjectHeading.@value": 
+				"preferredNameForTheSubjectHeading": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePlaceOrGeographicName.@value": 
+				"preferredNameForThePlaceOrGeographicName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.prefLabel.@value": 
+				"prefLabel": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.publisher.@value": 
+				"publisher": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheCorporateBody.@value": 
+				"preferredNameForTheCorporateBody": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.dateOfBirth.@value":
+				"dateOfBirth":
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
 
-				"@graph.dateOfDeath.@value": 
+				"dateOfDeath": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
@@ -708,171 +720,174 @@
 		{
 			"properties": 
 			{
-				"@graph.isPartOf.@value": 
+				"@context":{
+					"index":"no"
+				},
+				"isPartOf": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.subject.@value": 
+				"subject": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hasURN.@value": 
+				"hasURN": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasPart.@value": 
+				"hasPart": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasVersion.@value": 
+				"hasVersion": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.issued.@value": 
+				"issued": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.language.@value": 
+				"language": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.fulltextOnline.@value": 
+				"fulltextOnline": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hbzId.@value": 
+				"hbzId": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.urn.@value": 
+				"urn": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.exemplar.@value": 
+				"exemplar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similar.@value": 
+				"similar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.aggregates.@value": 
+				"aggregates": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isDescribedBy.@value": 
+				"isDescribedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similarTo.@value": 
+				"similarTo": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isLike.@value": 
+				"isLike": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.sameAs.@value": 
+				"sameAs": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.describedBy.@value": 
+				"describedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.isPrimaryTopic.@value": 
+				"isPrimaryTopic": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.created.@value": 
+				"created": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.modified.@value": 
+				"modified": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				}	,
-				"@graph.contributorName.@value": 
+				"contributorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creatorName.@value": 
+				"creatorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.contributor.@value": 
+				"contributor": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creator.@value": 
+				"creator": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePerson.@value": 
+				"preferredNameForThePerson": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheSubjectHeading.@value": 
+				"preferredNameForTheSubjectHeading": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePlaceOrGeographicName.@value": 
+				"preferredNameForThePlaceOrGeographicName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.prefLabel.@value": 
+				"prefLabel": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.publisher.@value": 
+				"publisher": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheCorporateBody.@value": 
+				"preferredNameForTheCorporateBody": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.dateOfBirth.@value":
+				"dateOfBirth":
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
 
-				"@graph.dateOfDeath.@value": 
+				"dateOfDeath": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
@@ -881,173 +896,176 @@
 		},
 		"article": 
 		{
+			"@context":{
+				"index":"no"
+			},
 			"properties": 
 			{
-				"@graph.isPartOf.@value": 
+				"isPartOf": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.subject.@value": 
+				"subject": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hasURN.@value": 
+				"hasURN": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasPart.@value": 
+				"hasPart": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.hasVersion.@value": 
+				"hasVersion": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.issued.@value": 
+				"issued": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.language.@value": 
+				"language": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.fulltextOnline.@value": 
+				"fulltextOnline": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.hbzId.@value": 
+				"hbzId": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.urn.@value": 
+				"urn": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.exemplar.@value": 
+				"exemplar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similar.@value": 
+				"similar": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.aggregates.@value": 
+				"aggregates": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isDescribedBy.@value": 
+				"isDescribedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.similarTo.@value": 
+				"similarTo": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.isLike.@value": 
+				"isLike": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.sameAs.@value": 
+				"sameAs": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.describedBy.@value": 
+				"describedBy": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				}
 				,
-				"@graph.isPrimaryTopic.@value": 
+				"isPrimaryTopic": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.created.@value": 
+				"created": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				},
-				"@graph.modified.@value": 
+				"modified": 
 				{
 					"type": "date",
 					"index": "not_analyzed"
 				}	,
-				"@graph.contributorName.@value": 
+				"contributorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creatorName.@value": 
+				"creatorName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.contributor.@value": 
+				"contributor": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.creator.@value": 
+				"creator": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePerson.@value": 
+				"preferredNameForThePerson": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheSubjectHeading.@value": 
+				"preferredNameForTheSubjectHeading": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForThePlaceOrGeographicName.@value": 
+				"preferredNameForThePlaceOrGeographicName": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.prefLabel.@value": 
+				"prefLabel": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.publisher.@value": 
+				"publisher": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.preferredNameForTheCorporateBody.@value": 
+				"preferredNameForTheCorporateBody": 
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
-				"@graph.dateOfBirth.@value":
+				"dateOfBirth":
 				{
 					"type": "string",
 					"index": "not_analyzed"
 				},
 
-				"@graph.dateOfDeath.@value": 
+				"dateOfDeath": 
 				{
 					"type": "string",
 					"index": "not_analyzed"

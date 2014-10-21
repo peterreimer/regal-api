@@ -91,37 +91,10 @@ public class Read extends RegalAction {
     }
 
     /**
-     * @param list
-     *            a list of nodes to create a json like map for
-     * @return a map with objects
-     */
-    public List<Map<String, Object>> nodelistToMap(List<Node> list) {
-	try {
-	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
-	    for (Node node : list) {
-		Map<String, Object> m = readJsonCompactFromCache(node.getPid());
-		if (m == null) {
-		    m = new Transform().getOaiOreJsonMap(node);
-		    m.put("primaryTopic", node.getPid());
-		    writeJsonCompactToCache(node.getPid(), m);
-		}
-		map.add(m);
-	    }
-	    return map;
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	}
-    }
-
-    /**
      * @param node
-     * @return a list of all children and their children aso
+     * @return all parts and their parts recursively
      */
-    public List<Map<String, Object>> getAllParts(Node node) {
-	return nodelistToMap(getParts(node));
-    }
-
-    private List<Node> getParts(Node node) {
+    public List<Node> getParts(Node node) {
 	List<Node> result = new ArrayList<Node>();
 	result.add(node);
 	List<Node> parts = getNodesFromCache(node.getRelatives(HAS_PART));

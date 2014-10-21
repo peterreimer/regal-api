@@ -32,23 +32,11 @@ public class RegalAction {
     void updateIndexAndCache(Node node) {
 	new Index().index(node);
 	writeNodeToCache(node);
-	try {
-	    writeJsonCompactToCache(node.getPid(),
-		    new Transform().getOaiOreJsonMap(node));
-	} catch (Exception e) {
-	    Cache.remove(createJsonCompactKey(node.getPid()));
-	}
     }
 
     void updateIndexAndCacheWithParents(Node node) {
 	new Index().index(node);
 	writeNodeToCache(node);
-	try {
-	    writeJsonCompactToCache(node.getPid(),
-		    new Transform().getOaiOreJsonMap(node));
-	} catch (Exception e) {
-	    Cache.remove(createJsonCompactKey(node.getPid()));
-	}
 	List<String> ps = node.getRelatives(IS_PART_OF);
 	if (ps.isEmpty() || ps == null)
 	    return;
