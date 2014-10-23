@@ -102,6 +102,8 @@ public class Index {
 	    int stepSize = 100;
 	    int from = 0 - stepSize;
 	    List<String> nodes = read.listRepoNamespace(indexName);
+	    messageOut.write(nodes.toString());
+	    messageOut.write("size: " + nodes.size());
 	    do {
 		until += stepSize;
 		from += stepSize;
@@ -113,6 +115,7 @@ public class Index {
 			read.getNodes(nodes.subList(from, until)),
 			indexNameWithDatestamp).toString());
 	    } while (until < nodes.size());
+	    messageOut.write("Attempted to index: " + nodes.size());
 	    messageOut.write("\nSuccessfuly Finished\n");
 	} finally {
 	    messageOut.close();
