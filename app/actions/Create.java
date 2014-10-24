@@ -69,7 +69,7 @@ public class Create extends RegalAction {
 	linkWithParent(parent, node);
 	updateTransformer(transformers, node);
 	Globals.fedora.updateNode(node);
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
 	return node;
     }
 
@@ -94,14 +94,14 @@ public class Create extends RegalAction {
     private void setNodeType(String type, Node node) {
 	node.setType(TYPE_OBJECT);
 	node.setContentType(type);
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
     }
 
     private void linkWithParent(String parentPid, Node node) {
 	Globals.fedora.unlinkParent(node);
 	Globals.fedora.linkToParent(node, parentPid);
 	Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
     }
 
     private void updateTransformer(List<String> transformers, Node node) {

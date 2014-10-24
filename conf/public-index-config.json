@@ -6,8 +6,10 @@
 			"properties": 
 			{
 				"@context":{
-					"index":"no"
-				},
+					"type": "object",
+					"index": "no",
+					"enabled" : false
+				},				
 				"isPartOf": 
 				{
 					"type": "string",
@@ -185,7 +187,9 @@
 			"properties": 
 			{
 				"@context":{
-					"index":"no"
+					"type": "object",
+					"index": "no",
+					"enabled" : false
 				},
 				"isPartOf": 
 				{
@@ -364,7 +368,9 @@
 			"properties": 
 			{
 				"@context":{
-				"index":"no"
+					"type": "object",
+					"index": "no",
+					"enabled" : false
 				},
 				"isPartOf": 
 				{
@@ -543,7 +549,9 @@
 			"properties": 
 			{
 				"@context":{
-					"index":"no"
+					"type": "object",
+					"index": "no",
+					"enabled" : false
 				},
 				"isPartOf": 
 				{
@@ -721,7 +729,9 @@
 			"properties": 
 			{
 				"@context":{
-					"index":"no"
+					"type": "object",
+					"index": "no",
+					"enabled" : false
 				},
 				"isPartOf": 
 				{
@@ -896,11 +906,13 @@
 		},
 		"article": 
 		{
-			"@context":{
-				"index":"no"
-			},
 			"properties": 
 			{
+				"@context":{
+					"type": "object",
+					"index": "no",
+					"enabled" : false
+				},
 				"isPartOf": 
 				{
 					"type": "string",

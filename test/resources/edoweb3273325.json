@@ -1,109 +1,275 @@
 {
-	"@graph": 
-	[
-		{
-			"@id": "edoweb:3273325",
-			"@type": 
-			[
-				"http://iflastandards.info/ns/isbd/terms/mediatype/T1002",
-				"http://purl.org/dc/terms/BibliographicResource",
-				"http://purl.org/ontology/bibo/Collection",
-				"http://purl.org/ontology/bibo/Newspaper",
-				"http://purl.org/ontology/bibo/Periodical",
-				"http://rdvocab.info/termList/RDACarrierType/1018"
-			],
 
-			"contentType": "journal",
-			"hasTransformer": 
-			[
-				"oaidc",
-				"epicur"
-			],
+    "isLike": [
+        "http://lobid.org/resource/HT014646471"
+    ],
+    "hasVersion": [
+        "http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=4915397&custom_att_2=simple_viewer",
+        "http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=5456704&custom_att_2=simple_viewer"
+    ],
+    "subject": [
+        "http://dewey.info/class/350/"
+    ],
+    "publishScheme": "public",
+    "transformer": [
+        {
+            "id": "oaidc",
+            "contentModelPID": "CM:oaidc",
+            "serviceDefinitionPID": "CM:oaidcServiceDefinition",
+            "serviceDeploymentPID": "CM:oaidcServiceDeployment"
+        },
+        {
+            "id": "epicur",
+            "contentModelPID": "CM:epicur",
+            "serviceDefinitionPID": "CM:epicurServiceDefinition",
+            "serviceDeploymentPID": "CM:epicurServiceDeployment"
+        }
+    ],
+    "language": [
+        "http://id.loc.gov/vocabulary/iso639-2/deu"
+    ],
+    "medium": [
+        "http://rdvocab.info/termList/RDACarrierType/1010",
+        "http://rdvocab.info/termList/RDACarrierType/1018"
+    ],
+    "fulltextOnline": [
+        "http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=4915397&custom_att_2=simple_viewer",
+        "http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=5456704&custom_att_2=simple_viewer"
+    ],
+    "title": [
+        "Staatszeitung / A"
+    ],
+    "type": [
+        "http://purl.org/dc/terms/BibliographicResource",
+        "http://purl.org/lobid/lv#Legislation",
+        "http://purl.org/ontology/bibo/Collection",
+        "http://purl.org/ontology/bibo/Newspaper",
+        "http://purl.org/ontology/bibo/Periodical",
+        "http://purl.org/vocab/frbr/core#Manifestation"
+    ],
+    "itemID": [
+        "localhost:9000/resource/edoweb:3273325"
+    ],
+    "exemplar": [
+        "http://lobid.org/item/ZDB2221001-5:DE-929:"
+    ],
+    "isMemberOf": [
+        "info:fedora/oai:350",
+        "info:fedora/oai:open_access"
+    ],
+    "@id": "edoweb:3273325",
+    "isPrimaryTopicOf": [
+        "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3DHT014646471"
+    ],
+    "issued": [
+        "2007",
+        "2007 - 2013"
+    ],
+    "contentType": "journal",
+    "publicationStatement": [
+        "Mainz; [s.n.]; 2007"
+    ],
+    "creator": [
+        "http://d-nb.info/gnd/4049795-1"
+    ],
+    "hasPart": [
+        "edoweb:3273325-0",
+        "edoweb:3273325-1",
+        "edoweb:3273325-2",
+        "edoweb:3273325-3",
+        "edoweb:3273325-4",
+        "edoweb:3273325-5",
+        "edoweb:3273325-6",
+        "edoweb:7000006"
+    ],
+    "accessScheme": "public",
+    "statementOfResponsibility": [
+        "Hrsg.: Staatskanzlei ; Der Präsident des Landtags"
+    ],
+    "creationDate": "2014-10-13T10:52:33.311+0000",
+    "@context": {
+        "isLike": {
+            "@type": "@id",
+            "@id": "http://www.umbel.org/specifications/vocabulary#isLike",
+            "label": "Ähnlich zu"
+        },
+        "hasVersion": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/hasVersion",
+            "label": "Vgl."
+        },
+        "subject": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/subject",
+            "label": "Schlagwort"
+        },
+        "publishScheme": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#publishScheme",
+            "label": "Sichtbarkeit Metadaten"
+        },
+        "language": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/language",
+            "label": "Sprache"
+        },
+        "medium": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/medium",
+            "label": "Träger"
+        },
+        "fulltextOnline": {
+            "@type": "@id",
+            "@id": "http://purl.org/lobid/lv#fulltextOnline",
+            "label": "Download"
+        },
+        "title": {
+            "@id": "http://purl.org/dc/terms/title",
+            "label": "Titel"
+        },
+        "type": {
+            "@type": "@id",
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "label": "Typ"
+        },
+        "isNodeType": {
+            "@type": "@id",
+            "@id": "info:hbz/hbz-ingest:def/model#isNodeType",
+            "label": "Fedora Typ"
+        },
+        "itemID": {
+            "@type": "@id",
+            "@id": "http://www.openarchives.org/OAI/2.0/itemID",
+            "label": "Oai Id"
+        },
+        "exemplar": {
+            "@type": "@id",
+            "@id": "http://purl.org/vocab/frbr/core#exemplar",
+            "label": "Exemplar"
+        },
+        "isMemberOf": {
+            "@type": "@id",
+            "@id": "info:fedora/fedora-system:def/relations-external#isMemberOf",
+            "label": "Oai Set"
+        },
+        "isPrimaryTopicOf": {
+            "@type": "@id",
+            "@id": "http://xmlns.com/foaf/0.1/isPrimaryTopicOf",
+            "label": "Gegenstand von"
+        },
+        "issued": {
+            "@id": "http://purl.org/dc/terms/issued",
+            "label": "Erschienen"
+        },
+        "contentType": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#contentType",
+            "label": "Regaltyp"
+        },
+        "publicationStatement": {
+            "@id": "http://rdvocab.info/Elements/publicationStatement",
+            "label": "Ort und Jahr"
+        },
+        "creator": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/creator",
+            "label": "Autor"
+        },
+        "hasPart": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/hasPart",
+            "label": "Kindobjekt"
+        },
+        "accessScheme": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#accessScheme",
+            "label": "Sichtbarkeit Daten"
+        },
+        "statementOfResponsibility": {
+            "@id": "http://rdvocab.info/Elements/statementOfResponsibility",
+            "label": "Verantwortlich"
+        },
+        "label": "http://www.w3.org/2000/01/rdf-schema#label",
+        "nodeType": "info:hbz/hbz-ingest:def/model#isNodeType",
+        "creationDate": "http://purl.org/dc/terms/created",
+        "isPartOf": "http://purl.org/dc/terms/isPartOf",
+        "otherTitleInformation": {
+            "@id": "http://rdvocab.info/Elements/otherTitleInformation",
+            "label": "Titelzusatz weitere"
+        },
+        "urn": {
+            "@id": "http://purl.org/lobid/lv#urn",
+            "label": "Urn"
+        },
+        "primaryTopic": {
+            "@type": "@id",
+            "@id": "http://xmlns.com/foaf/0.1/primaryTopic",
+            "label": "Vgl."
+        },
+        "zdbID": {
+            "@id": "http://purl.org/lobid/lv#zdbID",
+            "label": "http://purl.org/lobid/lv#zdbID"
+        },
+        "placeOfPublication": {
+            "@id": "http://rdvocab.info/Elements/placeOfPublication",
+            "label": "Ort"
+        },
+        "describedby": {
+            "@type": "@id",
+            "@id": "http://www.w3.org/2007/05/powder-s#describedby",
+            "label": "Beschrieben durch"
+        },
+        "publisher": {
+            "@id": "http://purl.org/dc/elements/1.1/publisher",
+            "label": "Herausgeber"
+        },
+        "bibliographicCitation": {
+            "@id": "http://purl.org/dc/terms/bibliographicCitation",
+            "label": "Veröffentlichungs Details"
+        },
+        "lastModified": "http://purl.org/dc/terms/modified",
+        "hbzID": {
+            "@id": "http://purl.org/lobid/lv#hbzID",
+            "label": "Katalog Id"
+        },
+        "sameAs": {
+            "@type": "@id",
+            "@id": "http://www.w3.org/2002/07/owl#sameAs",
+            "label": "Identisch zu"
+        }
+    },
+    "otherTitleInformation": [
+        "Ausgabe A, Elektronische Ressource"
+    ],
+    "urn": [
+        "urn:nbn:de:hbz:929:02-edoweb:32733252"
+    ],
+    "primaryTopic": "edoweb:3273325",
+    "zdbID": [
+        "2221001-5",
+        "ZDB2221001-5"
+    ],
+    "placeOfPublication": [
+        "Mainz"
+    ],
+    "describedby": [
+        "edoweb:3273325/about"
+    ],
+    "publisher": [
+        "[s.n.]"
+    ],
+    "bibliographicCitation": [
+        "Periodizität: wöchentl.; nicht mehr im Internet verfügbar"
+    ],
+    "lastModified": "2014-10-17T11:55:42.586+0000",
+    "hbzID": [
+        "HT014646471"
+    ],
+    "sameAs": [
+        "http://ld.zdb-services.de/resource/2221001-5",
+        "http://lobid.org/resource/ZDB2221001-5",
+        "http://hub.culturegraph.org/resource/ZDB-ZDB2221001-5",
+        "edoweb:3273325"
+    ]
 
-			"publisher": "[s.n.]",
-			"bibliographicCitation": "Periodizität: wöchentl.; nicht mehr im Internet verfügbar",
-			"creator": "http://d-nb.info/gnd/35789-3",
-			"hasPart": "edoweb:3273331",
-			"hasVersion": 
-			[
-				"http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=4915397&custom_att_2=simple_viewer",
-				"http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=5456704&custom_att_2=simple_viewer"
-			],
-
-			"issued": "2007 - 2013",
-			"language": "http://id.loc.gov/vocabulary/iso639-2/deu",
-			"subject": "http://dewey.info/class/350/",
-			"title": "Staatszeitung / A",
-			"fulltextOnline": 
-			[
-				"http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=4915397&custom_att_2=simple_viewer",
-				"http://digitool.hbz-nrw.de:1801/webclient/DeliveryManager?pid=5456704&custom_att_2=simple_viewer"
-			],
-
-			"hbzId": "HT014646471",
-			"urn": "urn:nbn:de:hbz:929:02-edoweb:32733252",
-			"exemplar": "http://lobid.org/item/ZDB2221001-5%3ADE-929",
-			"otherTitleInformation": "Ausgabe A, Elektronische Ressource",
-			"placeOfPublication": "Mainz",
-			"publicationStatement": "Mainz; [s.n.]",
-			"statementOfResponsibility": "Hrsg.: Staatskanzlei ; Der Präsident des Landtags",
-			"aggregates": "edoweb:3273331",
-			"isDescribedBy": "edoweb:3273325.rdf",
-			"similarTo": 
-			[
-				"http://klio.hbz-nrw.de:1801/webclient/MetadataManager?pid=3273325",
-				"http://api.localhost/fedora/objects/edoweb:3273325"
-			],
-
-			"isLike": "http://lobid.org/resource/HT014646471",
-			"sameAs": 
-			[
-				"edoweb:3273325",
-				"http://hub.culturegraph.org/resource/ZDB-ZDB2221001-5",
-				"http://ld.zdb-services.de/resource/2221001-5",
-				"http://lobid.org/resource/ZDB2221001-5"
-			],
-
-			"describedBy": "edoweb:3273325/about",
-			"isPrimaryTopicOf": "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3DHT014646471"
-		},
-
-		{
-			"@id": "edoweb:3273325.rdf",
-			"created": 
-			{
-				"@type": "xsd:dateTime",
-				"@value": "2014-04-30T16:41:51.535+02:00"
-			},
-
-			"modified": 
-			{
-				"@type": "xsd:dateTime",
-				"@value": "2014-04-30T16:41:59.042+02:00"
-			},
-
-			"describes": "edoweb:3273325"
-		},
-
-		{
-			"@id": "edoweb:3273325/about",
-			"primaryTopic": "edoweb:3273325"
-		},
-
-		{
-			"@id": "http://d-nb.info/gnd/35789-3",
-			"preferredNameForThePlaceOrGeographicName": "Rheinland-Pfalz"
-		},
-
-		{
-			"@id": "http://dewey.info/class/350/2009/08/about.en",
-			"prefLabel": 
-			{
-				"@language": "en",
-				"@value": "Public administration & military science"
-			}
-		}
-	],
-
-	"@context": "http://api.localhost/edoweb-resources.json"
 }

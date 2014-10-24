@@ -115,7 +115,7 @@ public class Modify extends RegalAction {
 	Node node = new Read().readNode(pid);
 	node.setDublinCoreData(dc);
 	Globals.fedora.updateNode(node);
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
 	return pid + " dc successfully updated!";
     }
 
@@ -143,7 +143,7 @@ public class Modify extends RegalAction {
 		node.setSeqFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    updateIndexAndCacheWithParents(node);
+	    updateIndexAndCache(node);
 	    return pid + " sequence of child objects updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
@@ -174,7 +174,7 @@ public class Modify extends RegalAction {
 		node.setMetadataFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    updateIndexAndCacheWithParents(new Read().readNode(pid));
+	    updateIndexAndCache(new Read().readNode(pid));
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400);
@@ -191,7 +191,7 @@ public class Modify extends RegalAction {
     public String updateMetadata(Node node) {
 	Globals.fedora.updateNode(node);
 	String pid = node.getPid();
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
 	return pid + " metadata successfully updated!";
     }
 
@@ -208,7 +208,7 @@ public class Modify extends RegalAction {
 	    node.addRelation(link);
 	}
 	Globals.fedora.updateNode(node);
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
 	return pid + " " + links + " links successfully added.";
     }
 
@@ -302,7 +302,7 @@ public class Modify extends RegalAction {
     public String lobidify(String pid) {
 	Node node = new Read().readNode(pid);
 	node = lobidify(node);
-	updateIndexAndCacheWithParents(node);
+	updateIndexAndCache(node);
 	return updateMetadata(node);
     }
 

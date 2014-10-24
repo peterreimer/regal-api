@@ -19,9 +19,13 @@ package archive.search;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.index.mapper.MapperParsingException;
+import org.elasticsearch.search.SearchHits;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -113,29 +117,29 @@ public class SearchTest extends BaseModelTest {
 	search.down();
     }
 
-    // @Test
-    // public void testCreation() {
-    // Assert.assertNotNull(search);
-    // }
-    //
-    // @Test
-    // public void testResourceListing() throws InterruptedException {
-    // SearchHits hits = search.listResources("test", "monograph", 0, 5);
-    // Assert.assertEquals(1, hits.getTotalHits());
-    // }
-    //
-    // @Test
-    // public void testResourceListing_withDefaultValues()
-    // throws InterruptedException {
-    // SearchHits hits = search.listResources("", "", 0, 10);
-    // Assert.assertEquals(1, hits.getTotalHits());
-    // }
-    //
-    // @Test(expected = Search.InvalidRangeException.class)
-    // public void testResourceListing_withWrongParameter() {
-    // search.listResources("test", "monograph", 5, 1);
-    // }
-    //
+    @Test
+    public void testCreation() {
+	Assert.assertNotNull(search);
+    }
+
+    @Test
+    public void testResourceListing() throws InterruptedException {
+	SearchHits hits = search.listResources("test", "monograph", 0, 5);
+	Assert.assertEquals(1, hits.getTotalHits());
+    }
+
+    @Test
+    public void testResourceListing_withDefaultValues()
+	    throws InterruptedException {
+	SearchHits hits = search.listResources("", "", 0, 10);
+	Assert.assertEquals(1, hits.getTotalHits());
+    }
+
+    @Test(expected = Search.InvalidRangeException.class)
+    public void testResourceListing_withWrongParameter() {
+	search.listResources("test", "monograph", 5, 1);
+    }
+
     // @Test
     // public void testDelete() throws InterruptedException {
     // SearchHits hits = search.listResources("test", "monograph", 0, 1);
@@ -144,30 +148,30 @@ public class SearchTest extends BaseModelTest {
     // hits = search.listResources("test", "monograph", 0, 1);
     // Assert.assertEquals(0, hits.getTotalHits());
     // }
-    //
-    // @Test
-    // public void testListIds() throws InterruptedException {
-    // search.index("test", "monograph", "edoweb2606976", edoweb2606976);
-    // List<String> list = search.listIds("test", "monograph", 0, 1);
-    // Assert.assertEquals(1, list.size());
-    // Assert.assertEquals(list.get(0), "edoweb2606976");
-    // }
-    //
-    // @Test
-    // public void testFromUntil() throws InterruptedException {
-    // for (int i = 100; i > 0; i--) {
-    // search.index("test", "monograph", "edoweb:" + i, edoweb2606976);
-    // }
-    // List<String> list = search.listIds("test", "monograph", 0, 10);
-    // Assert.assertEquals(10, list.size());
-    // list = search.listIds("test", "monograph", 10, 50);
-    // Assert.assertEquals(40, list.size());
-    // list = search.listIds("test", "monograph", 60, 61);
-    // Assert.assertEquals(1, list.size());
-    // list = search.listIds("test", "monograph", 100, 150);
-    // Assert.assertEquals(1, list.size());
-    // }
-    //
+
+    @Test
+    public void testListIds() throws InterruptedException {
+	search.index("test", "monograph", "edoweb2606976", edoweb2606976);
+	List<String> list = search.listIds("test", "monograph", 0, 1);
+	Assert.assertEquals(1, list.size());
+	Assert.assertEquals(list.get(0), "edoweb2606976");
+    }
+
+    @Test
+    public void testFromUntil() throws InterruptedException {
+	for (int i = 100; i > 0; i--) {
+	    search.index("test", "monograph", "edoweb:" + i, edoweb2606976);
+	}
+	List<String> list = search.listIds("test", "monograph", 0, 10);
+	Assert.assertEquals(10, list.size());
+	list = search.listIds("test", "monograph", 10, 50);
+	Assert.assertEquals(40, list.size());
+	list = search.listIds("test", "monograph", 60, 61);
+	Assert.assertEquals(1, list.size());
+	list = search.listIds("test", "monograph", 100, 150);
+	Assert.assertEquals(1, list.size());
+    }
+
     // @Test
     // public void mappingTest() {
     // search.index("test", "monograph", "edoweb:3273325", edoweb3273325);
@@ -179,169 +183,169 @@ public class SearchTest extends BaseModelTest {
     // Assert.assertEquals(1, hits.totalHits());
     // Assert.assertEquals("edoweb:3273331", hits.getHits()[0].getId());
     // }
-    //
-    // @Test
-    // public void indexTest() {
-    // search.index("test", "monograph", "edoweb:3273325", edoweb3273325);
-    // search.index("test", "monograph", "edoweb:3273325-2007",
-    // edoweb3273325_2007);
-    // search.index("test", "monograph", "edoweb:3273331", edoweb3273331);
-    // }
-    //
-    // @Test(expected = MapperParsingException.class)
-    // public void esSettings_fails() {
-    // search.down();
-    // search = new SearchMock("test", "public-index-config_fails.json");
-    // System.out.println("Fails with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // search.index("test", "monograph",
-    // "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b",
-    // edowebMappingTest);
-    //
-    // }
-    //
-    // @Test
-    // public void esSettings_succeed() {
-    // search.down();
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b",
-    // edowebMappingTest);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // }
-    //
-    // @Test(expected = MapperParsingException.class)
-    // public void esSettingsDrupalBulk_fail() {
-    // // Make sure everything is fresh
-    // search.down();
-    //
-    // /*-
-    // * Initalize index with very simple mapping
-    // * {
-    // * "mappings":
-    // * {
-    // * "monograph":
-    // * {
-    // * "properties":
-    // * {
-    // * "@graph":
-    // * {
-    // * "properties":
-    // * {
-    // * "creatorName":
-    // * {
-    // * "type": "string",
-    // * "index": "not_analyzed"
-    // * }
-    // * }
-    // * }
-    // * }
-    // * }
-    // * }
-    // * }
-    // *
-    // */
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    //
-    // /*-
-    // *Index
-    // * {
-    // * "@graph":
-    // * [
-    // * {
-    // * "@id" : "edoweb:1fe8fb0c-e844-4c07-9df3-7bf28d125e28",
-    // * "creatorName":
-    // * {
-    // * "@id": "http://d-nb.info/gnd/171948629"
-    // * }
-    // * }
-    // * ]
-    // * }
-    // */
-    // search.index("test", "monograph",
-    // "edoweb:1fe8fb0c-e844-4c07-9df3-7bf28d125e28", drupalOne);
-    //
-    // // Print mapping
-    // System.out.println("\nCurrent Mapping: "
-    // + printJsonFormatted(search.getSettings("test", "monograph"))
-    // + "\n");
-    //
-    // /*-
-    // * Index
-    // * {
-    // * "@graph":
-    // * [
-    // * {
-    // * "@id": "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b",
-    // * "creatorName": "1"
-    // * }
-    // * ]
-    // * }
-    // */
-    // // Here it goes off
-    // try {
-    // search.index("test", "monograph",
-    // "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b", drupalFour);
-    // } catch (MapperParsingException e) {
-    // e.printStackTrace();
-    // throw e;
-    // }
-    //
-    // }
-    //
-    // @Test
-    // public void esSettingsDrupalBulk_succeed() {
-    // search.down();
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:1fe8fb0c-e844-4c07-9df3-7bf28d125e28", drupalOne);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:a601c448-b370-4bc5-b2ba-367b53ecc513", drupalTwo);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:ad744673-5ded-43a0-90c0-3f8f2223b4be", drupalThree);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b", drupalFour);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:ad462c5d-f566-41f9-986d-744c10bbd450", drupalFive);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    // search = new SearchMock("test", "public-index-config_succeed.json");
-    // search.index("test", "monograph",
-    // "edoweb:549b92ee-d0a0-4471-83dc-799b08f3c0f6", drupalSix);
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    //
-    // }
-    //
-    // @Test(expected = MapperParsingException.class)
-    // public void esSettingsDrupalBulk_withNestedSettings_failsDirectly() {
-    // search.down();
-    // search = new SearchMock("test",
-    // "public-index-config_different_succeed.json");
-    //
-    // System.out.println("Succeeds with: "
-    // + printJsonFormatted(search.getSettings("test", "monograph")));
-    //
-    // search.index("test", "monograph",
-    // "edoweb:ad462c5d-f566-41f9-986d-744c10bbd450", drupalFour);
-    //
-    // search.index("test", "monograph",
-    // "edoweb:a601c448-b370-4bc5-b2ba-367b53ecc513", drupalOne);
-    //
-    // }
+
+    @Test
+    public void indexTest() {
+	search.index("test", "monograph", "edoweb:3273325", edoweb3273325);
+	search.index("test", "monograph", "edoweb:3273325-2007",
+		edoweb3273325_2007);
+	search.index("test", "monograph", "edoweb:3273331", edoweb3273331);
+    }
+
+    @Test(expected = MapperParsingException.class)
+    public void esSettings_fails() {
+	search.down();
+	search = new SearchMock("test", "public-index-config_fails.json");
+	System.out.println("Fails with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+	search.index("test", "monograph",
+		"edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b",
+		edowebMappingTest);
+
+    }
+
+    @Test
+    public void esSettings_succeed() {
+	search.down();
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b",
+		edowebMappingTest);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+    }
+
+    @Test(expected = MapperParsingException.class)
+    public void esSettingsDrupalBulk_fail() {
+	// Make sure everything is fresh
+	search.down();
+
+	/*-
+	 * Initalize index with very simple mapping
+	 * {
+	 * "mappings":
+	 * {
+	 * "monograph":
+	 * {
+	 * "properties":
+	 * {
+	 * "@graph":
+	 * {
+	 * "properties":
+	 * {
+	 * "creatorName":
+	 * {
+	 * "type": "string",
+	 * "index": "not_analyzed"
+	 * }
+	 * }
+	 * }
+	 * }
+	 * }
+	 * }
+	 * }
+	 *
+	 */
+	search = new SearchMock("test", "public-index-config_succeed.json");
+
+	/*-
+	 *Index
+	 * {
+	 * "@graph":
+	 * [
+	 * {
+	 * "@id" : "edoweb:1fe8fb0c-e844-4c07-9df3-7bf28d125e28",
+	 * "creatorName":
+	 * {
+	 * "@id": "http://d-nb.info/gnd/171948629"
+	 * }
+	 * }
+	 * ]
+	 * }
+	 */
+	search.index("test", "monograph",
+		"edoweb:1fe8fb0c-e844-4c07-9df3-7bf28d125e28", drupalOne);
+
+	// Print mapping
+	System.out.println("\nCurrent Mapping: "
+		+ printJsonFormatted(search.getSettings("test", "monograph"))
+		+ "\n");
+
+	/*-
+	 * Index
+	 * {
+	 * "@graph":
+	 * [
+	 * {
+	 * "@id": "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b",
+	 * "creatorName": "1"
+	 * }
+	 * ]
+	 * }
+	 */
+	// Here it goes off
+	try {
+	    search.index("test", "monograph",
+		    "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b", drupalFour);
+	} catch (MapperParsingException e) {
+	    e.printStackTrace();
+	    throw e;
+	}
+
+    }
+
+    @Test
+    public void esSettingsDrupalBulk_succeed() {
+	search.down();
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:1fe8fb0c-e844-4c07-9df3-7bf28d125e28", drupalOne);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:a601c448-b370-4bc5-b2ba-367b53ecc513", drupalTwo);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:ad744673-5ded-43a0-90c0-3f8f2223b4be", drupalThree);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b", drupalFour);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:ad462c5d-f566-41f9-986d-744c10bbd450", drupalFive);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+	search = new SearchMock("test", "public-index-config_succeed.json");
+	search.index("test", "monograph",
+		"edoweb:549b92ee-d0a0-4471-83dc-799b08f3c0f6", drupalSix);
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+
+    }
+
+    @Test(expected = MapperParsingException.class)
+    public void esSettingsDrupalBulk_withNestedSettings_failsDirectly() {
+	search.down();
+	search = new SearchMock("test",
+		"public-index-config_different_succeed.json");
+
+	System.out.println("Succeeds with: "
+		+ printJsonFormatted(search.getSettings("test", "monograph")));
+
+	search.index("test", "monograph",
+		"edoweb:ad462c5d-f566-41f9-986d-744c10bbd450", drupalFour);
+
+	search.index("test", "monograph",
+		"edoweb:a601c448-b370-4bc5-b2ba-367b53ecc513", drupalOne);
+
+    }
 
     @Test
     public void differentPrefLabelSchemas_mustSucceed() {
