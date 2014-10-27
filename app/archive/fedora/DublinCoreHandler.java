@@ -97,10 +97,10 @@ public class DublinCoreHandler {
 	    NodeList type = root.getElementsByTagName(ns + ":type");
 
 	    if (contributer != null && contributer.getLength() != 0) {
-		node.dublinCoreData.setContributer(new Vector<String>());
+		node.dublinCoreData.setContributor(new Vector<String>());
 		for (int i = 0; i < contributer.getLength(); i++) {
 		    node.dublinCoreData
-			    .addContributer(transformFromXMLEntity(contributer
+			    .addContributor(transformFromXMLEntity(contributer
 				    .item(i).getTextContent().trim()));
 		}
 	    }
@@ -247,7 +247,7 @@ public class DublinCoreHandler {
 	List<String> title = null;
 	List<String> type = null;
 
-	if ((contributer = node.dublinCoreData.getContributer()) != null) {
+	if ((contributer = node.dublinCoreData.getContributor()) != null) {
 	    for (String str : contributer) {
 		String scontributer = tagStart + "contributer" + tagEnd
 			+ transformToXMLEntity(str) + endTagStart
