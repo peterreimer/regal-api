@@ -152,30 +152,28 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
     public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
-	return new BulkAction()
-		.call(() -> {
-		    List<Transformer> transformers = new Vector<Transformer>();
-		    transformers.add(new Transformer(namespace + "epicur",
-			    "epicur", Globals.server + "/resource/(pid)."
-				    + namespace + "epicur"));
-		    transformers.add(new Transformer(namespace + "oaidc",
-			    "oaidc", Globals.server + "/resource/(pid)."
-				    + namespace + "oaidc"));
-		    transformers.add(new Transformer(namespace + "pdfa",
-			    "pdfa", Globals.server + "/resource/(pid)."
-				    + namespace + "pdfa"));
-		    transformers.add(new Transformer(namespace + "pdfbox",
-			    "pdfbox", Globals.server + "/resource/(pid)."
-				    + namespace + "pdfbox"));
-		    transformers.add(new Transformer(namespace + "aleph",
-			    "aleph", Globals.server + "/resource/(pid)."
-				    + namespace + "aleph"));
-		    create.contentModelsInit(transformers);
-		    String result = "Reinit contentModels " + namespace
-			    + "epicur, " + namespace + "oaidc, " + namespace
-			    + "pdfa, " + namespace + "pdfbox, " + namespace
-			    + "aleph";
-		    return JsonMessage(new Message(result));
-		});
+	return new BulkAction().call(() -> {
+	    List<Transformer> transformers = new Vector<Transformer>();
+	    transformers.add(new Transformer(namespace + "epicur", "epicur",
+		    "http://" + Globals.server + "/resource/(pid)." + namespace
+			    + "epicur"));
+	    transformers.add(new Transformer(namespace + "oaidc", "oaidc",
+		    "http://" + Globals.server + "/resource/(pid)." + namespace
+			    + "oaidc"));
+	    transformers.add(new Transformer(namespace + "pdfa", "pdfa",
+		    "http://" + Globals.server + "/resource/(pid)." + namespace
+			    + "pdfa"));
+	    transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
+		    "http://" + Globals.server + "/resource/(pid)." + namespace
+			    + "pdfbox"));
+	    transformers.add(new Transformer(namespace + "aleph", "aleph",
+		    "http://" + Globals.server + "/resource/(pid)." + namespace
+			    + "aleph"));
+	    create.contentModelsInit(transformers);
+	    String result = "Reinit contentModels " + namespace + "epicur, "
+		    + namespace + "oaidc, " + namespace + "pdfa, " + namespace
+		    + "pdfbox, " + namespace + "aleph";
+	    return JsonMessage(new Message(result));
+	});
     }
 }
