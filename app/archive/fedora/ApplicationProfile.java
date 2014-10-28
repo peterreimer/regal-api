@@ -192,9 +192,9 @@ public class ApplicationProfile {
 	RdfResource result = new RdfResource(r.getUri());
 	for (Link l : r.getLinks()) {
 	    l.setPredicateLabel(getPredicateLabel(l.getPredicate()));
-	    if (l.isLiteral()) {
-		l.setObjectLabel(l.getObject());
-	    }
+	    // if (l.isLiteral()) {
+	    // l.setObjectLabel(l.getObject());
+	    // }
 	    result.addLink(l);
 	}
 	return result;

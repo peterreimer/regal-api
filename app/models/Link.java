@@ -30,6 +30,7 @@ public class Link {
     private String predicateLabel = null;
     private String predicate = null;
     private String object = null;
+
     private String objectLabel = null;
 
     /**

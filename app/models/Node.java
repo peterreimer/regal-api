@@ -817,13 +817,31 @@ public class Node {
 	rdf.put("@id", getPid());
 	rdf.put("primaryTopic", getPid());
 	for (Link l : ls) {
+	    Map<String, Object> resolvedObject = null;
+	    play.Logger.debug(l.getObjectLabel());
+	    if (l.getObjectLabel() != null) {
+		String id = l.getObject();
+		String value = l.getObjectLabel();
+
+		resolvedObject = new HashMap<String, Object>();
+		resolvedObject.put("@id", id);
+		resolvedObject.put("prefLabel", value);
+	    }
 	    if (rdf.containsKey(l.getShortName())) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) rdf.get(l.getShortName());
-		list.add(l.getObject());
+		if (resolvedObject == null) {
+		    list.add(l.getObject());
+		} else {
+		    list.add(resolvedObject);
+		}
 	    } else {
 		List<Object> list = new ArrayList<Object>();
-		list.add(l.getObject());
+		if (resolvedObject == null) {
+		    list.add(l.getObject());
+		} else {
+		    list.add(resolvedObject);
+		}
 		rdf.put(l.getShortName(), list);
 	    }
 	}
@@ -893,6 +911,8 @@ public class Node {
 	pmap.put("label", "Kindobjekt");
 	pmap.put("@type", "@id");
 	cmap.put("isPartOf", pmap);
+
+	cmap.put("prefLabel", "http://www.w3.org/2004/02/skos/core#prefLabel");
 
 	return cmap;
     }
