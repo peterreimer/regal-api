@@ -864,19 +864,16 @@ public class Node {
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
 	pmap.put("label", "Regaltyp");
-	pmap.put("@type", "@id");
 	cmap.put("contentType", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
 	pmap.put("label", "Sichtbarkeit Daten");
-	pmap.put("@type", "@id");
 	cmap.put("accessScheme", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#publishScheme");
 	pmap.put("label", "Sichtbarkeit Metadaten");
-	pmap.put("@type", "@id");
 	cmap.put("publishScheme", pmap);
 
 	pmap = new HashMap<String, Object>();
@@ -895,7 +892,7 @@ public class Node {
 	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
 	pmap.put("label", "Kindobjekt");
 	pmap.put("@type", "@id");
-	cmap.put("isPartOf", "http://purl.org/dc/terms/isPartOf");
+	cmap.put("isPartOf", pmap);
 
 	return cmap;
     }
