@@ -1,1088 +1,209 @@
 {
 	"mappings": 
 	{
-		"monograph": 
-		{
-			"properties": 
-			{
-				"@context":{
-					"type": "object",
-					"index": "no",
-					"enabled" : false
-				},				
-				"isPartOf": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"subject": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hasUR": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasPart": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasVersion": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"issued": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"language": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"fulltextOnline": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hbzId": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"urn": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"exemplar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"aggregates": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isDescribedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similarTo": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isLike": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sameAs": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"describedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"isPrimaryTopic": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"created": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"modified": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"contributorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creatorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"contributor": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creator": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePerson": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheSubjectHeading": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePlaceOrGeographicName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"prefLabel": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"publisher": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheCorporateBody": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"dateOfBirth":
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-
-				"dateOfDeath": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-			}
+		"monograph": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
 		},
-
-		"journal": 
-		{
-			"properties": 
-			{
-				"@context":{
-					"type": "object",
-					"index": "no",
-					"enabled" : false
-				},
-				"isPartOf": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"subject": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hasURN": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasPart": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasVersion": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"issued": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"language": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"fulltextOnline": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hbzId": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"urn": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"exemplar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"aggregates": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isDescribedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similarTo": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isLike": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sameAs": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"describedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"isPrimaryTopic": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"created": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"modified": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"contributorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creatorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"contributor": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creator": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePerson": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheSubjectHeading": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePlaceOrGeographicName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"prefLabel": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"publisher": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheCorporateBody": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"dateOfBirth":
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-
-				"dateOfDeath": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-			}
+		"file": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
 		},
-
-		"volume": 
-		{
-			"properties": 
-			{
-				"@context":{
-					"type": "object",
-					"index": "no",
-					"enabled" : false
-				},
-				"isPartOf": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"subject": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hasURN": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasPart": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasVersion": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"issued": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"language": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"fulltextOnline": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hbzId": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"urn": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"exemplar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"aggregates": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isDescribedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similarTo": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isLike": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sameAs": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"describedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"isPrimaryTopic": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"created": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"modified": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"contributorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creatorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"contributor": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creator": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePerson": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheSubjectHeading": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePlaceOrGeographicName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"prefLabel": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"publisher": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheCorporateBody": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"dateOfBirth":
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-
-				"dateOfDeath": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-			}
+		"article": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
 		},
-
-		"file": 
-		{
-			"properties": 
-			{
-				"@context":{
-					"type": "object",
-					"index": "no",
-					"enabled" : false
-				},
-				"isPartOf": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"subject": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hasURN": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasPart": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasVersion": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"issued": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"language": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"fulltextOnline": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hbzId": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"urn": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"exemplar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"aggregates": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isDescribedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similarTo": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isLike": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sameAs": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"describedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"isPrimaryTopic": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"created": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"modified": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				}	,
-				"contributorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creatorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"contributor": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creator": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePerson": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheSubjectHeading": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePlaceOrGeographicName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"prefLabel": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"publisher": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheCorporateBody": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"dateOfBirth":
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-
-				"dateOfDeath": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-			}
+		"issue": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
 		},
-		"issue": 
-		{
-			"properties": 
-			{
-				"@context":{
-					"type": "object",
-					"index": "no",
-					"enabled" : false
-				},
-				"isPartOf": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"subject": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hasURN": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasPart": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasVersion": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"issued": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"language": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"fulltextOnline": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hbzId": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"urn": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"exemplar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"aggregates": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isDescribedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similarTo": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isLike": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sameAs": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"describedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"isPrimaryTopic": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"created": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"modified": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				}	,
-				"contributorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creatorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"contributor": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creator": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePerson": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheSubjectHeading": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePlaceOrGeographicName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"prefLabel": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"publisher": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheCorporateBody": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"dateOfBirth":
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-
-				"dateOfDeath": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-			}
+		"volume": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
 		},
-		"article": 
-		{
-			"properties": 
-			{
-				"@context":{
-					"type": "object",
-					"index": "no",
-					"enabled" : false
-				},
-				"isPartOf": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"subject": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hasURN": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasPart": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"hasVersion": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"issued": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"language": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"fulltextOnline": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"hbzId": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"urn": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"exemplar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similar": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"aggregates": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isDescribedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"similarTo": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"isLike": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sameAs": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"describedBy": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-				,
-				"isPrimaryTopic": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"created": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				},
-				"modified": 
-				{
-					"type": "date",
-					"index": "not_analyzed"
-				}	,
-				"contributorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creatorName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"contributor": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"creator": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePerson": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheSubjectHeading": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForThePlaceOrGeographicName": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"prefLabel": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"publisher": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"preferredNameForTheCorporateBody": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"dateOfBirth":
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				},
-
-				"dateOfDeath": 
-				{
-					"type": "string",
-					"index": "not_analyzed"
-				}
-			}
+		"journal": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
 		}
 	}
 }
