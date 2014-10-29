@@ -818,11 +818,10 @@ public class Node {
 	rdf.put("primaryTopic", getPid());
 	for (Link l : ls) {
 	    Map<String, Object> resolvedObject = null;
-	    play.Logger.debug(l.getObjectLabel());
+	    // play.Logger.debug(l.getObjectLabel());
 	    if (l.getObjectLabel() != null) {
 		String id = l.getObject();
 		String value = l.getObjectLabel();
-
 		resolvedObject = new HashMap<String, Object>();
 		resolvedObject.put("@id", id);
 		resolvedObject.put("prefLabel", value);
