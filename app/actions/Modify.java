@@ -277,7 +277,7 @@ public class Modify {
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = new Read().readMetadata(subject);
-	if (RdfUtils.hasTriple(subject, hasUrn, urn, metadata))
+	if (RdfUtils.hasTriple(subject, hasUrn, metadata))
 	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
@@ -306,10 +306,8 @@ public class Modify {
     }
 
     /**
-     * @param pid
-     *            the pid of a node that must be published on the oai interface
-     * @param fedoraExtern
-     *            the fedora endpoint for external users
+     * @param node
+     *            the node to be published on the oai interface
      * @return A short message.
      */
     public String makeOAISet(Node node) {
@@ -333,20 +331,38 @@ public class Modify {
 		}
 		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
 	    }
-	    String name = "open_access";
-	    String spec = "open_access";
-	    String namespace = "oai";
-	    String oaipid = namespace + ":" + "open_access";
-	    if (!Globals.fedora.nodeExists(oaipid)) {
-		createOAISet(name, spec, oaipid);
+
+	    if ("public".equals(node.getAccessScheme())) {
+		addSet(node, "open_access");
 	    }
-	    if ("public".equals(node.getAccessScheme()))
-		linkObjectToOaiSet(node, spec, oaipid);
+	    if (node.hasUrn()) {
+		addSet(node, "epicur");
+		String urn = node.getUrn();
+		if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
+		    addSet(node, "urn-set-1");
+
+		} else if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
+		    addSet(node, "urn-set-2");
+		}
+	    }
+	    if (node.hasLinkToCatalogId()) {
+		addSet(node, "aleph");
+	    }
 
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);
 	}
+    }
+
+    private void addSet(Node node, String name) {
+	String spec = name;
+	String namespace = "oai";
+	String oaipid = namespace + ":" + name;
+	if (!Globals.fedora.nodeExists(oaipid)) {
+	    createOAISet(name, spec, oaipid);
+	}
+	linkObjectToOaiSet(node, spec, oaipid);
     }
 
     private void linkObjectToOaiSet(Node node, String spec, String pid) {

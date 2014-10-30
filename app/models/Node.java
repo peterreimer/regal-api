@@ -1007,4 +1007,33 @@ public class Node {
 	}
 	return w.toString();
     }
+
+    /**
+     * @return true if the metadata contains urn
+     */
+    public boolean hasUrn() {
+	String hasUrn = "http://purl.org/lobid/lv#urn";
+	return RdfUtils.hasTriple(pid, hasUrn, metadata);
+    }
+
+    /**
+     * @return true if metadata contains catalog id
+     */
+    public boolean hasLinkToCatalogId() {
+	String hasUrn = "http://purl.org/lobid/lv#hbzId";
+	return RdfUtils.hasTriple(pid, hasUrn, metadata);
+    }
+
+    /**
+     * @return a urn or null
+     */
+    public String getUrn() {
+	try {
+	    String hasUrn = "http://purl.org/lobid/lv#urn";
+	    return RdfUtils.findRdfObjects(pid, hasUrn, metadata,
+		    RDFFormat.NTRIPLES).get(0);
+	} catch (Exception e) {
+	    return null;
+	}
+    }
 }

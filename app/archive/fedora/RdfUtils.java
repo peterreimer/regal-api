@@ -307,6 +307,8 @@ public class RdfUtils {
     /**
      * @param metadata
      *            a Url with NTRIPLES metadata
+     * @param baseUrl
+     *            a base Url for relative uris
      * @return all rdf statements
      */
     public static RepositoryResult<Statement> getStatements(String metadata,
@@ -548,7 +550,7 @@ public class RdfUtils {
      * @return true if the metadata string contains the triple
      */
     public static boolean hasTriple(String subject, String predicate,
-	    String object, String metadata) {
+	    String metadata) {
 	try {
 	    InputStream is = new ByteArrayInputStream(
 		    metadata.getBytes("UTF-8"));
