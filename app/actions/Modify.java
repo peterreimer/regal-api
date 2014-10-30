@@ -308,28 +308,16 @@ public class Modify {
     /**
      * @param pid
      *            the pid of a node that must be published on the oai interface
-     * @return A short message.
-     */
-    public String makeOAISet(String pid) {
-	return makeOAISet(pid, Globals.fedoraIntern);
-    }
-
-    /**
-     * @param pid
-     *            the pid of a node that must be published on the oai interface
      * @param fedoraExtern
      *            the fedora endpoint for external users
      * @return A short message.
      */
-    public String makeOAISet(String pid, String fedoraExtern) {
-
-	Node node = Globals.fedora.readNode(pid);
+    public String makeOAISet(Node node) {
 	try {
-	    URL metadata = new URL(fedoraExtern + "/objects/" + pid
-		    + "/datastreams/metadata/content");
+	    String pid = node.getPid();
 	    OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-	    RepositoryResult<Statement> statements = RdfUtils
-		    .getStatements(metadata);
+	    RepositoryResult<Statement> statements = RdfUtils.getStatements(
+		    node.getMetadata(), "fedora:info/");
 	    while (statements.hasNext()) {
 		Statement st = statements.next();
 		String subject = st.getSubject().stringValue();
@@ -352,7 +340,9 @@ public class Modify {
 	    if (!Globals.fedora.nodeExists(oaipid)) {
 		createOAISet(name, spec, oaipid);
 	    }
-	    linkObjectToOaiSet(node, spec, oaipid);
+	    if ("public".equals(node.getAccessScheme()))
+		linkObjectToOaiSet(node, spec, oaipid);
+
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);
@@ -368,8 +358,7 @@ public class Modify {
 	node.addRelation(link);
 	link = new Link();
 	link.setPredicate(ITEM_ID);
-	link.setObject(Globals.server + "/" + "resource" + "/" + node.getPid(),
-		false);
+	link.setObject("info:fedora/" + node.getPid(), false);
 	node.addRelation(link);
 	Globals.fedora.updateNode(node);
     }

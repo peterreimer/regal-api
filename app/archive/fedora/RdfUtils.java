@@ -309,10 +309,11 @@ public class RdfUtils {
      *            a Url with NTRIPLES metadata
      * @return all rdf statements
      */
-    public static RepositoryResult<Statement> getStatements(URL metadata) {
+    public static RepositoryResult<Statement> getStatements(String metadata,
+	    String baseUrl) {
 	try {
-	    RepositoryConnection con = RdfUtils.readRdfUrlToRepository(
-		    metadata, RDFFormat.NTRIPLES);
+	    RepositoryConnection con = RdfUtils.readRdfStringToRepository(
+		    metadata, RDFFormat.NTRIPLES, baseUrl);
 	    RepositoryResult<Statement> statements = con.getStatements(null,
 		    null, null, true);
 	    return statements;
@@ -445,6 +446,21 @@ public class RdfUtils {
 	    con = myRepository.getConnection();
 	    String baseURI = rdfUrl.toString();
 	    con.add(rdfUrl, baseURI, inf);
+	    return con;
+	} catch (Exception e) {
+	    throw new RdfException(e);
+	}
+    }
+
+    private static RepositoryConnection readRdfStringToRepository(String str,
+	    RDFFormat inf, String baseUrl) {
+	RepositoryConnection con = null;
+	try {
+	    Repository myRepository = new SailRepository(new MemoryStore());
+	    myRepository.initialize();
+	    con = myRepository.getConnection();
+	    con.add(new ByteArrayInputStream(str.getBytes("utf-8")), baseUrl,
+		    inf);
 	    return con;
 	} catch (Exception e) {
 	    throw new RdfException(e);
