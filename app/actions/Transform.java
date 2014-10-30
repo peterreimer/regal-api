@@ -20,13 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-import org.antlr.runtime.RecognitionException;
-import org.apache.commons.io.FileUtils;
-import org.culturegraph.mf.Flux;
 import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
@@ -34,7 +30,9 @@ import archive.fedora.XmlUtils;
 import helper.AlephMabMaker;
 import helper.Globals;
 import helper.HttpArchiveException;
+import helper.OaiDcMapper;
 import helper.PdfText;
+import models.DublinCoreData;
 import models.Node;
 
 /**
@@ -145,30 +143,12 @@ public class Transform {
     /**
      * @param pid
      *            The pid of an object
-     * @return The metadata a oaidc-xml
+     * @return a dc mapping
      */
-    public String oaidc(String pid) {
+    public DublinCoreData oaidc(String pid) {
 	Node node = new Read().readNode(pid);
-	if (node == null)
-	    return "No node with pid " + pid + " found";
-	String metadata = Globals.server + "/" + "resource" + "/" + pid
-		+ "/metadata";
-	try {
-	    File outfile = File.createTempFile("oaidc", "xml");
-	    outfile.deleteOnExit();
-	    File fluxFile = new File(Thread.currentThread()
-		    .getContextClassLoader()
-		    .getResource("morph-lobid-to-oaidc.flux").toURI());
-	    Flux.main(new String[] { fluxFile.getAbsolutePath(),
-		    "url=" + metadata, "out=" + outfile.getAbsolutePath() });
-	    return FileUtils.readFileToString(outfile);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (URISyntaxException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (RecognitionException e) {
-	    throw new HttpArchiveException(500, e);
-	}
+	DublinCoreData data = new OaiDcMapper(node).getData();
+	return data;
     }
 
     /**

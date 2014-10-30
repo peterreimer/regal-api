@@ -547,9 +547,9 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asOaiDc(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.oaidc(pid);
+	    DublinCoreData result = transform.oaidc(pid);
 	    response().setContentType("application/xml");
-	    return ok(result);
+	    return ok(oaidc.render(result));
 	});
     }
 

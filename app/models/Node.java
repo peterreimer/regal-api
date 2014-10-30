@@ -793,7 +793,11 @@ public class Node {
 	return this;
     }
 
-    private List<Link> getLinks() {
+    /**
+     * @return Rels-Ext AND metadata as List of Link
+     */
+    @JsonIgnore()
+    public List<Link> getLinks() {
 	try {
 	    InputStream stream = new ByteArrayInputStream(
 		    metadata.getBytes(StandardCharsets.UTF_8));

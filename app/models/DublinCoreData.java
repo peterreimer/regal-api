@@ -48,17 +48,17 @@ public class DublinCoreData {
     /**
      * @return dc:contributer
      */
-    public List<String> getContributer() {
+    public List<String> getContributor() {
 	return contributor;
     }
 
     /**
-     * @param contributer
-     *            dc:contributer
+     * @param contributor
+     *            dc:contributor
      * @return this
      */
-    public DublinCoreData setContributer(List<String> contributer) {
-	this.contributor = contributer;
+    public DublinCoreData setContributor(List<String> contributor) {
+	this.contributor = contributor;
 	return this;
     }
 
@@ -67,7 +67,7 @@ public class DublinCoreData {
      *            dc:contributer
      * @return this
      */
-    public DublinCoreData addContributer(String e) {
+    public DublinCoreData addContributor(String e) {
 	contributor.add(e);
 	return this;
     }
@@ -75,8 +75,8 @@ public class DublinCoreData {
     /**
      * @return dc:contributer
      */
-    public String getFirstContributer() {
-	List<String> elements = getContributer();
+    public String getFirstContributor() {
+	List<String> elements = getContributor();
 	if (elements == null || elements.size() == 0) {
 	    return "";
 	}
