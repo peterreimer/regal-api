@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import models.DublinCoreData;
+import models.Pair;
 import models.Link;
 import models.Node;
 import models.Transformer;
@@ -338,14 +339,14 @@ public class Modify {
 	    if (node.hasUrn()) {
 		addSet(node, "epicur");
 		String urn = node.getUrn();
-		if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
+		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
 		    addSet(node, "urn-set-1");
-
-		} else if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
+		} else if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
 		    addSet(node, "urn-set-2");
 		}
 	    }
 	    if (node.hasLinkToCatalogId()) {
+		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
 	    }
 
@@ -423,11 +424,12 @@ public class Modify {
      */
     public Node lobidify(Node node) {
 	String pid = node.getPid();
-	List<String> identifier = node.getDublinCoreData().getIdentifier();
+	List<Pair<String, String>> identifier = node.getDublinCoreData()
+		.getIdentifier();
 	String alephid = "";
-	for (String id : identifier) {
-	    if (id.startsWith("TT") || id.startsWith("HT")) {
-		alephid = id;
+	for (Pair<String, String> id : identifier) {
+	    if (id.getLeft().startsWith("TT") || id.getLeft().startsWith("HT")) {
+		alephid = id.getLeft();
 		break;
 	    }
 	}

@@ -29,13 +29,14 @@ import com.wordnik.swagger.core.util.JsonUtil;
  */
 
 public class DublinCoreData {
+
     List<String> contributor = new Vector<String>();
     List<String> coverage = new Vector<String>();
     List<String> creator = new Vector<String>();
     List<String> date = new Vector<String>();
     List<String> description = new Vector<String>();
     List<String> format = new Vector<String>();
-    List<String> identifier = new Vector<String>();
+    List<Pair<String, String>> identifier = new Vector<Pair<String, String>>();
     List<String> language = new Vector<String>();
     List<String> publisher = new Vector<String>();
     List<String> relation = new Vector<String>();
@@ -281,7 +282,7 @@ public class DublinCoreData {
     /**
      * @return dc:identifier
      */
-    public List<String> getIdentifier() {
+    public List<Pair<String, String>> getIdentifier() {
 	return identifier;
     }
 
@@ -290,7 +291,7 @@ public class DublinCoreData {
      *            dc:identifier
      * @return this
      */
-    public DublinCoreData setIdentifier(List<String> list) {
+    public DublinCoreData setIdentifier(List<Pair<String, String>> list) {
 	this.identifier = list;
 	return this;
     }
@@ -301,17 +302,22 @@ public class DublinCoreData {
      * @return this
      */
     public DublinCoreData addIdentifier(String e) {
-	identifier.add(e);
+	identifier.add(new Pair(e, null));
+	return this;
+    }
+
+    public DublinCoreData addIdentifier(String value, String type) {
+	identifier.add(new Pair(value, type));
 	return this;
     }
 
     /**
      * @return dc:identifier
      */
-    public String getFirstIdentifier() {
-	List<String> elements = getIdentifier();
+    public Pair<String, String> getFirstIdentifier() {
+	List<Pair<String, String>> elements = getIdentifier();
 	if (elements == null || elements.size() == 0) {
-	    return "";
+	    return new Pair<String, String>("", "");
 	}
 
 	return elements.get(0);
@@ -675,4 +681,5 @@ public class DublinCoreData {
 	}
 	return w.toString();
     }
+
 }

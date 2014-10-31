@@ -30,6 +30,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import models.Pair;
 import models.Node;
 
 import org.w3c.dom.Document;
@@ -143,7 +144,8 @@ public class DublinCoreHandler {
 		}
 	    }
 	    if (identifier != null && identifier.getLength() != 0) {
-		node.dublinCoreData.setIdentifier(new Vector<String>());
+		node.dublinCoreData
+			.setIdentifier(new Vector<Pair<String, String>>());
 		for (int i = 0; i < identifier.getLength(); i++) {
 		    node.dublinCoreData
 			    .addIdentifier(transformFromXMLEntity(identifier
@@ -237,7 +239,7 @@ public class DublinCoreHandler {
 	List<String> date = null;
 	List<String> description = null;
 	List<String> format = null;
-	List<String> identifier = null;
+	List<Pair<String, String>> identifier = null;
 	// String[] label = null;
 	List<String> language = null;
 	List<String> publisher = null;
@@ -298,9 +300,9 @@ public class DublinCoreHandler {
 	    }
 	}
 	if ((identifier = node.dublinCoreData.getIdentifier()) != null) {
-	    for (String str : identifier) {
+	    for (Pair<String, String> str : identifier) {
 		String sidentifier = tagStart + "identifier" + tagEnd
-			+ transformToXMLEntity(str) + endTagStart
+			+ transformToXMLEntity(str.getLeft()) + endTagStart
 			+ "identifier" + tagEnd;
 		update.append(sidentifier + "\n");
 	    }
