@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import models.DublinCoreData;
+import models.Pair;
 import models.Link;
 import models.Node;
 import models.Transformer;
@@ -278,7 +279,7 @@ public class Modify extends RegalAction {
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = new Read().readMetadata(subject);
-	if (RdfUtils.hasTriple(subject, hasUrn, urn, metadata))
+	if (RdfUtils.hasTriple(subject, hasUrn, metadata))
 	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
@@ -307,30 +308,16 @@ public class Modify extends RegalAction {
     }
 
     /**
-     * @param pid
-     *            the pid of a node that must be published on the oai interface
+     * @param node
+     *            the node to be published on the oai interface
      * @return A short message.
      */
-    public String makeOAISet(String pid) {
-	return makeOAISet(pid, Globals.fedoraIntern);
-    }
-
-    /**
-     * @param pid
-     *            the pid of a node that must be published on the oai interface
-     * @param fedoraExtern
-     *            the fedora endpoint for external users
-     * @return A short message.
-     */
-    public String makeOAISet(String pid, String fedoraExtern) {
-
-	Node node = Globals.fedora.readNode(pid);
+    public String makeOAISet(Node node) {
 	try {
-	    URL metadata = new URL(fedoraExtern + "/objects/" + pid
-		    + "/datastreams/metadata/content");
+	    String pid = node.getPid();
 	    OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-	    RepositoryResult<Statement> statements = RdfUtils
-		    .getStatements(metadata);
+	    RepositoryResult<Statement> statements = RdfUtils.getStatements(
+		    node.getMetadata(), "fedora:info/");
 	    while (statements.hasNext()) {
 		Statement st = statements.next();
 		String subject = st.getSubject().stringValue();
@@ -346,18 +333,38 @@ public class Modify extends RegalAction {
 		}
 		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
 	    }
-	    String name = "open_access";
-	    String spec = "open_access";
-	    String namespace = "oai";
-	    String oaipid = namespace + ":" + "open_access";
-	    if (!Globals.fedora.nodeExists(oaipid)) {
-		createOAISet(name, spec, oaipid);
+
+	    if ("public".equals(node.getAccessScheme())) {
+		addSet(node, "open_access");
 	    }
-	    linkObjectToOaiSet(node, spec, oaipid);
+	    if (node.hasUrn()) {
+		addSet(node, "epicur");
+		String urn = node.getUrn();
+		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
+		    addSet(node, "urn-set-1");
+		} else if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
+		    addSet(node, "urn-set-2");
+		}
+	    }
+	    if (node.hasLinkToCatalogId()) {
+		play.Logger.info(node.getPid() + " add aleph set!");
+		addSet(node, "aleph");
+	    }
+
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);
 	}
+    }
+
+    private void addSet(Node node, String name) {
+	String spec = name;
+	String namespace = "oai";
+	String oaipid = namespace + ":" + name;
+	if (!Globals.fedora.nodeExists(oaipid)) {
+	    createOAISet(name, spec, oaipid);
+	}
+	linkObjectToOaiSet(node, spec, oaipid);
     }
 
     private void linkObjectToOaiSet(Node node, String spec, String pid) {
@@ -369,8 +376,7 @@ public class Modify extends RegalAction {
 	node.addRelation(link);
 	link = new Link();
 	link.setPredicate(ITEM_ID);
-	link.setObject(Globals.server + "/" + "resource" + "/" + node.getPid(),
-		false);
+	link.setObject("info:fedora/" + node.getPid(), false);
 	node.addRelation(link);
 	Globals.fedora.updateNode(node);
     }
@@ -419,11 +425,12 @@ public class Modify extends RegalAction {
      */
     public Node lobidify(Node node) {
 	String pid = node.getPid();
-	List<String> identifier = node.getDublinCoreData().getIdentifier();
+	List<Pair<String, String>> identifier = node.getDublinCoreData()
+		.getIdentifier();
 	String alephid = "";
-	for (String id : identifier) {
-	    if (id.startsWith("TT") || id.startsWith("HT")) {
-		alephid = id;
+	for (Pair<String, String> id : identifier) {
+	    if (id.getLeft().startsWith("TT") || id.getLeft().startsWith("HT")) {
+		alephid = id.getLeft();
 		break;
 	    }
 	}

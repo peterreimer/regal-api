@@ -307,12 +307,15 @@ public class RdfUtils {
     /**
      * @param metadata
      *            a Url with NTRIPLES metadata
+     * @param baseUrl
+     *            a base Url for relative uris
      * @return all rdf statements
      */
-    public static RepositoryResult<Statement> getStatements(URL metadata) {
+    public static RepositoryResult<Statement> getStatements(String metadata,
+	    String baseUrl) {
 	try {
-	    RepositoryConnection con = RdfUtils.readRdfUrlToRepository(
-		    metadata, RDFFormat.NTRIPLES);
+	    RepositoryConnection con = RdfUtils.readRdfStringToRepository(
+		    metadata, RDFFormat.NTRIPLES, baseUrl);
 	    RepositoryResult<Statement> statements = con.getStatements(null,
 		    null, null, true);
 	    return statements;
@@ -451,6 +454,21 @@ public class RdfUtils {
 	}
     }
 
+    private static RepositoryConnection readRdfStringToRepository(String str,
+	    RDFFormat inf, String baseUrl) {
+	RepositoryConnection con = null;
+	try {
+	    Repository myRepository = new SailRepository(new MemoryStore());
+	    myRepository.initialize();
+	    con = myRepository.getConnection();
+	    con.add(new ByteArrayInputStream(str.getBytes("utf-8")), baseUrl,
+		    inf);
+	    return con;
+	} catch (Exception e) {
+	    throw new RdfException(e);
+	}
+    }
+
     private static RepositoryConnection readRdfInputStreamToRepository(
 	    InputStream is, RDFFormat inf) {
 	RepositoryConnection con = null;
@@ -532,7 +550,7 @@ public class RdfUtils {
      * @return true if the metadata string contains the triple
      */
     public static boolean hasTriple(String subject, String predicate,
-	    String object, String metadata) {
+	    String metadata) {
 	try {
 	    InputStream is = new ByteArrayInputStream(
 		    metadata.getBytes("UTF-8"));

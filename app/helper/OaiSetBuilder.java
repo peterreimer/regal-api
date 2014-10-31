@@ -29,8 +29,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -42,7 +40,6 @@ import org.xml.sax.SAXException;
  * 
  */
 public class OaiSetBuilder {
-    final static Logger logger = LoggerFactory.getLogger(OaiSetBuilder.class);
 
     /**
      * @param subject
@@ -77,24 +74,6 @@ public class OaiSetBuilder {
 	    spec = "contentType:" + docType;
 	    pid = "oai:" + docType;
 
-	} else if (predicate
-		.compareTo("http://geni-orca.renci.org/owl/topology.owl#hasURN") == 0) {
-	    if (object.contains("urn:nbn:de:hbz:929:02")) {
-		String snid = "hbz-929-02";
-		name = snid;
-		spec = "urn-set:" + snid;
-		pid = "oai:" + snid;
-	    } else if (object.contains("urn:nbn:de:hbz:929:01")) {
-		String snid = "hbz-929-01";
-		name = snid;
-		spec = "urn-set:" + snid;
-		pid = "oai:" + snid;
-	    } else {
-		String snid = "externUrn";
-		name = snid;
-		spec = "urn-set:" + snid;
-		pid = "oai:" + snid;
-	    }
 	}
 
 	else {
@@ -106,8 +85,8 @@ public class OaiSetBuilder {
 
     private String ddcmap(String number) {
 	if (number == null || number.length() != 3)
-	    logger.info("Didn't found ddc name for ddc:" + number);
-	String name = "";
+	    play.Logger.info("Didn't found ddc name for ddc:" + number);
+	String name = number;
 	try {
 	    URL url = new URL("http://dewey.info/class/" + number
 		    + "/2009-08/about.en");
@@ -131,20 +110,20 @@ public class OaiSetBuilder {
 	    try {
 		name = root.getElementsByTagName("skos:prefLabel").item(0)
 			.getTextContent();
-		logger.info("Found ddc name: " + name);
+		play.Logger.info("Found ddc name: " + name);
 	    } catch (Exception e) {
-		logger.info("Didn't found ddc name for ddc:" + number);
+		play.Logger.info("Didn't found ddc name for ddc:" + number);
 	    }
 	} catch (MalformedURLException e) {
-	    logger.error(e.getMessage());
+	    play.Logger.error(e.getMessage());
 	} catch (HttpException e) {
-	    logger.error(e.getMessage());
+	    play.Logger.error(e.getMessage());
 	} catch (IOException e) {
-	    logger.error(e.getMessage());
+	    play.Logger.error(e.getMessage());
 	} catch (ParserConfigurationException e) {
-	    logger.error(e.getMessage());
+	    play.Logger.error(e.getMessage());
 	} catch (SAXException e) {
-	    logger.error(e.getMessage());
+	    play.Logger.error(e.getMessage());
 	}
 
 	return name;

@@ -605,7 +605,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "text/plain", nickname = "updateOaiSets", value = "updateOaiSets", notes = "Links resource to oai sets and creates new sets if needed", response = String.class, httpMethod = "POST")
     public static Promise<Result> updateOaiSets(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = modify.makeOAISet(pid);
+	    String result = modify.makeOAISet(node);
 	    response().setContentType("text/plain");
 	    return ok(result);
 	});
