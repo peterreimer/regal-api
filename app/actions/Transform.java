@@ -148,7 +148,9 @@ public class Transform {
      */
     public DublinCoreData oaidc(String pid) {
 	Node node = new Read().readNode(pid);
-	DublinCoreData data = new OaiDcMapper(node).getData();
+	String uri = Globals.urnbase + node.getPid();
+	DublinCoreData data = new OaiDcMapper(node).getData().addIdentifier(
+		uri, "dcterms:Uri");
 	return data;
     }
 

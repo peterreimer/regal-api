@@ -49,16 +49,16 @@ public class OaiDcMapper {
 		    .getPredicate())) {
 		data.addPublisher(l.getObject());
 	    } else if ("http://purl.org/lobid/lv#urn".equals(l.getPredicate())) {
-		data.addIdentifier(l.getObject());
+		data.addIdentifier(l.getObject(), "hbz:urn");
 	    } else if ("http://purl.org/lobid/lv#hbzID"
 		    .equals(l.getPredicate())) {
-		data.addIdentifier(l.getObject());
+		data.addIdentifier(l.getObject(), "hbz:alephId");
 	    } else if ("http://purl.org/dc/elements/1.1/subjectr".equals(l
 		    .getPredicate())) {
 		data.addSubject(l.getObject());
 	    }
 	}
-	data.addIdentifier(node.getAggregationUri());
+	data.addIdentifier(node.getAggregationUri(), "hbz:edowebId");
 	data.addType(node.getContentType());
 	return data;
     }

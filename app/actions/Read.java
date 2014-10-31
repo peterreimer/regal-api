@@ -279,8 +279,9 @@ public class Read {
      */
     public DublinCoreData readDC(String pid) {
 	Node node = readNode(pid);
+	String uri = getHttpUriOfResource(node);
 	if (node != null)
-	    return node.getDublinCoreData();
+	    return node.getDublinCoreData().addIdentifier(uri);
 	return null;
     }
 

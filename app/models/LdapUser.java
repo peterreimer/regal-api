@@ -72,7 +72,7 @@ public class LdapUser implements User {
 	    String group = groupFromUser(username);
 	    role = group;
 	} catch (Exception e) {
-	    play.Logger.info("", e);
+	    // play.Logger.debug("Credentials not valid proceed as anonymous");
 	} finally {
 	    if (context != null)
 		try {
