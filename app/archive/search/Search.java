@@ -87,17 +87,9 @@ public class Search {
     }
 
     void init(String[] index) {
-	try {
-	    String indexConfig = CopyUtils.copyToString(Play.application()
-		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
-	    for (String i : index) {
-		client.admin().indices().prepareCreate(i)
-			.setSource(indexConfig).execute().actionGet();
-	    }
-	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    play.Logger.warn("", e);
-	} catch (Exception e) {
-	    play.Logger.warn("", e);
+	for (String i : index) {
+	    play.Logger.info("Init elasticsearch index " + i);
+	    init(i);
 	}
     }
 
@@ -110,7 +102,7 @@ public class Search {
 	    client.admin().indices().prepareCreate(index)
 		    .setSource(indexConfig).execute().actionGet();
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    play.Logger.warn("", e);
+	    play.Logger.debug("", e);
 	} catch (Exception e) {
 	    play.Logger.warn("", e);
 	}
