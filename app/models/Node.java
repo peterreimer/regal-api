@@ -70,7 +70,6 @@ public class Node {
     private String seq = null;
 
     private String pid = null;
-    private String alephId = null;
 
     private Date lastModified = null;
     private Date creationDate = null;
@@ -94,9 +93,10 @@ public class Node {
 
     private String contextDocumentUri = null;
 
-    private String createdBy;
-
-    private String importedFrom;
+    private String createdBy = "";
+    private String importedFrom = "";
+    private String legacyId = "";
+    private String catalogId = "";
 
     /**
      * Creates a new Node.
@@ -113,6 +113,18 @@ public class Node {
      */
     public Node(String pid) {
 	setPID(pid);
+	createCatalogId();
+    }
+
+    /**
+     * Creates a CatalogId based on the objects Pid
+     * 
+     */
+    public void createCatalogId() {
+	if (pid != null && !pid.isEmpty()) {
+	    String id = pid.split(":")[1];
+	    setCatalogId("ED" + id);
+	}
     }
 
     /**
@@ -593,18 +605,18 @@ public class Node {
     }
 
     /**
-     * @return alephId
+     * @return catalogId
      */
-    public String getAlephId() {
-	return alephId;
+    public String getCatalogId() {
+	return catalogId;
     }
 
     /**
-     * @param alephId
+     * @param catalogId
      * @return this
      */
-    public Node setAlephId(String alephId) {
-	this.alephId = alephId;
+    public Node setCatalogId(String catalogId) {
+	this.catalogId = catalogId;
 	return this;
     }
 
@@ -977,7 +989,7 @@ public class Node {
     public int hashCode() {
 	int result = 17;
 	result = 31 * result + (pid != null ? pid.hashCode() : 0);
-	result = 31 * result + (alephId != null ? alephId.hashCode() : 0);
+	result = 31 * result + (catalogId != null ? catalogId.hashCode() : 0);
 	result = 31 * result
 		+ (lastModified != null ? lastModified.hashCode() : 0);
 	result = 31 * result
@@ -1009,7 +1021,8 @@ public class Node {
 	Node mt = (Node) other;
 	if (!(pid == null ? mt.pid == null : pid.equals(mt.pid)))
 	    return false;
-	if (!(alephId == null ? mt.alephId == null : alephId.equals(mt.alephId)))
+	if (!(catalogId == null ? mt.catalogId == null : catalogId
+		.equals(mt.catalogId)))
 	    return false;
 	if (!(lastModified == null ? mt.lastModified == null : lastModified
 		.equals(lastModified)))
@@ -1093,5 +1106,24 @@ public class Node {
 	} catch (Exception e) {
 	    return null;
 	}
+    }
+
+    /**
+     * Part of provenance data
+     * 
+     * @return the old id of the object
+     */
+    public String getLegacyId() {
+	return legacyId;
+    }
+
+    /**
+     * @param legacyId
+     *            an id that once has been used for this object
+     * @return this object
+     */
+    public Node setLegacyId(String legacyId) {
+	this.legacyId = legacyId;
+	return this;
     }
 }

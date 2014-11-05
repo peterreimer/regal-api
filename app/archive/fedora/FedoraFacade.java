@@ -21,9 +21,13 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
 import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
-import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
+import static archive.fedora.Vocabulary.REL_CATALOG_ID;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_CREATED_BY;
+import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.REL_LEGACY_ID;
+import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import helper.HttpArchiveException;
 
 import java.io.IOException;
@@ -242,6 +246,22 @@ class FedoraFacade implements FedoraInterface {
 	    link = new Link();
 	    link.setObject(node.getPublishScheme(), true);
 	    link.setPredicate(REL_PUBLISH_SCHEME);
+	    node.addRelation(link);
+	    link = new Link();
+	    link.setObject(node.getImportedFrom(), true);
+	    link.setPredicate(REL_IMPORTED_FROM);
+	    node.addRelation(link);
+	    link = new Link();
+	    link.setObject(node.getCreatedBy(), true);
+	    link.setPredicate(REL_CREATED_BY);
+	    node.addRelation(link);
+	    link = new Link();
+	    link.setObject(node.getLegacyId(), true);
+	    link.setPredicate(REL_LEGACY_ID);
+	    node.addRelation(link);
+	    link = new Link();
+	    link.setObject(node.getCatalogId(), true);
+	    link.setPredicate(REL_CATALOG_ID);
 	    node.addRelation(link);
 
 	    utils.createRelsExt(node);
