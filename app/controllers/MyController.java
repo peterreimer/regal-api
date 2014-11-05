@@ -126,12 +126,14 @@ public class MyController extends Controller {
 	if (!"edoweb-admin".equals(role)) {
 	    if ("public".equals(accessScheme)) {
 		return true;
-	    } else if ("restricted".equals(accessScheme)) {
+	    } else if ("restricted".equals(accessScheme)
+		    || "remote".equals(accessScheme)) {
 		if ("edoweb-editor".equals(role)
 			|| "edoweb-reader".equals(role)) {
 		    return true;
 		}
-	    } else if ("private".equals(accessScheme)) {
+	    } else if ("private".equals(accessScheme)
+		    || "single".equals(accessScheme)) {
 		if ("edoweb-editor".equals(role))
 		    return true;
 	    }
