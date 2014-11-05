@@ -25,6 +25,10 @@ import play.mvc.SimpleResult;
 import static play.mvc.Results.*;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author Jan Schnasse
@@ -49,7 +53,26 @@ public class Global extends GlobalSettings {
 
     @SuppressWarnings("rawtypes")
     public Action onRequest(Request request, Method actionMethod) {
-	play.Logger.debug(request.toString());
+	play.Logger.debug("\n" + request.toString() + "\n\t"
+		+ mapToString(request.headers()) + "\n\t"
+		+ request.body().toString());
 	return super.onRequest(request, actionMethod);
+    }
+
+    private String mapToString(Map<String, String[]> map) {
+	StringBuilder sb = new StringBuilder();
+	Iterator<Entry<String, String[]>> iter = map.entrySet().iterator();
+	while (iter.hasNext()) {
+	    Entry<String, String[]> entry = iter.next();
+	    sb.append(entry.getKey());
+	    sb.append('=').append('"');
+	    sb.append(Arrays.toString(entry.getValue()));
+	    sb.append('"');
+	    if (iter.hasNext()) {
+		sb.append("\n\t'");
+	    }
+	}
+	return sb.toString();
+
     }
 }

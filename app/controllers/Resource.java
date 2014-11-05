@@ -43,8 +43,6 @@ import models.Node;
 import models.RegalObject;
 
 import org.openrdf.rio.RDFFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.Play;
 import play.libs.F.Function0;
@@ -75,8 +73,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "/resource", description = "The resource endpoint allows one to manipulate and access complex objects as http resources. ")
 @SuppressWarnings("javadoc")
 public class Resource extends MyController {
-
-    final static Logger logger = LoggerFactory.getLogger(Resource.class);
 
     @ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
     public static Promise<Result> listUrn(@PathParam("pid") String pid) {
@@ -267,6 +263,7 @@ public class Resource extends MyController {
     public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
 	    try {
+		play.Logger.info("updateResource: " + pid);
 		String[] p = pid.split(":");
 		return createResource(p[1], p[0]);
 	    } catch (JsonMappingException e) {
@@ -290,6 +287,7 @@ public class Resource extends MyController {
 	    throw new NullPointerException(
 		    "Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
 	}
+	play.Logger.debug("createResource: " + object);
 	Node newnode = create.createResource(object.getType(),
 		object.getParentPid(), object.getTransformer(),
 		object.getAccessScheme(), object.getPublishScheme(), id,

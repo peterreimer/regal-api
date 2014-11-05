@@ -102,9 +102,10 @@ public class Search {
 	    client.admin().indices().prepareCreate(index)
 		    .setSource(indexConfig).execute().actionGet();
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    play.Logger.debug("", e);
+	    play.Logger.debug("Index already exists!");
 	} catch (Exception e) {
-	    play.Logger.warn("", e);
+	    play.Logger.warn("Problems when creating " + index + " :"
+		    + e.getMessage());
 	}
     }
 

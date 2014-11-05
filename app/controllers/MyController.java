@@ -276,21 +276,26 @@ public class MyController extends Controller {
 	Promise<Result> call(String pid, NodeAction ca) {
 	    return Promise.promise(() -> {
 		try {
+
 		    String role = (String) Http.Context.current().args
 			    .get("role");
+		    play.Logger.debug("Try to access with role: " + role);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
+
 		    Node node = null;
 		    try {
 			node = read.readNode(pid);
 		    } catch (HttpArchiveException e) {
-
+			play.Logger.debug("", e);
 		    }
 		    return ca.exec(node);
 		} catch (HttpArchiveException e) {
+		    play.Logger.debug("", e);
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
+		    play.Logger.debug("", e);
 		    return JsonMessage(new Message(e, 500));
 		}
 	    });
