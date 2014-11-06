@@ -263,7 +263,7 @@ class FedoraFacade implements FedoraInterface {
 	    link.setObject(node.getCatalogId(), true);
 	    link.setPredicate(REL_CATALOG_ID);
 	    node.addRelation(link);
-
+	    play.Logger.debug("Added all links! " + node.getRelsExt());
 	    utils.createRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();

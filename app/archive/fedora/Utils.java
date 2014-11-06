@@ -242,22 +242,12 @@ public class Utils {
     }
 
     void createRelsExt(Node node) {
-
 	String pid = node.getPid();
-
-	// IF DATASTREAM ! EXISTS
-	// CREATE DATASTREAM
-	// ADD RELATIONS
-
 	if (!dataStreamExists(pid, "RELS-EXT")) {
-	    System.out.println("PID " + pid + " doesn't exist, create new");
 	    createFedoraXmlForRelsExt(pid);
-
 	}
-
 	List<Link> links = node.getRelsExt();
 	createRelsExt(pid, links);
-
     }
 
     boolean nodeExists(String pid) {
@@ -632,33 +622,36 @@ public class Utils {
 	    createFedoraXmlForRelsExt(pid);
 	}
 	Link link = new Link();
+	link.setObject(node.getContentType(), true);
 	link.setPredicate(REL_CONTENT_TYPE);
-	link.setObject(type, true);
 	node.addRelation(link);
-
 	link = new Link();
 	link.setObject(node.getNodeType(), true);
 	link.setPredicate(REL_IS_NODE_TYPE);
 	node.addRelation(link);
-
 	link = new Link();
 	link.setObject(node.getAccessScheme(), true);
 	link.setPredicate(REL_ACCESS_SCHEME);
 	node.addRelation(link);
-
 	link = new Link();
 	link.setObject(node.getPublishScheme(), true);
 	link.setPredicate(REL_PUBLISH_SCHEME);
 	node.addRelation(link);
-
 	link = new Link();
-	link.setObject(node.getImportedFrom(), false);
+	link.setObject(node.getImportedFrom(), true);
 	link.setPredicate(REL_IMPORTED_FROM);
 	node.addRelation(link);
-
 	link = new Link();
-	link.setObject(node.getCreatedBy(), false);
+	link.setObject(node.getCreatedBy(), true);
 	link.setPredicate(REL_CREATED_BY);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getLegacyId(), true);
+	link.setPredicate(REL_LEGACY_ID);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getCatalogId(), true);
+	link.setPredicate(REL_CATALOG_ID);
 	node.addRelation(link);
 
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());
