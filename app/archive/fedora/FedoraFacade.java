@@ -231,40 +231,9 @@ class FedoraFacade implements FedoraInterface {
 	    if (node.getSeqFile() != null) {
 		utils.createSeqStream(node);
 	    }
-	    Link link = new Link();
-	    link.setObject(node.getContentType(), true);
-	    link.setPredicate(REL_CONTENT_TYPE);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getNodeType(), true);
-	    link.setPredicate(REL_IS_NODE_TYPE);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getAccessScheme(), true);
-	    link.setPredicate(REL_ACCESS_SCHEME);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getPublishScheme(), true);
-	    link.setPredicate(REL_PUBLISH_SCHEME);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getImportedFrom(), true);
-	    link.setPredicate(REL_IMPORTED_FROM);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getCreatedBy(), true);
-	    link.setPredicate(REL_CREATED_BY);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getLegacyId(), true);
-	    link.setPredicate(REL_LEGACY_ID);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getCatalogId(), true);
-	    link.setPredicate(REL_CATALOG_ID);
-	    node.addRelation(link);
-	    play.Logger.debug("Added all links! " + node.getRelsExt());
-	    utils.createRelsExt(node);
+
+	    // utils.createRelsExt(node);
+	    utils.updateRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    throw new CreateNodeException(500, e);

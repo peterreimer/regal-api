@@ -142,7 +142,7 @@ public class RdfResource {
 		return findLabel(r.getLinks());
 	    }
 	}
-	return "No Label";
+	return null;
     }
 
     private String findLabel(List<Link> list) {
@@ -154,7 +154,7 @@ public class RdfResource {
 		    .getPredicate()))
 		return l.getObject();
 	}
-	return "No Label";
+	return null;
     }
 
 }

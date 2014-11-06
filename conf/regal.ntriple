@@ -1,0 +1,100 @@
+<http://purl.org/dc/terms/title> <http://www.w3.org/2004/02/skos/core#prefLabel> "Titel" .
+<http://purl.org/dc/terms/alternative> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Titelzusatz".
+<http://rdvocab.info/Elements/otherTitleInformation> <http://www.w3.org/2004/02/skos/core#prefLabel> "Titelzusatz weitere".
+<http://purl.org/dc/terms/title> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Titel".
+<http://purl.org/ontology/bibo/shortTitle> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Kurztitel".
+<http://purl.org/dc/terms/creator> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Autor".
+<http://purl.org/dc/elements/1.1/contributor> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Mitwirkende".
+<http://purl.org/dc/elements/1.1/creator> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Autor".
+<http://rdvocab.info/Elements/statementOfResponsibility> <http://www.w3.org/2004/02/skos/core#prefLabel> "Verantwortlich".
+<http://purl.org/dc/terms/contributor> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Mitwirkende".
+<http://id.loc.gov/vocabulary/relators/act> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Schauspieler".
+<http://id.loc.gov/vocabulary/relators/aft> <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor des Nachwortes".
+<http://id.loc.gov/vocabulary/relators/aui> <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor der Einleitung".
+<http://id.loc.gov/vocabulary/relators/aus> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Screenwriter".
+<http://rdvocab.info/Elements/publicationStatement> <http://www.w3.org/2004/02/skos/core#prefLabel> "Ort und Jahr".
+<http://rdvocab.info/Elements/placeOfPublication> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Ort".
+<http://purl.org/dc/elements/1.1/publisher> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Herausgeber".
+<http://purl.org/dc/terms/issued> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Erschienen".
+<http://www.w3.org/2002/07/owl#sameAs> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Identisch zu".
+<http://umbel.org/umbel#isLike> <http://www.w3.org/2004/02/skos/core#prefLabel>  "\u00E4hnlich zu".
+<http://purl.org/ontology/bibo/issn> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Issn".
+<http://purl.org/ontology/bibo/eissn> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Eissn".
+<http://purl.org/ontology/bibo/lccn> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Lccn".
+<http://purl.org/ontology/bibo/oclcnum> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Oclc".
+<http://purl.org/ontology/bibo/isbn> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Isbn".
+<http://purl.org/ontology/bibo/isbn13> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Isbn13".
+<http://purl.org/ontology/mo/ismn> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Ismn".
+<http://purl.org/lobid/lv#urn> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Urn".
+<http://purl.org/ontology/bibo/doi> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Doi".
+<http://purl.org/ontology/mo/wikipedia> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Wikipedia".
+<http://purl.org/dc/terms/medium> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Tr\u00E4ger".
+<http://purl.org/dc/terms/hasPart> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Bestandteile".
+<http://purl.org/dc/terms/isPartOf> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Bestandteil von".
+<http://www.w3.org/2000/01/rdf-schema#inDataset> <http://www.w3.org/2004/02/skos/core#prefLabel>  "".
+<http://purl.org/dc/elements/1.1/isPartOf> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Bestandteil von".
+<http://purl.org/dc/terms/hasVersion> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Vgl.".
+<http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://www.w3.org/2004/02/skos/core#prefLabel> "Weitere Informationen".
+<http://purl.org/dc/terms/tableOfContents> <http://www.w3.org/2004/02/skos/core#prefLabel> "Inhaltsverzeichnis".
+<http://purl.org/lobid/lv#hbzID> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Katalog Id".
+<http://purl.org/dc/terms/language> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Sprache".
+<http://purl.org/dc/terms/subject> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Schlagwort".
+<http://purl.org/dc/elements/1.1/subject> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Schlagwort".
+<http://purl.org/ontology/bibo/editor> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Herausgeber".
+<http://purl.org/ontology/bibo/translator> <http://www.w3.org/2004/02/skos/core#prefLabel>  "\u00DCbersetzer".
+<http://purl.org/ontology/bibo/volume> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Band".
+<http://www.w3.org/2007/05/powder-s#describedby> <http://www.w3.org/2004/02/skos/core#prefLabel> "Beschrieben durch".
+<http://d-nb.info/standards/elementset/gnd#dateOfBirth> <http://www.w3.org/2004/02/skos/core#prefLabel> "Geboren am".
+<http://d-nb.info/standards/elementset/gnd#dateOfDeath> <http://www.w3.org/2004/02/skos/core#prefLabel> "Gestorben am".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson> <http://www.w3.org/2004/02/skos/core#prefLabel> "Name".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheSubjectHeading> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheConferenceOrEvent> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheFamily> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheWork> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://d-nb.info/standards/elementset/gnd#preferredName> <http://www.w3.org/2004/02/skos/core#prefLabel> "Name".
+<http://purl.org/lobid/lv#fulltextOnline> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Download".
+<http://geni-orca.renci.org/owl/topology.owl#hasURN> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Urn".
+<http://hbz-nrw.de/regal#contentType> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Repository Typ".
+<http://www.openarchives.org/ore/terms/isDescribedBy> <http://www.w3.org/2004/02/skos/core#prefLabel> "Wird beschrieben durch".
+<http://www.openarchives.org/ore/terms/similarTo> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Vgl.".
+<http://www.umbel.org/specifications/vocabulary#isLike> <http://www.w3.org/2004/02/skos/core#prefLabel> "\u00E4hnlich zu".
+<http://purl.org/dc/terms/created> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Erstellt am".
+<http://purl.org/dc/terms/modified> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Zuletzt bearbeitet".
+<http://downlode.org/Code/RDF/File_Properties/schema#size> <http://www.w3.org/2004/02/skos/core#prefLabel> "Gr\u00F6\u00DFe".
+<http://downlode.org/Code/RDF/File_Properties/schema#checksumValue> <http://www.w3.org/2004/02/skos/core#prefLabel> "Pr\u00DCfsumme".
+<http://downlode.org/Code/RDF/File_Properties/schema#generator> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://www.w3.org/2000/01/rdf-schema#type> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Typ".
+<http://iflastandards.info/ns/isbd/elements/P1004> <http://www.w3.org/2004/02/skos/core#prefLabel> "Gesamttitel".
+<http://iflastandards.info/ns/isbd/elements/P1006> <http://www.w3.org/2004/02/skos/core#prefLabel> "Titelzusatz".
+<http://iflastandards.info/ns/isbd/elements/P1016> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Ort".
+<http://lobid.org/vocab/lobid#fulltextOnline> <http://www.w3.org/2004/02/skos/core#prefLabel> "Entfernter Download".
+<http://www.w3.org/2000/01/rdf-schema#label> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Etikett".
+<http://purl.org/dc/terms/format> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Format".
+<http://downlode.org/Code/RDF/File_Properties/schema#checksum> <http://www.w3.org/2004/02/skos/core#prefLabel> "Pr\u00DCfsumme".
+<http://hbz-nrw.de/regal#hasTransformer> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Transformer".
+<http://hbz-nrw.de/regal#hasData> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Download".
+<http://www.openarchives.org/ore/terms/isAggregatedBy> <http://www.w3.org/2004/02/skos/core#prefLabel> "Teil von".
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Typ".
+<http://xmlns.com/foaf/0.1/isPrimaryTopicOf> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Gegenstand von".
+<info:hbz/hbz-ingest:def/model#isNodeType> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Fedora Typ".
+<info:fedora/fedora-system:def/relations-external#isMemberOf> <http://www.w3.org/2004/02/skos/core#prefLabel> "Oai Set".
+<http://www.openarchives.org/OAI/2.0/itemID> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Oai Id".
+<info:fedora/fedora-system:def/relations-external#hasPart> <http://www.w3.org/2004/02/skos/core#prefLabel> "Kindobjekte".
+<info:fedora/fedora-system:def/relations-external#isPartOf> <http://www.w3.org/2004/02/skos/core#prefLabel> "Elternobjekt".
+<http://purl.org/vocab/frbr/core#exemplar> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Exemplar".
+<info:hbz/hbz-ingest:def/model#contentType> <http://www.w3.org/2004/02/skos/core#prefLabel>  "Regal Typ".
+<info:hbz/hbz-ingest:def/model#accessScheme> <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Daten".
+<info:hbz/hbz-ingest:def/model#publishScheme> <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Metadaten".
+<http://purl.org/dc/terms/bibliographicCitation> <http://www.w3.org/2004/02/skos/core#prefLabel> "Ver\u00F6ffentlichungs Details".
+<http://id.loc.gov/vocabulary/iso639-2/deu> <http://www.w3.org/2004/02/skos/core#prefLabel> "deutsch".
+<http://rdvocab.info/termList/RDACarrierType/1010>  <http://www.w3.org/2004/02/skos/core#prefLabel> "Datentr\u00E4ger".
+<http://rdvocab.info/termList/RDACarrierType/1018>  <http://www.w3.org/2004/02/skos/core#prefLabel> "Online-Ressource". 
+<http://purl.org/dc/terms/BibliographicResource> <http://www.w3.org/2004/02/skos/core#prefLabel> "Bibliografische Ressource" .
+<http://purl.org/lobid/lv#Legislation> <http://www.w3.org/2004/02/skos/core#prefLabel> "Amtsdruckschrift" .
+<http://purl.org/ontology/bibo/Collection> <http://www.w3.org/2004/02/skos/core#prefLabel> "Sammlung" .
+<http://purl.org/ontology/bibo/Newspaper> <http://www.w3.org/2004/02/skos/core#prefLabel> "Zeitung" .
+<http://purl.org/ontology/bibo/Periodical> <http://www.w3.org/2004/02/skos/core#prefLabel> "Periodikum" .
+<http://purl.org/vocab/frbr/core#Manifestation> <http://www.w3.org/2004/02/skos/core#prefLabel> "frbr:Manifestation" .

@@ -18,6 +18,7 @@ package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.Vocabulary.*;
+import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -819,9 +820,9 @@ public class Node {
 		    metadata.getBytes(StandardCharsets.UTF_8));
 	    RdfResource rdf = RdfUtils.createRdfResource(stream,
 		    RDFFormat.NTRIPLES, pid);
-	    rdf.resolve();
+	    rdf = rdf.resolve();
 	    rdf.addLinks(getRelsExt());
-	    return ApplicationProfile.addLabels(rdf).getLinks();
+	    return Globals.profile.addLabels(rdf).getLinks();
 	} catch (NullPointerException e) {
 	    return new ArrayList<Link>();
 	}
