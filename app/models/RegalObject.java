@@ -37,6 +37,7 @@ public class RegalObject {
     String publishScheme = null;
     String createdBy = null;
     String importedFrom = null;
+    String legacyId = null;
 
     /**
      * Default constructor
@@ -176,6 +177,21 @@ public class RegalObject {
      */
     public void setImportedFrom(String importedFrom) {
 	this.importedFrom = importedFrom;
+    }
+
+    /**
+     * @return legacyId
+     */
+    public String getLegacyId() {
+	return legacyId;
+    }
+
+    /**
+     * @param legacyId
+     *            legacyId
+     */
+    public void setLegacyId(String legacyId) {
+	this.legacyId = legacyId;
     }
 
     @Override

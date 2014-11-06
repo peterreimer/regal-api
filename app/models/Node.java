@@ -113,7 +113,6 @@ public class Node {
      */
     public Node(String pid) {
 	setPID(pid);
-	createCatalogId();
     }
 
     /**
@@ -203,6 +202,7 @@ public class Node {
      */
     public Node setPID(String pid) {
 	this.pid = pid;
+	createCatalogId();
 	return this;
     }
 
@@ -530,6 +530,8 @@ public class Node {
      * @return a string that signals who is allowed to access this node's data
      */
     public String getAccessScheme() {
+	if (accessScheme == null)
+	    return "private";
 	return accessScheme;
     }
 
@@ -547,6 +549,8 @@ public class Node {
      *         metadata
      */
     public String getPublishScheme() {
+	if (accessScheme == null)
+	    return "private";
 	return publishScheme;
     }
 
@@ -867,6 +871,10 @@ public class Node {
 	rdf.put("accessScheme", getAccessScheme());
 	rdf.put("publishScheme", getPublishScheme());
 	rdf.put("transformer", getTransformer());
+	rdf.put("createdBy", getCreatedBy());
+	rdf.put("legacyId", getLegacyId());
+	rdf.put("importedFrom", getImportedFrom());
+	rdf.put("catalogId", getCatalogId());
 	rdf.put("@context", getContext());
 	return rdf;
     }
@@ -891,6 +899,7 @@ public class Node {
 
 	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
 	cmap.put("nodeType", REL_IS_NODE_TYPE);
+
 	cmap.put("lastModified", "http://purl.org/dc/terms/modified");
 	cmap.put("creationDate", "http://purl.org/dc/terms/created");
 
@@ -898,6 +907,26 @@ public class Node {
 	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
 	pmap.put("label", "Regaltyp");
 	cmap.put("contentType", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#catalogId");
+	pmap.put("label", "Katalog Nr.");
+	cmap.put("catalogId", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#importedFrom");
+	pmap.put("label", "Original Quelle");
+	cmap.put("importedFrom", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#createdBy");
+	pmap.put("label", "Angelegt durch");
+	cmap.put("createdBy", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
+	pmap.put("label", "Angelegt durch");
+	cmap.put("legacyId", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
