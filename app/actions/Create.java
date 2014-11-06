@@ -21,10 +21,8 @@ import helper.Globals;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import models.Node;
+import models.RegalObject;
 import models.Transformer;
 
 /**
@@ -33,68 +31,99 @@ import models.Transformer;
  */
 public class Create extends RegalAction {
 
-    final static Logger logger = LoggerFactory.getLogger(Create.class);
-
     /**
-     * @param type
-     *            the type of the new resource
-     * @param parent
-     *            the parent of a new rsource
-     * @param transformers
-     *            transformers connected to the resource
-     * @param accessScheme
-     *            a string that signals who is allowed to access this node's
-     *            data
-     * @param publishScheme
-     *            a string that signals who is allowed to access this node's
-     *            metadata
-     * @param input
-     *            the input defines the contenttype and a optional parent
-     * @param rawPid
-     *            the pid without namespace
-     * @param namespace
-     *            the namespace
-     * @return the Node representing the resource
+     * @param node
+     * @param object
+     * @return the updated node
      */
-    public Node createResource(String type, String parent,
-	    List<String> transformers, String accessScheme,
-	    String publishScheme, String rawPid, String namespace) {
-	logger.debug("create " + type);
-	Node node = createNodeIfNotExists(type, parent, accessScheme,
-		publishScheme, rawPid, namespace);
-	new Index().remove(node.getPid(), namespace, node.getContentType());
-	node.setAccessScheme(accessScheme);
-	node.setPublishScheme(publishScheme);
-	setNodeType(type, node);
-	linkWithParent(parent, node);
-	updateTransformer(transformers, node);
+    public Node updateResource(Node node, RegalObject object) {
+	new Index().remove(node.getPid(), node.getNamespace(),
+		node.getContentType());
+	overrideNodeMembers(node, object);
 	Globals.fedora.updateNode(node);
 	updateIndexAndCache(node);
 	return node;
     }
 
-    private Node createNodeIfNotExists(String type, String parent,
-	    String accessScheme, String publishScheme, String rawPid,
-	    String namespace) {
-	String pid = namespace + ":" + rawPid;
-	Node node = null;
-	if (Globals.fedora.nodeExists(pid)) {
-	    node = new Read().readNode(pid);
-	} else {
-	    node = new Node();
-	    node.setNamespace(namespace).setPID(pid);
-	    node.setContentType(type);
-	    node.setAccessScheme(accessScheme);
-	    node.setPublishScheme(publishScheme);
-	    Globals.fedora.createNode(node);
-	}
+    /**
+     * @param node
+     * @param object
+     * @return the updated node
+     */
+    public Node patchResource(Node node, RegalObject object) {
+	new Index().remove(node.getPid(), node.getNamespace(),
+		node.getContentType());
+	setNodeMembers(node, object);
+	Globals.fedora.updateNode(node);
+	updateIndexAndCache(node);
 	return node;
+    }
+
+    /**
+     * @param namespace
+     * @param object
+     * @return the updated node
+     */
+    public Node createResource(String namespace, RegalObject object) {
+	String pid = pid(namespace);
+	return createResource(pid.split(":")[1], namespace, object);
+    }
+
+    /**
+     * @param id
+     * @param namespace
+     * @param object
+     * @return the updated node
+     */
+    public Node createResource(String id, String namespace, RegalObject object) {
+	Node node = initNode(id, namespace, object);
+	updateResource(node, object);
+	return node;
+    }
+
+    private Node initNode(String id, String namespace, RegalObject object) {
+	Node node = new Node();
+	node.setNamespace(namespace).setPID(namespace + ":" + id);
+	node.setContentType(object.getType());
+	node.setAccessScheme(object.getAccessScheme());
+	node.setPublishScheme(object.getPublishScheme());
+	Globals.fedora.createNode(node);
+	return node;
+    }
+
+    private void setNodeMembers(Node node, RegalObject object) {
+	if (object.getType() != null)
+	    setNodeType(object.getType(), node);
+	if (object.getParentPid() != null)
+	    linkWithParent(object.getParentPid(), node);
+	if (object.getTransformer() != null)
+	    updateTransformer(object.getTransformer(), node);
+	if (object.getAccessScheme() != null)
+	    node.setAccessScheme(object.getAccessScheme());
+	if (object.getPublishScheme() != null)
+	    node.setPublishScheme(object.getPublishScheme());
+	if (object.getCreatedBy() != null)
+	    node.setCreatedBy(object.getCreatedBy());
+	if (object.getImportedFrom() != null)
+	    node.setImportedFrom(object.getImportedFrom());
+	if (object.getLegacyId() != null)
+	    node.setLegacyId(object.getLegacyId());
+    }
+
+    private void overrideNodeMembers(Node node, RegalObject object) {
+	setNodeType(object.getType(), node);
+	linkWithParent(object.getParentPid(), node);
+	updateTransformer(object.getTransformer(), node);
+	node.setAccessScheme(object.getAccessScheme());
+	node.setPublishScheme(object.getPublishScheme());
+	node.setCreatedBy(object.getCreatedBy());
+	node.setImportedFrom(object.getImportedFrom());
+	node.setLegacyId(object.getLegacyId());
     }
 
     private void setNodeType(String type, Node node) {
 	node.setType(TYPE_OBJECT);
 	node.setContentType(type);
-	updateIndexAndCache(node);
     }
 
     private void linkWithParent(String parentPid, Node node) {

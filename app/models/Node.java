@@ -70,7 +70,6 @@ public class Node {
     private String seq = null;
 
     private String pid = null;
-    private String alephId = null;
 
     private Date lastModified = null;
     private Date creationDate = null;
@@ -94,9 +93,10 @@ public class Node {
 
     private String contextDocumentUri = null;
 
-    private String createdBy;
-
-    private String importedFrom;
+    private String createdBy = "";
+    private String importedFrom = "";
+    private String legacyId = "";
+    private String catalogId = "";
 
     /**
      * Creates a new Node.
@@ -113,6 +113,17 @@ public class Node {
      */
     public Node(String pid) {
 	setPID(pid);
+    }
+
+    /**
+     * Creates a CatalogId based on the objects Pid
+     * 
+     */
+    public void createCatalogId() {
+	if (pid != null && !pid.isEmpty()) {
+	    String id = pid.split(":")[1];
+	    setCatalogId("ED" + id);
+	}
     }
 
     /**
@@ -191,6 +202,7 @@ public class Node {
      */
     public Node setPID(String pid) {
 	this.pid = pid;
+	createCatalogId();
 	return this;
     }
 
@@ -518,6 +530,8 @@ public class Node {
      * @return a string that signals who is allowed to access this node's data
      */
     public String getAccessScheme() {
+	if (accessScheme == null)
+	    return "private";
 	return accessScheme;
     }
 
@@ -535,6 +549,8 @@ public class Node {
      *         metadata
      */
     public String getPublishScheme() {
+	if (accessScheme == null)
+	    return "private";
 	return publishScheme;
     }
 
@@ -593,18 +609,18 @@ public class Node {
     }
 
     /**
-     * @return alephId
+     * @return catalogId
      */
-    public String getAlephId() {
-	return alephId;
+    public String getCatalogId() {
+	return catalogId;
     }
 
     /**
-     * @param alephId
+     * @param catalogId
      * @return this
      */
-    public Node setAlephId(String alephId) {
-	this.alephId = alephId;
+    public Node setCatalogId(String catalogId) {
+	this.catalogId = catalogId;
 	return this;
     }
 
@@ -855,6 +871,10 @@ public class Node {
 	rdf.put("accessScheme", getAccessScheme());
 	rdf.put("publishScheme", getPublishScheme());
 	rdf.put("transformer", getTransformer());
+	rdf.put("createdBy", getCreatedBy());
+	rdf.put("legacyId", getLegacyId());
+	rdf.put("importedFrom", getImportedFrom());
+	rdf.put("catalogId", getCatalogId());
 	rdf.put("@context", getContext());
 	return rdf;
     }
@@ -879,6 +899,7 @@ public class Node {
 
 	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
 	cmap.put("nodeType", REL_IS_NODE_TYPE);
+
 	cmap.put("lastModified", "http://purl.org/dc/terms/modified");
 	cmap.put("creationDate", "http://purl.org/dc/terms/created");
 
@@ -886,6 +907,26 @@ public class Node {
 	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
 	pmap.put("label", "Regaltyp");
 	cmap.put("contentType", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#catalogId");
+	pmap.put("label", "Katalog Nr.");
+	cmap.put("catalogId", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#importedFrom");
+	pmap.put("label", "Original Quelle");
+	cmap.put("importedFrom", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#createdBy");
+	pmap.put("label", "Angelegt durch");
+	cmap.put("createdBy", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
+	pmap.put("label", "Angelegt durch");
+	cmap.put("legacyId", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
@@ -977,7 +1018,7 @@ public class Node {
     public int hashCode() {
 	int result = 17;
 	result = 31 * result + (pid != null ? pid.hashCode() : 0);
-	result = 31 * result + (alephId != null ? alephId.hashCode() : 0);
+	result = 31 * result + (catalogId != null ? catalogId.hashCode() : 0);
 	result = 31 * result
 		+ (lastModified != null ? lastModified.hashCode() : 0);
 	result = 31 * result
@@ -1009,7 +1050,8 @@ public class Node {
 	Node mt = (Node) other;
 	if (!(pid == null ? mt.pid == null : pid.equals(mt.pid)))
 	    return false;
-	if (!(alephId == null ? mt.alephId == null : alephId.equals(mt.alephId)))
+	if (!(catalogId == null ? mt.catalogId == null : catalogId
+		.equals(mt.catalogId)))
 	    return false;
 	if (!(lastModified == null ? mt.lastModified == null : lastModified
 		.equals(lastModified)))
@@ -1093,5 +1135,24 @@ public class Node {
 	} catch (Exception e) {
 	    return null;
 	}
+    }
+
+    /**
+     * Part of provenance data
+     * 
+     * @return the old id of the object
+     */
+    public String getLegacyId() {
+	return legacyId;
+    }
+
+    /**
+     * @param legacyId
+     *            an id that once has been used for this object
+     * @return this object
+     */
+    public Node setLegacyId(String legacyId) {
+	this.legacyId = legacyId;
+	return this;
     }
 }

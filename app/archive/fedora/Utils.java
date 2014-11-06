@@ -35,11 +35,13 @@ import static archive.fedora.FedoraVocabulary.REL_IS_DEPLOYMENT_OF;
 import static archive.fedora.FedoraVocabulary.SDEF_CONTENTMODEL;
 import static archive.fedora.FedoraVocabulary.SDEP_CONTENTMODEL;
 import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
-import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
+import static archive.fedora.Vocabulary.REL_CATALOG_ID;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
 import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.REL_LEGACY_ID;
+import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import helper.HttpArchiveException;
 
 import java.io.BufferedInputStream;
@@ -240,22 +242,12 @@ public class Utils {
     }
 
     void createRelsExt(Node node) {
-
 	String pid = node.getPid();
-
-	// IF DATASTREAM ! EXISTS
-	// CREATE DATASTREAM
-	// ADD RELATIONS
-
 	if (!dataStreamExists(pid, "RELS-EXT")) {
-	    System.out.println("PID " + pid + " doesn't exist, create new");
 	    createFedoraXmlForRelsExt(pid);
-
 	}
-
 	List<Link> links = node.getRelsExt();
 	createRelsExt(pid, links);
-
     }
 
     boolean nodeExists(String pid) {
@@ -416,37 +408,39 @@ public class Utils {
 			link.setObject(objUri.stringValue(), false);
 			link.setPredicate(predUri.stringValue());
 
-			if (link.getPredicate().compareTo(REL_IS_NODE_TYPE) == 0) {
+			String pred = link.getPredicate();
+			if (REL_IS_NODE_TYPE.equals(pred)) {
 			    node.setType(link.getObject());
-			} else if (link.getPredicate().compareTo(
-				REL_CONTENT_TYPE) == 0) {
+			} else if (REL_CONTENT_TYPE.equals(pred)) {
 			    node.setContentType(link.getObject());
-			} else if (link.getPredicate().compareTo(REL_HAS_MODEL) == 0) {
+			} else if (REL_HAS_MODEL.equals(pred)) {
 			    addContentModel(link, node);
 			    continue;
-			} else if (link.getPredicate().compareTo(
-				REL_ACCESS_SCHEME) == 0) {
+			} else if (REL_ACCESS_SCHEME.equals(pred)) {
 			    node.setAccessScheme(link.getObject());
 			    continue;
-			} else if (link.getPredicate().compareTo(
-				REL_IMPORTED_FROM) == 0) {
+			} else if (REL_IMPORTED_FROM.equals(pred)) {
 			    node.setImportedFrom(link.getObject());
 			    continue;
-			} else if (link.getPredicate()
-				.compareTo(REL_CREATED_BY) == 0) {
+			} else if (REL_CREATED_BY.equals(pred)) {
 			    node.setCreatedBy(link.getObject());
 			    continue;
-
-			} else if (link.getPredicate().compareTo(
-				REL_PUBLISH_SCHEME) == 0) {
+			} else if (REL_PUBLISH_SCHEME.equals(pred)) {
 			    node.setPublishScheme(link.getObject());
 			    continue;
+			} else if (REL_IMPORTED_FROM.equals(pred)) {
+			    node.setImportedFrom(link.getObject());
+			    continue;
+			} else if (REL_CREATED_BY.equals(pred)) {
+			    node.setCreatedBy(link.getObject());
+			    continue;
+			} else if (REL_LEGACY_ID.equals(pred)) {
+			    node.setLegacyId(link.getObject());
+			    continue;
+			} else if (REL_CATALOG_ID.equals(pred)) {
+			    node.setCatalogId(link.getObject());
+			    continue;
 			}
-			// else if (link.getPredicate().compareTo(IS_PART_OF) ==
-			// 0) {
-			// node.setParentPid(link.getObject());
-			// continue;
-			// }
 			String object = link.getObject();
 			try {
 			    if (object == null)
@@ -628,33 +622,36 @@ public class Utils {
 	    createFedoraXmlForRelsExt(pid);
 	}
 	Link link = new Link();
+	link.setObject(node.getContentType(), true);
 	link.setPredicate(REL_CONTENT_TYPE);
-	link.setObject(type, true);
 	node.addRelation(link);
-
 	link = new Link();
 	link.setObject(node.getNodeType(), true);
 	link.setPredicate(REL_IS_NODE_TYPE);
 	node.addRelation(link);
-
 	link = new Link();
 	link.setObject(node.getAccessScheme(), true);
 	link.setPredicate(REL_ACCESS_SCHEME);
 	node.addRelation(link);
-
 	link = new Link();
 	link.setObject(node.getPublishScheme(), true);
 	link.setPredicate(REL_PUBLISH_SCHEME);
 	node.addRelation(link);
-
 	link = new Link();
-	link.setObject(node.getImportedFrom(), false);
+	link.setObject(node.getImportedFrom(), true);
 	link.setPredicate(REL_IMPORTED_FROM);
 	node.addRelation(link);
-
 	link = new Link();
-	link.setObject(node.getCreatedBy(), false);
+	link.setObject(node.getCreatedBy(), true);
 	link.setPredicate(REL_CREATED_BY);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getLegacyId(), true);
+	link.setPredicate(REL_LEGACY_ID);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getCatalogId(), true);
+	link.setPredicate(REL_CATALOG_ID);
 	node.addRelation(link);
 
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());

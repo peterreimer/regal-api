@@ -59,6 +59,7 @@ public class MyController extends Controller {
      */
     public static Result AccessDenied() {
 	Message msg = new Message("Access Denied!", 401);
+	play.Logger.debug("\nResponse: " + msg.toString());
 	if (request().accepts("text/html")) {
 	    return HtmlMessage(msg);
 	} else {
@@ -94,6 +95,7 @@ public class MyController extends Controller {
      * @return a html rendering of msg
      */
     public static Result HtmlMessage(Message msg) {
+	play.Logger.debug("\nResponse: " + msg.toString());
 	return status(msg.getCode(), message.render(msg.toString()));
     }
 
@@ -111,6 +113,8 @@ public class MyController extends Controller {
 			"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
+
+	play.Logger.debug("\nResponse: " + msg.toString());
 	return status(msg.getCode(), msg.toString());
     }
 
@@ -276,29 +280,25 @@ public class MyController extends Controller {
 	Promise<Result> call(String pid, NodeAction ca) {
 	    return Promise.promise(() -> {
 		try {
-
 		    String role = (String) Http.Context.current().args
 			    .get("role");
 		    play.Logger.debug("Try to access with role: " + role);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-
 		    Node node = null;
 		    try {
 			node = read.readNode(pid);
-		    } catch (HttpArchiveException e) {
-			play.Logger.debug("", e);
-		    }
-		    return ca.exec(node);
-		} catch (HttpArchiveException e) {
-		    play.Logger.debug("", e);
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    play.Logger.debug("", e);
-		    return JsonMessage(new Message(e, 500));
+		    } catch (Exception e) {
+			// play.Logger.debug("", e);
 		}
-	    });
+		return ca.exec(node);
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	})  ;
 	}
     }
 

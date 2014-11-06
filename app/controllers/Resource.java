@@ -16,11 +16,11 @@
  */
 package controllers;
 
-import java.io.ByteArrayInputStream;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.Globals;
 import helper.HttpArchiveException;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -49,13 +49,16 @@ import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
-import play.mvc.*;
-import views.html.*;
+import play.mvc.Result;
+import views.html.oaidc;
+import views.html.resourceList;
+import views.html.resourceLong;
 import actions.BasicAuth;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -161,7 +164,6 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
-
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    if (request().accepts("application/rdf+xml"))
@@ -182,7 +184,6 @@ public class Resource extends MyController {
 		}
 	    });
 	}
-
     }
 
     @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
@@ -258,42 +259,36 @@ public class Resource extends MyController {
 	});
     }
 
-    @ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
+    @ApiOperation(produces = "application/json", nickname = "patchResource", value = "patchResource", notes = "Patches a Resource", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
-    public static Promise<Result> updateResource(@PathParam("pid") String pid) {
+    public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    try {
-		play.Logger.info("updateResource: " + pid);
-		String[] p = pid.split(":");
-		return createResource(p[1], p[0]);
-	    } catch (JsonMappingException e) {
-		throw new HttpArchiveException(500, e);
-	    } catch (JsonParseException e) {
-		throw new HttpArchiveException(500, e);
-	    } catch (IOException e) {
-		throw new HttpArchiveException(500, e);
-	    }
+	    RegalObject object = getRegalObject(request().body().asJson());
+	    Node newNode = create.patchResource(node, object);
+	    String result = newNode.getPid() + " created/updated!";
+	    return JsonMessage(new Message(result, 200));
 	});
     }
 
-    private static Result createResource(String id, String namespace)
-	    throws IOException, JsonParseException, JsonMappingException {
-	Object o = request().body().asJson();
-	RegalObject object;
-	if (o != null) {
-	    object = (RegalObject) MyController.mapper.readValue(o.toString(),
-		    RegalObject.class);
-	} else {
-	    throw new NullPointerException(
-		    "Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
-	}
-	play.Logger.debug("createResource: " + object);
-	Node newnode = create.createResource(object.getType(),
-		object.getParentPid(), object.getTransformer(),
-		object.getAccessScheme(), object.getPublishScheme(), id,
-		namespace);
-	String result = newnode.getPid() + " created/updated!";
-	return JsonMessage(new Message(result, 200));
+    @ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+    public static Promise<Result> updateResource(@PathParam("pid") String pid) {
+	return new ModifyAction().call(
+		pid,
+		node -> {
+		    RegalObject object = getRegalObject(request().body()
+			    .asJson());
+		    Node newNode = null;
+		    if (node == null) {
+			String[] namespacePlusId = pid.split(":");
+			newNode = create.createResource(namespacePlusId[1],
+				namespacePlusId[0], object);
+		    } else {
+			newNode = create.updateResource(node, object);
+		    }
+		    String result = newNode.getPid() + " created/updated!";
+		    return JsonMessage(new Message(result, 200));
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
@@ -301,22 +296,31 @@ public class Resource extends MyController {
     public static Promise<Result> createResource(
 	    @PathParam("namespace") String namespace) {
 	return new CreateAction().call(() -> {
-	    try {
-		String pid = create.pid(namespace);
-		String[] p = pid.split(":");
-		createResource(p[1], p[0]);
-		Node node = read.readNode(pid);
-		response().setHeader("Location",
-			read.getHttpUriOfResource(node));
-		return status(201, node.toString());
-	    } catch (JsonMappingException e) {
-		throw new HttpArchiveException(500, e);
-	    } catch (JsonParseException e) {
-		throw new HttpArchiveException(500, e);
-	    } catch (IOException e) {
-		throw new HttpArchiveException(500, e);
-	    }
+	    RegalObject object = getRegalObject(request().body().asJson());
+	    Node newNode = create.createResource(namespace, object);
+	    String result = newNode.getPid() + " created/updated!";
+	    return JsonMessage(new Message(result, 200));
 	});
+    }
+
+    private static RegalObject getRegalObject(JsonNode json) {
+	try {
+	    RegalObject object;
+	    if (json != null) {
+		object = (RegalObject) MyController.mapper.readValue(
+			json.toString(), RegalObject.class);
+		return object;
+	    } else {
+		throw new NullPointerException(
+			"Please PUT at least a type, e.g. {\"type\":\"monograph\"}");
+	    }
+	} catch (JsonMappingException e) {
+	    throw new HttpArchiveException(500, e);
+	} catch (JsonParseException e) {
+	    throw new HttpArchiveException(500, e);
+	} catch (IOException e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateSeq", value = "updateSeq", notes = "Updates the ordering of child objects using a n-triple list.", response = Message.class, httpMethod = "PUT")
