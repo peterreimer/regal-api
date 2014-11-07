@@ -351,10 +351,9 @@ public class Read extends RegalAction {
      * @return a urn object that describes the status of the urn
      */
     public Urn getUrnStatus(Node node) {
-
 	String urn = getUrn(node);
 	Urn result = new Urn(urn);
-	result.init(getHttpUriOfResource(node));
+	result.init(Globals.urnbase + node.getPid());
 	return result;
     }
 
