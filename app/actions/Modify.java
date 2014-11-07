@@ -34,17 +34,17 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import models.DublinCoreData;
+import models.Link;
+import models.Node;
+import models.Pair;
+import models.Transformer;
+
 import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import models.DublinCoreData;
-import models.Pair;
-import models.Link;
-import models.Node;
-import models.Transformer;
+import play.mvc.Results.Chunks;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -54,8 +54,7 @@ import archive.fedora.RdfUtils;
  *
  */
 public class Modify extends RegalAction {
-
-    final static Logger logger = LoggerFactory.getLogger(Modify.class);
+    Chunks.Out<String> messageOut;
 
     /**
      * @param pid
@@ -350,11 +349,12 @@ public class Modify extends RegalAction {
 		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
 	    }
-
+	    updateIndexAndCache(node);
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);
 	}
+
     }
 
     private void addSet(Node node, String name) {
@@ -466,11 +466,69 @@ public class Modify extends RegalAction {
 
     }
 
+    /**
+     * @param indexName
+     */
+    public void reinitOaisets(String namespace) {
+	try {
+	    Read read = new Read();
+	    int until = 0;
+	    int stepSize = 100;
+	    int from = 0 - stepSize;
+	    List<String> nodes = read.listRepoNamespace(namespace);
+	    messageOut.write(nodes.toString());
+	    messageOut.write("size: " + nodes.size());
+	    do {
+		until += stepSize;
+		from += stepSize;
+		if (nodes.isEmpty())
+		    break;
+		if (until > nodes.size())
+		    until = nodes.size();
+		messageOut.write(reinitOaiSets(read.getNodes(nodes.subList(
+			from, until))));
+	    } while (until < nodes.size());
+	    messageOut.write("Attempted to index: " + nodes.size());
+	    messageOut.write("\nSuccessfuly Finished\n");
+	} finally {
+	    messageOut.close();
+	}
+    }
+
+    private String reinitOaiSets(List<Node> nodes) {
+	StringBuffer str = new StringBuffer();
+	for (Node n : nodes) {
+	    try {
+		str.append("\n" + makeOAISet(n));
+	    } catch (MetadataNotFoundException e) {
+		str.append("\nProblems with " + n.getPid() + "\n"
+			+ e.getMessage());
+	    }
+	}
+	return str.toString();
+    }
+
+    /**
+     * @param out
+     *            messages for chunked responses
+     */
+    public void setMessageQueue(Chunks.Out<String> out) {
+	messageOut = out;
+    }
+
+    /**
+     * Close messageQueue for chunked responses
+     * 
+     */
+    public void closeMessageQueue() {
+	if (messageOut != null)
+	    messageOut.close();
+    }
+
     @SuppressWarnings({ "serial", "javadoc" })
     public class MetadataNotFoundException extends RuntimeException {
 	public MetadataNotFoundException(Throwable e) {
 	    super(e);
 	}
     }
-
 }

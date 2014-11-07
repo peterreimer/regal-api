@@ -77,6 +77,7 @@ GET /api-docs/resourceIndex 		controllers.ApiHelpController.getResource(path = "
 
 POST /utils/index/:pid 				controllers.MyUtils.index(pid,contentType,index?="")
 POST /utils/indexAll 				controllers.MyUtils.indexAll(index?="")
+POST /utils/reinitOaisets			controllers.MyUtils.reinitOaisets(namespace?="")
 DELETE /utils/removeFromIndex/:pid 	controllers.MyUtils.removeFromIndex(pid,contentType)
 POST /utils/publicIndex/:pid 		controllers.MyUtils.publicIndex(pid,contentType,index?="")
 DELETE /utils/removeFromPublicIndex/:pid controllers.MyUtils.removeFromPublicIndex(pid,contentType)

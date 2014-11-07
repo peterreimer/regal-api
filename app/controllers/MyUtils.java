@@ -88,6 +88,28 @@ public class MyUtils extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json,application/html", nickname = "reinitOaisets", value = "reinitOaisets", notes = "Updates the oaisets of all resources", response = List.class, httpMethod = "POST")
+    public static Promise<Result> reinitOaisets(
+	    @QueryParam("namespace") final String namespace) {
+	return new BulkAction().call(() -> {
+	    Chunks<String> chunks = new StringChunks() {
+		public void onReady(Chunks.Out<String> out) {
+		    modify.setMessageQueue(out);
+		}
+	    };
+	    ExecutorService executorService = Executors
+		    .newSingleThreadExecutor();
+	    executorService.execute(new Runnable() {
+		public void run() {
+		    modify.reinitOaisets(namespace);
+		}
+	    });
+	    executorService.shutdown();
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(chunks);
+	});
+    }
+
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
     public static Promise<Result> removeFromIndex(@PathParam("pid") String pid,
 	    @QueryParam("contentType") final String type) {

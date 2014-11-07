@@ -1121,7 +1121,6 @@ public class Node {
 	List<String> catalog = RdfUtils.findRdfObjects(pid, hasUrn, metadata,
 		RDFFormat.NTRIPLES);
 	boolean result = RdfUtils.hasTriple(pid, hasUrn, metadata);
-	play.Logger.debug(pid + " hasCatalogId? " + catalog + " -> " + result);
 	return result;
     }
 

@@ -4,6 +4,7 @@ target
 tmp
 .history
 dist
+regal-default.ntriple
 /.idea
 /*.iml
 /out

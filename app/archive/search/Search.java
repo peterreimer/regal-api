@@ -63,6 +63,10 @@ public class Search {
 	public SearchException(Throwable e) {
 	    super(e);
 	}
+
+	public SearchException(String msg, Throwable e) {
+	    super(msg, e);
+	}
     }
 
     Client client = null;
@@ -110,8 +114,13 @@ public class Search {
     }
 
     ActionResponse index(String index, String type, String id, String data) {
-	return client.prepareIndex(index, type, id).setSource(data).execute()
-		.actionGet();
+	try {
+	    return client.prepareIndex(index, type, id).setSource(data)
+		    .execute().actionGet();
+	} catch (Exception e) {
+	    throw new SearchException("Failed to index " + index + "," + type
+		    + "," + id, e);
+	}
     }
 
     SearchHits listResources(String index, String type, int from, int until) {

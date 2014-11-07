@@ -61,7 +61,13 @@ public class OaiSetBuilder {
 		String ddc = object.subSequence(object.length() - 4,
 			object.length() - 1).toString();
 
-		name = ddcmap(ddc);
+		if (Globals.profile.pMap.containsKey(object)) {
+		    name = Globals.profile.pMap.get(object);
+		    play.Logger.info("looked up ddc local name: " + name);
+		} else {
+		    name = ddcmap(ddc);
+		    Globals.profile.pMap.put(object, name);
+		}
 		spec = "ddc:" + ddc;
 		pid = "oai:" + ddc;
 
@@ -110,7 +116,7 @@ public class OaiSetBuilder {
 	    try {
 		name = root.getElementsByTagName("skos:prefLabel").item(0)
 			.getTextContent();
-		play.Logger.info("Found ddc name: " + name);
+		play.Logger.info("looked up ddc online name: " + name);
 	    } catch (Exception e) {
 		play.Logger.info("Didn't found ddc name for ddc:" + number);
 	    }
