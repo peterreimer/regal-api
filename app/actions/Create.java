@@ -77,6 +77,7 @@ public class Create extends RegalAction {
      */
     public Node createResource(String id, String namespace, RegalObject object) {
 	Node node = initNode(id, namespace, object);
+
 	updateResource(node, object);
 	return node;
     }
@@ -88,7 +89,7 @@ public class Create extends RegalAction {
 	node.setAccessScheme(object.getAccessScheme());
 	node.setPublishScheme(object.getPublishScheme());
 	Globals.fedora.createNode(node);
-	return node;
+	return new Read().readNode(node.getPid());
     }
 
     private void setNodeMembers(Node node, RegalObject object) {
