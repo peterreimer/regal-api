@@ -820,6 +820,7 @@ public class Node {
 		    metadata.getBytes(StandardCharsets.UTF_8));
 	    RdfResource rdf = RdfUtils.createRdfResource(stream,
 		    RDFFormat.NTRIPLES, pid);
+
 	    rdf = rdf.resolve();
 	    rdf.addLinks(getRelsExt());
 	    return Globals.profile.addLabels(rdf).getLinks();
@@ -838,33 +839,11 @@ public class Node {
 	rdf.put("@id", getPid());
 	rdf.put("primaryTopic", getPid());
 	for (Link l : ls) {
-	    Map<String, Object> resolvedObject = null;
-	    // play.Logger.debug(l.getObjectLabel());
-	    if (l.getObjectLabel() != null) {
-		String id = l.getObject();
-		String value = l.getObjectLabel();
-		resolvedObject = new HashMap<String, Object>();
-		resolvedObject.put("@id", id);
-		resolvedObject.put("prefLabel", value);
-	    }
-	    if (rdf.containsKey(l.getShortName())) {
-		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) rdf.get(l.getShortName());
-		if (resolvedObject == null) {
-		    list.add(l.getObject());
-		} else {
-		    list.add(resolvedObject);
-		}
-	    } else {
-		List<Object> list = new ArrayList<Object>();
-		if (resolvedObject == null) {
-		    list.add(l.getObject());
-		} else {
-		    list.add(resolvedObject);
-		}
-		rdf.put(l.getShortName(), list);
-	    }
+	    if (HAS_PART.equals(l.getPredicate()))
+		continue;
+	    addLinkToJsonMap(rdf, l);
 	}
+	addPartsToJsonMap(rdf);
 	rdf.remove("isNodeType");
 	rdf.put("lastModified", getLastModified());
 	rdf.put("creationDate", getCreationDate());
@@ -876,8 +855,51 @@ public class Node {
 	rdf.put("legacyId", getLegacyId());
 	rdf.put("importedFrom", getImportedFrom());
 	rdf.put("catalogId", getCatalogId());
+	if (getMimeType() != null && !getMimeType().isEmpty()) {
+	    play.Logger.debug(getDataUri());
+	    rdf.put("hasData", getDataUri());
+	}
 	rdf.put("@context", getContext());
 	return rdf;
+    }
+
+    private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
+	Map<String, Object> resolvedObject = null;
+	// play.Logger.debug(l.getObjectLabel());
+	if (l.getObjectLabel() != null) {
+	    String id = l.getObject();
+	    String value = l.getObjectLabel();
+	    resolvedObject = new HashMap<String, Object>();
+	    resolvedObject.put("@id", id);
+	    resolvedObject.put("prefLabel", value);
+	}
+	if (rdf.containsKey(l.getShortName())) {
+	    @SuppressWarnings("unchecked")
+	    List<Object> list = (List<Object>) rdf.get(l.getShortName());
+	    if (resolvedObject == null) {
+		list.add(l.getObject());
+	    } else {
+		list.add(resolvedObject);
+	    }
+	} else {
+	    List<Object> list = new ArrayList<Object>();
+	    if (resolvedObject == null) {
+		list.add(l.getObject());
+	    } else {
+		list.add(resolvedObject);
+	    }
+	    rdf.put(l.getShortName(), list);
+	}
+    }
+
+    private void addPartsToJsonMap(Map<String, Object> rdf) {
+	for (String p : getPartsSorted()) {
+	    Link l = new Link();
+	    l.setObject(p, false);
+	    l.setPredicate(HAS_PART);
+	    l.setObjectLabel("No Label");
+	    addLinkToJsonMap(rdf, l);
+	}
     }
 
     /**
@@ -940,6 +962,11 @@ public class Node {
 	cmap.put("publishScheme", pmap);
 
 	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#hasData");
+	pmap.put("label", "Daten");
+	cmap.put("hasData", pmap);
+
+	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://xmlns.com/foaf/0.1/primaryTopic");
 	pmap.put("label", "Vgl.");
 	pmap.put("@type", "@id");
@@ -992,7 +1019,7 @@ public class Node {
     private List<String> sort(List<String> nodeIds, String[] seq) {
 	List<String> sorted = new ArrayList<String>();
 	if (nodeIds == null || nodeIds.isEmpty())
-	    return null;
+	    return sorted;
 	for (String i : seq) {
 	    int j = -1;
 	    if ((j = nodeIds.indexOf(i)) != -1) {
