@@ -299,6 +299,8 @@ public class Resource extends MyController {
 	    RegalObject object = getRegalObject(request().body().asJson());
 	    Node newNode = create.createResource(namespace, object);
 	    String result = newNode.getPid() + " created/updated!";
+	    response()
+		    .setHeader("Location", read.getHttpUriOfResource(newNode));
 	    return JsonMessage(new Message(result, 200));
 	});
     }
