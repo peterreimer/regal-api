@@ -77,7 +77,6 @@ public class Create extends RegalAction {
      */
     public Node createResource(String id, String namespace, RegalObject object) {
 	Node node = initNode(id, namespace, object);
-
 	updateResource(node, object);
 	return node;
     }
@@ -88,8 +87,13 @@ public class Create extends RegalAction {
 	node.setContentType(object.getType());
 	node.setAccessScheme(object.getAccessScheme());
 	node.setPublishScheme(object.getPublishScheme());
+	node.setAggregationUri(createAggregationUri(node.getPid()));
+	node.setRemUri(node.getAggregationUri() + ".rdf");
+	node.setDataUri(node.getAggregationUri() + "/data");
+	node.setContextDocumentUri("http://" + Globals.server
+		+ "/public/edoweb-resources.json");
 	Globals.fedora.createNode(node);
-	return new Read().readNode(node.getPid());
+	return node;
     }
 
     private void setNodeMembers(Node node, RegalObject object) {

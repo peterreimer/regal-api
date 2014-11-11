@@ -16,6 +16,7 @@
  */
 package actions;
 
+import helper.Globals;
 import models.Node;
 import play.cache.Cache;
 
@@ -41,6 +42,21 @@ public class RegalAction {
 
     void removeFromCache(Node node) {
 	Cache.remove(node.getPid());
+    }
+
+    protected String createAggregationUri(String pid) {
+	return Globals.useHttpUris ? "http://" + Globals.server + "/resource/"
+		+ pid : pid;
+    }
+
+    /**
+     * @param node
+     *            the node
+     * @return the http address of the resource
+     */
+    public String getHttpUriOfResource(Node node) {
+	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
+		+ Globals.server + "/resource/" + node.getAggregationUri();
     }
 
 }
