@@ -19,7 +19,6 @@ package controllers;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,6 +29,7 @@ import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import views.html.message;
 import actions.Create;
 import actions.Delete;
 import actions.Index;
@@ -39,8 +39,6 @@ import actions.Transform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
-
-import views.html.*;
 
 /**
  * 
@@ -90,7 +88,13 @@ public class MyController extends Controller {
 	    e.printStackTrace();
 	    return internalServerError("Not able to create response!");
 	}
+	debugPrint(w.toString());
 	return ok(w.toString());
+    }
+
+    private static void debugPrint(String str) {
+	play.Logger.debug("\nResponse:\nHeaders\n\t"
+		+ mapToString(response().getHeaders()) + "\nBody:\n\t" + str);
     }
 
     /**
@@ -118,9 +122,7 @@ public class MyController extends Controller {
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
 
-	play.Logger
-		.debug("\nResponse: " + mapToString(response().getHeaders()));
-	play.Logger.debug("\nResponse: " + msg.toString());
+	debugPrint(msg.toString());
 	return status(msg.getCode(), msg.toString());
     }
 
@@ -354,14 +356,17 @@ public class MyController extends Controller {
 	}
     }
 
+    /**
+     * @param map
+     * @return a pritn of the map
+     */
     public static String mapToString(Map<String, String> map) {
 	StringBuilder sb = new StringBuilder();
 	Iterator<Entry<String, String>> iter = map.entrySet().iterator();
 	while (iter.hasNext()) {
 	    Entry<String, String> entry = iter.next();
 	    sb.append(entry.getKey());
-	    sb.append('=').append('"');
-	    sb.append('"');
+	    sb.append('=').append('"').append(entry.getValue()).append('"');
 	    if (iter.hasNext()) {
 		sb.append("\n\t'");
 	    }

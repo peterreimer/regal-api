@@ -32,7 +32,6 @@ public class RegalAction {
     }
 
     Node readNodeFromCache(String pid) {
-	play.Logger.debug("Read from cache: " + pid);
 	return (Node) Cache.get(pid);
     }
 

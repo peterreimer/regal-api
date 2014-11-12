@@ -23,11 +23,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
 
+import models.MabRecord;
+import models.MabRecord.Person;
+import models.MabRecord.PersonType;
+
 import org.apache.commons.io.IOUtils;
 import org.stringtemplate.v4.ST;
-
-import converter.mab.MabRecord.Person;
-import converter.mab.MabRecord.PersonType;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de

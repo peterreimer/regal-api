@@ -17,7 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
-import static archive.fedora.Vocabulary.*;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import helper.Globals;
 import helper.HttpArchiveException;
 
@@ -38,7 +38,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.openrdf.rio.RDFFormat;
 
-import archive.fedora.ApplicationProfile;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -1186,8 +1185,8 @@ public class Node {
      */
     public boolean hasLinkToCatalogId() {
 	String hasUrn = "http://purl.org/lobid/lv#hbzID";
-	List<String> catalog = RdfUtils.findRdfObjects(pid, hasUrn, metadata,
-		RDFFormat.NTRIPLES);
+	// List<String> catalog = RdfUtils.findRdfObjects(pid, hasUrn, metadata,
+	// RDFFormat.NTRIPLES);
 	boolean result = RdfUtils.hasTriple(pid, hasUrn, metadata);
 	return result;
     }

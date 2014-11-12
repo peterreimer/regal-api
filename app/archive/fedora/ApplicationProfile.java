@@ -22,12 +22,21 @@ import play.Play;
  */
 public class ApplicationProfile {
 
+    /**
+     * The class analyses values linked by this certain rdf predicate
+     */
     public final static String prefLabel = "http://www.w3.org/2004/02/skos/core#prefLabel";
 
+    /**
+     * A map with URIs as key and lables as values
+     */
     public Map<String, String> pMap = new HashMap<String, String>();
 
     private final String defaultMap = "regal-default.ntriple";
 
+    /**
+     * Associates lables to rdf predicates or known objects
+     */
     public ApplicationProfile() {
 	loadToMap(defaultMap);
 	loadToMap("regal.ntriple");
@@ -51,6 +60,10 @@ public class ApplicationProfile {
 	}
     }
 
+    /**
+     * stores the pmap to a file. Each entry is represented in one row forming
+     * an ntriple key prefLabel value
+     */
     public void saveMap() {
 	play.Logger.info("Write labels to map please hold on!!!");
 	String result = new String();

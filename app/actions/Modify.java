@@ -348,6 +348,7 @@ public class Modify extends RegalAction {
 	    if (node.hasLinkToCatalogId()) {
 		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
+		addSet(node, "edo01");
 	    }
 	    updateIndexAndCache(node);
 	    return pid + " successfully created oai sets!";
@@ -467,7 +468,8 @@ public class Modify extends RegalAction {
     }
 
     /**
-     * @param indexName
+     * @param namespace
+     *            all objects in the namespace will be modified
      */
     public void reinitOaisets(String namespace) {
 	try {

@@ -23,13 +23,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import models.MabRecord;
+import models.MabRecord.Person;
+import models.MabRecord.PersonType;
+import models.MabRecord.Subject;
+
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFFormat;
 
-import converter.mab.MabRecord.Person;
-import converter.mab.MabRecord.PersonType;
-import converter.mab.MabRecord.Subject;
 import archive.fedora.RdfUtils;
 
 /**
@@ -118,7 +120,7 @@ public class RegalToMabMapper {
 	else if ("http://iflastandards.info/ns/isbd/elements/P1053"
 		.equals(pred))
 	    record.umfang = obj;
-	else if ("http://lobid.org/vocab/lobid#urn".equals(pred))
+	else if ("http://purl.org/lobid/lv#urn".equals(pred))
 	    record.urn = obj;
 	else if ("http://lobid.org/vocab/lobid#fulltextOnline".equals(pred))
 	    record.httpAdresse = obj;
@@ -219,7 +221,8 @@ public class RegalToMabMapper {
 	String mabstring = "";
 
 	List<String> list = types.get(topic);
-
+	if (list == null)
+	    return mabstring;
 	if (list.contains(LobidVocabular.biboCollection)
 		&& list.contains(LobidVocabular.biboMultiVolumeBook))
 	    record.veroeffentlichungsSpezifischeAngabenString = "s|||w|||";

@@ -20,14 +20,6 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
-import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
-import static archive.fedora.Vocabulary.REL_CATALOG_ID;
-import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
-import static archive.fedora.Vocabulary.REL_CREATED_BY;
-import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
-import static archive.fedora.Vocabulary.REL_LEGACY_ID;
-import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import helper.HttpArchiveException;
 
 import java.io.IOException;

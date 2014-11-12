@@ -38,6 +38,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.DublinCoreData;
+import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
@@ -51,6 +52,7 @@ import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import views.html.oaidc;
+import views.html.mab;
 import views.html.resourceList;
 import views.html.resourceLong;
 import actions.BasicAuth;
@@ -538,16 +540,6 @@ public class Resource extends MyController {
 	});
     }
 
-    @ApiOperation(produces = "application/json", nickname = "asRegalObject", value = "asRegalObject", notes = "The basic regal object", response = Node.class, httpMethod = "GET")
-    public static Promise<Result> asRegalObject(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    response().setContentType("application/json");
-	    Node result = read.readNode(pid);
-	    return json(result);
-	});
-    }
-
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asOaiDc(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
@@ -569,9 +561,9 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/xml", nickname = "asAleph", value = "asAleph", notes = "Returns a aleph xml display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asAleph(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.aleph(pid);
+	    MabRecord result = transform.aleph(pid);
 	    response().setContentType("application/xml");
-	    return ok(result);
+	    return ok(mab.render(result));
 	});
     }
 
