@@ -93,10 +93,10 @@ public class Node {
 
     private String contextDocumentUri = null;
 
-    private String createdBy = "";
-    private String importedFrom = "";
-    private String legacyId = "";
-    private String catalogId = "";
+    private String createdBy = null;
+    private String importedFrom = null;
+    private String legacyId = null;
+    private String catalogId = null;
 
     /**
      * Creates a new Node.
@@ -844,28 +844,40 @@ public class Node {
 	}
 	addPartsToJsonMap(rdf);
 	rdf.remove("isNodeType");
-	rdf.put("lastModified", getLastModified());
-	rdf.put("creationDate", getCreationDate());
+
 	rdf.put("contentType", getContentType());
 	rdf.put("accessScheme", getAccessScheme());
 	rdf.put("publishScheme", getPublishScheme());
 	rdf.put("transformer", getTransformer());
-	rdf.put("createdBy", getCreatedBy());
-	rdf.put("legacyId", getLegacyId());
-	rdf.put("importedFrom", getImportedFrom());
 	rdf.put("catalogId", getCatalogId());
+
+	HashMap<String, Object> aboutMap = new HashMap<String, Object>();
+	aboutMap.put("@id", this.getAggregationUri() + ".rdf");
+	if (createdBy != null)
+	    aboutMap.put("createdBy", getCreatedBy());
+	if (legacyId != null)
+	    aboutMap.put("legacyId", getLegacyId());
+	if (importedFrom != null)
+	    aboutMap.put("importedFrom", getImportedFrom());
+	aboutMap.put("modified", getLastModified());
+	aboutMap.put("created", getCreationDate());
+	aboutMap.put("describes", this.getAggregationUri());
+	rdf.put("isDescribedBy", aboutMap);
+
 	if (getMimeType() != null && !getMimeType().isEmpty()) {
-	    rdf.put("hasData", getDataUri());
-	    rdf.put("format", getMimeType());
-	    rdf.put("size", getFileSize());
-	}
-	if (getChecksum() != null) {
-	    Map<String, Object> checksum = new HashMap<String, Object>();
-	    checksum.put("checksumValue", getChecksum());
-	    checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
-	    checksum.put("type",
-		    "http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
-	    rdf.put("checksum", checksum);
+	    Map<String, Object> hasDataMap = new HashMap<String, Object>();
+	    hasDataMap.put("@id", getDataUri());
+	    hasDataMap.put("format", getMimeType());
+	    hasDataMap.put("size", getFileSize());
+	    if (getChecksum() != null) {
+		Map<String, Object> checksum = new HashMap<String, Object>();
+		checksum.put("checksumValue", getChecksum());
+		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
+		checksum.put("type",
+			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		hasDataMap.put("checksum", checksum);
+	    }
+	    rdf.put("hasData", hasDataMap);
 	}
 
 	rdf.put("@context", getContext());
@@ -932,8 +944,8 @@ public class Node {
 	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
 	cmap.put("nodeType", REL_IS_NODE_TYPE);
 
-	cmap.put("lastModified", "http://purl.org/dc/terms/modified");
-	cmap.put("creationDate", "http://purl.org/dc/terms/created");
+	cmap.put("modified", "http://purl.org/dc/terms/modified");
+	cmap.put("created", "http://purl.org/dc/terms/created");
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
@@ -1023,6 +1035,18 @@ public class Node {
 	pmap.put("label", "Checksum");
 	pmap.put("@type", "@id");
 	cmap.put("checksum", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://www.openarchives.org/ore/terms/describes");
+	pmap.put("label", "Beschreibt");
+	pmap.put("@type", "@id");
+	cmap.put("describes", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://www.openarchives.org/ore/terms/isDescribedBy");
+	pmap.put("label", "Beschrieben durch");
+	pmap.put("@type", "@id");
+	cmap.put("isDescribedBy", pmap);
 
 	cmap.put("prefLabel", "http://www.w3.org/2004/02/skos/core#prefLabel");
 
