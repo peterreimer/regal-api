@@ -19,6 +19,10 @@ package controllers;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import models.Message;
 import models.Node;
@@ -114,6 +118,8 @@ public class MyController extends Controller {
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
 
+	play.Logger
+		.debug("\nResponse: " + mapToString(response().getHeaders()));
 	play.Logger.debug("\nResponse: " + msg.toString());
 	return status(msg.getCode(), msg.toString());
     }
@@ -346,5 +352,21 @@ public class MyController extends Controller {
 		}
 	    });
 	}
+    }
+
+    public static String mapToString(Map<String, String> map) {
+	StringBuilder sb = new StringBuilder();
+	Iterator<Entry<String, String>> iter = map.entrySet().iterator();
+	while (iter.hasNext()) {
+	    Entry<String, String> entry = iter.next();
+	    sb.append(entry.getKey());
+	    sb.append('=').append('"');
+	    sb.append('"');
+	    if (iter.hasNext()) {
+		sb.append("\n\t'");
+	    }
+	}
+	return sb.toString();
+
     }
 }
