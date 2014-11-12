@@ -856,9 +856,19 @@ public class Node {
 	rdf.put("importedFrom", getImportedFrom());
 	rdf.put("catalogId", getCatalogId());
 	if (getMimeType() != null && !getMimeType().isEmpty()) {
-	    play.Logger.debug(getDataUri());
 	    rdf.put("hasData", getDataUri());
+	    rdf.put("format", getMimeType());
+	    rdf.put("size", getFileSize());
 	}
+	if (getChecksum() != null) {
+	    Map<String, Object> checksum = new HashMap<String, Object>();
+	    checksum.put("checksumValue", getChecksum());
+	    checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
+	    checksum.put("type",
+		    "http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+	    rdf.put("checksum", checksum);
+	}
+
 	rdf.put("@context", getContext());
 	return rdf;
     }
@@ -983,6 +993,37 @@ public class Node {
 	pmap.put("label", "Kindobjekt");
 	pmap.put("@type", "@id");
 	cmap.put("isPartOf", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/format");
+	pmap.put("label", "Mime Type");
+	cmap.put("format", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#size");
+	pmap.put("label", "Bytes");
+	cmap.put("size", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#checksum");
+	pmap.put("label", "MD5");
+	cmap.put("checksumValue", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#generator");
+	pmap.put("label", "Generator");
+	pmap.put("@type", "@id");
+	cmap.put("generator", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#checksum");
+	pmap.put("label", "Checksum");
+	pmap.put("@type", "@id");
+	cmap.put("checksum", pmap);
 
 	cmap.put("prefLabel", "http://www.w3.org/2004/02/skos/core#prefLabel");
 
