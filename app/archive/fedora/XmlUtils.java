@@ -128,6 +128,7 @@ public class XmlUtils {
      *            the string will be stored in file
      * @return a file containing the string
      */
+    @Deprecated
     public static File stringToFile(File file, String str) {
 	FileOutputStream writer = null;
 	try {
@@ -137,6 +138,34 @@ public class XmlUtils {
 	    // TODO uhh prevent memory overload
 	    writer.write(str.replace("\n", " ").replace("  ", " ")
 		    .getBytes("utf-8"));
+	} catch (IOException e) {
+	    throw new ReadException(e);
+	} finally {
+	    if (writer != null)
+		try {
+		    writer.flush();
+		    writer.close();
+		} catch (IOException ignored) {
+		    throw new StreamNotClosedException(ignored);
+		}
+	}
+	str = null;
+	return file;
+    }
+
+    /**
+     * @param file
+     *            file to store the string in
+     * @param str
+     *            the string will be stored in file
+     * @return a file containing the string
+     */
+    public static File newStringToFile(File file, String str) {
+	FileOutputStream writer = null;
+	try {
+	    file.createNewFile();
+	    writer = new FileOutputStream(file);
+	    writer.write(str.getBytes("utf-8"));
 	} catch (IOException e) {
 	    throw new ReadException(e);
 	} finally {

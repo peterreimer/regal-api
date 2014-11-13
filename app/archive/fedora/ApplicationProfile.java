@@ -1,5 +1,8 @@
 package archive.fedora;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,31 +35,45 @@ public class ApplicationProfile {
      */
     public Map<String, String> pMap = new HashMap<String, String>();
 
-    private final String defaultMap = "regal-default.ntriple";
+    private final String defaultMap = "/tmp/regal-default.ntriple";
 
     /**
      * Associates lables to rdf predicates or known objects
      */
     public ApplicationProfile() {
-	loadToMap(defaultMap);
+	loadDefaultConfig();
 	loadToMap("regal.ntriple");
 	loadToMap("rpb.ntriple");
+    }
+
+    private void loadDefaultConfig() {
+	try {
+	    loadToMap(new FileInputStream(new File(defaultMap)));
+	} catch (Exception e) {
+	    play.Logger.info("Default config file " + defaultMap
+		    + " not found.");
+	}
     }
 
     private void loadToMap(String fileName) {
 	try {
 	    InputStream in = Play.application().resourceAsStream(fileName);
-	    Graph g = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
-	    Iterator<Statement> statements = g.iterator();
-	    while (statements.hasNext()) {
-		Statement st = statements.next();
-		if (prefLabel.equals(st.getPredicate().stringValue())) {
-		    pMap.put(st.getSubject().stringValue(), st.getObject()
-			    .stringValue());
-		}
-	    }
+	    loadToMap(in);
 	} catch (Exception e) {
-	    play.Logger.info("Config file " + fileName + " not found.");
+	    e.printStackTrace();
+	    play.Logger.info("config file " + fileName + " not found.");
+	}
+    }
+
+    private void loadToMap(InputStream in) {
+	Graph g = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+	Iterator<Statement> statements = g.iterator();
+	while (statements.hasNext()) {
+	    Statement st = statements.next();
+	    if (prefLabel.equals(st.getPredicate().stringValue())) {
+		pMap.put(st.getSubject().stringValue(), st.getObject()
+			.stringValue());
+	    }
 	}
     }
 
@@ -72,7 +89,7 @@ public class ApplicationProfile {
 	    result = RdfUtils.addTriple(e.getKey(), prefLabel, e.getValue(),
 		    true, result);
 	}
-	XmlUtils.stringToFile(Play.application().getFile(defaultMap), result);
+	XmlUtils.newStringToFile(new File(defaultMap), result);
     }
 
     /**
