@@ -106,7 +106,7 @@ public class ApplicationProfile {
 
 	    String label = pMap.get(l.getPredicate());
 	    if (label == null) {
-		l.setPredicateLabel("No Label");
+
 	    } else {
 		l.setPredicateLabel(label);
 	    }
@@ -114,9 +114,8 @@ public class ApplicationProfile {
 	    if (!l.isLiteral() && l.getObjectLabel() == null) {
 
 		label = pMap.get(l.getObject());
-		if (label == null)
-		    l.setObjectLabel("No Label");
-		else
+		if (label == null) {
+		} else
 		    l.setObjectLabel(label);
 	    }
 	    result.addLink(l);

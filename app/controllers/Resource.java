@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -51,10 +52,9 @@ import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
-import views.html.oaidc;
 import views.html.mab;
-import views.html.resourceList;
-import views.html.resourceLong;
+import views.html.oaidc;
+import views.html.resource;
 import actions.BasicAuth;
 import archive.fedora.RdfUtils;
 
@@ -83,7 +83,7 @@ public class Resource extends MyController {
     public static Promise<Result> listUrn(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, (Node node) -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    return json(read.getUrnStatus(node));
+	    return getJsonResult(read.getUrnStatus(node));
 	});
     }
 
@@ -92,7 +92,7 @@ public class Resource extends MyController {
 	return new ListAction().call(() -> {
 	    try {
 		List<String> is = Arrays.asList(ids.split(","));
-		return json(read.getNodes(is));
+		return getJsonResult(read.getNodes(is));
 	    } catch (HttpArchiveException e) {
 		return JsonMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
@@ -134,7 +134,7 @@ public class Resource extends MyController {
 	    try {
 		List<Node> nodes = read.listRepo(contentType, namespace, from,
 			until);
-		return json(nodes);
+		return getJsonResult(nodes);
 	    } catch (HttpArchiveException e) {
 		return JsonMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
@@ -150,11 +150,11 @@ public class Resource extends MyController {
 		String servername = Play.application().configuration()
 			.getString("regal-api.serverName");
 		response().setHeader("Access-Control-Allow-Origin", "*");
-		response().setContentType("text/html");
+		response()
+			.setHeader("Content-Type", "text/html; charset=utf-8");
 		List<Node> nodes = read.listRepo(contentType, namespace, from,
 			until);
-		return ok(resourceList.render(nodes, "http://" + servername
-			+ "/resource/"));
+		return ok(resource.render(json(nodes)));
 	    } catch (HttpArchiveException e) {
 		return HtmlMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
@@ -168,6 +168,8 @@ public class Resource extends MyController {
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    if (request().accepts("application/html"))
+		return asHtml(pid);
 	    if (request().accepts("application/rdf+xml"))
 		return asRdf(pid);
 	    if (request().accepts("text/plain"))
@@ -257,7 +259,7 @@ public class Resource extends MyController {
     public static Promise<Result> listDc(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    DublinCoreData dc = read.readDC(pid);
-	    return json(dc);
+	    return getJsonResult(dc);
 	});
     }
 
@@ -490,10 +492,10 @@ public class Resource extends MyController {
 	return new ReadMetadataAction().call(pid, node -> {
 	    List<String> nodeIds = node.getPartsSorted();
 	    if ("short".equals(style)) {
-		return json(nodeIds);
+		return getJsonResult(nodeIds);
 	    }
 	    List<Node> result = read.getNodesFromCache(nodeIds);
-	    return json(result);
+	    return getJsonResult(result);
 	});
     }
 
@@ -501,7 +503,7 @@ public class Resource extends MyController {
     public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    List<Node> result = read.getParts(node);
-	    return json(result);
+	    return getJsonResult(result);
 	});
     }
 
@@ -520,23 +522,32 @@ public class Resource extends MyController {
 	return new ReadMetadataAction().call(pid, node -> {
 	    List<String> nodeIds = node.getRelatives(IS_PART_OF);
 	    if ("short".equals(style)) {
-		return json(nodeIds);
+		return getJsonResult(nodeIds);
 	    }
 	    List<Node> result = read.getNodesFromCache(nodeIds);
-	    return json(result);
+	    return getJsonResult(result);
 	});
     }
 
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asHtml(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid,
-		node -> ok(resourceLong.render(node.toString())));
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		List<Node> nodes = new ArrayList<Node>();
+		nodes.add(node);
+		response()
+			.setHeader("Content-Type", "text/html; charset=utf-8");
+		return ok(resource.render(json(nodes).toString()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asJson(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    return json(node);
+	    return getJsonResult(node);
 	});
     }
 

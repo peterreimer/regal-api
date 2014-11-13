@@ -918,7 +918,6 @@ public class Node {
 	    Link l = new Link();
 	    l.setObject(p, false);
 	    l.setPredicate(HAS_PART);
-	    l.setObjectLabel("No Label");
 	    addLinkToJsonMap(rdf, l);
 	}
     }

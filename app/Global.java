@@ -43,7 +43,7 @@ public class Global extends GlobalSettings {
 
     @Override
     public void onStop(Application app) {
-	Globals.profile.saveMap();
+	// Globals.profile.saveMap();
 	play.Logger.info("Application shutdown...");
     }
 

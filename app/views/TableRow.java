@@ -1,14 +1,14 @@
-/* Copyright 2013 Fabian Steeg, hbz. Licensed under the Eclipse Public License 1.0 */
+/* Copyright 2014 Fabian Steeg, hbz. Licensed under the GPLv2 */
 
 package views;
 
 /**
- * Different ways of serializing a table row (used fo RDFa output)
+ * Different ways of serializing a table row
  * 
  * @author Fabian Steeg (fsteeg)
  */
 @SuppressWarnings("javadoc")
 /* no javadoc for elements. */
 public enum TableRow {
-    VALUES, VALUES_LANGUAGE_DE, LINK_VALUES, LINKS, IMAGE, LABEL
+	VALUES, LINKS
 }

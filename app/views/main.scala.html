@@ -1,64 +1,22 @@
-@* main Template File *@
 @(title: String)(content: Html)
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
-  "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" version="XHTML+RDFa 1.0" dir="ltr"
-  xmlns:edoweb="http://api.edoweb-test.hbz-nrw.de/resource/edoweb:"
-  xmlns:local="http://api.edoweb-test.hbz-nrw.de/resource/local:"
-  xmlns:isbd="http://iflastandards.info/ns/isbd/elements/"
-  xmlns:frbr="http://purl.org/vocab/frbr/core#"
-  xmlns:bibo="http://purl.org/ontology/bibo/"
-  xmlns:dce="http://purl.org/dc/elements/1.1/"
-  xmlns:ore="http://www.openarchives.org/ore/terms/"
-  xmlns:foaf="http://xmlns.com/foaf/0.1/"
-  xmlns:umbel="http://umbel.org/umbel#"
-  xmlns:lv="http://purl.org/lobid/lv#"
-  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-  xmlns:orca="http://geni-orca.renci.org/owl/topology.owl#"
-  xmlns:dnb="http://d-nb.info/gnd/"
-  xmlns:gnd="http://d-nb.info/standards/elementset/gnd#"
-  xmlns:lr="http://lobid.org/resource/"
-  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-  xmlns:ddc="http://dewey.info/class/"
-  xmlns:regal="http://hbz-nrw.de/regal#"
-  xmlns:rdvocab="http://rdvocab.info/Elements/"
-  xmlns:file="http://downlode.org/Code/RDF/File_Properties/schema#"
-  xmlns:marcrel="http://id.loc.gov/vocabulary/relators/"
-  xmlns:rpb="http://purl.org/lobid/rpb#"
-  xmlns:nwbib="http://purl.org/lobid/nwbib#"
-  xmlns:nwbib-spatial="http://purl.org/lobid/nwbib-spatial#"
-  xmlns:radion="http://www.w3.org/ns/radion#"
-  xmlns:content="http://purl.org/rss/1.0/modules/content/"
-  xmlns:dc="http://purl.org/dc/terms/"
-  xmlns:og="http://ogp.me/ns#"
-  xmlns:sioc="http://rdfs.org/sioc/ns#"
-  xmlns:sioct="http://rdfs.org/sioc/types#"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
 
-<head>
-<title>@title</title>
-<link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/edoweb_lbz.css")">
-<link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
-<link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
-<link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
-<script src="@controllers.routes.Assets.at("javascripts/jquery-1.10.2.min.js")"></script>
-<script src="@controllers.routes.Assets.at("javascripts/jquery-ui.min.js")"></script>
-<script src="@controllers.routes.Assets.at("javascripts/bootstrap.min.js")"></script>
-<script src="@controllers.routes.Assets.at("javascripts/regal-resource.js")"></script>
-</head>
-	<body>
-		<div id="header" class="with-secondary-menu">
-			<div class="section clearfix">
-				<a href="/" title="Home" rel="home" id="logo">
-        			<img src="@controllers.routes.Assets.at("images/logo.png")" alt="Home" />
-      			</a>   
-  			</div>
-  		</div>
-  		
-		<div class="content">
-			@content
-		</div>
-	
-		
-	</body>
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
+        <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
+        <script src="@controllers.routes.Assets.at("javascripts/jquery-1.10.2.min.js")"></script>
+        <script src="@controllers.routes.Assets.at("javascripts/jquery-ui.min.js")"></script>
+        <script src="@controllers.routes.Assets.at("javascripts/bootstrap.min.js")"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
+    </head>
+    <body onload="">
+        <div class="container">
+            @content
+        </div>
+    </body>
 </html>
