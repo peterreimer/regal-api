@@ -22,7 +22,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.index.mapper.MapperParsingException;
 import org.elasticsearch.search.SearchHits;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import archive.fedora.CopyUtils;
+import archive.search.Search.SearchException;
 import base.BaseModelTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -192,7 +192,7 @@ public class SearchTest extends BaseModelTest {
 	search.index("test", "monograph", "edoweb:3273331", edoweb3273331);
     }
 
-    @Test(expected = MapperParsingException.class)
+    @Test(expected = SearchException.class)
     public void esSettings_fails() {
 	search.down();
 	search = new SearchMock("test", "public-index-config_fails.json");
@@ -215,7 +215,7 @@ public class SearchTest extends BaseModelTest {
 		+ printJsonFormatted(search.getSettings("test", "monograph")));
     }
 
-    @Test(expected = MapperParsingException.class)
+    @Test(expected = SearchException.class)
     public void esSettingsDrupalBulk_fail() {
 	// Make sure everything is fresh
 	search.down();
@@ -287,7 +287,7 @@ public class SearchTest extends BaseModelTest {
 	try {
 	    search.index("test", "monograph",
 		    "edoweb:f1c9954d-f4d0-4d91-8f47-0a9c8f46df9b", drupalFour);
-	} catch (MapperParsingException e) {
+	} catch (SearchException e) {
 	    e.printStackTrace();
 	    throw e;
 	}
@@ -330,7 +330,7 @@ public class SearchTest extends BaseModelTest {
 
     }
 
-    @Test(expected = MapperParsingException.class)
+    @Test(expected = SearchException.class)
     public void esSettingsDrupalBulk_withNestedSettings_failsDirectly() {
 	search.down();
 	search = new SearchMock("test",
