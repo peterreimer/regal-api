@@ -101,3 +101,4 @@
 <http://data.archiveshub.ac.uk/def/ArchivalResource> <http://www.w3.org/2004/02/skos/core#prefLabel> "Archivierte Online Resource" .
 <http://purl.org/ontology/bibo/Book> <http://www.w3.org/2004/02/skos/core#prefLabel> "Buch" .
 <http://purl.org/ontology/bibo/Thesis> <http://www.w3.org/2004/02/skos/core#prefLabel> "Abschlussarbeit" .
+<http://iflastandards.info/ns/isbd/elements/P1053> <http://www.w3.org/2004/02/skos/core#prefLabel> "Umfang" .
