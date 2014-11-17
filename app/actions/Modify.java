@@ -278,7 +278,7 @@ public class Modify extends RegalAction {
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = new Read().readMetadata(subject);
-	if (RdfUtils.hasTriple(subject, hasUrn, metadata))
+	if (metadata != null && RdfUtils.hasTriple(subject, hasUrn, metadata))
 	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
