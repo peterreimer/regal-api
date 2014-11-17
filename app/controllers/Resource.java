@@ -164,7 +164,7 @@ public class Resource extends MyController {
 
     }
 
-    @ApiOperation(produces = "application/json", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
@@ -486,24 +486,43 @@ public class Resource extends MyController {
 	});
     }
 
-    @ApiOperation(produces = "application/json", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json,text/html", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid,
 	    @QueryParam("style") String style) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    List<String> nodeIds = node.getPartsSorted();
-	    if ("short".equals(style)) {
-		return getJsonResult(nodeIds);
+	    try {
+
+		List<String> nodeIds = node.getPartsSorted();
+		if ("short".equals(style)) {
+		    return getJsonResult(nodeIds);
+		}
+		List<Node> result = read.getNodesFromCache(nodeIds);
+
+		if (request().accepts("text/html")) {
+		    return ok(resource.render(json(result)));
+		} else {
+		    return getJsonResult(result);
+		}
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
 	    }
-	    List<Node> result = read.getNodesFromCache(nodeIds);
-	    return getJsonResult(result);
+
 	});
     }
 
-    @ApiOperation(produces = "application/json", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
+    @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    List<Node> result = read.getParts(node);
-	    return getJsonResult(result);
+	    try {
+		List<Node> result = read.getParts(node);
+		if (request().accepts("text/html")) {
+		    return ok(resource.render(json(result)));
+		} else {
+		    return getJsonResult(result);
+		}
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
 	});
     }
 

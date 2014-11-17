@@ -4,9 +4,29 @@
 @import play.api.libs.json._
 @import com.fasterxml.jackson.databind.JsonNode
 
+@analyseValue(v: String)={
+@v match {
+case a if v.startsWith("http") => {
+<a href=@v>@v</a>
+}
+case a if v.startsWith("edoweb") => {
+<a href=./@v>@v</a>
+}
+case _ => {@v
+}
+}
+}
 
 @value(value: JsValue)= {
-@((value \ "prefLabel").asOpt[String].getOrElse(value.asOpt[String]))
+@value match {
+case a: JsString => {
+@analyseValue(value.as[String])
+}
+case b: JsObject => {
+@((value \ "prefLabel").asOpt[String].getOrElse(value.asOpt[String])) |
+<a title="Linked-Data-Quelle abrufen" href=@((value \ "@id").asOpt[String].getOrElse(value.asOpt[String]))><span class="glyphicon glyphicon-link"></span></a>
+}
+}
 <br/>
 }
 
