@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -848,7 +849,8 @@ public class Node {
 	rdf.put("contentType", getContentType());
 	rdf.put("accessScheme", getAccessScheme());
 	rdf.put("publishScheme", getPublishScheme());
-	rdf.put("transformer", getTransformer());
+	rdf.put("transformer", getTransformer().stream().map(t -> t.getId())
+		.collect(Collectors.toList()));
 	rdf.put("catalogId", getCatalogId());
 
 	HashMap<String, Object> aboutMap = new HashMap<String, Object>();
@@ -863,6 +865,8 @@ public class Node {
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
 	rdf.put("isDescribedBy", aboutMap);
+	if (parentPid != null)
+	    rdf.put("parentPid", parentPid);
 
 	if (getMimeType() != null && !getMimeType().isEmpty()) {
 	    Map<String, Object> hasDataMap = new HashMap<String, Object>();
@@ -942,7 +946,6 @@ public class Node {
 
 	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
 	cmap.put("nodeType", REL_IS_NODE_TYPE);
-
 	cmap.put("modified", "http://purl.org/dc/terms/modified");
 	cmap.put("created", "http://purl.org/dc/terms/created");
 
@@ -1000,9 +1003,15 @@ public class Node {
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
-	pmap.put("label", "Kindobjekt");
+	pmap.put("label", "Überordnung");
 	pmap.put("@type", "@id");
 	cmap.put("isPartOf", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
+	pmap.put("label", "Überordnung");
+	pmap.put("@type", "@id");
+	cmap.put("parentPid", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://purl.org/dc/terms/format");

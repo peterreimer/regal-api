@@ -84,7 +84,7 @@ public class Create extends RegalAction {
     private Node initNode(String id, String namespace, RegalObject object) {
 	Node node = new Node();
 	node.setNamespace(namespace).setPID(namespace + ":" + id);
-	node.setContentType(object.getType());
+	node.setContentType(object.getContentType());
 	node.setAccessScheme(object.getAccessScheme());
 	node.setPublishScheme(object.getPublishScheme());
 	node.setAggregationUri(createAggregationUri(node.getPid()));
@@ -97,8 +97,8 @@ public class Create extends RegalAction {
     }
 
     private void setNodeMembers(Node node, RegalObject object) {
-	if (object.getType() != null)
-	    setNodeType(object.getType(), node);
+	if (object.getContentType() != null)
+	    setNodeType(object.getContentType(), node);
 	if (object.getParentPid() != null)
 	    linkWithParent(object.getParentPid(), node);
 	if (object.getTransformer() != null)
@@ -107,23 +107,23 @@ public class Create extends RegalAction {
 	    node.setAccessScheme(object.getAccessScheme());
 	if (object.getPublishScheme() != null)
 	    node.setPublishScheme(object.getPublishScheme());
-	if (object.getCreatedBy() != null)
-	    node.setCreatedBy(object.getCreatedBy());
-	if (object.getImportedFrom() != null)
-	    node.setImportedFrom(object.getImportedFrom());
-	if (object.getLegacyId() != null)
-	    node.setLegacyId(object.getLegacyId());
+	if (object.getIsDescribedBy().getCreatedBy() != null)
+	    node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+	if (object.getIsDescribedBy().getImportedFrom() != null)
+	    node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
+	if (object.getIsDescribedBy().getLegacyId() != null)
+	    node.setLegacyId(object.getIsDescribedBy().getLegacyId());
     }
 
     private void overrideNodeMembers(Node node, RegalObject object) {
-	setNodeType(object.getType(), node);
+	setNodeType(object.getContentType(), node);
 	linkWithParent(object.getParentPid(), node);
 	updateTransformer(object.getTransformer(), node);
 	node.setAccessScheme(object.getAccessScheme());
 	node.setPublishScheme(object.getPublishScheme());
-	node.setCreatedBy(object.getCreatedBy());
-	node.setImportedFrom(object.getImportedFrom());
-	node.setLegacyId(object.getLegacyId());
+	node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+	node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
+	node.setLegacyId(object.getIsDescribedBy().getLegacyId());
     }
 
     private void setNodeType(String type, Node node) {

@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -27,17 +28,101 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RegalObject {
 
-    String type = null;
+    /**
+     * @author jan schnasse
+     *
+     */
+    public class Provenience {
+	String createdBy = null;
+	String importedFrom = null;
+	String legacyId = null;
+
+	/**
+	 * @param createdBy
+	 */
+	public void setCreatedBy(String createdBy) {
+	    this.createdBy = createdBy;
+	}
+
+	/**
+	 * @return importedFrom
+	 */
+	public String getImportedFrom() {
+	    return importedFrom;
+	}
+
+	/**
+	 * @param importedFrom
+	 */
+	public void setImportedFrom(String importedFrom) {
+	    this.importedFrom = importedFrom;
+	}
+
+	/**
+	 * @return legacyId
+	 */
+	public String getLegacyId() {
+	    return legacyId;
+	}
+
+	/**
+	 * @param legacyId
+	 *            legacyId
+	 */
+	public void setLegacyId(String legacyId) {
+	    this.legacyId = legacyId;
+	}
+
+	/**
+	 * @return createdBy
+	 */
+	public String getCreatedBy() {
+	    return createdBy;
+	}
+
+	@Override
+	public int hashCode() {
+	    int result = 17;
+	    result = 31 * result
+		    + (createdBy != null ? createdBy.hashCode() : 0);
+	    result = 31 * result
+		    + (importedFrom != null ? importedFrom.hashCode() : 0);
+	    result = 31 * result + (legacyId != null ? legacyId.hashCode() : 0);
+	    return result;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+	    if (this == other)
+		return true;
+	    if (!(other instanceof Provenience))
+		return false;
+	    Provenience mt = (Provenience) other;
+	    if (!(createdBy == null ? mt.createdBy == null : createdBy
+		    .equals(mt.createdBy)))
+		return false;
+	    if (!(contentType == null ? mt.importedFrom == null : importedFrom
+		    .equals(mt.importedFrom)))
+		return false;
+	    if (!(legacyId == null ? mt.legacyId == null : legacyId
+		    .equals(legacyId)))
+		return false;
+	    return true;
+	}
+
+    }
+
+    String contentType = null;
     String parentPid = null;
     List<String> transformer = null;
     List<String> indexes = null;
     String accessScheme = null;
     String publishScheme = null;
-    String createdBy = null;
-    String importedFrom = null;
-    String legacyId = null;
+
+    Provenience isDescribedBy = new Provenience();
 
     /**
      * Default constructor
@@ -46,7 +131,7 @@ public class RegalObject {
     public RegalObject() {
 	transformer = new Vector<String>();
 	indexes = new Vector<String>();
-	type = "not";
+	contentType = "not";
     }
 
     /**
@@ -69,22 +154,22 @@ public class RegalObject {
      *            a valid type
      */
     public RegalObject(ObjectType t) {
-	type = t.toString();
+	contentType = t.toString();
     }
 
     /**
      * @return the type of the object
      */
-    public String getType() {
-	return type;
+    public String getContentType() {
+	return contentType;
     }
 
     /**
      * @param type
      *            the type
      */
-    public void setType(String type) {
-	this.type = type;
+    public void setContentType(String type) {
+	this.contentType = type;
     }
 
     /**
@@ -152,46 +237,17 @@ public class RegalObject {
     }
 
     /**
-     * @return createdBy
+     * @return some meta-metadata
      */
-    public String getCreatedBy() {
-	return createdBy;
+    public Provenience getIsDescribedBy() {
+	return isDescribedBy;
     }
 
     /**
-     * @param createdBy
+     * @param describedBy
      */
-    public void setCreatedBy(String createdBy) {
-	this.createdBy = createdBy;
-    }
-
-    /**
-     * @return importedFrom
-     */
-    public String getImportedFrom() {
-	return importedFrom;
-    }
-
-    /**
-     * @param importedFrom
-     */
-    public void setImportedFrom(String importedFrom) {
-	this.importedFrom = importedFrom;
-    }
-
-    /**
-     * @return legacyId
-     */
-    public String getLegacyId() {
-	return legacyId;
-    }
-
-    /**
-     * @param legacyId
-     *            legacyId
-     */
-    public void setLegacyId(String legacyId) {
-	this.legacyId = legacyId;
+    public void setIsDescribedBy(Provenience describedBy) {
+	this.isDescribedBy = describedBy;
     }
 
     @Override
@@ -204,5 +260,48 @@ public class RegalObject {
 	    return super.toString();
 	}
 	return w.toString();
+    }
+
+    @Override
+    public int hashCode() {
+	int result = 17;
+	result = 31 * result + (parentPid != null ? parentPid.hashCode() : 0);
+	result = 31 * result
+		+ (contentType != null ? contentType.hashCode() : 0);
+	result = 31 * result
+		+ (accessScheme != null ? accessScheme.hashCode() : 0);
+	result = 31 * result
+		+ (transformer != null ? transformer.hashCode() : 0);
+	result = 31 * result + (indexes != null ? indexes.hashCode() : 0);
+	result = 31 * result
+		+ (isDescribedBy != null ? isDescribedBy.hashCode() : 0);
+	return result;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+	if (this == other)
+	    return true;
+	if (!(other instanceof RegalObject))
+	    return false;
+	RegalObject mt = (RegalObject) other;
+	if (!(parentPid == null ? mt.parentPid == null : parentPid
+		.equals(mt.parentPid)))
+	    return false;
+	if (!(contentType == null ? mt.contentType == null : contentType
+		.equals(mt.contentType)))
+	    return false;
+	if (!(accessScheme == null ? mt.accessScheme == null : accessScheme
+		.equals(accessScheme)))
+	    return false;
+	if (!(transformer == null ? mt.transformer == null : transformer
+		.equals(mt.transformer)))
+	    return false;
+	if (!(indexes == null ? mt.indexes == null : indexes.equals(mt.indexes)))
+	    return false;
+	if (!(isDescribedBy == null ? mt.isDescribedBy == null : isDescribedBy
+		.equals(mt.isDescribedBy)))
+	    return false;
+	return true;
     }
 }
