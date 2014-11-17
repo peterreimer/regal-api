@@ -4,13 +4,14 @@
 @import play.api.libs.json._
 @import com.fasterxml.jackson.databind.JsonNode
 
+
 @analyseValue(v: String)={
 @v match {
 case a if v.startsWith("http") => {
 <a href=@v>@v</a>
 }
 case a if v.startsWith("edoweb") => {
-<a href=./@v>@v</a>
+<a href=/resource/@v>@v</a>
 }
 case _ => {@v
 }
@@ -81,7 +82,7 @@ case b: JsObject => {
 @main("") {
 @defining(Json.parse(js).asOpt[Seq[JsValue]].getOrElse(Seq())) { hits =>
 @for( hit <- hits){
-<h1><a href=./resource/@((hit \ "@id").asOpt[String].getOrElse(""))>@((hit \ "title").asOpt[Seq[String]].getOrElse("No title"))</a></h1>
+<h1><a href=/resource/@((hit \ "@id").asOpt[String].getOrElse(""))>@((hit \ "title").asOpt[Seq[String]].getOrElse("No title"))</a></h1>
 @table(hit)
 
 }
