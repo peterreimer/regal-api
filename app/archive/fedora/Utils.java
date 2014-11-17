@@ -28,6 +28,7 @@ import static archive.fedora.FedoraVocabulary.DS_METHODMAP_WSDL_URI;
 import static archive.fedora.FedoraVocabulary.DS_WSDL;
 import static archive.fedora.FedoraVocabulary.DS_WSDL_URI;
 import static archive.fedora.FedoraVocabulary.INFO_NAMESPACE;
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.REL_HAS_SERVICE;
 import static archive.fedora.FedoraVocabulary.REL_IS_CONTRACTOR_OF;
@@ -439,6 +440,9 @@ public class Utils {
 			    continue;
 			} else if (REL_CATALOG_ID.equals(pred)) {
 			    node.setCatalogId(link.getObject());
+			    continue;
+			} else if (IS_PART_OF.equals(pred)) {
+			    node.setParentPid(link.getObject());
 			    continue;
 			}
 			String object = link.getObject();
