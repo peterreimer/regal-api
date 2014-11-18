@@ -105,3 +105,6 @@
 <http://purl.org/lobid/lv#Miscellaneous> <http://www.w3.org/2004/02/skos/core#prefLabel> "Verschiedenes" .
 <http://purl.org/ontology/bibo/Journal> <http://www.w3.org/2004/02/skos/core#prefLabel> "Journal" .
 <http://purl.org/ontology/bibo/issue> <http://www.w3.org/2004/02/skos/core#prefLabel> "Issue" .
+<http://purl.org/ontology/bibo/Map> <http://www.w3.org/2004/02/skos/core#prefLabel> "Karte" .
+<http://purl.org/lobid/lv#Bibliography> <http://www.w3.org/2004/02/skos/core#prefLabel> "Bibliografie" .
+<http://rdvocab.info/termList/RDAproductionMethod/1010>  <http://www.w3.org/2004/02/skos/core#prefLabel> "Druck" .

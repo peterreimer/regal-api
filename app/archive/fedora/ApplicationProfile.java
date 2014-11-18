@@ -115,8 +115,11 @@ public class ApplicationProfile {
 
 		label = pMap.get(l.getObject());
 		if (label == null) {
-		} else
+		    l.setObjectLabel(l.getObject());
+		    play.Logger.debug("No label for " + l.getObject());
+		} else {
 		    l.setObjectLabel(label);
+		}
 	    }
 	    result.addLink(l);
 	}
