@@ -1,3 +1,5 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
@@ -15,7 +17,36 @@
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
     </head>
     <body onload="">
-        <div class="container">
+      <div class="container">
+      	<p>
+	  		<div class="panel panel-default" style="text-align:center; padding:5px;">
+		Dies ist eine Standardinstallation des <a href="https://github.com/edoweb/regal-api"> Regal </a> Repositories. 
+		Erfahren Sie mehr im Regal <a href="https://github.com/edoweb/regal/wiki">Wiki</a>.
+		Die Http-Schnittstelle von Regal ist <a href="/public/docs/">hier</a> dokumentiert. 
+	  		</div>
+	  		<div class="navbar navbar-default" role="navigation">
+		 		<div class="container-fluid">
+		  			<div class="navbar-header">
+		   				<div class="navbar-collapse collapse" id="nwbib-nav">
+							<ul class="nav navbar-nav">
+								<li @if(title=="Regal - Home"){class="active"}>
+									<a href="/">Home</a>
+								</li>
+								<li @if(title=="Regal - Doku"){class="active"}>
+
+								</li>
+							</ul>
+		 				</div>
+		 			</div>
+			 	</div>
+			 	
+	 	</p>
+	 	</div>
+		<div>
+	    	@tags.searchForm("")
+	    </div>
+	    <p/>
+	 	<div>
             @content
         </div>
     </body>

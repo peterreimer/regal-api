@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -44,6 +45,8 @@ import models.Message;
 import models.Node;
 import models.RegalObject;
 
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
 
 import play.Play;
@@ -55,6 +58,7 @@ import play.mvc.Result;
 import views.html.mab;
 import views.html.oaidc;
 import views.html.resource;
+import views.html.search;
 import actions.BasicAuth;
 import archive.fedora.RdfUtils;
 
@@ -508,6 +512,31 @@ public class Resource extends MyController {
 	    }
 
 	});
+    }
+
+    @ApiOperation(produces = "application/json,text/html", nickname = "search", value = "search", notes = "Find resources", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> search(@QueryParam("q") String queryString,
+	    @QueryParam("from") int from, @QueryParam("until") int until) {
+	return new ReadMetadataAction().call(
+		null,
+		node -> {
+		    try {
+			SearchHits hits = Globals.search.query("public_edoweb",
+				queryString, from, until);
+			List<SearchHit> list = Arrays.asList(hits.getHits());
+			List<Map<String, Object>> hitMap = read
+				.hitlistToMap(list);
+			if (request().accepts("text/html")) {
+			    return ok(search.render(json(hitMap), queryString,
+				    hits.getTotalHits(), from, until));
+			} else {
+			    return getJsonResult(hitMap);
+			}
+		    } catch (Exception e) {
+			return JsonMessage(new Message(e, 500));
+		    }
+
+		});
     }
 
     @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")

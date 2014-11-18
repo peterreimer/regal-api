@@ -7,12 +7,13 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 
-GET     /public/docs                controllers.Application.index()
-GET     /public/docs/               controllers.Application.index()
+GET     /public/docs                controllers.Application.docs()
+GET     /public/docs/               controllers.Application.docs()
 GET     /public/*file               controllers.Assets.at(path="/public", file)
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
+GET /find					        controllers.Resource.search(q?="",from: Int?=0,until: Int?=10)
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid)
 GET /resource/:pid/data				controllers.Resource.listData(pid)

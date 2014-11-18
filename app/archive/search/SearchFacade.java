@@ -146,6 +146,11 @@ public class SearchFacade {
 	return search.query(index, fieldName, fieldValue);
     }
 
+    public SearchHits query(String index, String queryString, int from,
+	    int until) {
+	return search.query(index, queryString, from, until);
+    }
+
     /**
      * @param index
      *            the index you want the settings for

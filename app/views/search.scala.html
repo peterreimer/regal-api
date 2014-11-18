@@ -1,0 +1,50 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@(js: String,q: String,totalNum: Long,from: Int, until: Int)
+
+@import play.api.libs.json._
+@import com.fasterxml.jackson.databind.JsonNode
+
+@pagination(allHits: Long,from: Int,until: Int)={
+<nav>
+	<ul class="pager">
+		<li class="previous @if(from==0){disabled}">
+			<a style="width:20%; text-align: center;" href="@if(from==0){#} else {@controllers.routes.Resource.search(q,from-10,until-10)}">
+			&larr;
+			</a>
+		</li>
+		<li class="disabled">
+			<a style="width:60%; text-align: center; white-space: nowrap;" href="#">
+			@from bis @if(until <= allHits){@until} else{@allHits} von @allHits
+			</a>
+		</li>
+		<li class="next @if(until >= allHits){disabled}">
+			<a style="width:20%; text-align: center;" href="@if(until >= allHits){#} else {@controllers.routes.Resource.search(q,from+10,until+10)}">
+			&rarr;
+			</a>
+		</li>
+	</ul>
+</nav>
+}
+
+@main("") {
+	<div class="row">
+		<div class="col-md-4"></div>
+		<div class="col-md-4">@pagination(totalNum,from,until)</div>
+		<div class="col-md-4"></div>
+	</div>
+	
+	@defining(Json.parse(js).asOpt[Seq[JsValue]].getOrElse(Seq())) { hits =>
+			@for( hit <- hits){
+	<h1><a href=/resource/@((hit \ "@id").asOpt[String].getOrElse(""))>@((hit \ "title").asOpt[Seq[String]].getOrElse("No title"))</a></h1>
+			@tags.resourceView(hit)
+			}
+		}
+
+	<div class="row">
+		<div class="col-md-4"></div>
+		<div class="col-md-4">@pagination(totalNum,from,until)</div>
+		<div class="col-md-4"></div>
+	</div>
+
+}

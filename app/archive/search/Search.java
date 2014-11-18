@@ -164,6 +164,14 @@ public class Search {
 	return response.getHits();
     }
 
+    SearchHits query(String index, String queryString, int from, int until) {
+	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	QueryBuilder query = QueryBuilders.queryString(queryString);
+	SearchResponse response = client.prepareSearch(index).setQuery(query)
+		.setFrom(from).setSize(until - from).execute().actionGet();
+	return response.getHits();
+    }
+
     Map<String, Object> getSettings(String index, String type) {
 	try {
 	    client.admin().indices().refresh(new RefreshRequest()).actionGet();
