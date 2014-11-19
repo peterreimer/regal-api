@@ -25,10 +25,13 @@ import play.Play;
 public class ApplicationProfile {
 
     /**
-     * The class analyses values linked by this certain rdf predicate
+     * prefLabel predicate will be analysed
      */
     public final static String prefLabel = "http://www.w3.org/2004/02/skos/core#prefLabel";
 
+    /**
+     * icon predicate will be analysed
+     */
     public final static String icon = "http://www.w3.org/1999/xhtml/vocab#icon";
 
     /**
@@ -102,9 +105,11 @@ public class ApplicationProfile {
 	pMap.put(key, e);
     }
 
+    /**
+     * @param key
+     * @return a icon string or null
+     */
     public String getIcon(String key) {
-	String result = null;
-	;
 	if (pMap.containsKey(key)) {
 	    MapEntry value = pMap.get(key);
 	    return value.icon;

@@ -1,4 +1,5 @@
 package converter.mab;
+
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -16,7 +17,6 @@ package converter.mab;
  *
  */
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,7 +33,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import converter.mab.MabConverter;
 import archive.fedora.XmlUtils;
 
 /**
@@ -63,7 +62,7 @@ public class MabConverterTest {
 	String str = os.toString();
 	System.out.println(str);
 	File output = File.createTempFile("mabconverterOut", "xml");
-	XmlUtils.stringToFile(output, str);
+	XmlUtils.newStringToFile(output, str);
 	File expected = File.createTempFile("mabconverter", "xml");
 	FileOutputStream out = new FileOutputStream(expected);
 	IOUtils.copy(getResourceAsStream(id + ".xml"), out);

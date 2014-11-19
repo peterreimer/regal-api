@@ -33,6 +33,9 @@ public class Application extends Controller {
 	return ok(views.html.index.render());
     }
 
+    /**
+     * @return the swagger docu
+     */
     public static Result docs() {
 	return redirect("/public/docs/index.html");
     }
