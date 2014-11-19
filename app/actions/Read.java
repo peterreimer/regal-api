@@ -20,7 +20,6 @@ import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
-import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.InputStream;
@@ -33,6 +32,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
+import models.Globals;
 import models.Node;
 import models.Urn;
 

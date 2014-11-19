@@ -17,10 +17,10 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.Globals;
 
 import java.util.List;
 
+import models.Globals;
 import models.Node;
 import models.RegalObject;
 import models.Transformer;

@@ -25,6 +25,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import models.Globals;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
@@ -32,6 +34,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import archive.fedora.MapEntry;
 
 /**
  * The OAISetBuilder creates OAISets from rdf statements
@@ -62,11 +66,14 @@ public class OaiSetBuilder {
 			object.length() - 1).toString();
 
 		if (Globals.profile.pMap.containsKey(object)) {
-		    name = Globals.profile.pMap.get(object);
+		    MapEntry e = Globals.profile.pMap.get(object);
+		    name = e.label;
 		    play.Logger.info("looked up ddc local name: " + name);
 		} else {
 		    name = ddcmap(ddc);
-		    Globals.profile.pMap.put(object, name);
+		    MapEntry e = new MapEntry();
+		    e.label = name;
+		    Globals.profile.pMap.put(object, e);
 		}
 		spec = "ddc:" + ddc;
 		pid = "oai:" + ddc;

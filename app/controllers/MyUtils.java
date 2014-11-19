@@ -16,8 +16,6 @@
  */
 package controllers;
 
-import helper.Globals;
-
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +25,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import models.Globals;
 import models.Message;
 import models.Transformer;
 

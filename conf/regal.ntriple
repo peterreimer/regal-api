@@ -90,21 +90,41 @@
 <info:hbz/hbz-ingest:def/model#publishScheme> <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Metadaten".
 <http://purl.org/dc/terms/bibliographicCitation> <http://www.w3.org/2004/02/skos/core#prefLabel> "Ver\u00F6ffentlichungs Details".
 <http://id.loc.gov/vocabulary/iso639-2/deu> <http://www.w3.org/2004/02/skos/core#prefLabel> "deutsch".
-<http://rdvocab.info/termList/RDACarrierType/1010>  <http://www.w3.org/2004/02/skos/core#prefLabel> "Datentr\u00E4ger".
 <http://rdvocab.info/termList/RDACarrierType/1018>  <http://www.w3.org/2004/02/skos/core#prefLabel> "Online-Ressource". 
 <http://purl.org/dc/terms/BibliographicResource> <http://www.w3.org/2004/02/skos/core#prefLabel> "Bibliografische Ressource" .
 <http://purl.org/lobid/lv#Legislation> <http://www.w3.org/2004/02/skos/core#prefLabel> "Amtsdruckschrift" .
 <http://purl.org/ontology/bibo/Collection> <http://www.w3.org/2004/02/skos/core#prefLabel> "Sammlung" .
+<http://purl.org/ontology/bibo/Collection> <http://www.w3.org/1999/xhtml/vocab#icon> "glyphicon glyphicon-th-large" .
 <http://purl.org/ontology/bibo/Newspaper> <http://www.w3.org/2004/02/skos/core#prefLabel> "Zeitung" .
+<http://purl.org/ontology/bibo/Newspaper> <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-book" .
 <http://purl.org/ontology/bibo/Periodical> <http://www.w3.org/2004/02/skos/core#prefLabel> "Periodikum" .
 <http://purl.org/vocab/frbr/core#Manifestation> <http://www.w3.org/2004/02/skos/core#prefLabel> "frbr:Manifestation" .
 <http://data.archiveshub.ac.uk/def/ArchivalResource> <http://www.w3.org/2004/02/skos/core#prefLabel> "Archivierte Online Resource" .
 <http://purl.org/ontology/bibo/Book> <http://www.w3.org/2004/02/skos/core#prefLabel> "Buch" .
+<http://purl.org/ontology/bibo/Book> <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-repo" .
 <http://purl.org/ontology/bibo/Thesis> <http://www.w3.org/2004/02/skos/core#prefLabel> "Abschlussarbeit" .
+<http://purl.org/ontology/bibo/Thesis> <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-mortar-board".
 <http://iflastandards.info/ns/isbd/elements/P1053> <http://www.w3.org/2004/02/skos/core#prefLabel> "Umfang" .
 <http://purl.org/lobid/lv#Miscellaneous> <http://www.w3.org/2004/02/skos/core#prefLabel> "Verschiedenes" .
 <http://purl.org/ontology/bibo/Journal> <http://www.w3.org/2004/02/skos/core#prefLabel> "Journal" .
+<http://purl.org/ontology/bibo/Journal> <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-book".
 <http://purl.org/ontology/bibo/issue> <http://www.w3.org/2004/02/skos/core#prefLabel> "Issue" .
 <http://purl.org/ontology/bibo/Map> <http://www.w3.org/2004/02/skos/core#prefLabel> "Karte" .
 <http://purl.org/lobid/lv#Bibliography> <http://www.w3.org/2004/02/skos/core#prefLabel> "Bibliografie" .
 <http://rdvocab.info/termList/RDAproductionMethod/1010>  <http://www.w3.org/2004/02/skos/core#prefLabel> "Druck" .
+<http://purl.org/lobid/lv#Miscellaneous> <http://www.w3.org/2004/02/skos/core#prefLabel> "Sonstige".
+<http://rdvocab.info/termList/RDACarrierType/1010> <http://www.w3.org/2004/02/skos/core#prefLabel> "Datentr\u00E4ger" .
+<http://rdvocab.info/termList/RDACarrierType/1010> <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-database" .
+<http://rdvocab.info/termList/RDACarrierType/1018> <http://www.w3.org/2004/02/skos/core#prefLabel> "Online".
+<http://rdvocab.info/termList/RDACarrierType/1020> <http://www.w3.org/2004/02/skos/core#prefLabel> "Mikroform".
+<http://purl.org/ontology/bibo/AudioDocument> <http://www.w3.org/2004/02/skos/core#prefLabel> "Audio".
+<http://purl.org/ontology/bibo/AudioVisualDocument> <http://www.w3.org/2004/02/skos/core#prefLabel> "Audio-Visuell".
+<http://rdvocab.info/termList/RDAMediaType/1005> <http://www.w3.org/2004/02/skos/core#prefLabel> "".
+<http://rdvocab.info/termList/RDACarrierType/1050> <http://www.w3.org/2004/02/skos/core#prefLabel> "Video".
+<http://iflastandards.info/ns/isbd/terms/mediatype/T1008> <http://www.w3.org/2004/02/skos/core#prefLabel> "Kombination".
+<http://purl.org/ontology/bibo/Image> <http://www.w3.org/2004/02/skos/core#prefLabel> "Bild" .
+<http://purl.org/library/BrailleBook> <http://www.w3.org/2004/02/skos/core#prefLabel> "Braille".
+<http://purl.org/ontology/mo/Vinyl> <http://www.w3.org/2004/02/skos/core#prefLabel> "Schallplatte".
+<http://purl.org/library/CassetteTape> <http://www.w3.org/2004/02/skos/core#prefLabel> "Tonband".
+<http://purl.org/ontology/bibo/Map> <http://www.w3.org/2004/02/skos/core#prefLabel> "Landkarte".
+<http://purl.org/ontology/bibo/Map> <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-globe" .

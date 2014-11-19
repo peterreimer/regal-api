@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-import helper.Globals;
 import play.Application;
+import play.Configuration;
 import play.GlobalSettings;
 import play.libs.F.Promise;
 import play.mvc.Action;
@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import models.Globals;
 
 /**
  * @author Jan Schnasse

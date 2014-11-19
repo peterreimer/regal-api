@@ -16,8 +16,6 @@
  */
 package archive.search;
 
-import helper.Globals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import models.Globals;
 import models.Node;
 
 import org.elasticsearch.action.ActionResponse;
@@ -44,7 +43,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
 import play.Play;
-
 import archive.fedora.CopyUtils;
 
 /**

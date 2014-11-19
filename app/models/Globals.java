@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package helper;
+package models;
 
 import play.Play;
 import archive.fedora.ApplicationProfile;

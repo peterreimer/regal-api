@@ -16,7 +16,7 @@
  */
 package actions;
 
-import helper.Globals;
+import models.Globals;
 import models.Node;
 import play.cache.Cache;
 

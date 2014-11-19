@@ -16,11 +16,10 @@
  */
 package actions;
 
-import helper.Globals;
-
 import java.util.List;
 
 import play.mvc.Results.Chunks;
+import models.Globals;
 import models.Node;
 
 /**

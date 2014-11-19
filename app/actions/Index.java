@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import play.mvc.Results.Chunks;
-import helper.Globals;
+import models.Globals;
 import models.Node;
 
 /**

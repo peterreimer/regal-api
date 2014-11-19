@@ -16,7 +16,6 @@
  */
 package actions;
 
-import helper.Globals;
 import helper.HttpArchiveException;
 import helper.OaiDcMapper;
 import helper.PdfText;
@@ -31,6 +30,7 @@ import java.net.URL;
 import java.util.List;
 
 import models.DublinCoreData;
+import models.Globals;
 import models.MabRecord;
 import models.Node;
 

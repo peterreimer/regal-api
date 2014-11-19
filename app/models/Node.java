@@ -18,7 +18,6 @@ package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
-import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -820,7 +819,6 @@ public class Node {
 		    metadata.getBytes(StandardCharsets.UTF_8));
 	    RdfResource rdf = RdfUtils.createRdfResource(stream,
 		    RDFFormat.NTRIPLES, pid);
-
 	    rdf = rdf.resolve();
 	    rdf.addLinks(getRelsExt());
 	    return Globals.profile.addLabels(rdf).getLinks();
@@ -889,8 +887,8 @@ public class Node {
     }
 
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
+
 	Map<String, Object> resolvedObject = null;
-	// play.Logger.debug(l.getObjectLabel());
 	if (l.getObjectLabel() != null) {
 	    String id = l.getObject();
 	    String value = l.getObjectLabel();

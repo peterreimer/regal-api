@@ -13,7 +13,7 @@ GET     /public/*file               controllers.Assets.at(path="/public", file)
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
-GET /find					        controllers.Resource.search(q?="",from: Int?=0,until: Int?=10)
+GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid)
 GET /resource/:pid/data				controllers.Resource.listData(pid)
@@ -87,4 +87,3 @@ POST /utils/lobidify/:pid 			controllers.MyUtils.lobidify(pid)
 POST /utils/addUrn 					controllers.MyUtils.addUrn(id,namespace,snid)
 POST /utils/replaceUrn 				controllers.MyUtils.replaceUrn(id,namespace, snid)
 POST /utils/initContentModels  		controllers.MyUtils.initContentModels(namespace)
-

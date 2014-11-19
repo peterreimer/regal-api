@@ -2,7 +2,6 @@ package archive.fedora;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,10 +29,12 @@ public class ApplicationProfile {
      */
     public final static String prefLabel = "http://www.w3.org/2004/02/skos/core#prefLabel";
 
+    public final static String icon = "http://www.w3.org/1999/xhtml/vocab#icon";
+
     /**
      * A map with URIs as key and lables as values
      */
-    public Map<String, String> pMap = new HashMap<String, String>();
+    public Map<String, MapEntry> pMap = new HashMap<String, MapEntry>();
 
     private final String defaultMap = "/tmp/regal-default.ntriple";
 
@@ -71,10 +72,44 @@ public class ApplicationProfile {
 	while (statements.hasNext()) {
 	    Statement st = statements.next();
 	    if (prefLabel.equals(st.getPredicate().stringValue())) {
-		pMap.put(st.getSubject().stringValue(), st.getObject()
-			.stringValue());
+		String key = st.getSubject().stringValue();
+		String labelStr = st.getObject().stringValue();
+		addLabel(key, labelStr);
+	    }
+	    if (icon.equals(st.getPredicate().stringValue())) {
+		String key = st.getSubject().stringValue();
+		String iconStr = st.getObject().stringValue();
+		addIcon(key, iconStr);
 	    }
 	}
+    }
+
+    void addLabel(String key, String labelStr) {
+	MapEntry e = new MapEntry();
+	if (pMap.containsKey(key)) {
+	    e = pMap.get(key);
+	}
+	e.label = labelStr;
+	pMap.put(key, e);
+    }
+
+    void addIcon(String key, String iconStr) {
+	MapEntry e = new MapEntry();
+	if (pMap.containsKey(key)) {
+	    e = pMap.get(key);
+	}
+	e.icon = iconStr;
+	pMap.put(key, e);
+    }
+
+    public String getIcon(String key) {
+	String result = null;
+	;
+	if (pMap.containsKey(key)) {
+	    MapEntry value = pMap.get(key);
+	    return value.icon;
+	}
+	return null;
     }
 
     /**
@@ -84,10 +119,18 @@ public class ApplicationProfile {
     public void saveMap() {
 	play.Logger.info("Write labels to map please hold on!!!");
 	String result = new String();
-	Set<Entry<String, String>> set = pMap.entrySet();
-	for (Entry<String, String> e : set) {
-	    result = RdfUtils.addTriple(e.getKey(), prefLabel, e.getValue(),
-		    true, result);
+	Set<Entry<String, MapEntry>> set = pMap.entrySet();
+	for (Entry<String, MapEntry> e : set) {
+	    String l = e.getValue().label;
+	    String i = e.getValue().icon;
+
+	    if (l != null) {
+		result = RdfUtils.addTriple(e.getKey(), prefLabel, l, true,
+			result);
+	    }
+	    if (i != null) {
+		result = RdfUtils.addTriple(e.getKey(), icon, i, true, result);
+	    }
 	}
 	XmlUtils.newStringToFile(new File(defaultMap), result);
     }
@@ -101,28 +144,34 @@ public class ApplicationProfile {
      * @return new RdfResource with labels for objects and predicates
      */
     public RdfResource addLabels(final RdfResource r) {
-	RdfResource result = new RdfResource(r.getUri());
-	for (Link l : r.getLinks()) {
+	try {
+	    play.Logger.debug(r.getLinks().toString());
+	    RdfResource result = new RdfResource(r.getUri());
+	    for (Link l : r.getLinks()) {
+		MapEntry entry = pMap.get(l.getPredicate());
 
-	    String label = pMap.get(l.getPredicate());
-	    if (label == null) {
+		if (entry == null || entry.label == null) {
 
-	    } else {
-		l.setPredicateLabel(label);
-	    }
-
-	    if (!l.isLiteral() && l.getObjectLabel() == null) {
-
-		label = pMap.get(l.getObject());
-		if (label == null) {
-		    l.setObjectLabel(l.getObject());
-		    play.Logger.debug("No label for " + l.getObject());
 		} else {
-		    l.setObjectLabel(label);
+		    l.setPredicateLabel(entry.label);
 		}
+
+		if (!l.isLiteral() && l.getObjectLabel() == null) {
+
+		    entry = pMap.get(l.getObject());
+		    if (entry == null || entry.label == null) {
+			l.setObjectLabel(l.getObject());
+			play.Logger.debug("No label for " + l.getObject());
+		    } else {
+			l.setObjectLabel(entry.label);
+		    }
+		}
+		result.addLink(l);
 	    }
-	    result.addLink(l);
+	    return result;
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    throw e;
 	}
-	return result;
     }
 }

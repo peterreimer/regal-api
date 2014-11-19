@@ -17,7 +17,6 @@
 package controllers;
 
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import helper.Globals;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -40,6 +39,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.DublinCoreData;
+import models.Globals;
 import models.MabRecord;
 import models.Message;
 import models.Node;
