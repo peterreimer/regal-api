@@ -466,8 +466,10 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteResources", value = "deleteResources", notes = "Deletes a set of resources", response = Message.class, httpMethod = "DELETE")
-    public static Promise<Result> deleteResources(String namespace,
-	    String type, String src, int from, int until) {
+    public static Promise<Result> deleteResources(
+	    @QueryParam("namespace") String namespace,
+	    @QueryParam("type") String type, @QueryParam("src") String src,
+	    @QueryParam("from") int from, @QueryParam("until") int until) {
 	return new BulkAction().call(() -> {
 	    Chunks<String> chunks = new StringChunks() {
 		public void onReady(Chunks.Out<String> out) {

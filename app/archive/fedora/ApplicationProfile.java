@@ -145,7 +145,6 @@ public class ApplicationProfile {
      */
     public RdfResource addLabels(final RdfResource r) {
 	try {
-	    play.Logger.debug(r.getLinks().toString());
 	    RdfResource result = new RdfResource(r.getUri());
 	    for (Link l : r.getLinks()) {
 		MapEntry entry = pMap.get(l.getPredicate());

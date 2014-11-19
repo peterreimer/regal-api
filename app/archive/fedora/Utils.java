@@ -83,8 +83,6 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -143,7 +141,6 @@ public class Utils {
 
     }
 
-    final static Logger logger = LoggerFactory.getLogger(Utils.class);
     ContentModelBuilder cmBuilder = new ContentModelBuilder();
     private String user = null;
 
@@ -202,8 +199,8 @@ public class Utils {
 			new AddRelationship(pid).predicate(link.getPredicate())
 				.object(link.getObject(), true).execute();
 		    } catch (Exception e2) {
-			// TODO WTF?
-			logger.debug("", e2);
+
+			play.Logger.debug("", e2);
 		    }
 
 		}
@@ -459,7 +456,7 @@ public class Utils {
 			    new java.net.URI(object);
 			    link.setLiteral(false);
 			} catch (URISyntaxException e) {
-			    logger.debug("", e);
+			    play.Logger.debug("", e);
 			}
 			node.addRelation(link);
 		    }
@@ -614,7 +611,7 @@ public class Utils {
 					curHBZLink.isLiteral()).execute();
 		    }
 		} catch (Exception e) {
-		    logger.debug("", e);
+		    play.Logger.debug("", e);
 		}
 	    }
     }
@@ -656,6 +653,10 @@ public class Utils {
 	link = new Link();
 	link.setObject(node.getCatalogId(), true);
 	link.setPredicate(REL_CATALOG_ID);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getParentPid(), true);
+	link.setPredicate(IS_PART_OF);
 	node.addRelation(link);
 
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());
@@ -816,7 +817,7 @@ public class Utils {
 	    Transformer t = readTransformer(link.getObject());
 	    node.addTransformer(t);
 	} catch (ContentModelException e) {
-	    logger.debug("", e);
+	    play.Logger.debug("", e);
 	}
 
     }
