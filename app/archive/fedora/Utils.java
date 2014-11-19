@@ -71,6 +71,7 @@ import models.Link;
 import models.Node;
 import models.Transformer;
 
+import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -442,22 +443,7 @@ public class Utils {
 			    node.setParentPid(link.getObject());
 			    continue;
 			}
-			String object = link.getObject();
-			try {
-			    if (object == null)
-				throw new URISyntaxException(" ", "Is a Null",
-					0);
-			    if (object.isEmpty())
-				throw new URISyntaxException(" ",
-					"Is an Empty String", 0);
-			    if (!object.contains(":") && !object.contains("/"))
-				throw new URISyntaxException(object,
-					"Contains no namespace and no Slash", 0);
-			    new java.net.URI(object);
-			    link.setLiteral(false);
-			} catch (URISyntaxException e) {
-			    play.Logger.debug("", e);
-			}
+			link.setLiteral(objUri instanceof Literal);
 			node.addRelation(link);
 		    }
 		} catch (Exception e) {
