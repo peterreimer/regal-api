@@ -30,7 +30,10 @@ public class Application extends Controller {
      * @return the swagger-doc site
      */
     public static Result index() {
-	return redirect("/public/docs/index.html");
+	return ok(views.html.index.render());
     }
 
+    public static Result docs() {
+	return redirect("/public/docs/index.html");
+    }
 }

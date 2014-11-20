@@ -16,8 +16,6 @@
  */
 package archive.search;
 
-import helper.Globals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import models.Globals;
 import models.Node;
 
 import org.elasticsearch.action.ActionResponse;
@@ -42,11 +41,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.Play;
-import actions.Transform;
 import archive.fedora.CopyUtils;
 
 /**
@@ -54,7 +50,6 @@ import archive.fedora.CopyUtils;
  * 
  */
 public class Search {
-    final static Logger logger = LoggerFactory.getLogger(Search.class);
 
     @SuppressWarnings("serial")
     class InvalidRangeException extends RuntimeException {
@@ -65,6 +60,10 @@ public class Search {
     class SearchException extends RuntimeException {
 	public SearchException(Throwable e) {
 	    super(e);
+	}
+
+	public SearchException(String msg, Throwable e) {
+	    super(msg, e);
 	}
     }
 
@@ -83,43 +82,43 @@ public class Search {
 			.setSource(indexConfig).execute().actionGet();
 	    }
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    logger.warn("", e);
+	    play.Logger.warn("", e);
 	} catch (Exception e) {
-	    logger.warn("", e);
+	    play.Logger.warn("", e);
 	}
     }
 
     void init(String[] index) {
-	try {
-	    String indexConfig = CopyUtils.copyToString(Play.application()
-		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
-	    for (String i : index) {
-		client.admin().indices().prepareCreate(i)
-			.setSource(indexConfig).execute().actionGet();
-	    }
-	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    logger.warn("", e);
-	} catch (Exception e) {
-	    logger.warn("", e);
+	for (String i : index) {
+	    play.Logger.info("Init elasticsearch index " + i);
+	    init(i);
 	}
     }
 
     void init(String index) {
 	try {
+	    play.Logger.debug("Configure " + index);
 	    String indexConfig = CopyUtils.copyToString(Play.application()
 		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
+
 	    client.admin().indices().prepareCreate(index)
 		    .setSource(indexConfig).execute().actionGet();
 	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    logger.warn("", e);
+	    play.Logger.debug("Index already exists!");
 	} catch (Exception e) {
-	    logger.warn("", e);
+	    play.Logger.warn("Problems when creating " + index + " :"
+		    + e.getMessage());
 	}
     }
 
     ActionResponse index(String index, String type, String id, String data) {
-	return client.prepareIndex(index, type, id).setSource(data).execute()
-		.actionGet();
+	try {
+	    return client.prepareIndex(index, type, id).setSource(data)
+		    .execute().actionGet();
+	} catch (Exception e) {
+	    throw new SearchException("Failed to index " + index + "," + type
+		    + "," + id, e);
+	}
     }
 
     SearchHits listResources(String index, String type, int from, int until) {
@@ -163,6 +162,14 @@ public class Search {
 	return response.getHits();
     }
 
+    SearchHits query(String index, String queryString, int from, int until) {
+	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	QueryBuilder query = QueryBuilders.queryString(queryString);
+	SearchResponse response = client.prepareSearch(index).setQuery(query)
+		.setFrom(from).setSize(until - from).execute().actionGet();
+	return response.getHits();
+    }
+
     Map<String, Object> getSettings(String index, String type) {
 	try {
 	    client.admin().indices().refresh(new RefreshRequest()).actionGet();
@@ -200,7 +207,6 @@ public class Search {
     public List<String> indexAll(List<Node> list, String index) {
 	init(index);
 	List<String> result = new ArrayList<String>();
-	Transform t = new Transform();
 	BulkRequestBuilder internalIndexBulk = client.prepareBulk();
 	BulkRequestBuilder publicIndexBulk = client.prepareBulk();
 
@@ -208,14 +214,15 @@ public class Search {
 	    try {
 		StringBuffer msg = new StringBuffer("Index " + node.getPid()
 			+ " to ");
-		internalIndexBulk.add(client.prepareIndex(index,
-			node.getContentType(), node.getPid()).setSource(
-			t.oaiore(node, "application/json+compact")));
+		String source = node.toString();
+		internalIndexBulk
+			.add(client.prepareIndex(index, node.getContentType(),
+				node.getPid()).setSource(source));
 		msg.append(index);
 		if ("public".equals(node.getPublishScheme())) {
 		    publicIndexBulk.add(client.prepareIndex("public_" + index,
 			    node.getContentType(), node.getPid()).setSource(
-			    t.oaiore(node, "application/json+compact")));
+			    source));
 		    msg.append(" and public_" + index);
 		}
 		msg.append("\n");

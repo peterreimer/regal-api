@@ -19,20 +19,20 @@ package actions;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.Globals;
+import static archive.fedora.FedoraVocabulary.HAS_PART;
 import helper.HttpArchiveException;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
+import models.Globals;
 import models.Node;
 import models.Urn;
 
@@ -44,14 +44,12 @@ import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * 
  * @author Jan Schnasse
  *
  */
-public class Read {
+public class Read extends RegalAction {
 
     /**
      * @param pid
@@ -65,7 +63,22 @@ public class Read {
 	n.setDataUri(n.getAggregationUri() + "/data");
 	n.setContextDocumentUri("http://" + Globals.server
 		+ "/public/edoweb-resources.json");
+	writeNodeToCache(n);
 	return n;
+    }
+
+    /**
+     * @param pid
+     *            the will be read to the node
+     * @return a Node containing the data from the repository
+     */
+    public Node readCachedNode(String pid) {
+	Node c = readNodeFromCache(pid);
+	if (c == null) {
+	    updateIndexAndCache(readNode(pid));
+	    return readNodeFromCache(pid);
+	}
+	return c;
     }
 
     /**
@@ -78,27 +91,17 @@ public class Read {
     }
 
     /**
-     * @param list
-     *            a list of nodes to create a json like map for
-     * @return a map with objects
+     * @param node
+     * @return all parts and their parts recursively
      */
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> nodelistToMap(List<Node> list) {
-	try {
-
-	    List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
-	    for (Node node : list) {
-		Map<String, Object> m = new ObjectMapper().readValue(
-			new Transform()
-				.oaiore(node, "application/json+compact"),
-			HashMap.class);
-		m.put("primaryTopic", node.getPid());
-		map.add(m);
-	    }
-	    return map;
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
+    public List<Node> getParts(Node node) {
+	List<Node> result = new ArrayList<Node>();
+	result.add(node);
+	List<Node> parts = getNodesFromCache(node.getRelatives(HAS_PART));
+	for (Node p : parts) {
+	    result.addAll(getParts(p));
 	}
+	return result;
     }
 
     /**
@@ -174,6 +177,22 @@ public class Read {
 	return ids.stream().map((String id) -> {
 	    try {
 		return readNode(id);
+	    } catch (Exception e) {
+		Logger.warn("", e);
+		return null;
+	    }
+	}).filter(n -> n != null).collect(Collectors.toList());
+    }
+
+    /**
+     * @param ids
+     *            a list of ids to get objects for
+     * @return a list of nodes
+     */
+    public List<Node> getNodesFromCache(List<String> ids) {
+	return ids.stream().map((String id) -> {
+	    try {
+		return readCachedNode(id);
 	    } catch (Exception e) {
 		Logger.warn("", e);
 		return null;
@@ -332,10 +351,9 @@ public class Read {
      * @return a urn object that describes the status of the urn
      */
     public Urn getUrnStatus(Node node) {
-
 	String urn = getUrn(node);
 	Urn result = new Urn(urn);
-	result.init(getHttpUriOfResource(node));
+	result.init(Globals.urnbase + node.getPid());
 	return result;
     }
 
@@ -364,21 +382,6 @@ public class Read {
 	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
 		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
 	return linkedObjects;
-    }
-
-    private String createAggregationUri(String pid) {
-	return Globals.useHttpUris ? "http://" + Globals.server + "/resource/"
-		+ pid : pid;
-    }
-
-    /**
-     * @param node
-     *            the node
-     * @return the http address of the resource
-     */
-    public String getHttpUriOfResource(Node node) {
-	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
-		+ Globals.server + "/resource/" + node.getAggregationUri();
     }
 
 }

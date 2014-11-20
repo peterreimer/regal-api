@@ -16,18 +16,17 @@
  */
 package actions;
 
-import helper.Globals;
-
 import java.util.List;
 
 import play.mvc.Results.Chunks;
+import models.Globals;
 import models.Node;
 
 /**
  * @author Jan Schnasse
  *
  */
-public class Delete {
+public class Delete extends RegalAction {
 
     Chunks.Out<String> messageOut;
 
@@ -89,6 +88,8 @@ public class Delete {
 	    msg.append("\n" + m);
 	} catch (Exception e) {
 	    msg.append("\n" + e);
+	} finally {
+	    removeFromCache(n);
 	}
 	return msg.toString();
     }
@@ -100,7 +101,7 @@ public class Delete {
      */
     public String deleteSeq(String pid) {
 	Globals.fedora.deleteDatastream(pid, "seq");
-	new Index().index(new Read().readNode(pid));
+	updateIndexAndCache(new Read().readNode(pid));
 	return pid + ": seq - datastream successfully deleted! ";
     }
 
@@ -110,9 +111,8 @@ public class Delete {
      * @return a message
      */
     public String deleteMetadata(String pid) {
-
 	Globals.fedora.deleteDatastream(pid, "metadata");
-	new Index().index(new Read().readNode(pid));
+	updateIndexAndCache(new Read().readNode(pid));
 	return pid + ": metadata - datastream successfully deleted! ";
     }
 
@@ -123,7 +123,7 @@ public class Delete {
      */
     public String deleteData(String pid) {
 	Globals.fedora.deleteDatastream(pid, "data");
-	new Index().index(new Read().readNode(pid));
+	updateIndexAndCache(new Read().readNode(pid));
 	return pid + ": data - datastream successfully deleted! ";
     }
 

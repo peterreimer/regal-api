@@ -118,6 +118,7 @@ public class SearchFacade {
 
     /**
      * Deletes a certain item
+     * 
      * @param id
      *            the item's id
      * @param index
@@ -143,6 +144,11 @@ public class SearchFacade {
      */
     public SearchHits query(String index, String fieldName, String fieldValue) {
 	return search.query(index, fieldName, fieldValue);
+    }
+
+    public SearchHits query(String index, String queryString, int from,
+	    int until) {
+	return search.query(index, queryString, from, until);
     }
 
     /**

@@ -1,92 +1,15 @@
-@* resource Template File *@
-@(node:String,url:String)
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+@(js: String)
 
 @import play.api.libs.json._
+@import com.fasterxml.jackson.databind.JsonNode
 
 
-@table(cl:String)(content:Html) = {
-<table class="@cl table table-striped">
-<tbody>
-@content
-</tbody>
-</table>
-}
-
-@row(cl:String,id:String)(content:Html) = {
-<tr class="@cl" id="@id">@content</tr>
-}
-
-@column(cl:String, id:String)(content:Html) = {
-<td class="@cl" id="@id">@content</td>
-}
-
-@resourceProperty(k:String,v:JsValue,js:JsValue)() ={
-	@resourceField((v \ "label").as[String],(v \ "uri").as[String]){
-		@for(i <- (js \ "ld" \ k).as[JsArray].value){
-			<li><a href="">@((i \ "label").as[String])</a></li>
+@main("") {
+	@defining(Json.parse(js).asOpt[Seq[JsValue]].getOrElse(Seq())) { hits =>
+		@for( hit <- hits){
+<h1><a href=/resource/@((hit \ "@id").asOpt[String].getOrElse(""))>@((hit \ "title").asOpt[Seq[String]].getOrElse("No title"))</a></h1>
+		@tags.resourceView(hit)
 		}
 	}
-}
-
-@resourceField(k:String,predUri:String)(content:Html) ={
-	@row("resourceRow",k){
-		@column("key", k+"Key"){<a href="@predUri">@k</a>}
-		@column("value",k+"Value"){<ul>@content</ul>}
-	}
-}
-
-	@defining(Json.parse(node)){js=>
-		<div class="shortTitle">
-			<h1><a href="@url">@((((js \ "ld" \ "title")(0)) \ "label").asOpt[String].getOrElse("Kein Titel Gefunden"))</a></h1>
-			<div id="otherTitleInformation">
-			@((((js \ "ld" \ "otherTitleInformation")(0)) \ "label").asOpt[String])
-			</div>
-			<div id="creator">
-			@((((js \ "ld" \ "creator")(0)) \ "label").asOpt[String])
-			</div>
-			<div id="contributor">
-			@((((js \ "ld" \ "contributor")(0)) \ "label").asOpt[String])
-			</div>
-			<div id="issued">
-			@((((js \ "ld" \ "issued")(0)) \ "label").asOpt[String].getOrElse("Datum unbekannt"))
-			</div>
-			<div id="urn">
-			@((((js \ "ld" \ "urn")(0)) \ "label").asOpt[String].getOrElse("Urn unbekannt"))
-			</div>
-@*			<div id="aggregationUri">
-			@((js \ "aggregationUri").asOpt[String])
-			</div>
-			<div id="lastModified">
-			@((js \ "lastModified").asOpt[String])
-			</div>*@
-		</div>
-		<div class="longTitle">
-		@table("resource"){
-			@if(( js \ "context").asOpt[JsObject] != None){
-				@for((k,v) <- (js \ "context").as[JsObject].fieldSet ){		
-					@resourceProperty(k,v,js)
-				}
-			}
-			@resourceField("ID",""){
-				<li>@((js \ "pid").as[String])</li>
-			}
-			@resourceField("Bearbeitet am",""){
-				<li>@((js \ "lastModified").asOpt[String])</li>
-			}
-			@resourceField("Erstellt am",""){
-				<li>@((js \ "creationDate").asOpt[String])</li>
-			}
-			@resourceField("Uri",""){
-				<li>@((js \ "aggregationUri").asOpt[String])</li>
-			}
-			@resourceField("Sichtbarkeit",""){
-				<li>@((js \ "accessScheme").asOpt[String])</li>
-			}
-			@resourceField("Transformer",""){
-				@for(i <- (js \ "transformer" ).asOpt[JsArray]){
-					<li>@((i \ "id").asOpt[String].getOrElse("-"))</li>
-				}
-			}
-			</div>
-		}
 }

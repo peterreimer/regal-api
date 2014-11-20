@@ -1,30 +1,132 @@
 {
-  "@graph" : [ {
-    "@id" : "edoweb:3273325-2007",
-    "contentType" : "volume",
-    "hasTransformer" : [ "oaidc", "epicur" ],
-    "hasPart" : [ "edoweb:3273331", "edoweb:3273334", "edoweb:3273418", "edoweb:3273421", "edoweb:3273424", "edoweb:3273339", "edoweb:3273342", "edoweb:3273345", "edoweb:3273348", "edoweb:3273351", "edoweb:3273356", "edoweb:3273359", "edoweb:3273362", "edoweb:3273365", "edoweb:3273368", "edoweb:3273376", "edoweb:3273379", "edoweb:3273382", "edoweb:3273385", "edoweb:3273401", "edoweb:3273404", "edoweb:3273407", "edoweb:3273410", "edoweb:3273413", "edoweb:3273373", "edoweb:3273390", "edoweb:3273393", "edoweb:3273396" ],
-    "isPartOf" : "edoweb:3273325",
-    "title" : "2007",
-    "urn" : "urn:nbn:de:hbz:929:02-edoweb:3273325-20071",
-    "volume" : "2007",
-    "aggregates" : [ "edoweb:3273331", "edoweb:3273334", "edoweb:3273418", "edoweb:3273421", "edoweb:3273424", "edoweb:3273339", "edoweb:3273342", "edoweb:3273345", "edoweb:3273348", "edoweb:3273351", "edoweb:3273356", "edoweb:3273359", "edoweb:3273362", "edoweb:3273365", "edoweb:3273368", "edoweb:3273376", "edoweb:3273379", "edoweb:3273382", "edoweb:3273385", "edoweb:3273401", "edoweb:3273404", "edoweb:3273407", "edoweb:3273410", "edoweb:3273413", "edoweb:3273373", "edoweb:3273390", "edoweb:3273393", "edoweb:3273396" ],
-    "isAggregatedBy" : {
-      "@id" : "edoweb:3273325"
+
+    "hasPart": [
+        "edoweb:3273325-0-1",
+        "edoweb:3273325-0-2",
+        "edoweb:3273325-0-3",
+        "edoweb:3273325-0-4",
+        "edoweb:3273325-0-5",
+        "edoweb:3273325-0-6",
+        "edoweb:3273325-0-7",
+        "edoweb:3273325-0-8",
+        "edoweb:3273325-0-9",
+        "edoweb:3273325-0-10",
+        "edoweb:3273325-0-11",
+        "edoweb:3273325-0-12",
+        "edoweb:3273325-0-13",
+        "edoweb:3273325-0-14",
+        "edoweb:3273325-0-15",
+        "edoweb:3273325-0-16",
+        "edoweb:3273325-0-17",
+        "edoweb:3273325-0-18",
+        "edoweb:3273325-0-19",
+        "edoweb:3273325-0-20",
+        "edoweb:3273325-0-21",
+        "edoweb:3273325-0-22",
+        "edoweb:3273325-0-23",
+        "edoweb:3273325-0-24",
+        "edoweb:3273325-0-25",
+        "edoweb:3273325-0-26",
+        "edoweb:3273325-0-27",
+        "edoweb:3273325-0-0"
+    ],
+    "publishScheme": "public",
+    "accessScheme": "public",
+    "transformer": [
+        {
+            "id": "oaidc",
+            "contentModelPID": "CM:oaidc",
+            "serviceDefinitionPID": "CM:oaidcServiceDefinition",
+            "serviceDeploymentPID": "CM:oaidcServiceDeployment"
+        },
+        {
+            "id": "epicur",
+            "contentModelPID": "CM:epicur",
+            "serviceDefinitionPID": "CM:epicurServiceDefinition",
+            "serviceDeploymentPID": "CM:epicurServiceDeployment"
+        }
+    ],
+    "title": [
+        "2007"
+    ],
+    "isPartOf": [
+        "edoweb:3273325"
+    ],
+    "creationDate": "2014-10-13T10:52:37.992+0000",
+    "@context": {
+        "hasPart": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/hasPart",
+            "label": "Kindobjekt"
+        },
+        "publishScheme": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#publishScheme",
+            "label": "Sichtbarkeit Metadaten"
+        },
+        "accessScheme": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#accessScheme",
+            "label": "Sichtbarkeit Daten"
+        },
+        "label": "http://www.w3.org/2000/01/rdf-schema#label",
+        "title": {
+            "@id": "http://purl.org/dc/terms/title",
+            "label": "Titel"
+        },
+        "isPartOf": "http://purl.org/dc/terms/isPartOf",
+        "nodeType": "info:hbz/hbz-ingest:def/model#isNodeType",
+        "creationDate": "http://purl.org/dc/terms/created",
+        "isNodeType": {
+            "@type": "@id",
+            "@id": "info:hbz/hbz-ingest:def/model#isNodeType",
+            "label": "Fedora Typ"
+        },
+        "volume": {
+            "@id": "http://purl.org/ontology/bibo/volume",
+            "label": "Band"
+        },
+        "urn": {
+            "@id": "http://purl.org/lobid/lv#urn",
+            "label": "Urn"
+        },
+        "itemID": {
+            "@type": "@id",
+            "@id": "http://www.openarchives.org/OAI/2.0/itemID",
+            "label": "Oai Id"
+        },
+        "primaryTopic": {
+            "@type": "@id",
+            "@id": "http://xmlns.com/foaf/0.1/primaryTopic",
+            "label": "Vgl."
+        },
+        "isMemberOf": {
+            "@type": "@id",
+            "@id": "info:fedora/fedora-system:def/relations-external#isMemberOf",
+            "label": "Oai Set"
+        },
+        "lastModified": "http://purl.org/dc/terms/modified",
+        "contentType": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#contentType",
+            "label": "Regaltyp"
+        }
     },
-    "isDescribedBy" : "edoweb:3273325-2007.rdf",
-    "similarTo" : "http://api.localhost/fedora/objects/edoweb:3273325-2007"
-  }, {
-    "@id" : "edoweb:3273325-2007.rdf",
-    "created" : {
-      "@type" : "xsd:dateTime",
-      "@value" : "2014-05-02T11:25:23.373+02:00"
-    },
-    "modified" : {
-      "@type" : "xsd:dateTime",
-      "@value" : "2014-05-02T11:26:28.384+02:00"
-    },
-    "describes" : "edoweb:3273325-2007"
-  } ],
-  "@context" : "http://api.localhost/edoweb-resources.json"
+    "volume": [
+        "2007"
+    ],
+    "urn": [
+        "urn:nbn:de:hbz:929:02-edoweb:3273325-02"
+    ],
+    "itemID": [
+        "localhost:9000/resource/edoweb:3273325-0"
+    ],
+    "primaryTopic": "edoweb:3273325-0",
+    "isMemberOf": [
+        "info:fedora/oai:open_access"
+    ],
+    "@id": "edoweb:3273325-0",
+    "lastModified": "2014-10-17T07:14:08.012+0000",
+    "contentType": "volume"
+
 }

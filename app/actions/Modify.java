@@ -18,7 +18,6 @@ package actions;
 
 import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
 import static archive.fedora.FedoraVocabulary.ITEM_ID;
-import helper.Globals;
 import helper.HttpArchiveException;
 import helper.OaiSet;
 import helper.OaiSetBuilder;
@@ -34,17 +33,18 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import models.DublinCoreData;
+import models.Globals;
+import models.Link;
+import models.Node;
+import models.Pair;
+import models.Transformer;
+
 import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import models.DublinCoreData;
-import models.Pair;
-import models.Link;
-import models.Node;
-import models.Transformer;
+import play.mvc.Results.Chunks;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -53,9 +53,8 @@ import archive.fedora.RdfUtils;
  * @author Jan Schnasse
  *
  */
-public class Modify {
-
-    final static Logger logger = LoggerFactory.getLogger(Modify.class);
+public class Modify extends RegalAction {
+    Chunks.Out<String> messageOut;
 
     /**
      * @param pid
@@ -101,6 +100,7 @@ public class Modify {
 			+ md5Hash);
 	    }
 	}
+	updateIndexAndCache(node);
 	return pid + " data successfully updated!";
     }
 
@@ -115,7 +115,7 @@ public class Modify {
 	Node node = new Read().readNode(pid);
 	node.setDublinCoreData(dc);
 	Globals.fedora.updateNode(node);
-	new Index().index(node);
+	updateIndexAndCache(node);
 	return pid + " dc successfully updated!";
     }
 
@@ -143,7 +143,7 @@ public class Modify {
 		node.setSeqFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    new Index().index(node);
+	    updateIndexAndCache(node);
 	    return pid + " sequence of child objects updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
@@ -174,7 +174,7 @@ public class Modify {
 		node.setMetadataFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    new Index().index(node);
+	    updateIndexAndCache(new Read().readNode(pid));
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400);
@@ -191,7 +191,7 @@ public class Modify {
     public String updateMetadata(Node node) {
 	Globals.fedora.updateNode(node);
 	String pid = node.getPid();
-	new Index().index(node);
+	updateIndexAndCache(node);
 	return pid + " metadata successfully updated!";
     }
 
@@ -208,7 +208,7 @@ public class Modify {
 	    node.addRelation(link);
 	}
 	Globals.fedora.updateNode(node);
-	new Index().index(node);
+	updateIndexAndCache(node);
 	return pid + " " + links + " links successfully added.";
     }
 
@@ -278,7 +278,7 @@ public class Modify {
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = new Read().readMetadata(subject);
-	if (RdfUtils.hasTriple(subject, hasUrn, metadata))
+	if (metadata != null && RdfUtils.hasTriple(subject, hasUrn, metadata))
 	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
@@ -302,7 +302,7 @@ public class Modify {
     public String lobidify(String pid) {
 	Node node = new Read().readNode(pid);
 	node = lobidify(node);
-	new Index().index(node);
+	updateIndexAndCache(node);
 	return updateMetadata(node);
     }
 
@@ -348,12 +348,14 @@ public class Modify {
 	    if (node.hasLinkToCatalogId()) {
 		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
+		addSet(node, "edo01");
 	    }
-
+	    updateIndexAndCache(node);
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);
 	}
+
     }
 
     private void addSet(Node node, String name) {
@@ -465,11 +467,70 @@ public class Modify {
 
     }
 
+    /**
+     * @param namespace
+     *            all objects in the namespace will be modified
+     */
+    public void reinitOaisets(String namespace) {
+	try {
+	    Read read = new Read();
+	    int until = 0;
+	    int stepSize = 100;
+	    int from = 0 - stepSize;
+	    List<String> nodes = read.listRepoNamespace(namespace);
+	    messageOut.write(nodes.toString());
+	    messageOut.write("size: " + nodes.size());
+	    do {
+		until += stepSize;
+		from += stepSize;
+		if (nodes.isEmpty())
+		    break;
+		if (until > nodes.size())
+		    until = nodes.size();
+		messageOut.write(reinitOaiSets(read.getNodes(nodes.subList(
+			from, until))));
+	    } while (until < nodes.size());
+	    messageOut.write("Attempted to index: " + nodes.size());
+	    messageOut.write("\nSuccessfuly Finished\n");
+	} finally {
+	    messageOut.close();
+	}
+    }
+
+    private String reinitOaiSets(List<Node> nodes) {
+	StringBuffer str = new StringBuffer();
+	for (Node n : nodes) {
+	    try {
+		str.append("\n" + makeOAISet(n));
+	    } catch (MetadataNotFoundException e) {
+		str.append("\nProblems with " + n.getPid() + "\n"
+			+ e.getMessage());
+	    }
+	}
+	return str.toString();
+    }
+
+    /**
+     * @param out
+     *            messages for chunked responses
+     */
+    public void setMessageQueue(Chunks.Out<String> out) {
+	messageOut = out;
+    }
+
+    /**
+     * Close messageQueue for chunked responses
+     * 
+     */
+    public void closeMessageQueue() {
+	if (messageOut != null)
+	    messageOut.close();
+    }
+
     @SuppressWarnings({ "serial", "javadoc" })
     public class MetadataNotFoundException extends RuntimeException {
 	public MetadataNotFoundException(Throwable e) {
 	    super(e);
 	}
     }
-
 }

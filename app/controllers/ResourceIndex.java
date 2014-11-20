@@ -30,7 +30,7 @@ public class ResourceIndex extends MyController {
 	    public Result exec(Node nodes) {
 		try {
 		    List<String> is = Arrays.asList(ids.split(","));
-		    return json(read.getNodesFromIndex(is));
+		    return getJsonResult(read.getNodesFromIndex(is));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -67,7 +67,7 @@ public class ResourceIndex extends MyController {
 	try {
 	    List<Map<String, Object>> hits = read.hitlistToMap(read.listSearch(
 		    contentType, namespace, from, until));
-	    return json(hits);
+	    return getJsonResult(hits);
 	} catch (HttpArchiveException e) {
 	    return JsonMessage(new Message(e, e.getCode()));
 	} catch (Exception e) {
@@ -95,7 +95,7 @@ public class ResourceIndex extends MyController {
 	ReadMetadataAction action = new ReadMetadataAction();
 	return action.call(pid, new NodeAction() {
 	    public Result exec(Node node) {
-		return json(read.readNodeFromIndex(pid));
+		return getJsonResult(read.readNodeFromIndex(pid));
 	    }
 	});
     }
@@ -107,11 +107,11 @@ public class ResourceIndex extends MyController {
 	    public Result exec(Node node) {
 		List<String> nodeIds = node.getPartsSorted();
 		if ("short".equals(style)) {
-		    return json(nodeIds);
+		    return getJsonResult(nodeIds);
 		}
 		List<Map<String, Object>> result = read
 			.getNodesFromIndex(nodeIds);
-		return json(result);
+		return getJsonResult(result);
 	    }
 	});
     }
@@ -125,11 +125,11 @@ public class ResourceIndex extends MyController {
 		List<String> nodeIds = read.readNode(pid).getRelatives(
 			IS_PART_OF);
 		if ("short".equals(style)) {
-		    return json(nodeIds);
+		    return getJsonResult(nodeIds);
 		}
 		List<Map<String, Object>> result = read
 			.getNodesFromIndex(nodeIds);
-		return json(result);
+		return getJsonResult(result);
 	    }
 	});
     }

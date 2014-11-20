@@ -17,91 +17,125 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.Globals;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import models.Globals;
 import models.Node;
+import models.RegalObject;
 import models.Transformer;
 
 /**
  * @author Jan Schnasse
  *
  */
-public class Create {
-
-    final static Logger logger = LoggerFactory.getLogger(Create.class);
+public class Create extends RegalAction {
 
     /**
-     * @param type
-     *            the type of the new resource
-     * @param parent
-     *            the parent of a new rsource
-     * @param transformers
-     *            transformers connected to the resource
-     * @param accessScheme
-     *            a string that signals who is allowed to access this node's
-     *            data
-     * @param publishScheme
-     *            a string that signals who is allowed to access this node's
-     *            metadata
-     * @param input
-     *            the input defines the contenttype and a optional parent
-     * @param rawPid
-     *            the pid without namespace
-     * @param namespace
-     *            the namespace
-     * @return the Node representing the resource
+     * @param node
+     * @param object
+     * @return the updated node
      */
-    public Node createResource(String type, String parent,
-	    List<String> transformers, String accessScheme,
-	    String publishScheme, String rawPid, String namespace) {
-	logger.debug("create " + type);
-	Node node = createNodeIfNotExists(type, parent, accessScheme,
-		publishScheme, rawPid, namespace);
-	new Index().remove(node.getPid(), namespace, node.getContentType());
-	node.setAccessScheme(accessScheme);
-	node.setPublishScheme(publishScheme);
-	setNodeType(type, node);
-	linkWithParent(parent, node);
-	updateTransformer(transformers, node);
+    public Node updateResource(Node node, RegalObject object) {
+	new Index().remove(node.getPid(), node.getNamespace(),
+		node.getContentType());
+	overrideNodeMembers(node, object);
 	Globals.fedora.updateNode(node);
-	new Index().index(node);
+	updateIndexAndCache(node);
 	return node;
     }
 
-    private Node createNodeIfNotExists(String type, String parent,
-	    String accessScheme, String publishScheme, String rawPid,
-	    String namespace) {
-	String pid = namespace + ":" + rawPid;
-	Node node = null;
-	if (Globals.fedora.nodeExists(pid)) {
-	    node = new Read().readNode(pid);
-	} else {
-	    node = new Node();
-	    node.setNamespace(namespace).setPID(pid);
-	    node.setContentType(type);
-	    node.setAccessScheme(accessScheme);
-	    node.setPublishScheme(publishScheme);
-	    Globals.fedora.createNode(node);
-	}
+    /**
+     * @param node
+     * @param object
+     * @return the updated node
+     */
+    public Node patchResource(Node node, RegalObject object) {
+	new Index().remove(node.getPid(), node.getNamespace(),
+		node.getContentType());
+	setNodeMembers(node, object);
+	Globals.fedora.updateNode(node);
+	updateIndexAndCache(node);
 	return node;
+    }
+
+    /**
+     * @param namespace
+     * @param object
+     * @return the updated node
+     */
+    public Node createResource(String namespace, RegalObject object) {
+	String pid = pid(namespace);
+	return createResource(pid.split(":")[1], namespace, object);
+    }
+
+    /**
+     * @param id
+     * @param namespace
+     * @param object
+     * @return the updated node
+     */
+    public Node createResource(String id, String namespace, RegalObject object) {
+	Node node = initNode(id, namespace, object);
+	updateResource(node, object);
+	return node;
+    }
+
+    private Node initNode(String id, String namespace, RegalObject object) {
+	Node node = new Node();
+	node.setNamespace(namespace).setPID(namespace + ":" + id);
+	node.setContentType(object.getContentType());
+	node.setAccessScheme(object.getAccessScheme());
+	node.setPublishScheme(object.getPublishScheme());
+	node.setAggregationUri(createAggregationUri(node.getPid()));
+	node.setRemUri(node.getAggregationUri() + ".rdf");
+	node.setDataUri(node.getAggregationUri() + "/data");
+	node.setContextDocumentUri("http://" + Globals.server
+		+ "/public/edoweb-resources.json");
+	Globals.fedora.createNode(node);
+	return node;
+    }
+
+    private void setNodeMembers(Node node, RegalObject object) {
+	if (object.getContentType() != null)
+	    setNodeType(object.getContentType(), node);
+	if (object.getParentPid() != null)
+	    linkWithParent(object.getParentPid(), node);
+	if (object.getTransformer() != null)
+	    updateTransformer(object.getTransformer(), node);
+	if (object.getAccessScheme() != null)
+	    node.setAccessScheme(object.getAccessScheme());
+	if (object.getPublishScheme() != null)
+	    node.setPublishScheme(object.getPublishScheme());
+	if (object.getIsDescribedBy().getCreatedBy() != null)
+	    node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+	if (object.getIsDescribedBy().getImportedFrom() != null)
+	    node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
+	if (object.getIsDescribedBy().getLegacyId() != null)
+	    node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+    }
+
+    private void overrideNodeMembers(Node node, RegalObject object) {
+	setNodeType(object.getContentType(), node);
+	linkWithParent(object.getParentPid(), node);
+	updateTransformer(object.getTransformer(), node);
+	node.setAccessScheme(object.getAccessScheme());
+	node.setPublishScheme(object.getPublishScheme());
+	node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+	node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
+	node.setLegacyId(object.getIsDescribedBy().getLegacyId());
     }
 
     private void setNodeType(String type, Node node) {
 	node.setType(TYPE_OBJECT);
 	node.setContentType(type);
-	new Index().index(node);
     }
 
     private void linkWithParent(String parentPid, Node node) {
 	Globals.fedora.unlinkParent(node);
 	Globals.fedora.linkToParent(node, parentPid);
 	Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	new Index().index(node);
+	updateIndexAndCache(node);
     }
 
     private void updateTransformer(List<String> transformers, Node node) {

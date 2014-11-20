@@ -1,31 +1,50 @@
-@(hits: List[org.elasticsearch.search.SearchHit], servername: String)
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@import org.elasticsearch.search.SearchHit
+@(js: String,q: String,totalNum: Long,from: Int, until: Int)
+
 @import play.api.libs.json._
+@import com.fasterxml.jackson.databind.JsonNode
 
-@main("Search") {
-
-     <form role="form" action="" method="get" class="form-inline" accept-charset="UTF-8">
-     <div class="form-group">
- 		<input title="Enter your search term here. You may use quotes to search for phrases as in &quot;The quick brown fox&quot;, and also boolean operators as in This AND that OR those." 
- 			placeholder="Bitte Suchbegriff eingeben"
- 			class="edoweb_live_search form-text" 
- 			type="text" 
- 			id="edit-query-0-term" 
- 			name="" 
- 			value="" 
- 			size="60" 
- 			maxlength="128" />
-		<input type="submit" id="edit-query-0-submit" name="" value="Search" class="form-submit" />
-		</div>
-	</form>
-
-	<ol class="resourceList">
-	@for(hit <- hits) {
-	@* <li>@resource("http://edoweb-admin:nopassword@"+servername+"/resource",hit.id(), hit)</li>*@
-	 
-	 <li><div class="resource">@resource(hit.sourceAsString(),servername+hit.id())</div></li>
-	 
-	} 
+@pagination(allHits: Long,from: Int,until: Int)={
+<nav>
+	<ul class="pager">
+		<li class="previous @if(from==0){disabled}">
+			<a style="width:20%; text-align: center;" href="@if(from==0){#} else {@controllers.routes.Resource.search(q,from-10,until-10)}">
+			&larr;
+			</a>
+		</li>
+		<li class="disabled">
+			<a style="width:60%; text-align: center; white-space: nowrap;" href="#">
+			@from bis @if(until <= allHits){@until} else{@allHits} von @allHits
+			</a>
+		</li>
+		<li class="next @if(until >= allHits){disabled}">
+			<a style="width:20%; text-align: center;" href="@if(until >= allHits){#} else {@controllers.routes.Resource.search(q,from+10,until+10)}">
+			&rarr;
+			</a>
+		</li>
 	</ul>
+</nav>
+}
+
+@main("") {
+	<div class="row">
+		<div class="col-md-4"></div>
+		<div class="col-md-4">@pagination(totalNum,from,until)</div>
+		<div class="col-md-4"></div>
+	</div>
+	
+	@defining(Json.parse(js).asOpt[Seq[JsValue]].getOrElse(Seq())) { hits =>
+			@for( hit <- hits){
+	<h1><a href=/resource/@((hit \ "@id").asOpt[String].getOrElse(""))>@((hit \ "title").asOpt[Seq[String]].getOrElse("No title"))</a></h1>
+			@tags.resourceView(hit)
+			}
+		}
+
+	<div class="row">
+		<div class="col-md-4"></div>
+		<div class="col-md-4">@pagination(totalNum,from,until)</div>
+		<div class="col-md-4"></div>
+	</div>
+
 }

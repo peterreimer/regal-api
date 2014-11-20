@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package converter.mab;
+package models;
 
 import java.util.ArrayList;
 import java.util.HashMap;

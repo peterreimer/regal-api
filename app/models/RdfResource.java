@@ -139,10 +139,22 @@ public class RdfResource {
     private String resolve(Link l) {
 	for (RdfResource r : resolvedLinks) {
 	    if (l.getObject().equals(r.getUri())) {
-		return r.getLinks().get(0).getObject();
+		return findLabel(r.getLinks());
 	    }
 	}
-	return l.getObjectLabel();
+	return null;
+    }
+
+    private String findLabel(List<Link> list) {
+	for (Link l : list) {
+	    if ("http://d-nb.info/standards/elementset/gnd#preferredName"
+		    .equals(l.getPredicate()))
+		return l.getObject();
+	    if ("http://www.w3.org/2004/02/skos/core#prefLabel".equals(l
+		    .getPredicate()))
+		return l.getObject();
+	}
+	return null;
     }
 
 }

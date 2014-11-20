@@ -16,8 +16,6 @@
  */
 package controllers;
 
-import helper.Globals;
-
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +25,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import models.Globals;
 import models.Message;
 import models.Transformer;
 
@@ -83,6 +82,29 @@ public class MyUtils extends MyController {
 		}
 	    });
 	    executorService.shutdown();
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(chunks);
+	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "reinitOaisets", value = "reinitOaisets", notes = "Updates the oaisets of all resources", response = List.class, httpMethod = "POST")
+    public static Promise<Result> reinitOaisets(
+	    @QueryParam("namespace") final String namespace) {
+	return new BulkAction().call(() -> {
+	    Chunks<String> chunks = new StringChunks() {
+		public void onReady(Chunks.Out<String> out) {
+		    modify.setMessageQueue(out);
+		}
+	    };
+	    ExecutorService executorService = Executors
+		    .newSingleThreadExecutor();
+	    executorService.execute(new Runnable() {
+		public void run() {
+		    modify.reinitOaisets(namespace);
+		}
+	    });
+	    executorService.shutdown();
+	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(chunks);
 	});
     }

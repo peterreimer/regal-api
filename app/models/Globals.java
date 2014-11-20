@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
-package helper;
+package models;
 
 import play.Play;
+import archive.fedora.ApplicationProfile;
 import archive.fedora.FedoraFactory;
 import archive.fedora.FedoraInterface;
 import archive.search.SearchFacade;
@@ -96,5 +97,10 @@ public class Globals {
      */
     public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
+
+    /**
+     * labels etc.
+     */
+    public static ApplicationProfile profile = new ApplicationProfile();
 
 }

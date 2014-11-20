@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import play.mvc.Results.Chunks;
-import helper.Globals;
+import models.Globals;
 import models.Node;
 
 /**
@@ -58,9 +58,7 @@ public class Index {
      * @return a short message.
      */
     public String index(String p, String index, String type) {
-	String jsonCompactStr = new Transform().oaiore(p,
-		"application/json+compact");
-	Globals.search.index(index, type, p, jsonCompactStr);
+	Globals.search.index(index, type, p, new Read().readNode(p).toString());
 	return p + " indexed in " + index + "!";
     }
 

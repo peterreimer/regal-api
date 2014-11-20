@@ -20,10 +20,6 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
-import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
-import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
-import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import helper.HttpArchiveException;
 
 import java.io.IOException;
@@ -227,24 +223,9 @@ class FedoraFacade implements FedoraInterface {
 	    if (node.getSeqFile() != null) {
 		utils.createSeqStream(node);
 	    }
-	    Link link = new Link();
-	    link.setObject(node.getContentType(), true);
-	    link.setPredicate(REL_CONTENT_TYPE);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getNodeType(), true);
-	    link.setPredicate(REL_IS_NODE_TYPE);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getAccessScheme(), true);
-	    link.setPredicate(REL_ACCESS_SCHEME);
-	    node.addRelation(link);
-	    link = new Link();
-	    link.setObject(node.getPublishScheme(), true);
-	    link.setPredicate(REL_PUBLISH_SCHEME);
-	    node.addRelation(link);
 
-	    utils.createRelsExt(node);
+	    // utils.createRelsExt(node);
+	    utils.updateRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    throw new CreateNodeException(500, e);

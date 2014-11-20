@@ -74,4 +74,17 @@ public abstract class Vocabulary {
      */
     public final static String REL_CREATED_BY = HBZ_MODEL_NAMESPACE
 	    + "createdBy";
+
+    /**
+     * An id once used to identify the object
+     * 
+     */
+    public final static String REL_LEGACY_ID = HBZ_MODEL_NAMESPACE + "legacyId";
+
+    /**
+     * An id for the catalog
+     * 
+     */
+    public final static String REL_CATALOG_ID = HBZ_MODEL_NAMESPACE
+	    + "catalogId";
 }

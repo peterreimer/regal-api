@@ -1,53 +1,71 @@
 {
-  "@graph" : [ {
-    "@id" : "_:node18mu4sffax1",
-    "checksumValue" : "5517c2b0419468b0f9894b0d722c6bf3",
-    "generator" : {
-      "@id" : "http://en.wikipedia.org/wiki/MD5"
-    },
-    "type" : {
-      "@id" : "http://downlode.org/Code/RDF/File_Properties/schema#Checksum"
+
+    "primaryTopic": "edoweb:3273331",
+    "publishScheme": "public",
+    "hasData": [
+        "edoweb:3273331/data"
+    ],
+    "accessScheme": "public",
+    "transformer": [ ],
+    "@id": "edoweb:3273331",
+    "lastModified": "2014-10-17T09:27:47.179+0000",
+    "type": [
+        "http://purl.org/ontology/bibo/DocumentPart"
+    ],
+    "title": [
+        "10_2007 hey"
+    ],
+    "creationDate": "2014-10-13T10:52:42.951+0000",
+    "contentType": "file",
+    "@context": {
+        "hasPart": {
+            "@type": "@id",
+            "@id": "http://purl.org/dc/terms/hasPart",
+            "label": "Kindobjekt"
+        },
+        "publishScheme": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#publishScheme",
+            "label": "Sichtbarkeit Metadaten"
+        },
+        "hasData": {
+            "@id": "http://hbz-nrw.de/regal#hasData",
+            "label": "Download"
+        },
+        "accessScheme": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#accessScheme",
+            "label": "Sichtbarkeit Daten"
+        },
+        "label": "http://www.w3.org/2000/01/rdf-schema#label",
+        "type": {
+            "@type": "@id",
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "label": "Typ"
+        },
+        "title": {
+            "@id": "http://purl.org/dc/terms/title",
+            "label": "Titel"
+        },
+        "nodeType": "info:hbz/hbz-ingest:def/model#isNodeType",
+        "creationDate": "http://purl.org/dc/terms/created",
+        "isPartOf": "http://purl.org/dc/terms/isPartOf",
+        "isNodeType": {
+            "@type": "@id",
+            "@id": "info:hbz/hbz-ingest:def/model#isNodeType",
+            "label": "Fedora Typ"
+        },
+        "primaryTopic": {
+            "@type": "@id",
+            "@id": "http://xmlns.com/foaf/0.1/primaryTopic",
+            "label": "Vgl."
+        },
+        "lastModified": "http://purl.org/dc/terms/modified",
+        "contentType": {
+            "@type": "@id",
+            "@id": "http://hbz-nrw.de/regal#contentType",
+            "label": "Regaltyp"
+        }
     }
-  }, {
-    "@id" : "edoweb:3273331",
-    "contentType" : "file",
-    "hasData" : {
-      "@id" : "edoweb:3273331/data"
-    },
-    "hasTransformer" : [ "oaidc", "epicur" ],
-    "isPartOf" : "edoweb:3273325-2007",
-    "title" : "10_2007",
-    "urn" : "urn:nbn:de:hbz:929:02-edoweb:32733312",
-    "aggregates" : "edoweb:3273331/data",
-    "isAggregatedBy" : {
-      "@id" : "edoweb:3273325-2007"
-    },
-    "isDescribedBy" : "edoweb:3273331.rdf",
-    "similarTo" : "http://api.localhost/fedora/objects/edoweb:3273331"
-  }, {
-    "@id" : "edoweb:3273331.rdf",
-    "created" : {
-      "@type" : "xsd:dateTime",
-      "@value" : "2014-05-02T11:25:24.898+02:00"
-    },
-    "modified" : {
-      "@type" : "xsd:dateTime",
-      "@value" : "2014-05-02T11:25:27.027+02:00"
-    },
-    "describes" : "edoweb:3273331"
-  }, {
-    "@id" : "edoweb:3273331/data",
-    "checksum" : {
-      "@id" : "_:node18mu4sffax1"
-    },
-    "size" : "337403",
-    "format" : "application/pdf",
-    "label" : "StaatsZeitung_Nr"
-  }, {
-    "@id" : "http://en.wikipedia.org/wiki/MD5",
-    "type" : {
-      "@id" : "http://xmlns.com/wordnet/1.6/Algorithm"
-    }
-  } ],
-  "@context" : "http://api.localhost/edoweb-resources.json"
+
 }

@@ -25,6 +25,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import models.Globals;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
@@ -32,6 +34,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import archive.fedora.MapEntry;
 
 /**
  * The OAISetBuilder creates OAISets from rdf statements
@@ -61,7 +65,16 @@ public class OaiSetBuilder {
 		String ddc = object.subSequence(object.length() - 4,
 			object.length() - 1).toString();
 
-		name = ddcmap(ddc);
+		if (Globals.profile.pMap.containsKey(object)) {
+		    MapEntry e = Globals.profile.pMap.get(object);
+		    name = e.label;
+		    play.Logger.info("looked up ddc local name: " + name);
+		} else {
+		    name = ddcmap(ddc);
+		    MapEntry e = new MapEntry();
+		    e.label = name;
+		    Globals.profile.pMap.put(object, e);
+		}
 		spec = "ddc:" + ddc;
 		pid = "oai:" + ddc;
 
@@ -110,7 +123,7 @@ public class OaiSetBuilder {
 	    try {
 		name = root.getElementsByTagName("skos:prefLabel").item(0)
 			.getTextContent();
-		play.Logger.info("Found ddc name: " + name);
+		play.Logger.info("looked up ddc online name: " + name);
 	    } catch (Exception e) {
 		play.Logger.info("Didn't found ddc name for ddc:" + number);
 	    }

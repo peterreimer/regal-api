@@ -16,25 +16,29 @@
  */
 package actions;
 
+import helper.HttpArchiveException;
+import helper.OaiDcMapper;
+import helper.PdfText;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import models.DublinCoreData;
+import models.Globals;
+import models.MabRecord;
+import models.Node;
+
 import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
-import helper.AlephMabMaker;
-import helper.Globals;
-import helper.HttpArchiveException;
-import helper.OaiDcMapper;
-import helper.OaiOreMaker;
-import helper.PdfText;
-import models.DublinCoreData;
-import models.Node;
+import converter.mab.RegalToMabMapper;
 
 /**
  * @author Jan Schnasse
@@ -46,18 +50,28 @@ public class Transform {
      * @param node
      *            pid with namespace:pid
      * @return a aleph mab xml representation
+     * @throws UnsupportedEncodingException
      */
-    public String aleph(Node node) {
-	AlephMabMaker am = new AlephMabMaker();
-	return am.aleph(node, "http://" + Globals.server);
+    public MabRecord aleph(Node node) {
+	try {
+	    RegalToMabMapper mapper = new RegalToMabMapper();
+	    MabRecord record;
+	    record = mapper.map(new ByteArrayInputStream(node.getMetadata()
+		    .getBytes("utf-8")), node.getPid());
+	    record.httpAdresse = Globals.urnbase + node.getPid();
+	    return record;
+	} catch (UnsupportedEncodingException e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     /**
      * @param pid
      *            pid with namespace:pid
      * @return a aleph mab xml representation
+     * @throws UnsupportedEncodingException
      */
-    public String aleph(String pid) {
+    public MabRecord aleph(String pid) {
 	return aleph(new Read().readNode(pid));
     }
 
@@ -222,29 +236,6 @@ public class Transform {
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
 	}
-    }
-
-    /**
-     * @param pid
-     *            the pid
-     * @param format
-     *            application/rdf+xml text/plain application/json
-     * @return a oai_ore resource map
-     */
-    public String oaiore(String pid, String format) {
-	return oaiore(new Read().readNode(pid), format);
-    }
-
-    /**
-     * @param node
-     *            a node to get a oai-ore representation from
-     * @param format
-     *            application/rdf+xml text/plain application/json
-     * @return a oai_ore resource map
-     */
-    public String oaiore(Node node, String format) {
-	OaiOreMaker ore = new OaiOreMaker(node);
-	return ore.getReM(format, node.getTransformer());
     }
 
 }

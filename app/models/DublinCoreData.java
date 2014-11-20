@@ -302,12 +302,19 @@ public class DublinCoreData {
      * @return this
      */
     public DublinCoreData addIdentifier(String e) {
-	identifier.add(new Pair(e, null));
+	identifier.add(new Pair<String, String>(e, null));
 	return this;
     }
 
+    /**
+     * @param value
+     *            the actual identifier
+     * @param type
+     *            type of the identifier preferred a qualified:name
+     * @return the modified Data
+     */
     public DublinCoreData addIdentifier(String value, String type) {
-	identifier.add(new Pair(value, type));
+	identifier.add(new Pair<String, String>(value, type));
 	return this;
     }
 

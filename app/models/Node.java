@@ -17,6 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -31,15 +32,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.openrdf.rio.RDFFormat;
 
-import archive.fedora.ApplicationProfile;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -68,7 +70,6 @@ public class Node {
     private String seq = null;
 
     private String pid = null;
-    private String alephId = null;
 
     private Date lastModified = null;
     private Date creationDate = null;
@@ -92,9 +93,10 @@ public class Node {
 
     private String contextDocumentUri = null;
 
-    private String createdBy;
-
-    private String importedFrom;
+    private String createdBy = null;
+    private String importedFrom = null;
+    private String legacyId = null;
+    private String catalogId = null;
 
     /**
      * Creates a new Node.
@@ -111,6 +113,17 @@ public class Node {
      */
     public Node(String pid) {
 	setPID(pid);
+    }
+
+    /**
+     * Creates a CatalogId based on the objects Pid
+     * 
+     */
+    public void createCatalogId() {
+	if (pid != null && !pid.isEmpty()) {
+	    String id = pid.split(":")[1];
+	    setCatalogId("ED" + id);
+	}
     }
 
     /**
@@ -150,7 +163,7 @@ public class Node {
 	while (it.hasNext()) {
 	    Transformer t = it.next();
 	    if (t.getId().compareTo(id) == 0) {
-		System.out.println("REMOVE: " + id);
+		play.Logger.info("REMOVE: " + id);
 		it.remove();
 	    }
 	}
@@ -168,7 +181,6 @@ public class Node {
      */
     public void removeRelation(String pred, String obj) {
 	Vector<Link> newRels = new Vector<Link>();
-
 	for (Link link : links) {
 	    if (link.getPredicate().compareTo(pred) == 0
 		    && link.getObject().compareTo(obj) == 0) {
@@ -190,6 +202,7 @@ public class Node {
      */
     public Node setPID(String pid) {
 	this.pid = pid;
+	createCatalogId();
 	return this;
     }
 
@@ -230,7 +243,6 @@ public class Node {
      */
     public Node setType(String str) {
 	this.type = str;
-
 	return this;
     }
 
@@ -259,7 +271,6 @@ public class Node {
 	uploadFile = localLocation;
 	setMimeType(mimeType);
 	return this;
-
     }
 
     /**
@@ -379,7 +390,6 @@ public class Node {
      * characteristics. e.g. type is more about the abstract role within the
      * graph.
      * 
-     * 
      * @param type
      *            the actual content type
      */
@@ -427,12 +437,8 @@ public class Node {
 	Vector<Link> removed = new Vector<Link>();
 	for (Link rel : links) {
 	    if (rel.getPredicate().compareTo(predicate) == 0) {
-		// System.out.println("REMOVE: " + this.pid + " <"
-		// + rel.getPredicate() + "> " + rel.getObject());
 		removed.add(rel);
 	    } else {
-		// System.out.println("ADD: " + this.pid + " <"
-		// + rel.getPredicate() + "> " + rel.getObject());
 		newRels.add(rel);
 	    }
 	}
@@ -524,6 +530,8 @@ public class Node {
      * @return a string that signals who is allowed to access this node's data
      */
     public String getAccessScheme() {
+	if (accessScheme == null)
+	    return "private";
 	return accessScheme;
     }
 
@@ -541,6 +549,8 @@ public class Node {
      *         metadata
      */
     public String getPublishScheme() {
+	if (accessScheme == null)
+	    return "private";
 	return publishScheme;
     }
 
@@ -599,18 +609,18 @@ public class Node {
     }
 
     /**
-     * @return alephId
+     * @return catalogId
      */
-    public String getAlephId() {
-	return alephId;
+    public String getCatalogId() {
+	return catalogId;
     }
 
     /**
-     * @param alephId
+     * @param catalogId
      * @return this
      */
-    public Node setAlephId(String alephId) {
-	this.alephId = alephId;
+    public Node setCatalogId(String catalogId) {
+	this.catalogId = catalogId;
 	return this;
     }
 
@@ -809,9 +819,9 @@ public class Node {
 		    metadata.getBytes(StandardCharsets.UTF_8));
 	    RdfResource rdf = RdfUtils.createRdfResource(stream,
 		    RDFFormat.NTRIPLES, pid);
-	    rdf.resolve();
+	    rdf = rdf.resolve();
 	    rdf.addLinks(getRelsExt());
-	    return ApplicationProfile.addLabels(rdf).getLinks();
+	    return Globals.profile.addLabels(rdf).getLinks();
 	} catch (NullPointerException e) {
 	    return new ArrayList<Link>();
 	}
@@ -820,47 +830,231 @@ public class Node {
     /**
      * @return a map representing the rdf data on this object
      */
+    @JsonValue
     public Map<String, Object> getLd() {
 	List<Link> ls = getLinks();
 	Map<String, Object> rdf = new HashMap<String, Object>();
+	rdf.put("@id", getPid());
+	rdf.put("primaryTopic", getPid());
 	for (Link l : ls) {
-	    Map<String, Object> pmap = new HashMap<String, Object>();
-	    String label = l.getObjectLabel() == null ? l.getObject() : l
-		    .getObjectLabel();
-	    pmap.put("label", label);
-	    if (!l.isLiteral) {
-		pmap.put("uri", l.getObject());
-	    }
-	    if (rdf.containsKey(l.getShortName())) {
-		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) rdf.get(l.getShortName());
-		list.add(pmap);
-	    } else {
-		List<Object> list = new ArrayList<Object>();
-		list.add(pmap);
-		rdf.put(l.getShortName(), list);
-	    }
+	    if (HAS_PART.equals(l.getPredicate()))
+		continue;
+	    addLinkToJsonMap(rdf, l);
 	}
+	addPartsToJsonMap(rdf);
+	rdf.remove("isNodeType");
+
+	rdf.put("contentType", getContentType());
+	rdf.put("accessScheme", getAccessScheme());
+	rdf.put("publishScheme", getPublishScheme());
+	rdf.put("transformer", getTransformer().stream().map(t -> t.getId())
+		.collect(Collectors.toList()));
+	rdf.put("catalogId", getCatalogId());
+
+	HashMap<String, Object> aboutMap = new HashMap<String, Object>();
+	aboutMap.put("@id", this.getAggregationUri() + ".rdf");
+	if (createdBy != null)
+	    aboutMap.put("createdBy", getCreatedBy());
+	if (legacyId != null)
+	    aboutMap.put("legacyId", getLegacyId());
+	if (importedFrom != null)
+	    aboutMap.put("importedFrom", getImportedFrom());
+	aboutMap.put("modified", getLastModified());
+	aboutMap.put("created", getCreationDate());
+	aboutMap.put("describes", this.getAggregationUri());
+	rdf.put("isDescribedBy", aboutMap);
+	if (parentPid != null)
+	    rdf.put("parentPid", parentPid);
+
+	if (getMimeType() != null && !getMimeType().isEmpty()) {
+	    Map<String, Object> hasDataMap = new HashMap<String, Object>();
+	    hasDataMap.put("@id", getDataUri());
+	    hasDataMap.put("format", getMimeType());
+	    hasDataMap.put("size", getFileSize());
+	    if (getChecksum() != null) {
+		Map<String, Object> checksum = new HashMap<String, Object>();
+		checksum.put("checksumValue", getChecksum());
+		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
+		checksum.put("type",
+			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		hasDataMap.put("checksum", checksum);
+	    }
+	    rdf.put("hasData", hasDataMap);
+	}
+
+	rdf.put("@context", getContext());
 	return rdf;
     }
 
+    private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
+
+	Map<String, Object> resolvedObject = null;
+	if (l.getObjectLabel() != null) {
+	    String id = l.getObject();
+	    String value = l.getObjectLabel();
+	    resolvedObject = new HashMap<String, Object>();
+	    resolvedObject.put("@id", id);
+	    resolvedObject.put("prefLabel", value);
+	}
+	if (rdf.containsKey(l.getShortName())) {
+	    @SuppressWarnings("unchecked")
+	    List<Object> list = (List<Object>) rdf.get(l.getShortName());
+	    if (resolvedObject == null) {
+		list.add(l.getObject());
+	    } else {
+		list.add(resolvedObject);
+	    }
+	} else {
+	    List<Object> list = new ArrayList<Object>();
+	    if (resolvedObject == null) {
+		list.add(l.getObject());
+	    } else {
+		list.add(resolvedObject);
+	    }
+	    rdf.put(l.getShortName(), list);
+	}
+    }
+
+    private void addPartsToJsonMap(Map<String, Object> rdf) {
+	for (String p : getPartsSorted()) {
+	    Link l = new Link();
+	    l.setObject(p, false);
+	    l.setPredicate(HAS_PART);
+	    addLinkToJsonMap(rdf, l);
+	}
+    }
+
     /**
-     * @return a Map representig additional information about the shortnames
+     * @return a Map representing additional information about the shortnames
      *         used in getLd
      */
     public Map<String, Object> getContext() {
 	List<Link> ls = getLinks();
+	Map<String, Object> pmap;
 	Map<String, Object> cmap = new HashMap<String, Object>();
 	for (Link l : ls) {
-
-	    Map<String, Object> pmap = new HashMap<String, Object>();
-	    pmap.put("uri", l.getPredicate());
-	    // if (!l.isLiteral) {
-	    // pmap.put("@type", "@id");
-	    // }
+	    pmap = new HashMap<String, Object>();
+	    pmap.put("@id", l.getPredicate());
 	    pmap.put("label", l.getPredicateLabel());
+	    if (!l.isLiteral) {
+		pmap.put("@type", "@id");
+	    }
 	    cmap.put(l.getShortName(), pmap);
 	}
+
+	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
+	cmap.put("nodeType", REL_IS_NODE_TYPE);
+	cmap.put("modified", "http://purl.org/dc/terms/modified");
+	cmap.put("created", "http://purl.org/dc/terms/created");
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
+	pmap.put("label", "Regaltyp");
+	cmap.put("contentType", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#catalogId");
+	pmap.put("label", "Katalog Nr.");
+	cmap.put("catalogId", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#importedFrom");
+	pmap.put("label", "Original Quelle");
+	cmap.put("importedFrom", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#createdBy");
+	pmap.put("label", "Angelegt durch");
+	cmap.put("createdBy", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
+	pmap.put("label", "Angelegt durch");
+	cmap.put("legacyId", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
+	pmap.put("label", "Sichtbarkeit Daten");
+	cmap.put("accessScheme", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#publishScheme");
+	pmap.put("label", "Sichtbarkeit Metadaten");
+	cmap.put("publishScheme", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#hasData");
+	pmap.put("label", "Daten");
+	cmap.put("hasData", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://xmlns.com/foaf/0.1/primaryTopic");
+	pmap.put("label", "Vgl.");
+	pmap.put("@type", "@id");
+	cmap.put("primaryTopic", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/hasPart");
+	pmap.put("label", "Kindobjekt");
+	pmap.put("@type", "@id");
+	cmap.put("hasPart", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
+	pmap.put("label", "Überordnung");
+	pmap.put("@type", "@id");
+	cmap.put("isPartOf", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
+	pmap.put("label", "Überordnung");
+	pmap.put("@type", "@id");
+	cmap.put("parentPid", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/dc/terms/format");
+	pmap.put("label", "Mime Type");
+	cmap.put("format", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#size");
+	pmap.put("label", "Bytes");
+	cmap.put("size", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#checksum");
+	pmap.put("label", "MD5");
+	cmap.put("checksumValue", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#generator");
+	pmap.put("label", "Generator");
+	pmap.put("@type", "@id");
+	cmap.put("generator", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id",
+		"http://downlode.org/Code/RDF/File_Properties/schema#checksum");
+	pmap.put("label", "Checksum");
+	pmap.put("@type", "@id");
+	cmap.put("checksum", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://www.openarchives.org/ore/terms/describes");
+	pmap.put("label", "Beschreibt");
+	pmap.put("@type", "@id");
+	cmap.put("describes", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://www.openarchives.org/ore/terms/isDescribedBy");
+	pmap.put("label", "Beschrieben durch");
+	pmap.put("@type", "@id");
+	cmap.put("isDescribedBy", pmap);
+
+	cmap.put("prefLabel", "http://www.w3.org/2004/02/skos/core#prefLabel");
 
 	return cmap;
     }
@@ -895,7 +1089,7 @@ public class Node {
     private List<String> sort(List<String> nodeIds, String[] seq) {
 	List<String> sorted = new ArrayList<String>();
 	if (nodeIds == null || nodeIds.isEmpty())
-	    return null;
+	    return sorted;
 	for (String i : seq) {
 	    int j = -1;
 	    if ((j = nodeIds.indexOf(i)) != -1) {
@@ -922,7 +1116,7 @@ public class Node {
     public int hashCode() {
 	int result = 17;
 	result = 31 * result + (pid != null ? pid.hashCode() : 0);
-	result = 31 * result + (alephId != null ? alephId.hashCode() : 0);
+	result = 31 * result + (catalogId != null ? catalogId.hashCode() : 0);
 	result = 31 * result
 		+ (lastModified != null ? lastModified.hashCode() : 0);
 	result = 31 * result
@@ -942,7 +1136,6 @@ public class Node {
 		+ (fileChecksum != null ? fileChecksum.hashCode() : 0);
 	result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
 	result = 31 * result + (fileLabel != null ? fileLabel.hashCode() : 0);
-
 	return result;
     }
 
@@ -955,7 +1148,8 @@ public class Node {
 	Node mt = (Node) other;
 	if (!(pid == null ? mt.pid == null : pid.equals(mt.pid)))
 	    return false;
-	if (!(alephId == null ? mt.alephId == null : alephId.equals(mt.alephId)))
+	if (!(catalogId == null ? mt.catalogId == null : catalogId
+		.equals(mt.catalogId)))
 	    return false;
 	if (!(lastModified == null ? mt.lastModified == null : lastModified
 		.equals(lastModified)))
@@ -1021,10 +1215,9 @@ public class Node {
      */
     public boolean hasLinkToCatalogId() {
 	String hasUrn = "http://purl.org/lobid/lv#hbzID";
-	List<String> catalog = RdfUtils.findRdfObjects(pid, hasUrn, metadata,
-		RDFFormat.NTRIPLES);
+	// List<String> catalog = RdfUtils.findRdfObjects(pid, hasUrn, metadata,
+	// RDFFormat.NTRIPLES);
 	boolean result = RdfUtils.hasTriple(pid, hasUrn, metadata);
-	play.Logger.debug(pid + " hasCatalogId? " + catalog + " -> " + result);
 	return result;
     }
 
@@ -1039,5 +1232,24 @@ public class Node {
 	} catch (Exception e) {
 	    return null;
 	}
+    }
+
+    /**
+     * Part of provenance data
+     * 
+     * @return the old id of the object
+     */
+    public String getLegacyId() {
+	return legacyId;
+    }
+
+    /**
+     * @param legacyId
+     *            an id that once has been used for this object
+     * @return this object
+     */
+    public Node setLegacyId(String legacyId) {
+	this.legacyId = legacyId;
+	return this;
     }
 }

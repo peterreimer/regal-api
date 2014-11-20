@@ -7,23 +7,23 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 
-GET     /public/docs                controllers.Application.index()
-GET     /public/docs/               controllers.Application.index()
+GET     /public/docs                controllers.Application.docs()
+GET     /public/docs/               controllers.Application.docs()
 GET     /public/*file               controllers.Assets.at(path="/public", file)
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
+GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid)
 GET /resource/:pid/data				controllers.Resource.listData(pid)
 GET /resource/:pid/dc				controllers.Resource.listDc(pid)
 GET /resource/:pid.html				controllers.Resource.asHtml(pid)
-GET /resource/:pid.rdf				controllers.Resource.asRdf(pid)
 GET /resource/:pid.oaidc			controllers.Resource.asOaiDc(pid)
-GET /resource/:pid.regal			controllers.Resource.asRegalObject(pid)
-GET /resource/:pid.json				controllers.Resource.asJson(pid,style?="compact")	
+GET /resource/:pid.json				controllers.Resource.asJson(pid)	
+GET /resource/:pid.regal			controllers.Resource.asJson(pid)	
+GET /resource/:pid.rdf				controllers.Resource.asRdf(pid)	
 GET /resource/:pid.epicur			controllers.Resource.asEpicur(pid)	
-GET /resource/:pid.pdfa				controllers.Resource.asPdfa(pid)
 GET /resource/:pid.pdfbox			controllers.Resource.asPdfboxTxt(pid)
 GET /resource/:pid.aleph			controllers.Resource.asAleph(pid)
 GET /resource/:pid					controllers.Resource.listResource(pid)
@@ -31,6 +31,8 @@ GET /resource 						controllers.Resource.listResources(namespace?="",contentType
 GET /resource/:pid/parts			controllers.Resource.listParts(pid,style?="")
 GET /resource/:pid/parents			controllers.Resource.listParents(pid,style?="")
 GET /resource/:pid/seq				controllers.Resource.listSeq(pid)
+GET /resource/:pid/all				controllers.Resource.listAllParts(pid)
+GET /resource/:pid/about			controllers.Resource.asRdf(pid)
 
 # list from elasticsearch index
 GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
@@ -46,6 +48,7 @@ PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)
 PUT /resource/:pid/data				controllers.Resource.updateData(pid,md5?="")
 PUT /resource/:pid/dc				controllers.Resource.updateDc(pid)
 PUT /resource/:pid					controllers.Resource.updateResource(pid)
+PATCH /resource/:pid			    controllers.Resource.patchResource(pid)
 
 POST /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 POST /resource/:pid/metadata		controllers.Resource.updateMetadata(pid)
@@ -76,6 +79,7 @@ GET /api-docs/resourceIndex 		controllers.ApiHelpController.getResource(path = "
 
 POST /utils/index/:pid 				controllers.MyUtils.index(pid,contentType,index?="")
 POST /utils/indexAll 				controllers.MyUtils.indexAll(index?="")
+POST /utils/reinitOaisets			controllers.MyUtils.reinitOaisets(namespace?="")
 DELETE /utils/removeFromIndex/:pid 	controllers.MyUtils.removeFromIndex(pid,contentType)
 POST /utils/publicIndex/:pid 		controllers.MyUtils.publicIndex(pid,contentType,index?="")
 DELETE /utils/removeFromPublicIndex/:pid controllers.MyUtils.removeFromPublicIndex(pid,contentType)
@@ -83,7 +87,3 @@ POST /utils/lobidify/:pid 			controllers.MyUtils.lobidify(pid)
 POST /utils/addUrn 					controllers.MyUtils.addUrn(id,namespace,snid)
 POST /utils/replaceUrn 				controllers.MyUtils.replaceUrn(id,namespace, snid)
 POST /utils/initContentModels  		controllers.MyUtils.initContentModels(namespace)
-
-GET /portal							controllers.Portal.index()
-GET /portal/opensearch				controllers.Portal.opensearch()
-GET /search*path					controllers.Portal.search(path: String)

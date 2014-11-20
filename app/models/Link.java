@@ -30,6 +30,7 @@ public class Link {
     private String predicateLabel = null;
     private String predicate = null;
     private String object = null;
+
     private String objectLabel = null;
 
     /**
@@ -189,12 +190,15 @@ public class Link {
      *         of '#' or last index of '/'
      */
     public String getShortName() {
+	String prefix = "";
+	if (predicate.startsWith("http://purl.org/dc/elements"))
+	    prefix = "dc:";
 	if (predicate.contains("#"))
-	    return predicate.split("#")[1];
+	    return prefix + predicate.split("#")[1];
 	else if (predicate.startsWith("http")) {
 	    int i = predicate.lastIndexOf("/");
-	    return predicate.substring(i + 1);
+	    return prefix + predicate.substring(i + 1);
 	}
-	return predicate;
+	return prefix + predicate;
     }
 }

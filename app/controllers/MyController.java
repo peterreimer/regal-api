@@ -18,14 +18,20 @@ package controllers;
 
 import helper.HttpArchiveException;
 
+import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
+import play.mvc.Content;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import views.html.message;
 import actions.Create;
 import actions.Delete;
 import actions.Index;
@@ -33,10 +39,10 @@ import actions.Modify;
 import actions.Read;
 import actions.Transform;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
-
-import views.html.*;
 
 /**
  * 
@@ -59,6 +65,7 @@ public class MyController extends Controller {
      */
     public static Result AccessDenied() {
 	Message msg = new Message("Access Denied!", 401);
+	play.Logger.debug("\nResponse: " + msg.toString());
 	if (request().accepts("text/html")) {
 	    return HtmlMessage(msg);
 	} else {
@@ -76,16 +83,27 @@ public class MyController extends Controller {
      *            an arbitrary object
      * @return json serialization of obj
      */
-    public static Result json(Object obj) {
+    public static Result getJsonResult(Object obj) {
 	setJsonHeader();
-	StringWriter w = new StringWriter();
 	try {
-	    mapper.writeValue(w, obj);
+	    return ok(json(obj));
 	} catch (Exception e) {
-	    e.printStackTrace();
 	    return internalServerError("Not able to create response!");
 	}
-	return ok(w.toString());
+    }
+
+    protected static String json(Object obj) throws Exception {
+	StringWriter w = new StringWriter();
+	mapper.writeValue(w, obj);
+	String result = w.toString();
+	debugPrint(result);
+	return result;
+
+    }
+
+    private static void debugPrint(String str) {
+	play.Logger.debug("\nResponse:\nHeaders\n\t"
+		+ mapToString(response().getHeaders()) + "\nBody:\n\t" + str);
     }
 
     /**
@@ -94,6 +112,7 @@ public class MyController extends Controller {
      * @return a html rendering of msg
      */
     public static Result HtmlMessage(Message msg) {
+	play.Logger.debug("\nResponse: " + msg.toString());
 	return status(msg.getCode(), message.render(msg.toString()));
     }
 
@@ -111,6 +130,8 @@ public class MyController extends Controller {
 			"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
+
+	debugPrint(msg.toString());
 	return status(msg.getCode(), msg.toString());
     }
 
@@ -126,12 +147,14 @@ public class MyController extends Controller {
 	if (!"edoweb-admin".equals(role)) {
 	    if ("public".equals(accessScheme)) {
 		return true;
-	    } else if ("restricted".equals(accessScheme)) {
+	    } else if ("restricted".equals(accessScheme)
+		    || "remote".equals(accessScheme)) {
 		if ("edoweb-editor".equals(role)
 			|| "edoweb-reader".equals(role)) {
 		    return true;
 		}
-	    } else if ("private".equals(accessScheme)) {
+	    } else if ("private".equals(accessScheme)
+		    || "single".equals(accessScheme)) {
 		if ("edoweb-editor".equals(role))
 		    return true;
 	    }
@@ -212,7 +235,6 @@ public class MyController extends Controller {
 			}
 		    });
 	}
-
     }
 
     /**
@@ -277,22 +299,23 @@ public class MyController extends Controller {
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
+		    play.Logger.debug("Try to access with role: " + role);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
 		    Node node = null;
 		    try {
 			node = read.readNode(pid);
-		    } catch (HttpArchiveException e) {
-
-		    }
-		    return ca.exec(node);
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
+		    } catch (Exception e) {
+			// play.Logger.debug("", e);
 		}
-	    });
+		return ca.exec(node);
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	})  ;
 	}
     }
 
@@ -340,5 +363,24 @@ public class MyController extends Controller {
 		}
 	    });
 	}
+    }
+
+    /**
+     * @param map
+     * @return a pritn of the map
+     */
+    public static String mapToString(Map<String, String> map) {
+	StringBuilder sb = new StringBuilder();
+	Iterator<Entry<String, String>> iter = map.entrySet().iterator();
+	while (iter.hasNext()) {
+	    Entry<String, String> entry = iter.next();
+	    sb.append(entry.getKey());
+	    sb.append('=').append('"').append(entry.getValue()).append('"');
+	    if (iter.hasNext()) {
+		sb.append("\n\t'");
+	    }
+	}
+	return sb.toString();
+
     }
 }
