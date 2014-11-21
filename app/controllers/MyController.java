@@ -225,8 +225,14 @@ public class MyController extends Controller {
 			    }
 			    return ca.exec(node);
 			} catch (HttpArchiveException e) {
+			    if (request().accepts("text/html")) {
+				return HtmlMessage(new Message(e, e.getCode()));
+			    }
 			    return JsonMessage(new Message(e, e.getCode()));
 			} catch (Exception e) {
+			    if (request().accepts("text/html")) {
+				return HtmlMessage(new Message(e, 500));
+			    }
 			    return JsonMessage(new Message(e, 500));
 			}
 		    });
