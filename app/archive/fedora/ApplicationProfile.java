@@ -46,8 +46,8 @@ public class ApplicationProfile {
      */
     public ApplicationProfile() {
 	loadDefaultConfig();
-	loadToMap("regal.ntriple");
-	loadToMap("rpb.ntriple");
+	loadToMap("regal.turtle");
+	loadToMap("rpb.turtle");
     }
 
     private void loadDefaultConfig() {
@@ -70,7 +70,7 @@ public class ApplicationProfile {
     }
 
     private void loadToMap(InputStream in) {
-	Graph g = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+	Graph g = RdfUtils.readRdfToGraph(in, RDFFormat.TURTLE, "");
 	Iterator<Statement> statements = g.iterator();
 	while (statements.hasNext()) {
 	    Statement st = statements.next();
@@ -131,10 +131,11 @@ public class ApplicationProfile {
 
 	    if (l != null) {
 		result = RdfUtils.addTriple(e.getKey(), prefLabel, l, true,
-			result);
+			result, RDFFormat.TURTLE);
 	    }
 	    if (i != null) {
-		result = RdfUtils.addTriple(e.getKey(), icon, i, true, result);
+		result = RdfUtils.addTriple(e.getKey(), icon, i, true, result,
+			RDFFormat.TURTLE);
 	    }
 	}
 	XmlUtils.newStringToFile(new File(defaultMap), result);

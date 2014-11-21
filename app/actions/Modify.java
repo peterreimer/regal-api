@@ -281,7 +281,8 @@ public class Modify extends RegalAction {
 	if (metadata != null && RdfUtils.hasTriple(subject, hasUrn, metadata))
 	    throw new HttpArchiveException(409, subject + "already has a urn: "
 		    + metadata);
-	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata);
+	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata,
+		RDFFormat.NTRIPLES);
 	updateMetadata(namespace + ":" + pid, metadata);
 	return "Update " + subject + " metadata " + metadata;
     }
