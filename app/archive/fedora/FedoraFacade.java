@@ -455,10 +455,8 @@ class FedoraFacade implements FedoraInterface {
 	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
-	    // Nothing to do
 	    play.Logger.debug(pid + " has no parent!");
 	} catch (ReadNodeException e) {
-	    // Nothing to do
 	    play.Logger.debug(pid + " has no parent!");
 	}
     }
@@ -470,8 +468,7 @@ class FedoraFacade implements FedoraInterface {
 	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
-	    // Nothing to do
-	    // logger.debug(node.getPID() + " has no parent!");
+	    play.Logger.debug(node.getPid() + " has no parent!");
 	}
     }
 
