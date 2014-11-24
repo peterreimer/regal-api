@@ -30,7 +30,6 @@ import play.libs.WS;
  */
 @SuppressWarnings("javadoc")
 public class IntegrationTest {
-
     @Test
     public void serverStarts() {
 	running(testServer(3333), new Runnable() {
