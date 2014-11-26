@@ -17,7 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -839,6 +839,8 @@ public class Node {
 	for (Link l : ls) {
 	    if (HAS_PART.equals(l.getPredicate()))
 		continue;
+	    if (REL_HBZ_ID.equals(l.getPredicate()))
+		continue;
 	    addLinkToJsonMap(rdf, l);
 	}
 	addPartsToJsonMap(rdf);
@@ -953,7 +955,7 @@ public class Node {
 	cmap.put("contentType", pmap);
 
 	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#catalogId");
+	pmap.put("@id", "http://purl.org/lobid/lv#hbzID");
 	pmap.put("label", "Katalog Nr.");
 	cmap.put("catalogId", pmap);
 
