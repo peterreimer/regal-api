@@ -1,0 +1,389 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://d-nb.info/standards/elementset/gnd#dateOfBirth>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Geboren am" .
+
+<http://d-nb.info/standards/elementset/gnd#dateOfDeath>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Gestorben am" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredName>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Name" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheConferenceOrEvent>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheFamily>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Name" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheSubjectHeading>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://d-nb.info/standards/elementset/gnd#preferredNameForTheWork>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://data.archiveshub.ac.uk/def/ArchivalResource>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-wifi" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Archivierte Online Resource" .
+
+<http://downlode.org/Code/RDF/File_Properties/schema#checksum>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-barcode" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Prüfsumme" .
+
+<http://downlode.org/Code/RDF/File_Properties/schema#generator>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://downlode.org/Code/RDF/File_Properties/schema#size>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Größe" .
+
+<http://geni-orca.renci.org/owl/topology.owl#hasURN>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-exchange" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Urn" .
+
+<http://hbz-nrw.de/regal#contentType>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Repository Typ" .
+
+<http://hbz-nrw.de/regal#hasData>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-download" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Download" .
+
+<http://hbz-nrw.de/regal#hasTransformer>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Transformer" .
+
+<http://id.loc.gov/vocabulary/iso639-2/deu>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "deutsch" .
+
+<http://id.loc.gov/vocabulary/relators/act>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Schauspieler" .
+
+<http://id.loc.gov/vocabulary/relators/aft>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor des Nachwortes" .
+
+<http://id.loc.gov/vocabulary/relators/aui>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor der Einleitung" .
+
+<http://id.loc.gov/vocabulary/relators/aus>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Screenwriter" .
+
+<http://iflastandards.info/ns/isbd/elements/P1004>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Gesamttitel" .
+
+<http://iflastandards.info/ns/isbd/elements/P1006>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Titelzusatz" .
+
+<http://iflastandards.info/ns/isbd/elements/P1016>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Ort" .
+
+<http://iflastandards.info/ns/isbd/elements/P1053>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Umfang" .
+
+<http://iflastandards.info/ns/isbd/terms/mediatype/T1008>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Kombination" .
+
+<http://lobid.org/vocab/lobid#fulltextOnline>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Download" .
+
+<http://purl.org/dc/elements/1.1/contributor>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Mitwirkende" .
+
+<http://purl.org/dc/elements/1.1/creator>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor" .
+
+<http://purl.org/dc/elements/1.1/isPartOf>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Bestandteil von" .
+
+<http://purl.org/dc/elements/1.1/publisher>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Herausgeber" .
+
+<http://purl.org/dc/elements/1.1/subject>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Schlagwort" .
+
+<http://purl.org/dc/terms/BibliographicResource>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-file-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Bibliografische Ressource" .
+
+<http://purl.org/dc/terms/alternative>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Titelzusatz" .
+
+<http://purl.org/dc/terms/bibliographicCitation>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Veröffentlichungs Details" .
+
+<http://purl.org/dc/terms/contributor>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Mitwirkende" .
+
+<http://purl.org/dc/terms/created>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Erstellt am" .
+
+<http://purl.org/dc/terms/creator>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor" .
+
+<http://purl.org/dc/terms/format>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Format" .
+
+<http://purl.org/dc/terms/hasPart>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Bestandteile" .
+
+<http://purl.org/dc/terms/hasVersion>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Vgl." .
+
+<http://purl.org/dc/terms/isPartOf>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Bestandteil von" .
+
+<http://purl.org/dc/terms/issued>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Erschienen" .
+
+<http://purl.org/dc/terms/language>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sprache" .
+
+<http://purl.org/dc/terms/medium>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Träger" .
+
+<http://purl.org/dc/terms/modified>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Zuletzt bearbeitet" .
+
+<http://purl.org/dc/terms/subject>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-tag" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Schlagwort" .
+
+<http://purl.org/dc/terms/tableOfContents>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-list" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Inhaltsverzeichnis" .
+
+<http://purl.org/dc/terms/title>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Titel" .
+
+<http://purl.org/library/BrailleBook>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-hand-o-up" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Braille" .
+
+<http://purl.org/library/CassetteTape>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-audio" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Tonband" .
+
+<http://purl.org/lobid/lv#Bibliography>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-bars" ;
+  	<http://www.w3.org/2004/02/skos/core#prefLabel> "Bibliografie" .
+
+<http://purl.org/lobid/lv#Legislation>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-legal" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Amtsdruckschrift" .
+
+<http://purl.org/lobid/lv#Miscellaneous>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sonstige", "Verschiedenes" .
+
+<http://purl.org/lobid/lv#hbzID>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-bars" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Katalog Id" .
+
+<http://purl.org/lobid/lv#urn>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-exchange" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Urn" .
+
+<http://purl.org/ontology/bibo/AudioDocument>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-audio" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Audio" .
+
+<http://purl.org/ontology/bibo/AudioVisualDocument>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-video-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Audio-Visuell" .
+
+<http://purl.org/ontology/bibo/Book>
+    <http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-book" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Buch" .
+
+<http://purl.org/ontology/bibo/Collection>
+    <http://www.w3.org/1999/xhtml/vocab#icon> "glyphicon glyphicon-th-large" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sammlung" .
+
+<http://purl.org/ontology/bibo/Image>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-file-image-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Bild" .
+
+<http://purl.org/ontology/bibo/Journal>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-newspaper-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Journal" .
+
+<http://purl.org/ontology/bibo/Map>
+    <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-globe" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Karte", "Landkarte" .
+
+<http://purl.org/ontology/bibo/Newspaper>
+    <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-book" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Zeitung" .
+
+<http://purl.org/ontology/bibo/Periodical>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-newspaper-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Periodikum" .
+
+<http://purl.org/ontology/bibo/Thesis>
+    <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-mortar-board" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Abschlussarbeit" .
+
+<http://purl.org/ontology/bibo/doi>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Doi" .
+
+<http://purl.org/ontology/bibo/editor>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Herausgeber" .
+
+<http://purl.org/ontology/bibo/eissn>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Eissn" .
+
+<http://purl.org/ontology/bibo/isbn>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Isbn" .
+
+<http://purl.org/ontology/bibo/isbn13>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Isbn13" .
+
+<http://purl.org/ontology/bibo/issn>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Issn" .
+
+<http://purl.org/ontology/bibo/issue>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Issue" .
+
+<http://purl.org/ontology/bibo/lccn>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Lccn" .
+
+<http://purl.org/ontology/bibo/oclcnum>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Oclc" .
+
+<http://purl.org/ontology/bibo/shortTitle>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Kurztitel" .
+
+<http://purl.org/ontology/bibo/translator>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Übersetzer" .
+
+<http://purl.org/ontology/bibo/volume>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Band" .
+
+<http://purl.org/ontology/mo/Vinyl>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-dot-circle-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Schallplatte" .
+
+<http://purl.org/ontology/mo/ismn>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Ismn" .
+
+<http://purl.org/ontology/mo/wikipedia>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Wikipedia" .
+
+<http://purl.org/vocab/frbr/core#Manifestation>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-file-o" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "frbr:Manifestation" .
+
+<http://purl.org/vocab/frbr/core#exemplar>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Exemplar" .
+
+<http://rdvocab.info/Elements/otherTitleInformation>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Titelzusatz weitere" .
+
+<http://rdvocab.info/Elements/placeOfPublication>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-location-arrow" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Ort" .
+
+<http://rdvocab.info/Elements/publicationStatement>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Ort und Jahr" .
+
+<http://rdvocab.info/Elements/statementOfResponsibility>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Verantwortlich" .
+
+<http://rdvocab.info/termList/RDACarrierType/1010>
+    <http://www.w3.org/1999/xhtml/vocab#icon> "octicon octicon-database" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Datenträger" .
+
+<http://rdvocab.info/termList/RDACarrierType/1018>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-wifi" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Online", "Online-Ressource" .
+
+<http://rdvocab.info/termList/RDACarrierType/1020>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-eye" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Mikroform" .
+
+<http://rdvocab.info/termList/RDACarrierType/1050>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-video-camera" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Video" .
+
+<http://rdvocab.info/termList/RDAMediaType/1005>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://rdvocab.info/termList/RDAproductionMethod/1010>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-print" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Druck" .
+
+<http://umbel.org/umbel#isLike>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-link" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "ähnlich zu" .
+
+<http://www.openarchives.org/OAI/2.0/itemID>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Oai Id" .
+
+<http://www.openarchives.org/ore/terms/isAggregatedBy>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Teil von" .
+
+<http://www.openarchives.org/ore/terms/isDescribedBy>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Beschrieben durch" .
+
+<http://www.openarchives.org/ore/terms/similarTo>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Vgl." .
+
+<http://www.umbel.org/specifications/vocabulary#isLike>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "ähnlich zu" .
+
+rdf:type
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Typ" .
+
+<http://www.w3.org/2000/01/rdf-schema#inDataset>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "" .
+
+<http://www.w3.org/2000/01/rdf-schema#label>
+  	<http://www.w3.org/1999/xhtml/vocab#icon> "fa fa-tag" ;
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Etikett" .
+
+<http://www.w3.org/2000/01/rdf-schema#seeAlso>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Weitere Informationen" .
+
+<http://www.w3.org/2000/01/rdf-schema#type>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Typ" .
+
+<http://www.w3.org/2002/07/owl#sameAs>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Identisch zu" .
+
+<http://www.w3.org/2007/05/powder-s#describedby>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Beschrieben durch" .
+
+<http://xmlns.com/foaf/0.1/isPrimaryTopicOf>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Gegenstand von" .
+
+<info:fedora/fedora-system:def/relations-external#hasPart>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Kindobjekte" .
+
+<info:fedora/fedora-system:def/relations-external#isMemberOf>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Oai Set" .
+
+<info:fedora/fedora-system:def/relations-external#isPartOf>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Elternobjekt" .
+
+<info:hbz/hbz-ingest:def/model#accessScheme>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Daten" .
+
+<info:hbz/hbz-ingest:def/model#contentType>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Regal Typ" .
+
+<info:hbz/hbz-ingest:def/model#isNodeType>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Fedora Typ" .
+
+<info:hbz/hbz-ingest:def/model#publishScheme>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Metadaten" .
+    
+<http://purl.org/lobid/lv#subjectChain>
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Schlagwortkette" .
+

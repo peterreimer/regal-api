@@ -25,10 +25,13 @@ import play.Play;
 public class ApplicationProfile {
 
     /**
-     * The class analyses values linked by this certain rdf predicate
+     * prefLabel predicate will be analysed
      */
     public final static String prefLabel = "http://www.w3.org/2004/02/skos/core#prefLabel";
 
+    /**
+     * icon predicate will be analysed
+     */
     public final static String icon = "http://www.w3.org/1999/xhtml/vocab#icon";
 
     /**
@@ -43,8 +46,8 @@ public class ApplicationProfile {
      */
     public ApplicationProfile() {
 	loadDefaultConfig();
-	loadToMap("regal.ntriple");
-	loadToMap("rpb.ntriple");
+	loadToMap("regal.turtle");
+	loadToMap("rpb.turtle");
     }
 
     private void loadDefaultConfig() {
@@ -67,7 +70,7 @@ public class ApplicationProfile {
     }
 
     private void loadToMap(InputStream in) {
-	Graph g = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+	Graph g = RdfUtils.readRdfToGraph(in, RDFFormat.TURTLE, "");
 	Iterator<Statement> statements = g.iterator();
 	while (statements.hasNext()) {
 	    Statement st = statements.next();
@@ -102,9 +105,11 @@ public class ApplicationProfile {
 	pMap.put(key, e);
     }
 
+    /**
+     * @param key
+     * @return a icon string or null
+     */
     public String getIcon(String key) {
-	String result = null;
-	;
 	if (pMap.containsKey(key)) {
 	    MapEntry value = pMap.get(key);
 	    return value.icon;
@@ -126,10 +131,11 @@ public class ApplicationProfile {
 
 	    if (l != null) {
 		result = RdfUtils.addTriple(e.getKey(), prefLabel, l, true,
-			result);
+			result, RDFFormat.TURTLE);
 	    }
 	    if (i != null) {
-		result = RdfUtils.addTriple(e.getKey(), icon, i, true, result);
+		result = RdfUtils.addTriple(e.getKey(), icon, i, true, result,
+			RDFFormat.TURTLE);
 	    }
 	}
 	XmlUtils.newStringToFile(new File(defaultMap), result);

@@ -14,15 +14,7 @@
  * limitations under the License.
  *
  */
-import play.Application;
-import play.Configuration;
-import play.GlobalSettings;
-import play.libs.F.Promise;
-import play.mvc.Action;
-import play.mvc.Http.Request;
-import play.mvc.Http.RequestHeader;
-import play.mvc.SimpleResult;
-import static play.mvc.Results.*;
+import static play.mvc.Results.notFound;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -31,6 +23,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import models.Globals;
+import play.Application;
+import play.GlobalSettings;
+import play.libs.F.Promise;
+import play.mvc.Action;
+import play.mvc.Http.Request;
+import play.mvc.Http.RequestHeader;
+import play.mvc.SimpleResult;
 
 /**
  * @author Jan Schnasse

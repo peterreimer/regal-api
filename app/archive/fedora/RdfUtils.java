@@ -586,16 +586,18 @@ public class RdfUtils {
      *            true, if object is a literal
      * @param metadata
      *            ntriple rdf-string to add the triple
+     * @param format
+     *            format of in and out
      * @return the string together with the new triple
      */
     public static String addTriple(String subject, String predicate,
-	    String object, boolean isLiteral, String metadata) {
+	    String object, boolean isLiteral, String metadata, RDFFormat format) {
 	try {
 	    RepositoryConnection con = null;
 	    if (metadata != null) {
 		InputStream is = new ByteArrayInputStream(
 			metadata.getBytes("UTF-8"));
-		con = readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
+		con = readRdfInputStreamToRepository(is, format);
 	    } else {
 		Repository myRepository = new SailRepository(new MemoryStore());
 		myRepository.initialize();
@@ -611,7 +613,7 @@ public class RdfUtils {
 		o = f.createLiteral(object);
 	    }
 	    con.add(s, p, o);
-	    return writeStatements(con, RDFFormat.NTRIPLES);
+	    return writeStatements(con, format);
 	} catch (RepositoryException e) {
 	    throw new RdfException(e);
 	} catch (UnsupportedEncodingException e) {

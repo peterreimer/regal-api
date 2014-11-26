@@ -146,6 +146,17 @@ public class SearchFacade {
 	return search.query(index, fieldName, fieldValue);
     }
 
+    /**
+     * @param index
+     *            a index to quer against
+     * @param queryString
+     *            a elasticsearch querystring
+     * @param from
+     *            for paging
+     * @param until
+     *            for paging
+     * @return all Hits
+     */
     public SearchHits query(String index, String queryString, int from,
 	    int until) {
 	return search.query(index, queryString, from, until);

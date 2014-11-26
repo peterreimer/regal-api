@@ -45,11 +45,10 @@ import models.Message;
 import models.Node;
 import models.RegalObject;
 
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
 
-import play.Play;
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
@@ -151,8 +150,6 @@ public class Resource extends MyController {
 	    String contentType, int from, int until) {
 	return new ListAction().call(() -> {
 	    try {
-		String servername = Play.application().configuration()
-			.getString("regal-api.serverName");
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response()
 			.setHeader("Content-Type", "text/html; charset=utf-8");

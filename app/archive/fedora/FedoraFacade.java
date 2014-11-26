@@ -42,8 +42,6 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.yourmediashelf.fedora.client.FedoraClient;
 import com.yourmediashelf.fedora.client.FedoraClientException;
@@ -160,8 +158,6 @@ class FedoraFacade implements FedoraInterface {
 	}
 
     }
-
-    final static Logger logger = LoggerFactory.getLogger(FedoraFacade.class);
 
     static FedoraFacade me = null;
     Utils utils = null;
@@ -455,22 +451,22 @@ class FedoraFacade implements FedoraInterface {
     void unlinkParent(String pid) {
 	try {
 	    Node node = readNode(pid);
-	    Node parent = readNode(getNodeParent(node));
+	    Node parent = readNode(node.getParentPid());
 	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
 	    // Nothing to do
-	    logger.debug(pid + " has no parent!");
+	    play.Logger.debug(pid + " has no parent!");
 	} catch (ReadNodeException e) {
 	    // Nothing to do
-	    logger.debug(pid + " has no parent!");
+	    play.Logger.debug(pid + " has no parent!");
 	}
     }
 
     @Override
     public void unlinkParent(Node node) {
 	try {
-	    Node parent = readNode(getNodeParent(node));
+	    Node parent = readNode(node.getParentPid());
 	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {

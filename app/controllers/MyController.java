@@ -18,7 +18,6 @@ package controllers;
 
 import helper.HttpArchiveException;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.Map.Entry;
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
-import play.mvc.Content;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -39,8 +37,6 @@ import actions.Modify;
 import actions.Read;
 import actions.Transform;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -229,8 +225,14 @@ public class MyController extends Controller {
 			    }
 			    return ca.exec(node);
 			} catch (HttpArchiveException e) {
+			    if (request().accepts("text/html")) {
+				return HtmlMessage(new Message(e, e.getCode()));
+			    }
 			    return JsonMessage(new Message(e, e.getCode()));
 			} catch (Exception e) {
+			    if (request().accepts("text/html")) {
+				return HtmlMessage(new Message(e, 500));
+			    }
 			    return JsonMessage(new Message(e, 500));
 			}
 		    });

@@ -7,47 +7,27 @@
 <html>
     <head>
         <title>@title</title>
+				<link rel="shortcut icon" href="/public/images/favicon.ico" type="image/x-icon" /> 
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
         <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
+				<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/font-awesome.min.css")">
         <script src="@controllers.routes.Assets.at("javascripts/jquery-1.10.2.min.js")"></script>
         <script src="@controllers.routes.Assets.at("javascripts/jquery-ui.min.js")"></script>
         <script src="@controllers.routes.Assets.at("javascripts/bootstrap.min.js")"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
     </head>
-    <body onload="">
-      <div class="container">
-      	<p>
-	  		<div class="panel panel-default" style="text-align:center; padding:5px;">
-		Dies ist eine Standardinstallation des <a href="https://github.com/edoweb/regal-api"> Regal </a> Repositories. 
-		Erfahren Sie mehr im Regal <a href="https://github.com/edoweb/regal/wiki">Wiki</a>.
-		Die Http-Schnittstelle von Regal ist <a href="/public/docs/">hier</a> dokumentiert. 
-	  		</div>
-	  		<div class="navbar navbar-default" role="navigation">
-		 		<div class="container-fluid">
-		  			<div class="navbar-header">
-		   				<div class="navbar-collapse collapse" id="nwbib-nav">
-							<ul class="nav navbar-nav">
-								<li @if(title=="Regal - Home"){class="active"}>
-									<a href="/">Home</a>
-								</li>
-								<li @if(title=="Regal - Doku"){class="active"}>
-
-								</li>
-							</ul>
-		 				</div>
-		 			</div>
-			 	</div>
-			 	
-	 	</p>
-	 	</div>
-		<div>
-	    	@tags.searchForm("")
-	    </div>
-	    <p/>
-	 	<div>
-            @content
-        </div>
-    </body>
+	<body onload="">
+			<p/>
+		<div class="container">	
+					<div class="container">
+						<div class="row">
+							<div class="col-md-4"><a href="/"><img src="/public/images/logo.png"/></a></div>
+							<div class="col-md-11">@tags.searchForm("*")</div>
+						</div>
+				</div>
+        @content
+		</div>
+	</body>
 </html>

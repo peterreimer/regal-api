@@ -1,0 +1,23 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@(pid: String, value: String)
+@helper.form(action = routes.Resource.listResource(pid)) {
+List resource from:<div class="radio-inline">
+  <label>
+    <input type="radio" name="src" id="public" value="@value" disabled>
+    public
+  </label>
+</div>
+<div class="radio-inline">
+  <label>
+    <input type="radio" name="src" id="private" value="@value" disabled>
+    private
+  </label>
+</div>
+<div class="radio-inline">
+  <label>
+    <input type="radio" name="src" id="repo" value="@value" checked>
+    repo
+  </label>
+</div>
+}
