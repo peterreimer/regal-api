@@ -104,7 +104,7 @@ public class RegalObject {
 	    if (!(createdBy == null ? mt.createdBy == null : createdBy
 		    .equals(mt.createdBy)))
 		return false;
-	    if (!(contentType == null ? mt.importedFrom == null : importedFrom
+	    if (!(importedFrom == null ? mt.importedFrom == null : importedFrom
 		    .equals(mt.importedFrom)))
 		return false;
 	    if (!(legacyId == null ? mt.legacyId == null : legacyId
