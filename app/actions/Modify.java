@@ -300,7 +300,11 @@ public class Modify extends RegalAction {
      */
     public String lobidify(String pid) {
 	Node node = new Read().readNode(pid);
-	node = lobidify(node);
+	return lobidify(node);
+    }
+
+    private String lobidify(Node node) {
+	node = addLobidMetadata(node);
 	updateIndexAndCache(node);
 	return updateMetadata(node);
     }
@@ -423,7 +427,7 @@ public class Modify extends RegalAction {
      *            generate metadatafile with lobid data for this node
      * @return a short message
      */
-    public Node lobidify(Node node) {
+    private Node addLobidMetadata(Node node) {
 	String pid = node.getPid();
 	List<Pair<String, String>> identifier = node.getDublinCoreData()
 		.getIdentifier();
@@ -498,7 +502,7 @@ public class Modify extends RegalAction {
 	StringBuffer str = new StringBuffer();
 	for (Node n : nodes) {
 	    try {
-		str.append("\n Updated " + lobidify(n).getPid());
+		str.append("\n Updated " + lobidify(n));
 	    } catch (Exception e) {
 		str.append("\n Not updated " + n.getPid());
 	    }
