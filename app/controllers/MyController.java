@@ -348,7 +348,7 @@ public class MyController extends Controller {
      * @author Jan Schnasse
      *
      */
-    public static class BulkAction {
+    public static class BulkActionAccessor {
 	Promise<Result> call(Action ca) {
 	    return Promise.promise(() -> {
 		try {

@@ -62,7 +62,7 @@ DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)
 DELETE /resource/:pid/data			controllers.Resource.deleteData(pid)
 DELETE /resource/:pid/dc			controllers.Resource.deleteDc(pid)
 DELETE /resource/:pid				controllers.Resource.deleteResource(pid)
-DELETE /resource 					controllers.Resource.deleteResources(namespace?="",contentType?="",src?="repo",from: Int ?=0, until: Int?=10)
+DELETE /resource 					controllers.Resource.deleteResources(namespace?="")
 
 
 POST /resource/:pid/oaisets			controllers.Resource.updateOaiSets(pid)
@@ -84,6 +84,7 @@ DELETE /utils/removeFromIndex/:pid 	controllers.MyUtils.removeFromIndex(pid,cont
 POST /utils/publicIndex/:pid 		controllers.MyUtils.publicIndex(pid,contentType,index?="")
 DELETE /utils/removeFromPublicIndex/:pid controllers.MyUtils.removeFromPublicIndex(pid,contentType)
 POST /utils/lobidify/:pid 			controllers.MyUtils.lobidify(pid)
+POST /utils/lobidify         		controllers.MyUtils.lobidifyAll(namespace?="")
 POST /utils/addUrn 					controllers.MyUtils.addUrn(id,namespace,snid)
 POST /utils/replaceUrn 				controllers.MyUtils.replaceUrn(id,namespace, snid)
 POST /utils/initContentModels  		controllers.MyUtils.initContentModels(namespace)

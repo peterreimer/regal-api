@@ -44,7 +44,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 
-import play.mvc.Results.Chunks;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -54,7 +53,6 @@ import archive.fedora.RdfUtils;
  *
  */
 public class Modify extends RegalAction {
-    Chunks.Out<String> messageOut;
 
     /**
      * @param pid
@@ -470,36 +468,13 @@ public class Modify extends RegalAction {
     }
 
     /**
-     * @param namespace
-     *            all objects in the namespace will be modified
+     * reinits oai sets on every node
+     * 
+     * @param nodes
+     *            a list of nodes
+     * @return a message
      */
-    public void reinitOaisets(String namespace) {
-	try {
-	    Read read = new Read();
-	    int until = 0;
-	    int stepSize = 100;
-	    int from = 0 - stepSize;
-	    List<String> nodes = read.listRepoNamespace(namespace);
-	    messageOut.write(nodes.toString());
-	    messageOut.write("size: " + nodes.size());
-	    do {
-		until += stepSize;
-		from += stepSize;
-		if (nodes.isEmpty())
-		    break;
-		if (until > nodes.size())
-		    until = nodes.size();
-		messageOut.write(reinitOaiSets(read.getNodes(nodes.subList(
-			from, until))));
-	    } while (until < nodes.size());
-	    messageOut.write("Attempted to index: " + nodes.size());
-	    messageOut.write("\nSuccessfuly Finished\n");
-	} finally {
-	    messageOut.close();
-	}
-    }
-
-    private String reinitOaiSets(List<Node> nodes) {
+    public String reinitOaiSets(List<Node> nodes) {
 	StringBuffer str = new StringBuffer();
 	for (Node n : nodes) {
 	    try {
@@ -513,20 +488,23 @@ public class Modify extends RegalAction {
     }
 
     /**
-     * @param out
-     *            messages for chunked responses
-     */
-    public void setMessageQueue(Chunks.Out<String> out) {
-	messageOut = out;
-    }
-
-    /**
-     * Close messageQueue for chunked responses
+     * Imports lobid metadata for each node in the list
      * 
+     * @param nodes
+     *            list of nodes
+     * @return a message
      */
-    public void closeMessageQueue() {
-	if (messageOut != null)
-	    messageOut.close();
+    public String lobidify(List<Node> nodes) {
+	StringBuffer str = new StringBuffer();
+	for (Node n : nodes) {
+	    try {
+		str.append("\n Updated " + lobidify(n).getPid());
+	    } catch (Exception e) {
+		str.append("\n Not updated " + n.getPid());
+	    }
+	}
+	str.append("\n");
+	return str.toString();
     }
 
     @SuppressWarnings({ "serial", "javadoc" })

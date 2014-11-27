@@ -149,7 +149,7 @@
 	<classpathentry kind="lib" path="/opt/play/repository/cache/com.hp.hpl.jena/iri/jars/iri-0.8.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/cache/org.apache.santuario/xmlsec/bundles/xmlsec-1.5.4.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/cache/org.slf4j/log4j-over-slf4j/jars/log4j-over-slf4j-1.7.5.jar"/>
-	<classpathentry kind="lib" path="/opt/play/repository/cache/org.elasticsearch/elasticsearch/jars/elasticsearch-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/opt/play/repository/cache/org.elasticsearch/elasticsearch/jars/elasticsearch-1.1.0.jar" sourcepath="/home/cpt/.m2/repository/org/elasticsearch/elasticsearch/1.1.0/elasticsearch-1.1.0-sources.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/cache/org.apache.lucene/lucene-core/jars/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/cache/org.apache.lucene/lucene-analyzers-common/jars/lucene-analyzers-common-4.7.0.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/cache/org.apache.lucene/lucene-codecs/jars/lucene-codecs-4.7.0.jar"/>

@@ -18,9 +18,9 @@ package actions;
 
 import java.util.List;
 
-import play.mvc.Results.Chunks;
 import models.Globals;
 import models.Node;
+import actions.Modify.MetadataNotFoundException;
 
 /**
  * @author Jan Schnasse
@@ -28,52 +28,37 @@ import models.Node;
  */
 public class Delete extends RegalAction {
 
-    Chunks.Out<String> messageOut;
-
     /**
-     * @param pids
-     *            The pids that must be deleted
-     * @return A short message.
+     * Deletes only this single node. Child objects will remain.
+     * 
+     * @param n
+     *            a node to delete
+     * @return a message
      */
-    public String deleteAll(List<String> pids) {
-	if (pids == null || pids.isEmpty()) {
-	    return "Nothing to delete!";
-	}
-	for (String pid : pids) {
-	    try {
-		delete(pid);
-	    } catch (Exception e) {
-		play.Logger.warn(pid + " " + e.getMessage());
-	    }
-	}
-	messageOut.close();
-	return "Successfuly finished\n";
+    public String delete(Node n) {
+	removeIdFromPublicAndPrivateIndex(n);
+	Globals.fedora.deleteNode(n.getPid());
+	return n.getPid() + " deleted!";
     }
 
     /**
-     * @param pid
-     *            The pid that must be deleted
+     * Each node in the list will be deleted. Child objects will remain
+     * 
+     * @param nodes
+     *            a list of nodes to delete.
+     * @return a message
      */
-    public void delete(String pid) {
-	StringBuffer msg = new StringBuffer();
-	List<Node> pids = null;
-	try {
-	    pids = Globals.fedora.deleteComplexObject(pid);
-	} catch (Exception e) {
-	    messageOut.write("\n" + e);
-	}
-	try {
-	    if (pids != null) {
-		for (Node n : pids) {
-		    messageOut.write("\n"
-			    + removeIdFromPublicAndPrivateIndex(n));
-		}
+    public String delete(List<Node> nodes) {
+	StringBuffer str = new StringBuffer();
+	for (Node n : nodes) {
+	    try {
+		str.append("\n" + delete(n));
+	    } catch (MetadataNotFoundException e) {
+		str.append("\nProblems with " + n.getPid() + "\n"
+			+ e.getMessage());
 	    }
-	} catch (Exception e) {
-	    messageOut.write("\n" + e);
 	}
-	messageOut.write(pid + " successfully deleted! \n" + msg + "\n");
-
+	return str.toString();
     }
 
     private String removeIdFromPublicAndPrivateIndex(Node n) {
@@ -126,22 +111,4 @@ public class Delete extends RegalAction {
 	updateIndexAndCache(new Read().readNode(pid));
 	return pid + ": data - datastream successfully deleted! ";
     }
-
-    /**
-     * @param out
-     *            messages for chunked responses
-     */
-    public void setMessageQueue(Chunks.Out<String> out) {
-	messageOut = out;
-    }
-
-    /**
-     * Close messageQueue for chunked responses
-     * 
-     */
-    public void closeMessageQueue() {
-	if (messageOut != null)
-	    messageOut.close();
-    }
-
 }

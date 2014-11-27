@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import play.mvc.Results.Chunks;
 import models.Globals;
 import models.Node;
 
@@ -30,7 +29,6 @@ import models.Node;
  *
  */
 public class Index {
-    Chunks.Out<String> messageOut;
 
     /**
      * @param pid
@@ -90,56 +88,21 @@ public class Index {
     }
 
     /**
-     * @param indexName
+     * @param nodes
+     *            a list of nodes
+     * @param namespace
+     *            a namespace to create a new index from
+     * @return the list of indexed objects as string
      */
-    public void indexAll(String indexName) {
-	try {
-	    Read read = new Read();
-	    String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
-	    int until = 0;
-	    int stepSize = 100;
-	    int from = 0 - stepSize;
-	    List<String> nodes = read.listRepoNamespace(indexName);
-	    messageOut.write(nodes.toString());
-	    messageOut.write("size: " + nodes.size());
-	    do {
-		until += stepSize;
-		from += stepSize;
-		if (nodes.isEmpty())
-		    break;
-		if (until > nodes.size())
-		    until = nodes.size();
-		messageOut.write(Globals.search.indexAll(
-			read.getNodes(nodes.subList(from, until)),
-			indexNameWithDatestamp).toString());
-	    } while (until < nodes.size());
-	    messageOut.write("Attempted to index: " + nodes.size());
-	    messageOut.write("\nSuccessfuly Finished\n");
-	} finally {
-	    messageOut.close();
-	}
+    public String indexAll(List<Node> nodes, String namespace) {
+	String indexNameWithDatestamp = namespace + "-" + getCurrentDate();
+	return Globals.search.indexAll(nodes, indexNameWithDatestamp)
+		.toString();
     }
 
     private String getCurrentDate() {
 	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 	Date date = new Date();
 	return dateFormat.format(date);
-    }
-
-    /**
-     * @param out
-     *            messages for chunked responses
-     */
-    public void setMessageQueue(Chunks.Out<String> out) {
-	messageOut = out;
-    }
-
-    /**
-     * Close messageQueue for chunked responses
-     * 
-     */
-    public void closeMessageQueue() {
-	if (messageOut != null)
-	    messageOut.close();
     }
 }

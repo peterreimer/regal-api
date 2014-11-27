@@ -178,8 +178,8 @@ public class Read extends RegalAction {
 	    try {
 		return readNode(id);
 	    } catch (Exception e) {
-		Logger.warn("", e);
-		return null;
+		Logger.error("" + id, e);
+		return new Node(id);
 	    }
 	}).filter(n -> n != null).collect(Collectors.toList());
     }
