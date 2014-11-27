@@ -278,7 +278,7 @@ public class MyController extends Controller {
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
-		    if (!readMetadata_accessIsAllowed("public", role)) {
+		    if (!readMetadata_accessIsAllowed("private", role)) {
 			return AccessDenied();
 		    }
 		    return ca.exec();
