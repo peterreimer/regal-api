@@ -455,8 +455,9 @@ public class Modify extends RegalAction {
 		    .replaceAll(Matcher.quoteReplacement(pid))
 		    + "<"
 		    + pid
-		    + "> <http://www.umbel.org/specifications/vocabulary#isLike> <"
-		    + lobidUri + "> .";
+		    + "> <"
+		    + archive.fedora.Vocabulary.REL_MAB_527
+		    + "> <" + lobidUri + "> .";
 	    File metadataFile = CopyUtils.copyStringToFile(str);
 	    node.setMetadataFile(metadataFile.getAbsolutePath());
 	    return node;

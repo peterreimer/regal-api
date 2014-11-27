@@ -93,4 +93,6 @@ public abstract class Vocabulary {
      * 
      */
     public final static String REL_HBZ_ID = "http://purl.org/lobid/lv#hbzID";
+
+    public final static String REL_MAB_527 = "http://www.umbel.org/specifications/vocabulary#isLike";
 }
