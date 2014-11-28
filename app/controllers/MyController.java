@@ -19,6 +19,9 @@ package controllers;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -278,7 +281,7 @@ public class MyController extends Controller {
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
-		    if (!readMetadata_accessIsAllowed("public", role)) {
+		    if (!readMetadata_accessIsAllowed("private", role)) {
 			return AccessDenied();
 		    }
 		    return ca.exec();
@@ -348,7 +351,7 @@ public class MyController extends Controller {
      * @author Jan Schnasse
      *
      */
-    public static class BulkAction {
+    public static class BulkActionAccessor {
 	Promise<Result> call(Action ca) {
 	    return Promise.promise(() -> {
 		try {
@@ -384,5 +387,22 @@ public class MyController extends Controller {
 	}
 	return sb.toString();
 
+    }
+
+    /**
+     * @param d
+     *            a string in format "yyyyy-mm-dd"
+     * @return a Date representation of the String passed as param
+     */
+    public static Date createDateFromString(String d) {
+	try {
+	    SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd");
+	    Date date = dt.parse(d);
+	    return date;
+	} catch (ParseException e) {
+	    throw new HttpArchiveException(400, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 }

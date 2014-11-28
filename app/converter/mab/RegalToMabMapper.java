@@ -100,8 +100,8 @@ public class RegalToMabMapper {
 
     private void handleFreeFields(String subj, String pred, String obj) {
 
-	if ("http://purl.org/lobid/lv#hbzID".equals(pred))
-	    record.id = obj;
+	if (archive.fedora.Vocabulary.REL_MAB_527.equals(pred))
+	    record.id = obj.substring(obj.lastIndexOf('/') + 1);
 	else if ("http://purl.org/dc/terms/created".equals(pred))
 	    record.datumDerErsterfassung = obj;
 	else if ("http://purl.org/dc/terms/title".equals(pred))

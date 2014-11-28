@@ -31,9 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -59,6 +56,7 @@ import views.html.oaidc;
 import views.html.resource;
 import views.html.search;
 import actions.BasicAuth;
+import actions.BulkAction;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -410,26 +408,15 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResource(@PathParam("pid") String pid) {
-	return new ModifyAction().call(
-		pid,
-		node -> {
-		    Chunks<String> chunks = new StringChunks() {
-			public void onReady(Chunks.Out<String> out) {
-			    delete.setMessageQueue(out);
-			}
-		    };
-		    ExecutorService executorService = Executors
-			    .newSingleThreadExecutor();
-		    executorService.execute(new Runnable() {
-			public void run() {
-			    delete.delete(pid);
-			    delete.closeMessageQueue();
-			}
-		    });
-		    executorService.shutdown();
-		    response().setHeader("Transfer-Encoding", "Chunked");
-		    return ok(chunks);
-		});
+	return new BulkActionAccessor().call(() -> {
+	    List<Node> list = Globals.fedora.listComplexObject(pid);
+	    BulkAction bulk = new BulkAction();
+	    bulk.executeOnNodes(list, nodes -> {
+		return delete.delete(nodes);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
+	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteSeq", value = "deleteSeq", notes = "Deletes a resources ordering definition for it's children objects", response = Message.class, httpMethod = "DELETE")
@@ -464,28 +451,14 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "deleteResources", value = "deleteResources", notes = "Deletes a set of resources", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResources(
-	    @QueryParam("namespace") String namespace,
-	    @QueryParam("type") String type, @QueryParam("src") String src,
-	    @QueryParam("from") int from, @QueryParam("until") int until) {
-	return new BulkAction().call(() -> {
-	    Chunks<String> chunks = new StringChunks() {
-		public void onReady(Chunks.Out<String> out) {
-		    delete.setMessageQueue(out);
-		}
-	    };
-	    ExecutorService executorService = Executors
-		    .newSingleThreadExecutor();
-	    executorService.execute(new Runnable() {
-		public void run() {
-		    delete.deleteAll(read
-			    .listRepo(type, namespace, from, until).stream()
-			    .map((Node n) -> n.getPid())
-			    .collect(Collectors.toList()));
-		}
+	    @QueryParam("namespace") String namespace) {
+	return new BulkActionAccessor().call(() -> {
+	    actions.BulkAction bulk = new actions.BulkAction();
+	    bulk.execute(namespace, nodes -> {
+		return delete.delete(nodes);
 	    });
-	    executorService.shutdown();
 	    response().setHeader("Transfer-Encoding", "Chunked");
-	    return ok(chunks);
+	    return ok(bulk.getChunks());
 	});
     }
 

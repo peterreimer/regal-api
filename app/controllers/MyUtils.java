@@ -16,10 +16,9 @@
  */
 package controllers;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
@@ -68,44 +67,55 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "indexAll", value = "indexAll", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Promise<Result> indexAll(
 	    @QueryParam("index") final String indexName) {
-	return new BulkAction().call(() -> {
-	    Chunks<String> chunks = new StringChunks() {
-		public void onReady(Chunks.Out<String> out) {
-		    index.setMessageQueue(out);
-		}
-	    };
-	    ExecutorService executorService = Executors
-		    .newSingleThreadExecutor();
-	    executorService.execute(new Runnable() {
-		public void run() {
-		    index.indexAll(indexName);
-		}
+	return new BulkActionAccessor().call(() -> {
+	    actions.BulkAction bulk = new actions.BulkAction();
+	    bulk.execute(indexName, nodes -> {
+		return index.indexAll(nodes, indexName);
 	    });
-	    executorService.shutdown();
 	    response().setHeader("Transfer-Encoding", "Chunked");
-	    return ok(chunks);
+	    return ok(bulk.getChunks());
 	});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "reinitOaisets", value = "reinitOaisets", notes = "Updates the oaisets of all resources", response = List.class, httpMethod = "POST")
     public static Promise<Result> reinitOaisets(
 	    @QueryParam("namespace") final String namespace) {
-	return new BulkAction().call(() -> {
-	    Chunks<String> chunks = new StringChunks() {
-		public void onReady(Chunks.Out<String> out) {
-		    modify.setMessageQueue(out);
-		}
-	    };
-	    ExecutorService executorService = Executors
-		    .newSingleThreadExecutor();
-	    executorService.execute(new Runnable() {
-		public void run() {
-		    modify.reinitOaisets(namespace);
-		}
+	return new BulkActionAccessor().call(() -> {
+	    actions.BulkAction bulk = new actions.BulkAction();
+	    bulk.execute(namespace, nodes -> {
+		return modify.reinitOaiSets(nodes);
 	    });
-	    executorService.shutdown();
 	    response().setHeader("Transfer-Encoding", "Chunked");
-	    return ok(chunks);
+	    return ok(bulk.getChunks());
+	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "lobidifyAll", value = "lobidifyAll", notes = "Updates the bibliographic metadata of all resources", response = List.class, httpMethod = "POST")
+    public static Promise<Result> lobidifyAll(
+	    @QueryParam("namespace") final String namespace) {
+	return new BulkActionAccessor().call(() -> {
+	    actions.BulkAction bulk = new actions.BulkAction();
+	    bulk.execute(namespace, nodes -> {
+		return modify.lobidify(nodes);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
+	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "addUrnToAll", value = "addUrnToAll", notes = "Attempts to add urns to all resources", response = List.class, httpMethod = "POST")
+    public static Promise<Result> addUrnToAll(
+	    @QueryParam("namespace") final String namespace,
+	    @QueryParam("snid") final String snid,
+	    @QueryParam("fromBefore") final String fromBefore) {
+	return new BulkActionAccessor().call(() -> {
+	    Date fromBeforeDate = createDateFromString(fromBefore);
+	    actions.BulkAction bulk = new actions.BulkAction();
+	    bulk.execute(namespace, nodes -> {
+		return modify.addUrnToAll(nodes, snid, fromBeforeDate);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
 	});
     }
 
@@ -146,7 +156,7 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
     public static Promise<Result> lobidify(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = modify.lobidify(pid);
+	    String result = modify.lobidify(node);
 	    return JsonMessage(new Message(result));
 	});
     }
@@ -155,7 +165,7 @@ public class MyUtils extends MyController {
     public static Promise<Result> addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	return new BulkAction().call(() -> {
+	return new BulkActionAccessor().call(() -> {
 	    String result = modify.addUrn(id, namespace, snid);
 	    return JsonMessage(new Message(result));
 	});
@@ -165,8 +175,9 @@ public class MyUtils extends MyController {
     public static Promise<Result> replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	return new BulkAction().call(() -> {
-	    String result = modify.replaceUrn(id, namespace, snid);
+	return new BulkActionAccessor().call(() -> {
+	    String result = modify.replaceUrn(
+		    read.readNode(namespace + ":" + id), snid);
 	    return JsonMessage(new Message(result));
 	});
     }
@@ -174,7 +185,7 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
     public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
-	return new BulkAction().call(() -> {
+	return new BulkActionAccessor().call(() -> {
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
 		    "http://edoweb-anonymous-user:nopwd@" + Globals.server

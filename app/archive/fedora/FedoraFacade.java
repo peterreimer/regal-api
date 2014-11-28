@@ -416,23 +416,33 @@ class FedoraFacade implements FedoraInterface {
 
     @Override
     public List<Node> listComplexObject(String rootPID) {
+	List<Node> result = new ArrayList<Node>();
 	if (!nodeExists(rootPID)) {
 	    throw new NodeNotFoundException(404, "Can not find: " + rootPID);
 	}
-	Node root = readNode(rootPID);
-	List<Node> result = new ArrayList<Node>();
+	Node root = new Node(rootPID);
+	try {
+	    root = readNode(rootPID);
+	} catch (Exception e) {
+	    play.Logger.error(rootPID, e);
+	}
 	result.add(root);
 	result.addAll(listChildren(root));
 	return result;
+
     }
 
     private List<Node> listChildren(Node root) {
 	List<Node> result = new ArrayList<Node>();
-	List<Link> rels = root.getRelsExt();
-	for (Link r : rels) {
-	    if (HAS_PART.equals(r.getPredicate())) {
-		result.addAll(listComplexObject(r.getObject()));
+	try {
+	    List<Link> rels = root.getRelsExt();
+	    for (Link r : rels) {
+		if (HAS_PART.equals(r.getPredicate())) {
+		    result.addAll(listComplexObject(r.getObject()));
+		}
 	    }
+	} catch (Exception e) {
+	    play.Logger.error(root.getPid(), e);
 	}
 	return result;
     }
@@ -451,15 +461,15 @@ class FedoraFacade implements FedoraInterface {
     void unlinkParent(String pid) {
 	try {
 	    Node node = readNode(pid);
+	    if (node.getParentPid() == null)
+		return;
 	    Node parent = readNode(node.getParentPid());
 	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
-	    // Nothing to do
-	    play.Logger.debug(pid + " has no parent!");
+	    play.Logger.debug("", e);
 	} catch (ReadNodeException e) {
-	    // Nothing to do
-	    play.Logger.debug(pid + " has no parent!");
+	    play.Logger.debug("", e);
 	}
     }
 
@@ -470,8 +480,7 @@ class FedoraFacade implements FedoraInterface {
 	    parent.removeRelation(HAS_PART, node.getPid());
 	    updateNode(parent);
 	} catch (NodeNotFoundException e) {
-	    // Nothing to do
-	    // logger.debug(node.getPID() + " has no parent!");
+	    play.Logger.debug(node.getPid() + " has no parent!");
 	}
     }
 

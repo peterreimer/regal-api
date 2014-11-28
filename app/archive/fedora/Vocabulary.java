@@ -87,4 +87,15 @@ public abstract class Vocabulary {
      */
     public final static String REL_CATALOG_ID = HBZ_MODEL_NAMESPACE
 	    + "catalogId";
+
+    /**
+     * All hbzIds from /metadata must be ignored
+     * 
+     */
+    public final static String REL_HBZ_ID = "http://purl.org/lobid/lv#hbzID";
+
+    /**
+     * Regal uses this predicate to link to parallel title resources
+     */
+    public final static String REL_MAB_527 = "http://umbel.org/umbel#isLike";
 }
