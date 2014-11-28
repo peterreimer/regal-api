@@ -27,6 +27,7 @@ import models.Globals;
 import models.Node;
 
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -113,12 +114,21 @@ public class Search {
 
     ActionResponse index(String index, String type, String id, String data) {
 	try {
+	    if (!indexExists(index)) {
+		play.Logger.info("Create new Index " + index);
+		init(index);
+	    }
 	    return client.prepareIndex(index, type, id).setSource(data)
 		    .execute().actionGet();
 	} catch (Exception e) {
 	    throw new SearchException("Failed to index " + index + "," + type
 		    + "," + id, e);
 	}
+    }
+
+    private boolean indexExists(String index) {
+	return client.admin().indices().exists(new IndicesExistsRequest(index))
+		.actionGet().isExists();
     }
 
     SearchHits listResources(String index, String type, int from, int until) {
@@ -149,6 +159,9 @@ public class Search {
     }
 
     ActionResponse delete(String id, String index, String type) {
+	if (!indexExists(index)) {
+	    init(index);
+	}
 	return client.prepareDelete(index, type, id)
 		.setOperationThreaded(false).execute().actionGet();
     }
@@ -206,6 +219,7 @@ public class Search {
      */
     public List<String> indexAll(List<Node> list, String index) {
 	init(index);
+	init("public_" + index);
 	List<String> result = new ArrayList<String>();
 	BulkRequestBuilder internalIndexBulk = client.prepareBulk();
 	BulkRequestBuilder publicIndexBulk = client.prepareBulk();
@@ -218,6 +232,7 @@ public class Search {
 		internalIndexBulk
 			.add(client.prepareIndex(index, node.getContentType(),
 				node.getPid()).setSource(source));
+
 		msg.append(index);
 		if ("public".equals(node.getPublishScheme())) {
 		    publicIndexBulk.add(client.prepareIndex("public_" + index,
