@@ -20,7 +20,6 @@ import java.util.List;
 
 import models.Globals;
 import models.Node;
-import actions.Modify.MetadataNotFoundException;
 
 /**
  * @author Jan Schnasse
@@ -49,16 +48,7 @@ public class Delete extends RegalAction {
      * @return a message
      */
     public String delete(List<Node> nodes) {
-	StringBuffer str = new StringBuffer();
-	for (Node n : nodes) {
-	    try {
-		str.append("\n" + delete(n));
-	    } catch (MetadataNotFoundException e) {
-		str.append("\nProblems with " + n.getPid() + "\n"
-			+ e.getMessage());
-	    }
-	}
-	return str.toString();
+	return apply(nodes, n -> delete(n));
     }
 
     private String removeIdFromPublicAndPrivateIndex(Node n) {

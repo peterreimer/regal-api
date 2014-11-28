@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -263,16 +264,30 @@ public class Modify extends RegalAction {
     /**
      * Generates a urn
      * 
-     * @param pid
-     *            usually the pid of an object
+     * @param id
+     *            usually the id of an object without namespace
      * @param namespace
      *            usually the namespace
      * @param snid
-     *            the urn subnamespace id
+     *            the urn subnamespace id e.g."hbz:929:02"
      * @return the urn
      */
-    public String addUrn(String pid, String namespace, String snid) {
-	String subject = namespace + ":" + pid;
+    public String addUrn(String id, String namespace, String snid) {
+	String pid = namespace + ":" + id;
+	return addUrn(pid, snid);
+    }
+
+    /**
+     * Generates a urn
+     * 
+     * @param pid
+     *            usually the id of an object with namespace
+     * @param snid
+     *            the urn subnamespace id e.g."hbz:929:02"
+     * @return the urn
+     */
+    public String addUrn(String pid, String snid) {
+	String subject = pid;
 	String urn = generateUrn(subject, snid);
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = new Read().readMetadata(subject);
@@ -281,8 +296,28 @@ public class Modify extends RegalAction {
 		    + metadata);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata,
 		RDFFormat.NTRIPLES);
-	updateMetadata(namespace + ":" + pid, metadata);
+	updateMetadata(pid, metadata);
 	return "Update " + subject + " metadata " + metadata;
+    }
+
+    /**
+     * @param nodes
+     *            a list of nodes
+     * @param snid
+     *            a urn snid e.g."hbz:929:02"
+     * @param fromBefore
+     *            only objects created before "fromBefore" will get a urn
+     * @return a message
+     */
+    public String addUrnToAll(List<Node> nodes, String snid, Date fromBefore) {
+	return apply(nodes, n -> addUrn(n, snid, fromBefore));
+    }
+
+    private String addUrn(Node n, String snid, Date fromBefore) {
+	if (n.getCreationDate().before(fromBefore))
+	    return addUrn(n.getPid(), snid);
+	return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
+		+ " is not before " + fromBefore;
     }
 
     @SuppressWarnings({ "serial" })
@@ -479,16 +514,7 @@ public class Modify extends RegalAction {
      * @return a message
      */
     public String reinitOaiSets(List<Node> nodes) {
-	StringBuffer str = new StringBuffer();
-	for (Node n : nodes) {
-	    try {
-		str.append("\n" + makeOAISet(n));
-	    } catch (MetadataNotFoundException e) {
-		str.append("\nProblems with " + n.getPid() + "\n"
-			+ e.getMessage());
-	    }
-	}
-	return str.toString();
+	return apply(nodes, n -> makeOAISet(n));
     }
 
     /**
@@ -499,16 +525,7 @@ public class Modify extends RegalAction {
      * @return a message
      */
     public String lobidify(List<Node> nodes) {
-	StringBuffer str = new StringBuffer();
-	for (Node n : nodes) {
-	    try {
-		str.append("\n Updated " + lobidify(n));
-	    } catch (Exception e) {
-		str.append("\n Not updated " + n.getPid());
-	    }
-	}
-	str.append("\n");
-	return str.toString();
+	return apply(nodes, n -> lobidify(n));
     }
 
     @SuppressWarnings({ "serial", "javadoc" })
@@ -517,4 +534,5 @@ public class Modify extends RegalAction {
 	    super(e);
 	}
     }
+
 }

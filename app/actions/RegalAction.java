@@ -16,6 +16,8 @@
  */
 package actions;
 
+import java.util.List;
+
 import models.Globals;
 import models.Node;
 import play.cache.Cache;
@@ -58,4 +60,24 @@ public class RegalAction {
 		+ Globals.server + "/resource/" + node.getAggregationUri();
     }
 
+    /**
+     * @param nodes
+     *            a list of nodes
+     * @param action
+     *            a action performed on each node
+     * @return a message
+     */
+    public String apply(List<Node> nodes, ProcessNode action) {
+	StringBuffer str = new StringBuffer();
+	for (Node n : nodes) {
+	    try {
+		str.append("\n Updated " + action.process(n));
+	    } catch (Exception e) {
+		str.append("\n Not updated " + n.getPid() + " "
+			+ e.getMessage());
+	    }
+	}
+	str.append("\n");
+	return str.toString();
+    }
 }

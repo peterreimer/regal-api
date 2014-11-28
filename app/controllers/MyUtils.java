@@ -16,6 +16,7 @@
  */
 package controllers;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -96,6 +97,22 @@ public class MyUtils extends MyController {
 	    actions.BulkAction bulk = new actions.BulkAction();
 	    bulk.execute(namespace, nodes -> {
 		return modify.lobidify(nodes);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
+	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "addUrnToAll", value = "addUrnToAll", notes = "Attempts to add urns to all resources", response = List.class, httpMethod = "POST")
+    public static Promise<Result> addUrnToAll(
+	    @QueryParam("namespace") final String namespace,
+	    @QueryParam("snid") final String snid,
+	    @QueryParam("fromBefore") final String fromBefore) {
+	return new BulkActionAccessor().call(() -> {
+	    Date fromBeforeDate = createDateFromString(fromBefore);
+	    actions.BulkAction bulk = new actions.BulkAction();
+	    bulk.execute(namespace, nodes -> {
+		return modify.addUrnToAll(nodes, snid, fromBeforeDate);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
