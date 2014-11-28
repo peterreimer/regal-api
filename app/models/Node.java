@@ -149,7 +149,8 @@ public class Node {
      * @return this
      */
     public Node addTransformer(Transformer cm) {
-	transformer.add(cm);
+	if (!transformer.contains(cm))
+	    transformer.add(cm);
 	return this;
     }
 

@@ -156,7 +156,7 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
     public static Promise<Result> lobidify(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = modify.lobidify(pid);
+	    String result = modify.lobidify(node);
 	    return JsonMessage(new Message(result));
 	});
     }
@@ -176,7 +176,8 @@ public class MyUtils extends MyController {
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
 	return new BulkActionAccessor().call(() -> {
-	    String result = modify.replaceUrn(id, namespace, snid);
+	    String result = modify.replaceUrn(
+		    read.readNode(namespace + ":" + id), snid);
 	    return JsonMessage(new Message(result));
 	});
     }

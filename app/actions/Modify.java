@@ -160,6 +160,23 @@ public class Modify extends RegalAction {
      */
     public String updateMetadata(String pid, String content) {
 	try {
+	    Node node = new Read().readNode(pid);
+	    return updateMetadata(node, content);
+	} catch (Exception e) {
+	    throw new UpdateNodeException(e);
+	}
+    }
+
+    /**
+     * @param node
+     *            The node that must be updated
+     * @param content
+     *            The metadata as rdf string
+     * @return a short message
+     */
+    public String updateMetadata(Node node, String content) {
+	try {
+	    String pid = node.getPid();
 	    if (content == null) {
 		throw new HttpArchiveException(406, pid
 			+ " You've tried to upload an empty string."
@@ -168,11 +185,13 @@ public class Modify extends RegalAction {
 	    }
 	    RdfUtils.validate(content);
 	    File file = CopyUtils.copyStringToFile(content);
-	    Node node = new Read().readNode(pid);
-	    if (node != null) {
-		node.setMetadataFile(file.getAbsolutePath());
-		Globals.fedora.updateNode(node);
+	    node.setMetadataFile(file.getAbsolutePath());
+	    if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+		node.addTransformer(new Transformer("aleph"));
+	    } else {
+		node.removeTransformer("aleph");
 	    }
+	    Globals.fedora.updateNode(node);
 	    updateIndexAndCache(new Read().readNode(pid));
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
@@ -180,18 +199,6 @@ public class Modify extends RegalAction {
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
 	}
-    }
-
-    /**
-     * @param node
-     *            read metadata from the Node to the repository
-     * @return a message
-     */
-    public String updateMetadata(Node node) {
-	Globals.fedora.updateNode(node);
-	String pid = node.getPid();
-	updateIndexAndCache(node);
-	return pid + " metadata successfully updated!";
     }
 
     /**
@@ -223,27 +230,6 @@ public class Modify extends RegalAction {
 	Vector<Link> v = new Vector<Link>();
 	v.add(link);
 	return addLinks(pid, v);
-    }
-
-    /**
-     * Generates a urn
-     * 
-     * @param pid
-     *            usually the pid of an object
-     * @param namespace
-     *            usually the namespace
-     * @param snid
-     *            the urn subnamespace id
-     * @return the urn
-     */
-    public String replaceUrn(String pid, String namespace, String snid) {
-	String subject = namespace + ":" + pid;
-	String urn = generateUrn(subject, snid);
-	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = new Read().readMetadata(subject);
-	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
-	updateMetadata(namespace + ":" + pid, metadata);
-	return "Update " + subject + " metadata " + metadata;
     }
 
     /**
@@ -287,16 +273,51 @@ public class Modify extends RegalAction {
      * @return the urn
      */
     public String addUrn(String pid, String snid) {
-	String subject = pid;
-	String urn = generateUrn(subject, snid);
+	Node node = new Read().readNode(pid);
+	return addUrn(node, snid);
+    }
+
+    /**
+     * Generates a urn
+     * 
+     * @param node
+     *            the node to add a urn to
+     * @param snid
+     *            the urn subnamespace id e.g."hbz:929:02"
+     * @return the urn
+     */
+    public String addUrn(Node node, String snid) {
+	String subject = node.getPid();
 	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = new Read().readMetadata(subject);
-	if (metadata != null && RdfUtils.hasTriple(subject, hasUrn, metadata))
-	    throw new HttpArchiveException(409, subject + "already has a urn: "
-		    + metadata);
+	String metadata = node.getMetadata();
+	if (node.hasUrn())
+	    throw new HttpArchiveException(409, subject
+		    + " already has a urn: " + metadata);
+	String urn = generateUrn(subject, snid);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata,
 		RDFFormat.NTRIPLES);
-	updateMetadata(pid, metadata);
+	node.addTransformer(new Transformer("epicur"));
+	updateMetadata(node, metadata);
+	return "Update " + subject + " metadata " + metadata;
+    }
+
+    /**
+     * Generates a urn
+     * 
+     * @param node
+     *            the object
+     * @param snid
+     *            the urn subnamespace id
+     * @return the urn
+     */
+    public String replaceUrn(Node node, String snid) {
+	String subject = node.getPid();
+	String hasUrn = "http://purl.org/lobid/lv#urn";
+	String metadata = node.getMetadata();
+	String urn = generateUrn(subject, snid);
+	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
+	node.addTransformer(new Transformer("epicur"));
+	updateMetadata(node, metadata);
 	return "Update " + subject + " metadata " + metadata;
     }
 
@@ -315,33 +336,9 @@ public class Modify extends RegalAction {
 
     private String addUrn(Node n, String snid, Date fromBefore) {
 	if (n.getCreationDate().before(fromBefore))
-	    return addUrn(n.getPid(), snid);
+	    return addUrn(n, snid);
 	return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
 		+ " is not before " + fromBefore;
-    }
-
-    @SuppressWarnings({ "serial" })
-    private class UpdateNodeException extends RuntimeException {
-	public UpdateNodeException(Throwable cause) {
-	    super(cause);
-	}
-    }
-
-    /**
-     * @param pid
-     *            adds lobidmetadata (if avaiable) to the node and updates the
-     *            repository
-     * @return a message
-     */
-    public String lobidify(String pid) {
-	Node node = new Read().readNode(pid);
-	return lobidify(node);
-    }
-
-    private String lobidify(Node node) {
-	node = addLobidMetadata(node);
-	updateIndexAndCache(node);
-	return updateMetadata(node);
     }
 
     /**
@@ -462,7 +459,7 @@ public class Modify extends RegalAction {
      *            generate metadatafile with lobid data for this node
      * @return a short message
      */
-    private Node addLobidMetadata(Node node) {
+    public String lobidify(Node node) {
 	String pid = node.getPid();
 	List<Pair<String, String>> identifier = node.getDublinCoreData()
 		.getIdentifier();
@@ -495,12 +492,12 @@ public class Modify extends RegalAction {
 		    + "> <"
 		    + archive.fedora.Vocabulary.REL_MAB_527
 		    + "> <" + lobidUri + "> .";
-	    File metadataFile = CopyUtils.copyStringToFile(str);
-	    node.setMetadataFile(metadataFile.getAbsolutePath());
-	    return node;
+
+	    return updateMetadata(node, str);
+
 	} catch (MalformedURLException e) {
 	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
+	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
 
@@ -532,6 +529,13 @@ public class Modify extends RegalAction {
     public class MetadataNotFoundException extends RuntimeException {
 	public MetadataNotFoundException(Throwable e) {
 	    super(e);
+	}
+    }
+
+    @SuppressWarnings({ "serial" })
+    private class UpdateNodeException extends RuntimeException {
+	public UpdateNodeException(Throwable cause) {
+	    super(cause);
 	}
     }
 

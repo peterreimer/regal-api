@@ -140,8 +140,13 @@ public class Create extends RegalAction {
 
     private void updateTransformer(List<String> transformers, Node node) {
 	node.removeAllContentModels();
+	if ("public".equals(node.getPublishScheme())) {
+	    node.addTransformer(new Transformer("oaidc"));
+	}
 	if (transformers != null) {
 	    for (String t : transformers) {
+		if ("oaidc".equals(t))
+		    continue; // already added
 		node.addTransformer(new Transformer(t));
 	    }
 	}
