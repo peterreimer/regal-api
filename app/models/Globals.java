@@ -103,4 +103,9 @@ public class Globals {
      */
     public static ApplicationProfile profile = new ApplicationProfile();
 
+    /**
+     * defines a protocol used by this app
+     */
+    public static String protocol = "http://";
+
 }

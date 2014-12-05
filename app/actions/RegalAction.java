@@ -46,8 +46,8 @@ public class RegalAction {
     }
 
     protected String createAggregationUri(String pid) {
-	return Globals.useHttpUris ? "http://" + Globals.server + "/resource/"
-		+ pid : pid;
+	return Globals.useHttpUris ? Globals.protocol + Globals.server
+		+ "/resource/" + pid : pid;
     }
 
     /**
@@ -56,8 +56,9 @@ public class RegalAction {
      * @return the http address of the resource
      */
     public String getHttpUriOfResource(Node node) {
-	return Globals.useHttpUris ? node.getAggregationUri() : "http://"
-		+ Globals.server + "/resource/" + node.getAggregationUri();
+	return Globals.useHttpUris ? node.getAggregationUri()
+		: Globals.protocol + Globals.server + "/resource/"
+			+ node.getAggregationUri();
     }
 
     /**
