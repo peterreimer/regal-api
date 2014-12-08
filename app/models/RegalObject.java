@@ -131,7 +131,6 @@ public class RegalObject {
     public RegalObject() {
 	transformer = new Vector<String>();
 	indexes = new Vector<String>();
-	contentType = "not";
     }
 
     /**

@@ -40,7 +40,8 @@ public class Index {
      * @return A short message
      */
     public String remove(String pid, String index, String type) {
-
+	if (type == null)
+	    return pid + " not deleted from index. Cause: No type available!";
 	Globals.search.delete(pid, index, type);
 	return pid + " of type " + type + " removed from index " + index + "!";
     }

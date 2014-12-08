@@ -273,6 +273,21 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json", nickname = "patchResources", value = "patchResources", notes = "Applies the PATCH object to the resource and to all child resources", response = Message.class, httpMethod = "PUT")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
+    public static Promise<Result> patchResources(@PathParam("pid") String pid) {
+	return new BulkActionAccessor().call(() -> {
+	    RegalObject object = getRegalObject(request().body().asJson());
+	    List<Node> list = Globals.fedora.listComplexObject(pid);
+	    BulkAction bulk = new BulkAction();
+	    bulk.executeOnNodes(list, nodes -> {
+		return create.patchResources(nodes, object);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
+	});
+    }
+
     @ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> updateResource(@PathParam("pid") String pid) {

@@ -39,6 +39,7 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import models.Pair;
+import models.RegalObject;
 import models.Transformer;
 
 import org.openrdf.model.Statement;
