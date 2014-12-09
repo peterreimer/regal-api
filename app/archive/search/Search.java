@@ -118,8 +118,10 @@ public class Search {
 		play.Logger.info("Create new Index " + index);
 		init(index);
 	    }
-	    return client.prepareIndex(index, type, id).setSource(data)
-		    .execute().actionGet();
+	    ActionResponse response = client.prepareIndex(index, type, id)
+		    .setSource(data).execute().actionGet();
+	    refresh();
+	    return response;
 	} catch (Exception e) {
 	    throw new SearchException("Failed to index " + index + "," + type
 		    + "," + id, e);
@@ -127,6 +129,7 @@ public class Search {
     }
 
     private boolean indexExists(String index) {
+	refresh();
 	return client.admin().indices().exists(new IndicesExistsRequest(index))
 		.actionGet().isExists();
     }
@@ -135,7 +138,7 @@ public class Search {
 	if (from >= until)
 	    throw new InvalidRangeException();
 	SearchRequestBuilder builder = null;
-	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	refresh();
 	if (index == null || index.equals(""))
 	    builder = client.prepareSearch();
 	else
@@ -162,12 +165,14 @@ public class Search {
 	if (!indexExists(index)) {
 	    init(index);
 	}
-	return client.prepareDelete(index, type, id)
-		.setOperationThreaded(false).execute().actionGet();
+	ActionResponse response = client.prepareDelete(index, type, id)
+		.execute().actionGet();
+	refresh();
+	return response;
     }
 
     SearchHits query(String index, String fieldName, String fieldValue) {
-	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	refresh();
 	QueryBuilder query = QueryBuilders.boolQuery().must(
 		QueryBuilders.matchQuery(fieldName, fieldValue));
 	SearchResponse response = client.prepareSearch(index).setQuery(query)
@@ -176,7 +181,7 @@ public class Search {
     }
 
     SearchHits query(String index, String queryString, int from, int until) {
-	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	refresh();
 	QueryBuilder query = QueryBuilders.queryString(queryString);
 	SearchResponse response = client.prepareSearch(index).setQuery(query)
 		.setFrom(from).setSize(until - from).execute().actionGet();
@@ -185,7 +190,7 @@ public class Search {
 
     Map<String, Object> getSettings(String index, String type) {
 	try {
-	    client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	    refresh();
 	    ClusterState clusterState = client.admin().cluster().prepareState()
 		    .setIndices(index).execute().actionGet().getState();
 	    IndexMetaData inMetaData = clusterState.getMetaData().index(index);
@@ -202,7 +207,7 @@ public class Search {
      * @return a map that represents the node
      */
     public Map<String, Object> get(String pid) {
-	client.admin().indices().refresh(new RefreshRequest()).actionGet();
+	refresh();
 	GetResponse response = client
 		.prepareGet(pid.split(":")[0], "_all", pid).execute()
 		.actionGet();
@@ -268,5 +273,9 @@ public class Search {
 	    play.Logger.warn("", e);
 	}
 	return result;
+    }
+
+    private void refresh() {
+	client.admin().indices().refresh(new RefreshRequest()).actionGet();
     }
 }
