@@ -16,9 +16,6 @@
  */
 package actions;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import models.Globals;
@@ -91,19 +88,13 @@ public class Index {
     /**
      * @param nodes
      *            a list of nodes
-     * @param namespace
-     *            a namespace to create a new index from
+     * @param indexNameWithDatestamp
+     *            a name for a new index
      * @return the list of indexed objects as string
      */
-    public String indexAll(List<Node> nodes, String namespace) {
-	String indexNameWithDatestamp = namespace + "-" + getCurrentDate();
+    public String indexAll(List<Node> nodes, String indexNameWithDatestamp) {
 	return Globals.search.indexAll(nodes, indexNameWithDatestamp)
 		.toString();
     }
 
-    private String getCurrentDate() {
-	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	Date date = new Date();
-	return dateFormat.format(date);
-    }
 }

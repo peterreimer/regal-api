@@ -68,9 +68,10 @@ public class MyUtils extends MyController {
     public static Promise<Result> indexAll(
 	    @QueryParam("index") final String indexName) {
 	return new BulkActionAccessor().call(() -> {
+	    String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
 	    actions.BulkAction bulk = new actions.BulkAction();
 	    bulk.execute(indexName, nodes -> {
-		return index.indexAll(nodes, indexName);
+		return index.indexAll(nodes, indexNameWithDatestamp);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
