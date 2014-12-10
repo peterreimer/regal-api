@@ -134,7 +134,6 @@ public class Modify extends RegalAction {
 			+ " This action is not supported."
 			+ " Use HTTP DELETE instead.\n");
 	    }
-	    // RdfUtils.validate(content);
 	    play.Logger.info(content);
 	    File file = CopyUtils.copyStringToFile(content);
 	    Node node = new Read().readNode(pid);

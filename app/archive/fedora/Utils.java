@@ -409,8 +409,10 @@ public class Utils {
 			String pred = link.getPredicate();
 			if (REL_IS_NODE_TYPE.equals(pred)) {
 			    node.setType(link.getObject());
+			    continue;
 			} else if (REL_CONTENT_TYPE.equals(pred)) {
 			    node.setContentType(link.getObject());
+			    continue;
 			} else if (REL_HAS_MODEL.equals(pred)) {
 			    addContentModel(link, node);
 			    continue;
@@ -607,6 +609,8 @@ public class Utils {
 	if (!dataStreamExists(pid, "RELS-EXT")) {
 	    createFedoraXmlForRelsExt(pid);
 	}
+	System.out
+		.println(node.getRelsExt() + "\n--------------------------\n");
 	Link link = new Link();
 	link.setObject(node.getContentType(), true);
 	link.setPredicate(REL_CONTENT_TYPE);
@@ -643,7 +647,7 @@ public class Utils {
 	link.setObject(node.getParentPid(), true);
 	link.setPredicate(IS_PART_OF);
 	node.addRelation(link);
-
+	System.out.println(node.getRelsExt());
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());
     }
 

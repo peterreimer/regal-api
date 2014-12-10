@@ -60,6 +60,18 @@ public class Create extends RegalAction {
     }
 
     /**
+     * @param nodes
+     *            nodes to set new properties for
+     * @param object
+     *            the RegalObject contains props that will be applied to all
+     *            nodes in the list
+     * @return a message
+     */
+    public String patchResources(List<Node> nodes, RegalObject object) {
+	return apply(nodes, n -> patchResource(n, object).getPid());
+    }
+
+    /**
      * @param namespace
      * @param object
      * @return the updated node
