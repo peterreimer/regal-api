@@ -68,9 +68,10 @@ public class MyUtils extends MyController {
     public static Promise<Result> indexAll(
 	    @QueryParam("index") final String indexName) {
 	return new BulkActionAccessor().call(() -> {
+	    String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
 	    actions.BulkAction bulk = new actions.BulkAction();
 	    bulk.execute(indexName, nodes -> {
-		return index.indexAll(nodes, indexName);
+		return index.indexAll(nodes, indexNameWithDatestamp);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
@@ -188,19 +189,19 @@ public class MyUtils extends MyController {
 	return new BulkActionAccessor().call(() -> {
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
-		    "http://edoweb-anonymous-user:nopwd@" + Globals.server
+		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "epicur"));
 	    transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-		    "http://edoweb-anonymous-user:nopwd@" + Globals.server
+		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "oaidc"));
 	    transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-		    "http://edoweb-anonymous-user:nopwd@" + Globals.server
+		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "pdfa"));
 	    transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
-		    "http://edoweb-anonymous-user:nopwd@" + Globals.server
+		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "pdfbox"));
 	    transformers.add(new Transformer(namespace + "aleph", "aleph",
-		    "http://edoweb-anonymous-user:nopwd@" + Globals.server
+		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "aleph"));
 	    create.contentModelsInit(transformers);
 	    String result = "Reinit contentModels " + namespace + "epicur, "

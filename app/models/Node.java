@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.openrdf.rio.RDFFormat;
 
+import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -1210,7 +1211,11 @@ public class Node {
      */
     public boolean hasUrn() {
 	String hasUrn = "http://purl.org/lobid/lv#urn";
-	return RdfUtils.hasTriple(pid, hasUrn, metadata);
+	try {
+	    return RdfUtils.hasTriple(pid, hasUrn, metadata);
+	} catch (Exception e) {
+	    return false;
+	}
     }
 
     /**

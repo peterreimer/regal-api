@@ -19,6 +19,7 @@ package controllers;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -404,5 +405,11 @@ public class MyController extends Controller {
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
+    }
+
+    protected static String getCurrentDate() {
+	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	Date date = new Date();
+	return dateFormat.format(date);
     }
 }

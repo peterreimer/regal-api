@@ -17,9 +17,13 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
+import helper.HttpArchiveException;
 
 import java.util.List;
 
+import org.openrdf.rio.RDFFormat;
+
+import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Node;
 import models.RegalObject;
@@ -113,8 +117,6 @@ public class Create extends RegalAction {
 	    setNodeType(object.getContentType(), node);
 	if (object.getParentPid() != null)
 	    linkWithParent(object.getParentPid(), node);
-	if (object.getTransformer() != null)
-	    updateTransformer(object.getTransformer(), node);
 	if (object.getAccessScheme() != null)
 	    node.setAccessScheme(object.getAccessScheme());
 	if (object.getPublishScheme() != null)
@@ -125,17 +127,19 @@ public class Create extends RegalAction {
 	    node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 	if (object.getIsDescribedBy().getLegacyId() != null)
 	    node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+	if (object.getTransformer() != null)
+	    updateTransformer(object.getTransformer(), node);
     }
 
     private void overrideNodeMembers(Node node, RegalObject object) {
 	setNodeType(object.getContentType(), node);
 	linkWithParent(object.getParentPid(), node);
-	updateTransformer(object.getTransformer(), node);
 	node.setAccessScheme(object.getAccessScheme());
 	node.setPublishScheme(object.getPublishScheme());
 	node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
 	node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 	node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+	updateTransformer(object.getTransformer(), node);
     }
 
     private void setNodeType(String type, Node node) {
@@ -155,10 +159,19 @@ public class Create extends RegalAction {
 	if ("public".equals(node.getPublishScheme())) {
 	    node.addTransformer(new Transformer("oaidc"));
 	}
+	if (node.hasUrn()) {
+	    node.addTransformer(new Transformer("epicur"));
+	    node.addTransformer(new Transformer("aleph"));
+	}
+
 	if (transformers != null) {
 	    for (String t : transformers) {
 		if ("oaidc".equals(t))
-		    continue; // already added
+		    continue; // implicitly added - or not allowed to set
+		if ("epicur".equals(t))
+		    continue; // implicitly added - or not allowed to set
+		if ("aleph".equals(t))
+		    continue; // implicitly added - or not allowed to set
 		node.addTransformer(new Transformer(t));
 	    }
 	}
