@@ -97,5 +97,5 @@ public abstract class Vocabulary {
     /**
      * Regal uses this predicate to link to parallel title resources
      */
-    public final static String REL_MAB_527 = "http://umbel.org/umbel#isLike";
+    public final static String REL_MAB_527 = "http://hbz-nrw.de/regal#parallelEdition";
 }
