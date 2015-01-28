@@ -17,13 +17,9 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.HttpArchiveException;
 
 import java.util.List;
 
-import org.openrdf.rio.RDFFormat;
-
-import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Node;
 import models.RegalObject;
@@ -127,6 +123,8 @@ public class Create extends RegalAction {
 	    node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 	if (object.getIsDescribedBy().getLegacyId() != null)
 	    node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+	if (object.getIsDescribedBy().getName() != null)
+	    node.setName(object.getIsDescribedBy().getName());
 	if (object.getTransformer() != null)
 	    updateTransformer(object.getTransformer(), node);
     }
@@ -139,6 +137,7 @@ public class Create extends RegalAction {
 	node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
 	node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 	node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+	node.setName(object.getIsDescribedBy().getName());
 	updateTransformer(object.getTransformer(), node);
     }
 

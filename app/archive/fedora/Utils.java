@@ -43,6 +43,7 @@ import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_LEGACY_ID;
 import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
+import static archive.fedora.Vocabulary.REL_NAME;
 import helper.HttpArchiveException;
 
 import java.io.BufferedInputStream;
@@ -437,6 +438,9 @@ public class Utils {
 			} else if (REL_LEGACY_ID.equals(pred)) {
 			    node.setLegacyId(link.getObject());
 			    continue;
+			} else if (REL_NAME.equals(pred)) {
+			    node.setName(link.getObject());
+			    continue;
 			} else if (REL_CATALOG_ID.equals(pred)) {
 			    node.setCatalogId(link.getObject());
 			    continue;
@@ -638,6 +642,10 @@ public class Utils {
 	link = new Link();
 	link.setObject(node.getLegacyId(), true);
 	link.setPredicate(REL_LEGACY_ID);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getName(), true);
+	link.setPredicate(REL_NAME);
 	node.addRelation(link);
 	link = new Link();
 	link.setObject(node.getCatalogId(), true);

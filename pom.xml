@@ -1,6 +1,6 @@
 <project>
 	<groupId>de.nrw.hbz.regal</groupId>
-	<version>0.6.0</version>
+	<version>0.7.0-SNAPSHOT</version>
 	<properties>
 		<play2.version>2.2.3</play2.version>
 	</properties>

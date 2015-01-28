@@ -82,6 +82,11 @@ public abstract class Vocabulary {
     public final static String REL_LEGACY_ID = HBZ_MODEL_NAMESPACE + "legacyId";
 
     /**
+     * A system internal name for the object
+     */
+    public final static String REL_NAME = HBZ_MODEL_NAMESPACE + "name";
+
+    /**
      * An id for the catalog
      * 
      */

@@ -38,7 +38,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.openrdf.rio.RDFFormat;
 
-import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -98,6 +97,7 @@ public class Node {
     private String importedFrom = null;
     private String legacyId = null;
     private String catalogId = null;
+    private String name = null;
 
     /**
      * Creates a new Node.
@@ -863,6 +863,8 @@ public class Node {
 	    aboutMap.put("legacyId", getLegacyId());
 	if (importedFrom != null)
 	    aboutMap.put("importedFrom", getImportedFrom());
+	if (name != null)
+	    aboutMap.put("name", getName());
 	aboutMap.put("modified", getLastModified());
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
@@ -976,6 +978,11 @@ public class Node {
 	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
 	pmap.put("label", "Angelegt durch");
 	cmap.put("legacyId", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#name");
+	pmap.put("label", "Interner Name");
+	cmap.put("name", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
@@ -1259,6 +1266,24 @@ public class Node {
      */
     public Node setLegacyId(String legacyId) {
 	this.legacyId = legacyId;
+	return this;
+    }
+
+    /**
+     * Part of provenance data
+     * 
+     * @return a system internal name for the object
+     */
+    public String getName() {
+	return legacyId;
+    }
+
+    /**
+     * @param name
+     * @return this
+     */
+    public Node setName(String name) {
+	this.name = name;
 	return this;
     }
 }
