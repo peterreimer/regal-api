@@ -17,7 +17,8 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
-import static archive.fedora.Vocabulary.*;
+import static archive.fedora.Vocabulary.REL_HBZ_ID;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
