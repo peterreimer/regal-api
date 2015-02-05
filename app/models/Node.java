@@ -1274,7 +1274,7 @@ public class Node {
      * @return a system internal name for the object
      */
     public String getName() {
-	return legacyId;
+	return name;
     }
 
     /**
