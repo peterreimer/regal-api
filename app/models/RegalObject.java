@@ -39,6 +39,7 @@ public class RegalObject {
 	String createdBy = null;
 	String importedFrom = null;
 	String legacyId = null;
+	String name = null;
 
 	/**
 	 * @param createdBy
@@ -83,6 +84,23 @@ public class RegalObject {
 	    return createdBy;
 	}
 
+	/**
+	 * An internal name for the object
+	 * 
+	 * @param name
+	 */
+	public void setName(String name) {
+	    this.name = name;
+	}
+
+	/**
+	 * 
+	 * @return an internal name for the object
+	 */
+	public String getName() {
+	    return name;
+	}
+
 	@Override
 	public int hashCode() {
 	    int result = 17;
@@ -91,6 +109,7 @@ public class RegalObject {
 	    result = 31 * result
 		    + (importedFrom != null ? importedFrom.hashCode() : 0);
 	    result = 31 * result + (legacyId != null ? legacyId.hashCode() : 0);
+	    result = 31 * result + (name != null ? name.hashCode() : 0);
 	    return result;
 	}
 
@@ -112,7 +131,6 @@ public class RegalObject {
 		return false;
 	    return true;
 	}
-
     }
 
     String contentType = null;
