@@ -1230,10 +1230,7 @@ public class Node {
      * @return true if metadata contains catalog id
      */
     public boolean hasLinkToCatalogId() {
-	String hasUrn = "http://purl.org/lobid/lv#hbzID";
-	// List<String> catalog = RdfUtils.findRdfObjects(pid, hasUrn, metadata,
-	// RDFFormat.NTRIPLES);
-	boolean result = RdfUtils.hasTriple(pid, hasUrn, metadata);
+	boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata);
 	return result;
     }
 
