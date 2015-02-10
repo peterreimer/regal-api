@@ -240,10 +240,14 @@ public class Search {
 
 		msg.append(index);
 		if ("public".equals(node.getPublishScheme())) {
-		    publicIndexBulk.add(client.prepareIndex("public_" + index,
-			    node.getContentType(), node.getPid()).setSource(
-			    source));
-		    msg.append(" and public_" + index);
+		    if ("monograph".equals(node.getContentType())
+			    || "journal".equals(node.getContentType())
+			    || "webpage".equals(node.getContentType())) {
+			publicIndexBulk.add(client.prepareIndex(
+				"public_" + index, node.getContentType(),
+				node.getPid()).setSource(source));
+			msg.append(" and public_" + index);
+		    }
 		}
 		msg.append("\n");
 		result.add(msg.toString());

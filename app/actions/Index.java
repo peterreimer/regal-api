@@ -78,7 +78,10 @@ public class Index {
 	String pid = n.getPid();
 	String msg = "";
 	if ("public".equals(n.getPublishScheme())) {
-	    msg = index(pid, "public_" + namespace, n.getContentType());
+	    if ("monograph".equals(n.getContentType())
+		    || "journal".equals(n.getContentType())
+		    || "webpage".equals(n.getContentType()))
+		msg = index(pid, "public_" + namespace, n.getContentType());
 	} else {
 	    msg = remove(pid, "public_" + namespace, n.getContentType());
 	}
