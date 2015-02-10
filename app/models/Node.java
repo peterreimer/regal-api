@@ -19,6 +19,7 @@ package models;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.REL_MAB_527;
 import helper.HttpArchiveException;
 
 import java.io.ByteArrayInputStream;
@@ -923,11 +924,9 @@ public class Node {
     }
 
     private void addPartsToJsonMap(Map<String, Object> rdf) {
-	for (String p : getPartsSorted()) {
-	    Link l = new Link();
-	    l.setObject(p, false);
-	    l.setPredicate(HAS_PART);
-	    l.setObjectLabel(p);
+	for (Link l : getPartsSorted()) {
+	    if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
+		l.setObjectLabel(l.getObject());
 	    addLinkToJsonMap(rdf, l);
 	}
     }
@@ -1081,11 +1080,11 @@ public class Node {
      *            looking for
      * @return list of pids of related objects
      */
-    public List<String> getRelatives(String relation) {
-	List<String> result = new Vector<String>();
+    public List<Link> getRelatives(String relation) {
+	List<Link> result = new Vector<Link>();
 	for (Link l : links) {
 	    if (l.getPredicate().equals(relation))
-		result.add(l.getObject());
+		result.add(l);
 	}
 	return result;
     }
@@ -1095,18 +1094,18 @@ public class Node {
      * @return an ordered list of the nodes Children taking the information
      *         provided by seq datastream into accoutn
      */
-    public List<String> getPartsSorted() {
+    public List<Link> getPartsSorted() {
 	return sort(getRelatives(HAS_PART), getSeqArray());
     }
 
-    private List<String> sort(List<String> nodeIds, String[] seq) {
-	List<String> sorted = new ArrayList<String>();
+    private List<Link> sort(List<Link> nodeIds, String[] seq) {
+	List<Link> sorted = new ArrayList<Link>();
 	if (nodeIds == null || nodeIds.isEmpty())
 	    return sorted;
 	for (String i : seq) {
 	    int j = -1;
 	    if ((j = nodeIds.indexOf(i)) != -1) {
-		sorted.add(i);
+		sorted.add(nodeIds.get(j));
 		nodeIds.remove(j);
 	    }
 	}

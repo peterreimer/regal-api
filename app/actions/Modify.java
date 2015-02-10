@@ -575,6 +575,14 @@ public class Modify extends RegalAction {
 	return node;
     }
 
+    public String flattenAll(List<Node> nodes) {
+	return apply(nodes, n -> flatten(n).getPid());
+    }
+
+    public Node flatten(Node n) {
+	return moveUp(copyMetadata(n, "title", ""));
+    }
+
     @SuppressWarnings({ "serial", "javadoc" })
     public class MetadataNotFoundException extends RuntimeException {
 	public MetadataNotFoundException(Throwable e) {
