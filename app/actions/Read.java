@@ -75,8 +75,7 @@ public class Read extends RegalAction {
     public Node readCachedNode(String pid) {
 	Node c = readNodeFromCache(pid);
 	if (c == null) {
-	    updateIndexAndCache(readNode(pid));
-	    return readNodeFromCache(pid);
+	    return readNode(pid);
 	}
 	return c;
     }
