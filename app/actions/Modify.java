@@ -297,6 +297,7 @@ public class Modify extends RegalAction {
 		RDFFormat.NTRIPLES);
 	node.addTransformer(new Transformer("epicur"));
 	updateMetadata(node, metadata);
+	makeOAISet(new Read().readNode(node.getPid()));
 	return "Update " + subject + " metadata " + metadata;
     }
 
