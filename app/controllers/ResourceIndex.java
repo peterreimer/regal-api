@@ -6,10 +6,12 @@ import helper.HttpArchiveException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import models.Link;
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
@@ -105,7 +107,9 @@ public class ResourceIndex extends MyController {
 	    @QueryParam("style") String style) {
 	return new ReadMetadataAction().call(pid, new NodeAction() {
 	    public Result exec(Node node) {
-		List<String> nodeIds = node.getPartsSorted();
+		List<String> nodeIds = node.getPartsSorted().stream()
+			.map((Link l) -> l.getObject())
+			.collect(Collectors.toList());
 		if ("short".equals(style)) {
 		    return getJsonResult(nodeIds);
 		}
@@ -122,8 +126,10 @@ public class ResourceIndex extends MyController {
 	ReadMetadataAction action = new ReadMetadataAction();
 	return action.call(pid, new NodeAction() {
 	    public Result exec(Node node) {
-		List<String> nodeIds = read.readNode(pid).getRelatives(
-			IS_PART_OF);
+		List<String> nodeIds = read.readNode(pid)
+			.getRelatives(IS_PART_OF).stream()
+			.map((Link l) -> l.getObject())
+			.collect(Collectors.toList());
 		if ("short".equals(style)) {
 		    return getJsonResult(nodeIds);
 		}

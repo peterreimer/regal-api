@@ -31,12 +31,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.DublinCoreData;
 import models.Globals;
+import models.Link;
 import models.MabRecord;
 import models.Message;
 import models.Node;
@@ -221,11 +223,13 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "text/plain", nickname = "listMetadata", value = "listMetadata", notes = "Shows Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Promise<Result> listMetadata(@PathParam("pid") String pid) {
+    public static Promise<Result> listMetadata(@PathParam("pid") String pid,
+	    @QueryParam("field") String field) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    String result = read.readMetadata(pid);
+	    String result = read.readMetadata(pid, field);
 	    return ok(result);
+
 	});
     }
 
@@ -480,25 +484,29 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json,text/html", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid,
 	    @QueryParam("style") String style) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    try {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
 
-		List<String> nodeIds = node.getPartsSorted();
-		if ("short".equals(style)) {
-		    return getJsonResult(nodeIds);
-		}
-		List<Node> result = read.getNodesFromCache(nodeIds);
+			List<String> nodeIds = node.getPartsSorted().stream()
+				.map((Link l) -> l.getObject())
+				.collect(Collectors.toList());
+			if ("short".equals(style)) {
+			    return getJsonResult(nodeIds);
+			}
+			List<Node> result = read.getNodesFromCache(nodeIds);
 
-		if (request().accepts("text/html")) {
-		    return ok(resource.render(json(result)));
-		} else {
-		    return getJsonResult(result);
-		}
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+			if (request().accepts("text/html")) {
+			    return ok(resource.render(json(result)));
+			} else {
+			    return getJsonResult(result);
+			}
+		    } catch (Exception e) {
+			return JsonMessage(new Message(e, 500));
+		    }
 
-	});
+		});
     }
 
     @ApiOperation(produces = "application/json,text/html", nickname = "search", value = "search", notes = "Find resources", response = play.mvc.Result.class, httpMethod = "GET")
@@ -554,14 +562,18 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParents(@PathParam("pid") String pid,
 	    @QueryParam("style") String style) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    List<String> nodeIds = node.getRelatives(IS_PART_OF);
-	    if ("short".equals(style)) {
-		return getJsonResult(nodeIds);
-	    }
-	    List<Node> result = read.getNodesFromCache(nodeIds);
-	    return getJsonResult(result);
-	});
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    List<String> nodeIds = node.getRelatives(IS_PART_OF)
+			    .stream().map((Link l) -> l.getObject())
+			    .collect(Collectors.toList());
+		    if ("short".equals(style)) {
+			return getJsonResult(nodeIds);
+		    }
+		    List<Node> result = read.getNodesFromCache(nodeIds);
+		    return getJsonResult(result);
+		});
     }
 
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
@@ -653,4 +665,86 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json", nickname = "moveUp", value = "moveUp", notes = "Moves the resource to the parents parent. If parent has no parent, a HTTP 406 will be replied.", response = String.class, httpMethod = "POST")
+    public static Promise<Result> moveUp(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = modify.moveUp(node);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "copyMetadata", value = "copyMetadata", notes = "Copy a certain metadata field from an other resource. If no param given the title field of the parent will be copied. ", response = String.class, httpMethod = "POST")
+    public static Promise<Result> copyMetadata(@PathParam("pid") String pid,
+	    @QueryParam("field") String field,
+	    @QueryParam("copySource") String copySource) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = modify.copyMetadata(node, field, copySource);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "flatten", value = "flatten", notes = "Copy the title of your parent and move up one level.", response = String.class, httpMethod = "POST")
+    public static Promise<Result> flatten(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = modify.flatten(node);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "flattenAll", value = "flattenAll", notes = "flatten is applied to all descendents of type contentType or type \"file\"(default).", response = String.class, httpMethod = "POST")
+    public static Promise<Result> flattenAll(@PathParam("pid") String pid,
+	    @QueryParam("contentType") String contentType) {
+	return new BulkActionAccessor().call(() -> {
+	    List<Node> list = null;
+	    if (contentType != null && !contentType.isEmpty()) {
+		list = Globals.fedora.listComplexObject(pid).stream()
+			.filter(n -> contentType.equals(n.getContentType()))
+			.collect(Collectors.toList());
+	    } else {
+		list = Globals.fedora.listComplexObject(pid).stream()
+			.filter(n -> "file".equals(n.getContentType()))
+			.collect(Collectors.toList());
+	    }
+	    BulkAction bulk = new BulkAction();
+	    bulk.executeOnNodes(list, nodes -> {
+		return modify.flattenAll(nodes);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "flattenAll", value = "flattenAll", notes = "flatten is applied to all descendents of type file.", response = String.class, httpMethod = "POST")
+    public static Promise<Result> deleteDescendent(
+	    @PathParam("pid") String pid,
+	    @QueryParam("contentType") String contentType) {
+	return new BulkActionAccessor().call(() -> {
+	    List<Node> list = null;
+	    if (contentType != null && !contentType.isEmpty()) {
+		list = Globals.fedora.listComplexObject(pid).stream()
+			.filter(n -> contentType.equals(n.getContentType()))
+			.collect(Collectors.toList());
+	    } else {
+		list = Globals.fedora.listComplexObject(pid);
+	    }
+	    BulkAction bulk = new BulkAction();
+	    bulk.executeOnNodes(list, nodes -> {
+		return delete.delete(nodes);
+	    });
+	    response().setHeader("Transfer-Encoding", "Chunked");
+	    return ok(bulk.getChunks());
+	});
+    }
 }

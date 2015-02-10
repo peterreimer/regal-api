@@ -7,13 +7,24 @@
 <table class="table table-striped table-condensed">
 @for(k <- (hit \ "@context").as[JsObject].keys.toSeq.sorted){
 		@tableRow((hit \ "@context" \ k \ "label"),k,hit)
-}	
+}
 </table>
 
-
-
-
 @analyseValue(v: String)={
+	@v match {
+		case a if v.startsWith("http") => {
+			@v
+		}
+		case a if v.startsWith("edoweb") => {
+			/resource/@v
+		}
+		case _ => {
+			@v
+		}
+	}
+}
+
+@analyseString(v: String)={
 	@v match {
 		case a if v.startsWith("http") => {
 			<a href=@v>@v</a>
@@ -30,14 +41,16 @@
 @value(value: JsValue)= {
 	@value match {
 		case a: JsString => {
-			@analyseValue(value.as[String])
+			@analyseString(value.as[String])
 		}
 		case b: JsObject => {
 			<span class="@models.Globals.profile.getIcon(((value \ "@id").asOpt[String].getOrElse("")))"></span>
-			<a href=http://api.localhost/find?q="@((value \ "@id").asOpt[String].getOrElse(value.asOpt[String]))">
+			<a href=@analyseValue((value \ "@id").asOpt[String].getOrElse(""))>
 			@((value \ "prefLabel").asOpt[String].getOrElse(value.asOpt[String]))
 			</a> |
-			<a title="Linked-Data-Quelle abrufen" href=@((value \ "@id").asOpt[String].getOrElse(value.asOpt[String]))><span class="glyphicon glyphicon-link"></span></a>
+			<a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode((value \ "@id").asOpt[String].getOrElse(value.as[String]))">
+				<span class="glyphicon glyphicon-link"></span>
+			</a>
 		}
 	}
 	<br/>
@@ -46,7 +59,7 @@
 
 @htmlRow(values: JsValue,label: String, fieldId: String,hit: JsValue)={
 	@values match {
-		case a: JsString => { 
+		case a: JsString => {
 			<tr>
 				<td><a href=@fieldId>@label</a></td>
 				<td>
@@ -54,16 +67,16 @@
 				</td>
 			</tr>
   		}
-		case b: JsArray => {	
+		case b: JsArray => {
 			<tr>
 				<td><a href=@fieldId>@label</a></td>
 				<td>
-			@for(field <- values.asOpt[Seq[JsValue]].getOrElse(Seq())){	
-				@value(field)	
-			} 
+			@for(field <- values.asOpt[Seq[JsValue]].getOrElse(Seq())){
+				@value(field)
+			}
 				</td>
-			</tr>	
-		}	
+			</tr>
+		}
 		case c : JsObject => {
 			<tr>
 				<td><a href=@fieldId>@label</a></td>
@@ -74,13 +87,12 @@
 					}
 					</table>
 				</td>
-			</tr>	
+			</tr>
 		}
 		case _ => {}
-	}	
+	}
 }
 
 @tableRow(label: JsValue,name: String,hit:JsValue ) = {
 @htmlRow((hit \ name),label.asOpt[String].getOrElse(name),(hit \ "@context" \ name \ "@id").asOpt[String].getOrElse(""),hit)
 }
-
