@@ -333,6 +333,9 @@ public class Read extends RegalAction {
     /**
      * @param pid
      *            the pid of the object
+     * @param field
+     *            if field is specified, only the value of a certain field will
+     *            be returned
      * @return n-triple metadata
      */
     public String readMetadata(String pid, String field) {
@@ -358,6 +361,9 @@ public class Read extends RegalAction {
     /**
      * @param pid
      *            the pid of the object
+     * @param field
+     *            if field is specified, only a certain field of the node's
+     *            metadata will be returned
      * @return n-triple metadata
      */
     public String readMetadataFromCache(String pid, String field) {
