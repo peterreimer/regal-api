@@ -20,6 +20,7 @@ import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
 
 import java.io.InputStream;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 
 import models.DublinCoreData;
 import models.Globals;
+import models.Link;
 import models.Node;
 import models.Urn;
 
@@ -63,6 +65,7 @@ public class Read extends RegalAction {
 	n.setDataUri(n.getAggregationUri() + "/data");
 	n.setContextDocumentUri("http://" + Globals.server
 		+ "/public/edoweb-resources.json");
+	addLabelsForParts(n);
 	writeNodeToCache(n);
 	return n;
     }
@@ -77,7 +80,29 @@ public class Read extends RegalAction {
 	if (c == null) {
 	    return readNode(pid);
 	}
+	// addLabelsForParts(c);
 	return c;
+    }
+
+    private void addLabelsForParts(Node n) {
+	List<Link> rels = n.getRelsExt();
+	for (Link l : rels) {
+	    if (HAS_PART.equals(l.getPredicate())
+		    || IS_PART_OF.equals(l.getPredicate())) {
+		addLabel(n, l);
+	    }
+	}
+    }
+
+    private void addLabel(Node n, Link l) {
+	try {
+	    String label = readMetadataFromCache(l.getObject(), "title");
+	    l.setObjectLabel(label);
+	    n.removeRelation(l.getPredicate(), l.getObject());
+	    n.addRelation(l);
+	} catch (Exception e) {
+
+	}
     }
 
     /**
@@ -96,7 +121,9 @@ public class Read extends RegalAction {
     public List<Node> getParts(Node node) {
 	List<Node> result = new ArrayList<Node>();
 	result.add(node);
-	List<Node> parts = getNodesFromCache(node.getRelatives(HAS_PART));
+	List<Node> parts = getNodesFromCache(node.getRelatives(HAS_PART)
+		.stream().map((Link l) -> l.getObject())
+		.collect(Collectors.toList()));
 	for (Node p : parts) {
 	    result.addAll(getParts(p));
 	}
@@ -308,10 +335,47 @@ public class Read extends RegalAction {
      *            the pid of the object
      * @return n-triple metadata
      */
-    public String readMetadata(String pid) {
+    public String readMetadata(String pid, String field) {
 	try {
 	    Node node = readNode(pid);
-	    return node.getMetadata();
+	    String metadata = node.getMetadata();
+	    if (field == null || field.isEmpty()) {
+		return metadata;
+	    } else {
+		String pred = Globals.profile.nMap.get(field).uri;
+		List<String> value = RdfUtils.findRdfObjects(pid, pred,
+			metadata, RDFFormat.NTRIPLES);
+
+		return value.isEmpty() ? "No " + field : value.get(0);
+	    }
+	} catch (UrlConnectionException e) {
+	    throw new HttpArchiveException(404, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    /**
+     * @param pid
+     *            the pid of the object
+     * @return n-triple metadata
+     */
+    public String readMetadataFromCache(String pid, String field) {
+	try {
+	    Node node = readCachedNode(pid);
+	    String metadata = node.getMetadata();
+	    if (metadata == null || metadata.isEmpty())
+		throw new HttpArchiveException(404, "No Metadata on " + pid
+			+ " available!");
+	    if (field == null || field.isEmpty()) {
+		return metadata;
+	    } else {
+		String pred = Globals.profile.nMap.get(field).uri;
+		List<String> value = RdfUtils.findRdfObjects(pid, pred,
+			metadata, RDFFormat.NTRIPLES);
+
+		return value.isEmpty() ? "No " + field : value.get(0);
+	    }
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
 	} catch (Exception e) {
