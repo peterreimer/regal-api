@@ -80,7 +80,7 @@ public class HardCodedUser implements User {
 	    role = MyController.SUBSCRIBER_ROLE;
 	} else if (MyController.REMOTE_ROLE.equals(username)
 		&& password.equals(Play.application().configuration()
-			.getString("regal-api.subscriber-password"))) {
+			.getString("regal-api.remote-password"))) {
 	    role = MyController.REMOTE_ROLE;
 	}
 	if (role == null)
