@@ -726,7 +726,7 @@ public class Resource extends MyController {
 	});
     }
 
-    @ApiOperation(produces = "application/json", nickname = "flattenAll", value = "flattenAll", notes = "flatten is applied to all descendents of type file.", response = String.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json", nickname = "deleteDescendent", value = "deleteDescendent", notes = "deletes all descendents of a certain contentType", response = String.class, httpMethod = "POST")
     public static Promise<Result> deleteDescendent(
 	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
