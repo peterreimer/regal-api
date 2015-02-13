@@ -292,14 +292,14 @@ public class Modify extends RegalAction {
 	String metadata = node.getMetadata();
 	if (node.hasUrn())
 	    throw new HttpArchiveException(409, subject
-		    + " already has a urn: " + metadata);
+		    + " already has a urn. Leave unmodified!");
 	String urn = generateUrn(subject, snid);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata,
 		RDFFormat.NTRIPLES);
 	node.addTransformer(new Transformer("epicur"));
 	updateMetadata(node, metadata);
 	makeOAISet(new Read().readNode(node.getPid()));
-	return "Update " + subject + " metadata " + metadata;
+	return "Update " + subject + "! Urn has been added.";
     }
 
     /**
@@ -336,10 +336,19 @@ public class Modify extends RegalAction {
     }
 
     private String addUrn(Node n, String snid, Date fromBefore) {
-	if (n.getCreationDate().before(fromBefore))
-	    return addUrn(n, snid);
+	String contentType = n.getContentType();
+	if (n.getCreationDate().before(fromBefore)) {
+	    if ("journal".equals(contentType)) {
+		return addUrn(n, snid);
+	    } else if ("monograph".equals(contentType)) {
+		return addUrn(n, snid);
+	    } else if ("file".equals(contentType)) {
+		return addUrn(n, snid);
+	    }
+	}
 	return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
-		+ " is not before " + fromBefore;
+		+ " is not before " + fromBefore + " or contentType "
+		+ contentType + " is not allowed to carry urn.";
     }
 
     /**
@@ -386,6 +395,7 @@ public class Modify extends RegalAction {
 		addSet(node, "aleph");
 		addSet(node, "edo01");
 	    }
+	    addSet(node, node.getContentType());
 	    updateIndexAndCache(node);
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
