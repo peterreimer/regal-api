@@ -1092,7 +1092,7 @@ public class Node {
     /**
      * @param node
      * @return an ordered list of the nodes Children taking the information
-     *         provided by seq datastream into accoutn
+     *         provided by seq datastream into account
      */
     public List<Link> getPartsSorted() {
 	return sort(getRelatives(HAS_PART), getSeqArray());
@@ -1104,7 +1104,8 @@ public class Node {
 	    return sorted;
 	for (String i : seq) {
 	    int j = -1;
-	    if ((j = nodeIds.indexOf(i)) != -1) {
+	    if ((j = nodeIds.stream().map((Link l) -> l.getObject())
+		    .collect(Collectors.toList()).indexOf(i)) != -1) {
 		sorted.add(nodeIds.get(j));
 		nodeIds.remove(j);
 	    }
