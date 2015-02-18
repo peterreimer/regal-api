@@ -651,7 +651,8 @@ public class Resource extends MyController {
     public static Promise<Result> asPdfboxTxt(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    String result = transform.pdfbox(pid);
-	    response().setContentType("text/plain");
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setHeader("Content-Type", "text/plain; charset=utf-8");
 	    return ok(result);
 	});
     }

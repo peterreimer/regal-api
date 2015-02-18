@@ -18,6 +18,7 @@ package helper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -44,7 +45,7 @@ public class PdfText {
      *            this file will be extracted.
      * @return the plain text of the pdf
      */
-    public String toString(File pdfFile) {
+    public String toString(InputStream pdfFile) {
 	PDDocument doc = null;
 	try {
 
