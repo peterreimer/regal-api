@@ -176,7 +176,7 @@ public class Transform {
      *            the pid of a node with pdf data
      * @return the plain text content of the pdf
      */
-    public String pdfbox(String pid) {
+    public Node pdfbox(String pid) {
 	return pdfbox(new Read().readNode(pid));
     }
 
@@ -185,7 +185,8 @@ public class Transform {
      *            the node with pdf data
      * @return the plain text content of the pdf
      */
-    public String pdfbox(Node node) {
+    public Node pdfbox(final Node node) {
+	Node result = node;
 	String pid = node.getPid();
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
@@ -198,7 +199,7 @@ public class Transform {
 	    throw new HttpArchiveException(406,
 		    "Wrong mime type. Cannot extract text from " + mimeType);
 	InputStream content = null;
-	String result = "";
+
 	try {
 	    URL url = new URL(getHttpDataUri(node));
 	    String authStr = "edoweb-anonymous:nopwd";
@@ -208,7 +209,7 @@ public class Transform {
 	    connection.setRequestProperty("Authorization", "Basic "
 		    + authEncoded);
 	    PdfText pdf = new PdfText();
-	    result = pdf.toString(connection.getInputStream());
+	    result.addFulltext(pdf.toString(connection.getInputStream()));
 	} catch (MalformedURLException e) {
 	    throw new HttpArchiveException(500, e);
 	} catch (IOException e) {

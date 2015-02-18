@@ -28,64 +28,143 @@ import models.Node;
 public class Index {
 
     /**
-     * @param pid
-     *            The namespaced pid to remove from index
-     * @param index
-     *            the elasticsearch index
-     * @param type
-     *            the type of the resource
+     * @param n
+     *            the node to remove from all indexes
      * @return A short message
      */
-    public String remove(String pid, String index, String type) {
+    public String remove(Node n) {
+	String pid = n.getPid();
+	String type = n.getContentType();
+	String index = n.getNamespace();
+	return removeFromAllIndexed(pid, type, index);
+    }
+
+    private String removeFromAllIndexed(String pid, String type, String index) {
 	if (type == null)
 	    return pid + " not deleted from index. Cause: No type available!";
-	Globals.search.delete(pid, index, type);
-	return pid + " of type " + type + " removed from index " + index + "!";
+	StringBuffer message = new StringBuffer(pid + " of type " + type
+		+ " removed from index " + index + "!");
+	message.append(removeFromPrivateIndex(pid, type, index));
+	message.append(removeFromPublicIndex(pid, type, index));
+	message.append(removeFromFulltextIndex(pid, type, index));
+	return message.toString();
+
+    }
+
+    private String removeFromFulltextIndex(String pid, String type, String index) {
+	try {
+	    Globals.search.delete(pid, Globals.PDFBOX_OCR_INDEX_PREF + index,
+		    type);
+	    return pid + " removed from " + Globals.PDFBOX_OCR_INDEX_PREF
+		    + index + "\n";
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return pid + " cannot be removed from"
+		    + Globals.PDFBOX_OCR_INDEX_PREF + index + "\n";
+	}
+    }
+
+    private String removeFromPublicIndex(String pid, String type, String index) {
+	try {
+	    Globals.search.delete(pid, Globals.PUBLIC_INDEX_PREF + index, type);
+	    return pid + " removed from " + Globals.PUBLIC_INDEX_PREF + index
+		    + "\n";
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return pid + " cannot be removed from" + Globals.PUBLIC_INDEX_PREF
+		    + index + "\n";
+	}
+    }
+
+    private String removeFromPrivateIndex(String pid, String type, String index) {
+	try {
+	    Globals.search.delete(pid, index, type);
+	    return pid + " removed from " + index + "\n";
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return pid + " cannot be removed from" + index + "\n";
+	}
     }
 
     /**
-     * @param p
-     *            The pid with namespace that must be indexed
-     * @param index
-     *            the name of the index. Convention is to use the namespace of
-     *            the pid.
-     * @param type
-     *            the type of the resource
-     * @return a short message.
+     * @param n
+     *            the node to index in all indexes
+     * @return a message
      */
-    public String index(String p, String index, String type) {
-	Globals.search.index(index, type, p, new Read().readNode(p).toString());
-	return p + " indexed in " + index + "!";
-    }
-
-    /**
-     * @param p
-     *            The pid with namespace that must be indexed
-     * @param index
-     *            the name of the index. Convention is to use the namespace of
-     *            the pid.
-     * @param type
-     *            the type of the resource
-     * @return a short message.
-     */
-    public String publicIndex(String p, String index, String type) {
-	Globals.search.index(index, type, p, new Read().readNode(p).toString());
-	return p + " indexed!";
-    }
-
-    protected String index(Node n) {
-	String namespace = n.getNamespace();
+    public String index(Node n) {
+	String index = n.getNamespace();
 	String pid = n.getPid();
-	String msg = "";
+	String type = n.getContentType();
+	StringBuffer msg = new StringBuffer();
+	msg.append(indexToPrivateIndex(pid, type, index, n));
+	msg.append(handlePublicIndex(pid, type, index, n));
+	msg.append(handleFulltextIndex(pid, type, index, n));
+	return msg.toString();
+    }
+
+    private String handleFulltextIndex(String pid, String type, String index,
+	    Node n) {
+	if ("public".equals(n.getAccessScheme())) {
+	    if ("file".equals(n.getContentType())
+		    && "application/pdf".equals(n.getMimeType())) {
+		return indexToFulltextIndex(pid, type, index, n);
+	    }
+	} else {
+	    return removeFromFulltextIndex(pid, type, index);
+	}
+	return pid + " not indexed in fulltext index!\n";
+    }
+
+    private String handlePublicIndex(String pid, String type, String index,
+	    Node n) {
 	if ("public".equals(n.getPublishScheme())) {
 	    if ("monograph".equals(n.getContentType())
 		    || "journal".equals(n.getContentType())
 		    || "webpage".equals(n.getContentType()))
-		msg = index(pid, "public_" + namespace, n.getContentType());
+		return indexToPublicIndex(pid, type, index, n);
 	} else {
-	    msg = remove(pid, "public_" + namespace, n.getContentType());
+	    return removeFromPublicIndex(pid, type, index);
 	}
-	return msg + "\n" + index(pid, namespace, n.getContentType());
+	return pid + " not indexed in public index!\n";
+    }
+
+    private String indexToPublicIndex(String pid, String type, String index,
+	    Node data) {
+	try {
+	    Globals.search.index(Globals.PUBLIC_INDEX_PREF + index, type, pid,
+		    data.toString());
+	    return pid + " indexed in " + Globals.PUBLIC_INDEX_PREF + index
+		    + "\n";
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return pid + " not indexed in " + Globals.PUBLIC_INDEX_PREF + index
+		    + "\n";
+	}
+    }
+
+    private String indexToFulltextIndex(String pid, String type, String index,
+	    Node data) {
+	try {
+	    Globals.search.index(Globals.PDFBOX_OCR_INDEX_PREF + index, type,
+		    pid, data.toString());
+	    return pid + " indexed in " + Globals.PDFBOX_OCR_INDEX_PREF + index
+		    + "\n";
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return pid + " not indexed in " + Globals.PDFBOX_OCR_INDEX_PREF
+		    + index + "\n";
+	}
+    }
+
+    private String indexToPrivateIndex(String pid, String type, String index,
+	    Node data) {
+	try {
+	    Globals.search.index(index, type, pid, data.toString());
+	    return pid + " indexed in " + index + "\n";
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return pid + " not indexed in " + index + "\n";
+	}
     }
 
     /**

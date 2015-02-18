@@ -157,7 +157,7 @@ public class SearchFacade {
      *            for paging
      * @return all Hits
      */
-    public SearchHits query(String index, String queryString, int from,
+    public SearchHits query(String[] index, String queryString, int from,
 	    int until) {
 	return search.query(index, queryString, from, until);
     }
@@ -194,5 +194,4 @@ public class SearchFacade {
     public List<String> indexAll(List<Node> list, String index) {
 	return search.indexAll(list, index);
     }
-
 }
