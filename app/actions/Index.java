@@ -42,8 +42,7 @@ public class Index {
     private String removeFromAllIndexed(String pid, String type, String index) {
 	if (type == null)
 	    return pid + " not deleted from index. Cause: No type available!";
-	StringBuffer message = new StringBuffer(pid + " of type " + type
-		+ " removed from index " + index + "!");
+	StringBuffer message = new StringBuffer();
 	message.append(removeFromPrivateIndex(pid, type, index));
 	message.append(removeFromPublicIndex(pid, type, index));
 	message.append(removeFromFulltextIndex(pid, type, index));

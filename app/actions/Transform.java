@@ -28,7 +28,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import org.apache.commons.codec.binary.Base64;
+
 import java.util.List;
 
 import models.DublinCoreData;
@@ -38,7 +40,6 @@ import models.Node;
 
 import org.w3c.dom.Element;
 
-import sun.misc.BASE64Decoder;
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
 import converter.mab.RegalToMabMapper;
@@ -126,6 +127,10 @@ public class Transform {
 		+ Globals.server + "/resource/" + node.getDataUri();
     }
 
+    private String getInternalDataUri(Node node) {
+	return "http://localhost:9000/resource/" + node.getDataUri();
+    }
+
     /**
      * @param pid
      *            the pid of the object
@@ -201,7 +206,7 @@ public class Transform {
 	InputStream content = null;
 
 	try {
-	    URL url = new URL(getHttpDataUri(node));
+	    URL url = new URL(getInternalDataUri(node));
 	    String authStr = "edoweb-anonymous:nopwd";
 	    String authEncoded = Base64.encodeBase64String(authStr.getBytes());
 	    HttpURLConnection connection = (HttpURLConnection) url
