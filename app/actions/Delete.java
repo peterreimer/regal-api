@@ -35,9 +35,10 @@ public class Delete extends RegalAction {
      * @return a message
      */
     public String delete(Node n) {
-	removeIdFromPublicAndPrivateIndex(n);
+	StringBuffer message = new StringBuffer();
+	message.append(new Index().remove(n));
 	Globals.fedora.deleteNode(n.getPid());
-	return n.getPid() + " deleted!";
+	return message.toString() + "\n" + n.getPid() + " deleted!";
     }
 
     /**
@@ -49,24 +50,6 @@ public class Delete extends RegalAction {
      */
     public String delete(List<Node> nodes) {
 	return apply(nodes, n -> delete(n));
-    }
-
-    private String removeIdFromPublicAndPrivateIndex(Node n) {
-	StringBuffer msg = new StringBuffer();
-	try {
-	    String namespace = n.getNamespace();
-	    String m = new Index().remove(n.getPid(), namespace,
-		    n.getContentType());
-	    msg.append("\n" + m);
-	    m = new Index().remove(n.getPid(), "public_" + namespace,
-		    n.getContentType());
-	    msg.append("\n" + m);
-	} catch (Exception e) {
-	    msg.append("\n" + e);
-	} finally {
-	    removeFromCache(n);
-	}
-	return msg.toString();
     }
 
     /**

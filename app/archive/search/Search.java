@@ -44,6 +44,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
 import play.Play;
+import actions.Transform;
 import archive.fedora.CopyUtils;
 
 /**
@@ -180,7 +181,7 @@ public class Search {
 	return response.getHits();
     }
 
-    SearchHits query(String index, String queryString, int from, int until) {
+    SearchHits query(String[] index, String queryString, int from, int until) {
 	refresh();
 	QueryBuilder query = QueryBuilders.queryString(queryString);
 	SearchResponse response = client.prepareSearch(index).setQuery(query)
@@ -224,7 +225,7 @@ public class Search {
      */
     public List<String> indexAll(List<Node> list, String index) {
 	init(index);
-	init("public_" + index);
+	init(Globals.PUBLIC_INDEX_PREF + index);
 	List<String> result = new ArrayList<String>();
 	BulkRequestBuilder internalIndexBulk = client.prepareBulk();
 	BulkRequestBuilder publicIndexBulk = client.prepareBulk();
@@ -243,10 +244,26 @@ public class Search {
 		    if ("monograph".equals(node.getContentType())
 			    || "journal".equals(node.getContentType())
 			    || "webpage".equals(node.getContentType())) {
+
 			publicIndexBulk.add(client.prepareIndex(
-				"public_" + index, node.getContentType(),
-				node.getPid()).setSource(source));
-			msg.append(" and public_" + index);
+				Globals.PUBLIC_INDEX_PREF + index,
+				node.getContentType(), node.getPid())
+				.setSource(source));
+			msg.append(" and " + Globals.PUBLIC_INDEX_PREF + index);
+		    }
+
+		}
+		if ("public".equals(node.getAccessScheme())) {
+		    if ("file".equals(node.getContentType())) {
+			publicIndexBulk
+				.add(client.prepareIndex(
+					Globals.PDFBOX_OCR_INDEX_PREF + index,
+					node.getContentType(), node.getPid())
+					.setSource(
+						new Transform().pdfbox(node)
+							.toString()));
+			msg.append(" and " + Globals.PDFBOX_OCR_INDEX_PREF
+				+ index);
 		    }
 		}
 		msg.append("\n");
@@ -282,4 +299,5 @@ public class Search {
     private void refresh() {
 	client.admin().indices().refresh(new RefreshRequest()).actionGet();
     }
+
 }

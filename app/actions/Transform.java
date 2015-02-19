@@ -23,10 +23,12 @@ import helper.PdfText;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.apache.commons.codec.binary.Base64;
 import java.util.List;
 
 import models.DublinCoreData;
@@ -36,6 +38,7 @@ import models.Node;
 
 import org.w3c.dom.Element;
 
+import sun.misc.BASE64Decoder;
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
 import converter.mab.RegalToMabMapper;
@@ -119,8 +122,8 @@ public class Transform {
     }
 
     private String getHttpDataUri(Node node) {
-	return Globals.useHttpUris ? node.getDataUri() : Globals.server
-		+ "/resource/" + node.getDataUri();
+	return Globals.useHttpUris ? node.getDataUri() : Globals.protocol
+		+ Globals.server + "/resource/" + node.getDataUri();
     }
 
     /**
@@ -173,7 +176,7 @@ public class Transform {
      *            the pid of a node with pdf data
      * @return the plain text content of the pdf
      */
-    public String pdfbox(String pid) {
+    public Node pdfbox(String pid) {
 	return pdfbox(new Read().readNode(pid));
     }
 
@@ -182,7 +185,8 @@ public class Transform {
      *            the node with pdf data
      * @return the plain text content of the pdf
      */
-    public String pdfbox(Node node) {
+    public Node pdfbox(final Node node) {
+	Node result = node;
 	String pid = node.getPid();
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
@@ -194,17 +198,31 @@ public class Transform {
 	if (mimeType.compareTo("application/pdf") != 0)
 	    throw new HttpArchiveException(406,
 		    "Wrong mime type. Cannot extract text from " + mimeType);
-	URL content = null;
+	InputStream content = null;
+
 	try {
-	    content = new URL(getHttpDataUri(node));
-	    File pdfFile = CopyUtils.download(content);
+	    URL url = new URL(getHttpDataUri(node));
+	    String authStr = "edoweb-anonymous:nopwd";
+	    String authEncoded = Base64.encodeBase64String(authStr.getBytes());
+	    HttpURLConnection connection = (HttpURLConnection) url
+		    .openConnection();
+	    connection.setRequestProperty("Authorization", "Basic "
+		    + authEncoded);
 	    PdfText pdf = new PdfText();
-	    return pdf.toString(pdfFile);
+	    result.addFulltext(pdf.toString(connection.getInputStream()));
 	} catch (MalformedURLException e) {
 	    throw new HttpArchiveException(500, e);
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
+	} finally {
+	    if (content != null)
+		try {
+		    content.close();
+		} catch (IOException e) {
+		    play.Logger.warn("", e);
+		}
 	}
+	return result;
     }
 
     /**
