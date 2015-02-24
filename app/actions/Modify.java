@@ -195,7 +195,7 @@ public class Modify extends RegalAction {
 	    updateIndexAndCache(new Read().readNode(pid));
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
-	    throw new HttpArchiveException(400);
+	    throw new HttpArchiveException(400, e);
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
 	}
