@@ -59,14 +59,24 @@ public class Read extends RegalAction {
      * @return a Node containing the data from the repository
      */
     public Node readNode(String pid) {
+	Node n = internalReadNode(pid);
+	addLabelsForParts(n);
+	writeNodeToCache(n);
+	return n;
+    }
+
+    /**
+     * @param pid
+     *            the will be read to the node
+     * @return a Node containing the data from the repository
+     */
+    private Node internalReadNode(String pid) {
 	Node n = Globals.fedora.readNode(pid);
 	n.setAggregationUri(createAggregationUri(n.getPid()));
 	n.setRemUri(n.getAggregationUri() + ".rdf");
 	n.setDataUri(n.getAggregationUri() + "/data");
 	n.setContextDocumentUri("http://" + Globals.server
 		+ "/public/edoweb-resources.json");
-	addLabelsForParts(n);
-	writeNodeToCache(n);
 	return n;
     }
 
@@ -96,7 +106,7 @@ public class Read extends RegalAction {
 
     private void addLabel(Node n, Link l) {
 	try {
-	    String label = readMetadataFromCache(l.getObject(), "title");
+	    String label = readMetadata(l.getObject(), "title");
 	    l.setObjectLabel(label);
 	    n.removeRelation(l.getPredicate(), l.getObject());
 	    n.addRelation(l);
@@ -340,7 +350,7 @@ public class Read extends RegalAction {
      */
     public String readMetadata(String pid, String field) {
 	try {
-	    Node node = readNode(pid);
+	    Node node = internalReadNode(pid);
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
 		return metadata;
