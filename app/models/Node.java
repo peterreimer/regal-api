@@ -17,6 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_MAB_527;
@@ -846,6 +847,8 @@ public class Node {
 	    if (HAS_PART.equals(l.getPredicate()))
 		continue;
 	    if (REL_HBZ_ID.equals(l.getPredicate()))
+		continue;
+	    if (IS_PART_OF.equals(l.getPredicate()))
 		continue;
 	    addLinkToJsonMap(rdf, l);
 	}
