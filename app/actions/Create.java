@@ -40,6 +40,7 @@ public class Create extends RegalAction {
 	new Index().remove(node);
 	overrideNodeMembers(node, object);
 	Globals.fedora.updateNode(node);
+	new Read().addLabelsForParts(node);
 	updateIndexAndCache(node);
 	return node;
     }
@@ -53,6 +54,7 @@ public class Create extends RegalAction {
 	new Index().remove(node);
 	setNodeMembers(node, object);
 	Globals.fedora.updateNode(node);
+	new Read().addLabelsForParts(node);
 	updateIndexAndCache(node);
 	return node;
     }

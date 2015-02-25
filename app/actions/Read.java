@@ -94,7 +94,7 @@ public class Read extends RegalAction {
 	return c;
     }
 
-    private void addLabelsForParts(Node n) {
+    void addLabelsForParts(Node n) {
 	List<Link> rels = n.getRelsExt();
 	for (Link l : rels) {
 	    if (HAS_PART.equals(l.getPredicate())
