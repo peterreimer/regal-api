@@ -24,6 +24,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import models.Globals;
 import models.Message;
 import models.Transformer;
 
@@ -53,12 +54,11 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Promise<Result> index(@PathParam("pid") String pid,
-	    @QueryParam("contentType") final String type,
 	    @QueryParam("index") final String indexName) {
 	return new ModifyAction().call(pid, node -> {
 	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
 		    : indexName;
-	    String result = index.index(pid, curIndex, type);
+	    String result = index.index(node);
 	    return JsonMessage(new Message(result));
 	});
     }
@@ -120,37 +120,11 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
-    public static Promise<Result> removeFromIndex(@PathParam("pid") String pid,
-	    @QueryParam("contentType") final String type) {
+    public static Promise<Result> removeFromIndex(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = index.remove(pid, pid.split(":")[0], type);
+	    String result = index.remove(node);
 	    return JsonMessage(new Message(result));
 	});
-    }
-
-    @ApiOperation(produces = "application/json,application/html", nickname = "publicIndex", value = "publicIndex", notes = "Adds resource to public elasticsearch index", httpMethod = "POST")
-    public static Promise<Result> publicIndex(@PathParam("pid") String pid,
-	    @QueryParam("contentType") final String type,
-	    @QueryParam("index") final String indexName) {
-	return new ModifyAction().call(pid, node -> {
-	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
-		    : indexName;
-	    String result = index.publicIndex(pid, "public_" + curIndex, type);
-	    return JsonMessage(new Message(result));
-	});
-    }
-
-    @ApiOperation(produces = "application/json,application/html", nickname = "removeFromPublicIndex", value = "removeFromPublicIndex", notes = "Removes resource to public elasticsearch index", httpMethod = "DELETE")
-    public static Promise<Result> removeFromPublicIndex(
-	    @PathParam("pid") String pid,
-	    @QueryParam("contentType") final String type) {
-	return new ModifyAction().call(
-		pid,
-		node -> {
-		    String result = index.remove(pid,
-			    "public_" + pid.split(":")[0], type);
-		    return JsonMessage(new Message(result));
-		});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
@@ -188,19 +162,19 @@ public class MyUtils extends MyController {
 	return new BulkActionAccessor().call(() -> {
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
-		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
+		    "http://edoweb-anonymous:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "epicur"));
 	    transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
+		    "http://edoweb-anonymous:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "oaidc"));
 	    transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
+		    "http://edoweb-anonymous:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "pdfa"));
 	    transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
-		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
+		    "http://edoweb-anonymous:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "pdfbox"));
 	    transformers.add(new Transformer(namespace + "aleph", "aleph",
-		    "http://edoweb-anonymous-user:nopwd@" + "localhost:9000"
+		    "http://edoweb-anonymous:nopwd@" + "localhost:9000"
 			    + "/resource/(pid)." + namespace + "aleph"));
 	    create.contentModelsInit(transformers);
 	    String result = "Reinit contentModels " + namespace + "epicur, "

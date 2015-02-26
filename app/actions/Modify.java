@@ -195,7 +195,7 @@ public class Modify extends RegalAction {
 	    updateIndexAndCache(new Read().readNode(pid));
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
-	    throw new HttpArchiveException(400);
+	    throw new HttpArchiveException(400, e);
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
 	}
@@ -292,14 +292,14 @@ public class Modify extends RegalAction {
 	String metadata = node.getMetadata();
 	if (node.hasUrn())
 	    throw new HttpArchiveException(409, subject
-		    + " already has a urn: " + metadata);
+		    + " already has a urn. Leave unmodified!");
 	String urn = generateUrn(subject, snid);
 	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata,
 		RDFFormat.NTRIPLES);
 	node.addTransformer(new Transformer("epicur"));
 	updateMetadata(node, metadata);
 	makeOAISet(new Read().readNode(node.getPid()));
-	return "Update " + subject + " metadata " + metadata;
+	return "Update " + subject + "! Urn has been added.";
     }
 
     /**
@@ -336,10 +336,19 @@ public class Modify extends RegalAction {
     }
 
     private String addUrn(Node n, String snid, Date fromBefore) {
-	if (n.getCreationDate().before(fromBefore))
-	    return addUrn(n, snid);
+	String contentType = n.getContentType();
+	if (n.getCreationDate().before(fromBefore)) {
+	    if ("journal".equals(contentType)) {
+		return addUrn(n, snid);
+	    } else if ("monograph".equals(contentType)) {
+		return addUrn(n, snid);
+	    } else if ("file".equals(contentType)) {
+		return addUrn(n, snid);
+	    }
+	}
 	return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
-		+ " is not before " + fromBefore;
+		+ " is not before " + fromBefore + " or contentType "
+		+ contentType + " is not allowed to carry urn.";
     }
 
     /**
@@ -386,6 +395,7 @@ public class Modify extends RegalAction {
 		addSet(node, "aleph");
 		addSet(node, "edo01");
 	    }
+	    addSet(node, node.getContentType());
 	    updateIndexAndCache(node);
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
@@ -550,6 +560,15 @@ public class Modify extends RegalAction {
 	return node;
     }
 
+    /**
+     * @param node
+     *            the node is the target of the copy operation
+     * @param field
+     *            defines which metadata field to copy
+     * @param copySource
+     *            the pid of the source of the copy operation
+     * @return the updated node
+     */
     public Node copyMetadata(Node node, String field, String copySource) {
 	if (copySource.isEmpty()) {
 	    copySource = node.getParentPid();
@@ -575,10 +594,23 @@ public class Modify extends RegalAction {
 	return node;
     }
 
+    /**
+     * @param nodes
+     *            a list of nodes to hammer on
+     * @return a message
+     */
     public String flattenAll(List<Node> nodes) {
 	return apply(nodes, n -> flatten(n).getPid());
     }
 
+    /**
+     * Flatten a node means to take the title of the parent and to move up the
+     * node by one level in the object tree
+     * 
+     * @param n
+     *            the node to hammer on
+     * @return the updated node
+     */
     public Node flatten(Node n) {
 	return moveUp(copyMetadata(n, "title", ""));
     }
@@ -594,10 +626,6 @@ public class Modify extends RegalAction {
     private class UpdateNodeException extends RuntimeException {
 	public UpdateNodeException(Throwable cause) {
 	    super(cause);
-	}
-
-	public UpdateNodeException(String msg) {
-	    super(msg);
 	}
     }
 
