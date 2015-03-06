@@ -16,8 +16,6 @@
  */
 package models;
 
-import com.hp.hpl.jena.sparql.function.library.namespace;
-
 import play.Play;
 import archive.fedora.ApplicationProfile;
 import archive.fedora.FedoraFactory;
