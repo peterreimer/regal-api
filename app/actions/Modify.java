@@ -90,9 +90,10 @@ public class Modify extends RegalAction {
 	} else {
 	    throw new HttpArchiveException(500, "Lost Node!");
 	}
-	new Index().index(node);
+	node = new Read().readNode(pid);
+	updateIndex(node);
 	if (md5Hash != null && !md5Hash.isEmpty()) {
-	    node = new Read().readNode(pid);
+
 	    String fedoraHash = node.getChecksum();
 	    if (!md5Hash.equals(fedoraHash)) {
 		throw new HttpArchiveException(417, pid + " expected a MD5 of "
@@ -100,7 +101,6 @@ public class Modify extends RegalAction {
 			+ md5Hash);
 	    }
 	}
-	updateIndexAndCache(node);
 	return pid + " data successfully updated!";
     }
 
@@ -115,7 +115,7 @@ public class Modify extends RegalAction {
 	Node node = new Read().readNode(pid);
 	node.setDublinCoreData(dc);
 	Globals.fedora.updateNode(node);
-	updateIndexAndCache(node);
+	updateIndex(new Read().readNode(pid));
 	return pid + " dc successfully updated!";
     }
 
@@ -142,7 +142,7 @@ public class Modify extends RegalAction {
 		node.setSeqFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    updateIndexAndCache(node);
+	    updateIndex(new Read().readNode(pid));
 	    return pid + " sequence of child objects updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
@@ -174,7 +174,7 @@ public class Modify extends RegalAction {
      *            The metadata as rdf string
      * @return a short message
      */
-    public String updateMetadata(Node node, String content) {
+    String updateMetadata(Node node, String content) {
 	try {
 	    String pid = node.getPid();
 	    if (content == null) {
@@ -192,12 +192,21 @@ public class Modify extends RegalAction {
 		node.removeTransformer("aleph");
 	    }
 	    Globals.fedora.updateNode(node);
-	    updateIndexAndCache(new Read().readNode(pid));
+	    reindexNodeAndParent(pid);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
+	}
+    }
+
+    private void reindexNodeAndParent(String pid) {
+	Node node = new Read().readNode(pid);
+	updateIndex(node);
+	String parentPid = node.getParentPid();
+	if (parentPid != null && !parentPid.isEmpty()) {
+	    updateIndex(new Read().readNode(parentPid));
 	}
     }
 
@@ -208,13 +217,13 @@ public class Modify extends RegalAction {
      *            list of links
      * @return a short message
      */
-    public String addLinks(String pid, List<Link> links) {
+    private String addLinks(String pid, List<Link> links) {
 	Node node = new Read().readNode(pid);
 	for (Link link : links) {
 	    node.addRelation(link);
 	}
 	Globals.fedora.updateNode(node);
-	updateIndexAndCache(node);
+	updateIndex(new Read().readNode(pid));
 	return pid + " " + links + " links successfully added.";
     }
 
@@ -226,7 +235,7 @@ public class Modify extends RegalAction {
      *            a link
      * @return a short message
      */
-    public String addLink(String pid, Link link) {
+    private String addLink(String pid, Link link) {
 	Vector<Link> v = new Vector<Link>();
 	v.add(link);
 	return addLinks(pid, v);
@@ -240,7 +249,7 @@ public class Modify extends RegalAction {
      * @param transformerId
      *            the id of the transformer
      */
-    public void addTransformer(String p, String namespace, String transformerId) {
+    private void addTransformer(String p, String namespace, String transformerId) {
 	String pid = namespace + ":" + p;
 	Node node = new Read().readNode(pid);
 	node.addTransformer(new Transformer(transformerId));
@@ -272,7 +281,7 @@ public class Modify extends RegalAction {
      *            the urn subnamespace id e.g."hbz:929:02"
      * @return the urn
      */
-    public String addUrn(String pid, String snid) {
+    String addUrn(String pid, String snid) {
 	Node node = new Read().readNode(pid);
 	return addUrn(node, snid);
     }
@@ -286,7 +295,7 @@ public class Modify extends RegalAction {
      *            the urn subnamespace id e.g."hbz:929:02"
      * @return the urn
      */
-    public String addUrn(Node node, String snid) {
+    String addUrn(Node node, String snid) {
 	String subject = node.getPid();
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = node.getMetadata();
@@ -298,7 +307,8 @@ public class Modify extends RegalAction {
 		RDFFormat.NTRIPLES);
 	node.addTransformer(new Transformer("epicur"));
 	updateMetadata(node, metadata);
-	makeOAISet(new Read().readNode(node.getPid()));
+	node = new Read().readNode(node.getPid());
+	makeOAISet(node);
 	return "Update " + subject + "! Urn has been added.";
     }
 
@@ -378,7 +388,7 @@ public class Modify extends RegalAction {
 		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
 	    }
 
-	    if ("public".equals(node.getAccessScheme())) {
+	    if ("".equals(node.getAccessScheme())) {
 		addSet(node, "open_access");
 	    }
 	    if (node.hasUrn()) {
@@ -396,7 +406,7 @@ public class Modify extends RegalAction {
 		addSet(node, "edo01");
 	    }
 	    addSet(node, node.getContentType());
-	    updateIndexAndCache(node);
+	    updateIndex(new Read().readNode(pid));
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);
@@ -460,7 +470,7 @@ public class Modify extends RegalAction {
      *            usually the namespace
      * @return the urn
      */
-    public String generateUrn(String niss, String snid) {
+    String generateUrn(String niss, String snid) {
 	URN urn = new URN(snid, niss);
 	return urn.toString();
     }
@@ -616,15 +626,15 @@ public class Modify extends RegalAction {
     }
 
     @SuppressWarnings({ "serial", "javadoc" })
-    public class MetadataNotFoundException extends RuntimeException {
-	public MetadataNotFoundException(Throwable e) {
+    class MetadataNotFoundException extends RuntimeException {
+	MetadataNotFoundException(Throwable e) {
 	    super(e);
 	}
     }
 
     @SuppressWarnings({ "serial" })
     private class UpdateNodeException extends RuntimeException {
-	public UpdateNodeException(Throwable cause) {
+	UpdateNodeException(Throwable cause) {
 	    super(cause);
 	}
     }

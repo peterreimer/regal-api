@@ -59,7 +59,7 @@ public class Delete extends RegalAction {
      */
     public String deleteSeq(String pid) {
 	Globals.fedora.deleteDatastream(pid, "seq");
-	updateIndexAndCache(new Read().readNode(pid));
+	updateIndex(new Read().readNode(pid));
 	return pid + ": seq - datastream successfully deleted! ";
     }
 
@@ -70,7 +70,7 @@ public class Delete extends RegalAction {
      */
     public String deleteMetadata(String pid) {
 	Globals.fedora.deleteDatastream(pid, "metadata");
-	updateIndexAndCache(new Read().readNode(pid));
+	updateIndex(new Read().readNode(pid));
 	return pid + ": metadata - datastream successfully deleted! ";
     }
 
@@ -81,7 +81,7 @@ public class Delete extends RegalAction {
      */
     public String deleteData(String pid) {
 	Globals.fedora.deleteDatastream(pid, "data");
-	updateIndexAndCache(new Read().readNode(pid));
+	updateIndex(new Read().readNode(pid));
 	return pid + ": data - datastream successfully deleted! ";
     }
 }

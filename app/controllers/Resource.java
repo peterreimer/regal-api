@@ -169,7 +169,7 @@ public class Resource extends MyController {
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    if (request().accepts("application/html"))
+	    if (request().accepts("text/html"))
 		return asHtml(pid);
 	    if (request().accepts("application/rdf+xml"))
 		return asRdf(pid);
@@ -495,7 +495,7 @@ public class Resource extends MyController {
 			if ("short".equals(style)) {
 			    return getJsonResult(nodeIds);
 			}
-			List<Node> result = read.getNodesFromCache(nodeIds);
+			List<Node> result = read.getNodes(nodeIds);
 
 			if (request().accepts("text/html")) {
 			    return ok(resource.render(json(result)));
@@ -575,7 +575,7 @@ public class Resource extends MyController {
 		    if ("short".equals(style)) {
 			return getJsonResult(nodeIds);
 		    }
-		    List<Node> result = read.getNodesFromCache(nodeIds);
+		    List<Node> result = read.getNodes(nodeIds);
 		    return getJsonResult(result);
 		});
     }
