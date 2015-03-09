@@ -67,6 +67,23 @@ public class Read extends RegalAction {
     }
 
     /**
+     * returns the lastModified child of the whole tree
+     * 
+     * @param node
+     * @return node
+     */
+    public Node getLastModifiedChild(Node node) {
+	Node last = node;
+	for (Node n : getParts(node)) {
+	    Date cur = n.getLastModified();
+	    if (cur.after(last.getLastModified())) {
+		last = n;
+	    }
+	}
+	return last;
+    }
+
+    /**
      * @param pid
      *            the will be read to the node
      * @return a Node containing the data from the repository

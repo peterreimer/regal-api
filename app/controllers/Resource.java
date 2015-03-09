@@ -752,4 +752,29 @@ public class Resource extends MyController {
 	    return ok(bulk.getChunks());
 	});
     }
+
+    @ApiOperation(produces = "application/json,text/html", nickname = "getLastModifiedChild", value = "getLastModifiedChild", notes = "Return the last modified object of tree", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> getLastModifiedChild(
+	    @PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
+			response()
+				.setHeader("Access-Control-Allow-Origin", "*");
+			Node result = read.getLastModifiedChild(node);
+			if (request().accepts("text/html")) {
+			    List<Node> nodes = new ArrayList<Node>();
+			    nodes.add(result);
+			    response().setHeader("Content-Type",
+				    "text/html; charset=utf-8");
+			    return ok(resource.render(json(nodes).toString()));
+			} else {
+			    return getJsonResult(result);
+			}
+		    } catch (Exception e) {
+			return JsonMessage(new Message(e, 500));
+		    }
+		});
+    }
 }
