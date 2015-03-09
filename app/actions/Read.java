@@ -57,10 +57,7 @@ public class Read extends RegalAction {
      * @return a Node containing the data from the repository
      */
     public Node readNode(String pid) {
-	Node n = readNodeFromCache(pid);
-	if (n == null) {
-	    n = internalReadNode(pid);
-	}
+	Node n = internalReadNode(pid);
 	addLabelsForParts(n);
 	writeNodeToCache(n);
 	return n;
@@ -89,12 +86,17 @@ public class Read extends RegalAction {
      * @return a Node containing the data from the repository
      */
     private Node internalReadNode(String pid) {
-	Node n = Globals.fedora.readNode(pid);
+	Node n = readNodeFromCache(pid);
+	if (n != null) {
+	    return n;
+	}
+	n = Globals.fedora.readNode(pid);
 	n.setAggregationUri(createAggregationUri(n.getPid()));
 	n.setRemUri(n.getAggregationUri() + ".rdf");
 	n.setDataUri(n.getAggregationUri() + "/data");
 	n.setContextDocumentUri("http://" + Globals.server
 		+ "/public/edoweb-resources.json");
+	writeNodeToCache(n);
 	return n;
     }
 
@@ -215,7 +217,7 @@ public class Read extends RegalAction {
     public List<Node> getNodes(List<String> ids) {
 	return ids.stream().map((String id) -> {
 	    try {
-		return readNode(id);
+		return internalReadNode(id);
 	    } catch (Exception e) {
 		Logger.error("" + id, e);
 		return new Node(id);
