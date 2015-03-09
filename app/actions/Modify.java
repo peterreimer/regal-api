@@ -30,7 +30,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -208,52 +207,6 @@ public class Modify extends RegalAction {
 	if (parentPid != null && !parentPid.isEmpty()) {
 	    updateIndex(new Read().readNode(parentPid));
 	}
-    }
-
-    /**
-     * @param pid
-     *            The pid to which links must be added
-     * @param links
-     *            list of links
-     * @return a short message
-     */
-    private String addLinks(String pid, List<Link> links) {
-	Node node = new Read().readNode(pid);
-	for (Link link : links) {
-	    node.addRelation(link);
-	}
-	Globals.fedora.updateNode(node);
-	updateIndex(new Read().readNode(pid));
-	return pid + " " + links + " links successfully added.";
-    }
-
-    /**
-     * @param pid
-     *            The pid to which links must be added uses: Vector<Link> v =
-     *            new Vector<Link>(); v.add(link); return addLinks(pid, v);
-     * @param link
-     *            a link
-     * @return a short message
-     */
-    private String addLink(String pid, Link link) {
-	Vector<Link> v = new Vector<Link>();
-	v.add(link);
-	return addLinks(pid, v);
-    }
-
-    /**
-     * @param p
-     *            the id part of a pid
-     * @param namespace
-     *            the namespace part of a pid
-     * @param transformerId
-     *            the id of the transformer
-     */
-    private void addTransformer(String p, String namespace, String transformerId) {
-	String pid = namespace + ":" + p;
-	Node node = new Read().readNode(pid);
-	node.addTransformer(new Transformer(transformerId));
-	Globals.fedora.updateNode(node);
     }
 
     /**
@@ -625,7 +578,7 @@ public class Modify extends RegalAction {
 	return moveUp(copyMetadata(n, "title", ""));
     }
 
-    @SuppressWarnings({ "serial", "javadoc" })
+    @SuppressWarnings({ "serial" })
     class MetadataNotFoundException extends RuntimeException {
 	MetadataNotFoundException(Throwable e) {
 	    super(e);
