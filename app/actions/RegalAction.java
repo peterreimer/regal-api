@@ -28,8 +28,11 @@ import models.Node;
  */
 public class RegalAction {
 
-    void updateIndex(Node node) {
+    Node updateIndex(String pid) {
+	removeNodeFromCache(pid);
+	Node node = new Read().readNode(pid);
 	new Index().index(node);
+	return node;
     }
 
     Node readNodeFromCache(String pid) {
@@ -38,6 +41,10 @@ public class RegalAction {
 
     void writeNodeToCache(Node node) {
 	Cache.set(node.getPid(), node);
+    }
+
+    void removeNodeFromCache(String pid) {
+	Cache.remove(pid);
     }
 
     protected String createAggregationUri(String pid) {

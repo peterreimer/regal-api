@@ -89,8 +89,7 @@ public class Modify extends RegalAction {
 	} else {
 	    throw new HttpArchiveException(500, "Lost Node!");
 	}
-	node = new Read().readNode(pid);
-	updateIndex(node);
+	node = updateIndex(pid);
 	if (md5Hash != null && !md5Hash.isEmpty()) {
 
 	    String fedoraHash = node.getChecksum();
@@ -114,7 +113,7 @@ public class Modify extends RegalAction {
 	Node node = new Read().readNode(pid);
 	node.setDublinCoreData(dc);
 	Globals.fedora.updateNode(node);
-	updateIndex(new Read().readNode(pid));
+	updateIndex(node.getPid());
 	return pid + " dc successfully updated!";
     }
 
@@ -141,7 +140,7 @@ public class Modify extends RegalAction {
 		node.setSeqFile(file.getAbsolutePath());
 		Globals.fedora.updateNode(node);
 	    }
-	    updateIndex(new Read().readNode(pid));
+	    updateIndex(node.getPid());
 	    return pid + " sequence of child objects updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
@@ -191,7 +190,7 @@ public class Modify extends RegalAction {
 		node.removeTransformer("aleph");
 	    }
 	    Globals.fedora.updateNode(node);
-	    reindexNodeAndParent(pid);
+	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
 	    throw new HttpArchiveException(400, e);
@@ -200,12 +199,11 @@ public class Modify extends RegalAction {
 	}
     }
 
-    private void reindexNodeAndParent(String pid) {
-	Node node = new Read().readNode(pid);
-	updateIndex(node);
+    private void reindexNodeAndParent(Node node) {
+	node = updateIndex(node.getPid());
 	String parentPid = node.getParentPid();
 	if (parentPid != null && !parentPid.isEmpty()) {
-	    updateIndex(new Read().readNode(parentPid));
+	    updateIndex(parentPid);
 	}
     }
 
@@ -359,7 +357,7 @@ public class Modify extends RegalAction {
 		addSet(node, "edo01");
 	    }
 	    addSet(node, node.getContentType());
-	    updateIndex(new Read().readNode(pid));
+	    updateIndex(node.getPid());
 	    return pid + " successfully created oai sets!";
 	} catch (Exception e) {
 	    throw new MetadataNotFoundException(e);

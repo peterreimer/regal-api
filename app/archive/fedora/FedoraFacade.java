@@ -510,13 +510,9 @@ class FedoraFacade implements FedoraInterface {
 
     @Override
     public void unlinkParent(Node node) {
-	try {
-	    Node parent = readNode(node.getParentPid());
-	    parent.removeRelation(HAS_PART, node.getPid());
-	    updateNode(parent);
-	} catch (NodeNotFoundException e) {
-	    play.Logger.debug(node.getPid() + " has no parent!");
-	}
+	Node parent = readNode(node.getParentPid());
+	parent.removeRelation(HAS_PART, node.getPid());
+	updateNode(parent);
     }
 
     @Override
