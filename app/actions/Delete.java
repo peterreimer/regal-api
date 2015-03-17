@@ -16,6 +16,8 @@
  */
 package actions;
 
+import helper.HttpArchiveException;
+
 import java.util.List;
 
 import models.Globals;
@@ -37,6 +39,17 @@ public class Delete extends RegalAction {
     public String delete(Node n) {
 	StringBuffer message = new StringBuffer();
 	message.append(new Index().remove(n));
+	removeNodeFromCache(n.getPid());
+	String parentPid = n.getParentPid();
+	if (parentPid != null && !parentPid.isEmpty()) {
+	    try {
+		Globals.fedora.unlinkParent(n);
+		updateIndex(parentPid);
+	    } catch (HttpArchiveException e) {
+		message.append(e.getCode() + " parent " + parentPid
+			+ " allready deleted.");
+	    }
+	}
 	Globals.fedora.deleteNode(n.getPid());
 	return message.toString() + "\n" + n.getPid() + " deleted!";
     }
@@ -59,7 +72,7 @@ public class Delete extends RegalAction {
      */
     public String deleteSeq(String pid) {
 	Globals.fedora.deleteDatastream(pid, "seq");
-	updateIndexAndCache(new Read().readNode(pid));
+	updateIndex(pid);
 	return pid + ": seq - datastream successfully deleted! ";
     }
 
@@ -70,7 +83,7 @@ public class Delete extends RegalAction {
      */
     public String deleteMetadata(String pid) {
 	Globals.fedora.deleteDatastream(pid, "metadata");
-	updateIndexAndCache(new Read().readNode(pid));
+	updateIndex(pid);
 	return pid + ": metadata - datastream successfully deleted! ";
     }
 
@@ -81,7 +94,7 @@ public class Delete extends RegalAction {
      */
     public String deleteData(String pid) {
 	Globals.fedora.deleteDatastream(pid, "data");
-	updateIndexAndCache(new Read().readNode(pid));
+	updateIndex(pid);
 	return pid + ": data - datastream successfully deleted! ";
     }
 }

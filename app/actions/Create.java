@@ -17,6 +17,7 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
+import helper.HttpArchiveException;
 
 import java.util.List;
 
@@ -40,8 +41,7 @@ public class Create extends RegalAction {
 	new Index().remove(node);
 	overrideNodeMembers(node, object);
 	Globals.fedora.updateNode(node);
-	new Read().addLabelsForParts(node);
-	updateIndexAndCache(node);
+	updateIndex(node.getPid());
 	return node;
     }
 
@@ -54,8 +54,7 @@ public class Create extends RegalAction {
 	new Index().remove(node);
 	setNodeMembers(node, object);
 	Globals.fedora.updateNode(node);
-	node = new Read().readNode(node.getPid());
-	updateIndexAndCache(node);
+	updateIndex(node.getPid());
 	return node;
     }
 
@@ -90,6 +89,7 @@ public class Create extends RegalAction {
     public Node createResource(String id, String namespace, RegalObject object) {
 	Node node = initNode(id, namespace, object);
 	updateResource(node, object);
+	updateIndex(node.getPid());
 	return node;
     }
 
@@ -148,19 +148,19 @@ public class Create extends RegalAction {
 
     private void linkWithParent(String parentPid, Node node) {
 	try {
-	    play.Logger.debug("New parentPid " + parentPid);
-	    play.Logger.debug("Unlink " + node.getParentPid() + " from parent "
-		    + node.getParentPid());
-	    Globals.fedora.unlinkParent(node);
-	    play.Logger.debug("Link " + node.getParentPid() + " to parent "
-		    + parentPid);
+	    String pp = node.getParentPid();
+	    if (pp != null && !pp.isEmpty()) {
+		try {
+		    Globals.fedora.unlinkParent(node);
+		    updateIndex(pp);
+		} catch (HttpArchiveException e) {
+		    play.Logger.debug("", e);
+		}
+	    }
 	    Globals.fedora.linkToParent(node, parentPid);
-	    play.Logger.debug("Link " + parentPid + " to child "
-		    + node.getPid());
 	    Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	    play.Logger.debug("Ready!" + node.getPid() + " has parent "
-		    + node.getParentPid());
-	    updateIndexAndCache(node);
+	    updateIndex(node.getPid());
+	    updateIndex(parentPid);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	}

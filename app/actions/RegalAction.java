@@ -18,9 +18,9 @@ package actions;
 
 import java.util.List;
 
+import play.cache.Cache;
 import models.Globals;
 import models.Node;
-import play.cache.Cache;
 
 /**
  * @author Jan Schnasse
@@ -28,9 +28,11 @@ import play.cache.Cache;
  */
 public class RegalAction {
 
-    void updateIndexAndCache(Node node) {
+    Node updateIndex(String pid) {
+	removeNodeFromCache(pid);
+	Node node = new Read().readNode(pid);
 	new Index().index(node);
-	writeNodeToCache(node);
+	return node;
     }
 
     Node readNodeFromCache(String pid) {
@@ -41,8 +43,8 @@ public class RegalAction {
 	Cache.set(node.getPid(), node);
     }
 
-    void removeFromCache(Node node) {
-	Cache.remove(node.getPid());
+    void removeNodeFromCache(String pid) {
+	Cache.remove(pid);
     }
 
     protected String createAggregationUri(String pid) {

@@ -169,7 +169,7 @@ public class Resource extends MyController {
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    if (request().accepts("application/html"))
+	    if (request().accepts("text/html"))
 		return asHtml(pid);
 	    if (request().accepts("application/rdf+xml"))
 		return asRdf(pid);
@@ -495,7 +495,7 @@ public class Resource extends MyController {
 			if ("short".equals(style)) {
 			    return getJsonResult(nodeIds);
 			}
-			List<Node> result = read.getNodesFromCache(nodeIds);
+			List<Node> result = read.getNodes(nodeIds);
 
 			if (request().accepts("text/html")) {
 			    return ok(resource.render(json(result)));
@@ -575,7 +575,7 @@ public class Resource extends MyController {
 		    if ("short".equals(style)) {
 			return getJsonResult(nodeIds);
 		    }
-		    List<Node> result = read.getNodesFromCache(nodeIds);
+		    List<Node> result = read.getNodes(nodeIds);
 		    return getJsonResult(result);
 		});
     }
@@ -751,5 +751,30 @@ public class Resource extends MyController {
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
 	});
+    }
+
+    @ApiOperation(produces = "application/json,text/html", nickname = "getLastModifiedChild", value = "getLastModifiedChild", notes = "Return the last modified object of tree", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> getLastModifiedChild(
+	    @PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
+			response()
+				.setHeader("Access-Control-Allow-Origin", "*");
+			Node result = read.getLastModifiedChild(node);
+			if (request().accepts("text/html")) {
+			    List<Node> nodes = new ArrayList<Node>();
+			    nodes.add(result);
+			    response().setHeader("Content-Type",
+				    "text/html; charset=utf-8");
+			    return ok(resource.render(json(nodes).toString()));
+			} else {
+			    return getJsonResult(result);
+			}
+		    } catch (Exception e) {
+			return JsonMessage(new Message(e, 500));
+		    }
+		});
     }
 }
