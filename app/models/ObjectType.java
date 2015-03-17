@@ -83,6 +83,8 @@ public enum ObjectType {
      * A subject object holds information about a subject. If possible,
      * resources should link to global subject URIs like DDC or GND.
      */
-    subject
+    subject,
+
+    rootElement
 
 }

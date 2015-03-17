@@ -16,9 +16,7 @@
  */
 package actions;
 
-import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
-import static archive.fedora.Vocabulary.TYPE_OBJECT;
+import static archive.fedora.Vocabulary.*;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
@@ -59,15 +57,27 @@ public class Read extends RegalAction {
      * @return a Node containing the data from the repository
      */
     public Node readNode(String pid) {
-	Node n = Globals.fedora.readNode(pid);
-	n.setAggregationUri(createAggregationUri(n.getPid()));
-	n.setRemUri(n.getAggregationUri() + ".rdf");
-	n.setDataUri(n.getAggregationUri() + "/data");
-	n.setContextDocumentUri("http://" + Globals.server
-		+ "/public/edoweb-resources.json");
+	Node n = internalReadNode(pid);
 	addLabelsForParts(n);
 	writeNodeToCache(n);
 	return n;
+    }
+
+    /**
+     * returns the lastModified child of the whole tree
+     * 
+     * @param node
+     * @return node
+     */
+    public Node getLastModifiedChild(Node node) {
+	Node last = node;
+	for (Node n : getParts(node)) {
+	    Date cur = n.getLastModified();
+	    if (cur.after(last.getLastModified())) {
+		last = n;
+	    }
+	}
+	return last;
     }
 
     /**
@@ -75,16 +85,22 @@ public class Read extends RegalAction {
      *            the will be read to the node
      * @return a Node containing the data from the repository
      */
-    public Node readCachedNode(String pid) {
-	Node c = readNodeFromCache(pid);
-	if (c == null) {
-	    return readNode(pid);
+    private Node internalReadNode(String pid) {
+	Node n = readNodeFromCache(pid);
+	if (n != null) {
+	    return n;
 	}
-	// addLabelsForParts(c);
-	return c;
+	n = Globals.fedora.readNode(pid);
+	n.setAggregationUri(createAggregationUri(n.getPid()));
+	n.setRemUri(n.getAggregationUri() + ".rdf");
+	n.setDataUri(n.getAggregationUri() + "/data");
+	n.setContextDocumentUri("http://" + Globals.server
+		+ "/public/edoweb-resources.json");
+	writeNodeToCache(n);
+	return n;
     }
 
-    private void addLabelsForParts(Node n) {
+    void addLabelsForParts(Node n) {
 	List<Link> rels = n.getRelsExt();
 	for (Link l : rels) {
 	    if (HAS_PART.equals(l.getPredicate())
@@ -96,7 +112,7 @@ public class Read extends RegalAction {
 
     private void addLabel(Node n, Link l) {
 	try {
-	    String label = readMetadataFromCache(l.getObject(), "title");
+	    String label = readMetadata(l.getObject(), "title");
 	    l.setObjectLabel(label);
 	    n.removeRelation(l.getPredicate(), l.getObject());
 	    n.addRelation(l);
@@ -121,9 +137,8 @@ public class Read extends RegalAction {
     public List<Node> getParts(Node node) {
 	List<Node> result = new ArrayList<Node>();
 	result.add(node);
-	List<Node> parts = getNodesFromCache(node.getRelatives(HAS_PART)
-		.stream().map((Link l) -> l.getObject())
-		.collect(Collectors.toList()));
+	List<Node> parts = getNodes(node.getRelatives(HAS_PART).stream()
+		.map((Link l) -> l.getObject()).collect(Collectors.toList()));
 	for (Node p : parts) {
 	    result.addAll(getParts(p));
 	}
@@ -202,26 +217,10 @@ public class Read extends RegalAction {
     public List<Node> getNodes(List<String> ids) {
 	return ids.stream().map((String id) -> {
 	    try {
-		return readNode(id);
+		return internalReadNode(id);
 	    } catch (Exception e) {
 		Logger.error("" + id, e);
 		return new Node(id);
-	    }
-	}).filter(n -> n != null).collect(Collectors.toList());
-    }
-
-    /**
-     * @param ids
-     *            a list of ids to get objects for
-     * @return a list of nodes
-     */
-    public List<Node> getNodesFromCache(List<String> ids) {
-	return ids.stream().map((String id) -> {
-	    try {
-		return readCachedNode(id);
-	    } catch (Exception e) {
-		Logger.warn("", e);
-		return null;
 	    }
 	}).filter(n -> n != null).collect(Collectors.toList());
     }
@@ -333,18 +332,25 @@ public class Read extends RegalAction {
     /**
      * @param pid
      *            the pid of the object
+     * @param field
+     *            if field is specified, only the value of a certain field will
+     *            be returned
      * @return n-triple metadata
      */
     public String readMetadata(String pid, String field) {
+	Node node = internalReadNode(pid);
+	return readMetadata(node, field);
+    }
+
+    private String readMetadata(Node node, String field) {
 	try {
-	    Node node = readNode(pid);
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
 		String pred = Globals.profile.nMap.get(field).uri;
-		List<String> value = RdfUtils.findRdfObjects(pid, pred,
-			metadata, RDFFormat.NTRIPLES);
+		List<String> value = RdfUtils.findRdfObjects(node.getPid(),
+			pred, metadata, RDFFormat.NTRIPLES);
 
 		return value.isEmpty() ? "No " + field : value.get(0);
 	    }
@@ -358,11 +364,14 @@ public class Read extends RegalAction {
     /**
      * @param pid
      *            the pid of the object
+     * @param field
+     *            if field is specified, only a certain field of the node's
+     *            metadata will be returned
      * @return n-triple metadata
      */
     public String readMetadataFromCache(String pid, String field) {
 	try {
-	    Node node = readCachedNode(pid);
+	    Node node = readNode(pid);
 	    String metadata = node.getMetadata();
 	    if (metadata == null || metadata.isEmpty())
 		throw new HttpArchiveException(404, "No Metadata on " + pid
@@ -446,5 +455,4 @@ public class Read extends RegalAction {
 		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
 	return linkedObjects;
     }
-
 }

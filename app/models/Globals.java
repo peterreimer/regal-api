@@ -108,4 +108,10 @@ public class Globals {
      */
     public static String protocol = "http://";
 
+    public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
+
+    public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
+
+    public static final String PUBLIC_INDEX_PREF = "public_";
+
 }

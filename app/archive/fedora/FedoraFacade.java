@@ -247,35 +247,16 @@ class FedoraFacade implements FedoraInterface {
 	Node node = new Node();
 	node.setPID(pid);
 	node.setNamespace(pid.substring(0, pid.indexOf(':')));
-	try {
-	    DublinCoreHandler.readFedoraDcToNode(node);
-	    utils.readRelsExt(node);
-	    // utils.readContentModels(node);
-	    GetObjectProfileResponse prof = new GetObjectProfile(pid).execute();
-	    node.setLabel(prof.getLabel());
-	    node.setLastModified(prof.getLastModifiedDate());
-	    node.setCreationDate(prof.getCreateDate());
-	} catch (FedoraClientException e) {
-	    throw new ReadNodeException(500, e);
-	}
-	try {
-	    GetDatastreamResponse response = new GetDatastream(pid, "data")
-		    .execute();
-	    node.setMimeType(response.getDatastreamProfile().getDsMIME());
-	    node.setFileLabel(response.getDatastreamProfile().getDsLabel());
-	    node.setChecksum(response.getDatastreamProfile().getDsChecksum());
-	    node.setFileSize(response.getDatastreamProfile().getDsSize());
-	} catch (FedoraClientException e) {
-	    // datastream with name data is optional
-	}
-	try {
-	    FedoraResponse response = new GetDatastreamDissemination(pid,
-		    "metadata").execute();
-	    node.setMetadata(CopyUtils.copyToString(
-		    response.getEntityInputStream(), "utf-8"));
-	} catch (Exception e) {
-	    // datastream with name metadata is optional
-	}
+	getDublinCoreFromFedora(node);
+	getRelsExtFromFedora(node);
+	getDatesFromFedora(node);
+	getChecksumFromFedora(node);
+	getMetadataFromFedora(node);
+	getDataFromFedora(pid, node);
+	return node;
+    }
+
+    private void getDataFromFedora(String pid, Node node) {
 	try {
 	    FedoraResponse response = new GetDatastreamDissemination(pid, "seq")
 		    .execute();
@@ -284,7 +265,47 @@ class FedoraFacade implements FedoraInterface {
 	} catch (Exception e) {
 	    // datastream with name metadata is optional
 	}
-	return node;
+    }
+
+    private void getMetadataFromFedora(Node node) {
+	try {
+	    FedoraResponse response = new GetDatastreamDissemination(
+		    node.getPid(), "metadata").execute();
+	    node.setMetadata(CopyUtils.copyToString(
+		    response.getEntityInputStream(), "utf-8"));
+	} catch (Exception e) {
+	    // datastream with name metadata is optional
+	}
+    }
+
+    private void getDublinCoreFromFedora(Node node) {
+	try {
+	    DublinCoreHandler.readFedoraDcToNode(node);
+
+	} catch (FedoraClientException e) {
+	    throw new ReadNodeException(500, e);
+	}
+    }
+
+    private void getRelsExtFromFedora(Node node) {
+	try {
+	    utils.readRelsExt(node);
+	} catch (FedoraClientException e) {
+	    throw new ReadNodeException(500, e);
+	}
+    }
+
+    private void getChecksumFromFedora(Node node) {
+	try {
+	    GetDatastreamResponse response = new GetDatastream(node.getPid(),
+		    "data").execute();
+	    node.setMimeType(response.getDatastreamProfile().getDsMIME());
+	    node.setFileLabel(response.getDatastreamProfile().getDsLabel());
+	    node.setChecksum(response.getDatastreamProfile().getDsChecksum());
+	    node.setFileSize(response.getDatastreamProfile().getDsSize());
+	} catch (FedoraClientException e) {
+	    // datastream with name data is optional
+	}
     }
 
     @Override
@@ -295,6 +316,7 @@ class FedoraFacade implements FedoraInterface {
 	node.removeRelations(REL_HAS_MODEL);
 	if (node.getUploadFile() != null) {
 	    utils.updateManagedStream(node);
+	    getChecksumFromFedora(node);
 	}
 	if (node.getMetadataFile() != null) {
 	    utils.updateMetadataStream(node);
@@ -304,6 +326,19 @@ class FedoraFacade implements FedoraInterface {
 	}
 	utils.linkContentModels(models, node);
 	utils.updateRelsExt(node);
+	getDatesFromFedora(node);
+    }
+
+    private void getDatesFromFedora(Node node) {
+	try {
+	    GetObjectProfileResponse prof = new GetObjectProfile(node.getPid())
+		    .execute();
+	    node.setLabel(prof.getLabel());
+	    node.setLastModified(prof.getLastModifiedDate());
+	    node.setCreationDate(prof.getCreateDate());
+	} catch (FedoraClientException e) {
+	    throw new ReadNodeException(500, e);
+	}
     }
 
     @Override
@@ -475,13 +510,9 @@ class FedoraFacade implements FedoraInterface {
 
     @Override
     public void unlinkParent(Node node) {
-	try {
-	    Node parent = readNode(node.getParentPid());
-	    parent.removeRelation(HAS_PART, node.getPid());
-	    updateNode(parent);
-	} catch (NodeNotFoundException e) {
-	    play.Logger.debug(node.getPid() + " has no parent!");
-	}
+	Node parent = readNode(node.getParentPid());
+	parent.removeRelation(HAS_PART, node.getPid());
+	updateNode(parent);
     }
 
     @Override

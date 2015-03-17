@@ -33,7 +33,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
     private static final String AUTHORIZATION = "authorization";
     private static final String WWW_AUTHENTICATE = "WWW-Authenticate";
-    private static final String REALM = "Basic realm=\"Your Realm Here\"";
+    private static final String REALM = "Basic realm=\"Please enter edoweb-anonymous with any password for guest access\"";
 
     @Override
     public F.Promise<SimpleResult> call(Http.Context context) throws Throwable {
@@ -70,7 +70,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	    cl = Class.forName(userImpl);
 	    return ((User) cl.newInstance()).authenticate(username, password);
 	} catch (Throwable e) {
-	    e.printStackTrace();
+	    play.Logger.debug("", e);
 	    return null;
 	}
 

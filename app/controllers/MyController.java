@@ -51,6 +51,67 @@ import com.wordnik.swagger.core.util.JsonUtil;
  */
 public class MyController extends Controller {
 
+    /**
+     * The admin can do everything
+     */
+    public final static String ADMIN_ROLE = "edoweb-admin";
+    /**
+     * The editor sees everything but cannot run some batch processes
+     */
+    public final static String EDITOR_ROLE = "edoweb-editor";
+    /**
+     * The reader can read all data flagged with "public","restricted","remote"
+     * The reader is not able to perform modifying, creating, or deleting
+     * operations
+     */
+    public final static String READER_ROLE = "edoweb-reader";
+    /**
+     * The subscriber behaves like the reader but can als access date flagged
+     * with "single"
+     */
+    public final static String SUBSCRIBER_ROLE = "edoweb-subscriber";
+    /**
+     * The remote user behaves like the reader
+     */
+    public final static String REMOTE_ROLE = "edoweb-remote";
+
+    /**
+     * The anonymous user can read everything flagged with "public".
+     */
+    public final static String ANONYMOUS_ROLE = "edoweb-anonymous";
+
+    /**
+     * private metadata is only visible to admins and editors
+     */
+    public final static String METADATA_ACCESSOR_PRIVATE = "private";
+    /**
+     * public metadata is visible to everyone
+     */
+    public final static String METADATA_ACCESSOR_PUBLIC = "public";
+
+    /**
+     * public data is visible to everyone
+     */
+    public final static String DATA_ACCESSOR_PUBLIC = "public";
+    /**
+     * private data is visible to admins and editors
+     */
+    public final static String DATA_ACCESSOR_PRIVATE = "private";
+    /**
+     * restricted data is visible to admins, editors, readers, subscribers and
+     * remotes
+     */
+    public final static String DATA_ACCESSOR_RESTRICTED = "restricted";
+    /**
+     * single data is visible to admins, editors, and subscribers
+     */
+    public final static String DATA_ACCESSOR_SINGLE = "single";
+    /**
+     * remote data is visible to admins, editors, readers, subscribers and
+     * remotes
+     */
+    public final static String DATA_ACCESSOR_REMOTE = "remote";
+
     protected static ObjectMapper mapper = JsonUtil.mapper();
 
     static Read read = new Read();
@@ -144,21 +205,30 @@ public class MyController extends Controller {
      */
     public static boolean readData_accessIsAllowed(String accessScheme,
 	    String role) {
-	if (!"edoweb-admin".equals(role)) {
-	    if ("public".equals(accessScheme)) {
+	if (!ADMIN_ROLE.equals(role)) {
+	    if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
 		return true;
-	    } else if ("restricted".equals(accessScheme)
-		    || "remote".equals(accessScheme)) {
-		if ("edoweb-editor".equals(role)
-			|| "edoweb-reader".equals(role)) {
+	    } else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
+		if (EDITOR_ROLE.equals(role) || READER_ROLE.equals(role)
+			|| SUBSCRIBER_ROLE.equals(role)
+			|| REMOTE_ROLE.equals(role)) {
 		    return true;
 		}
-	    } else if ("private".equals(accessScheme)
-		    || "single".equals(accessScheme)) {
-		if ("edoweb-editor".equals(role))
+	    } else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
+		if (EDITOR_ROLE.equals(role))
 		    return true;
+	    } else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
+		if (EDITOR_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)) {
+		    return true;
+		}
+	    } else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
+		if (EDITOR_ROLE.equals(role) || REMOTE_ROLE.equals(role)
+			|| READER_ROLE.equals(role)
+			|| SUBSCRIBER_ROLE.equals(role)) {
+		    return true;
+		}
 	    }
-	} else {
+	} else {// if enter here you are admin
 	    return true;
 	}
 	return false;
@@ -173,16 +243,15 @@ public class MyController extends Controller {
      */
     public static boolean readMetadata_accessIsAllowed(String publishScheme,
 	    String role) {
-	if (!"edoweb-admin".equals(role)) {
-	    if ("public".equals(publishScheme)) {
+	if (!ADMIN_ROLE.equals(role)) {
+	    if (METADATA_ACCESSOR_PUBLIC.equals(publishScheme)) {
 		return true;
-	    } else if ("private".equals(publishScheme)) {
-		if ("edoweb-editor".equals(role)
-			|| "edoweb-reader".equals(role)) {
+	    } else if (METADATA_ACCESSOR_PRIVATE.equals(publishScheme)) {
+		if (EDITOR_ROLE.equals(role)) {
 		    return true;
 		}
 	    }
-	} else {
+	} else {// if enter here you are admin
 	    return true;
 	}
 	return false;
@@ -194,7 +263,7 @@ public class MyController extends Controller {
      * @return true if the user is allowed to modify the object
      */
     public static boolean modifyingAccessIsAllowed(String role) {
-	if ("edoweb-admin".equals(role) || "edoweb-editor".equals(role))
+	if (ADMIN_ROLE.equals(role) || EDITOR_ROLE.equals(role))
 	    return true;
 	return false;
     }

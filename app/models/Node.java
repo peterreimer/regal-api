@@ -17,6 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
+import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_MAB_527;
@@ -100,6 +101,8 @@ public class Node {
     private String legacyId = null;
     private String catalogId = null;
     private String name = null;
+
+    private String fulltext;
 
     /**
      * Creates a new Node.
@@ -845,6 +848,8 @@ public class Node {
 		continue;
 	    if (REL_HBZ_ID.equals(l.getPredicate()))
 		continue;
+	    if (IS_PART_OF.equals(l.getPredicate()))
+		continue;
 	    addLinkToJsonMap(rdf, l);
 	}
 	addPartsToJsonMap(rdf);
@@ -856,6 +861,9 @@ public class Node {
 	rdf.put("transformer", getTransformer().stream().map(t -> t.getId())
 		.collect(Collectors.toList()));
 	rdf.put("catalogId", getCatalogId());
+
+	if (fulltext != null)
+	    rdf.put("fulltext-ocr", fulltext);
 
 	HashMap<String, Object> aboutMap = new HashMap<String, Object>();
 	aboutMap.put("@id", this.getAggregationUri() + ".rdf");
@@ -1066,6 +1074,11 @@ public class Node {
 	pmap.put("@type", "@id");
 	cmap.put("isDescribedBy", pmap);
 
+	// pmap = new HashMap<String, Object>();
+	// pmap.put("@id", "http://hbz-nrw.de/regal#fulltext-ocr");
+	// pmap.put("label", "Volltext-OCR");
+	// cmap.put("fulltext-ocr", pmap);
+
 	cmap.put("prefLabel", "http://www.w3.org/2004/02/skos/core#prefLabel");
 
 	return cmap;
@@ -1092,7 +1105,7 @@ public class Node {
     /**
      * @param node
      * @return an ordered list of the nodes Children taking the information
-     *         provided by seq datastream into accoutn
+     *         provided by seq datastream into account
      */
     public List<Link> getPartsSorted() {
 	return sort(getRelatives(HAS_PART), getSeqArray());
@@ -1104,7 +1117,8 @@ public class Node {
 	    return sorted;
 	for (String i : seq) {
 	    int j = -1;
-	    if ((j = nodeIds.indexOf(i)) != -1) {
+	    if ((j = nodeIds.stream().map((Link l) -> l.getObject())
+		    .collect(Collectors.toList()).indexOf(i)) != -1) {
 		sorted.add(nodeIds.get(j));
 		nodeIds.remove(j);
 	    }
@@ -1282,5 +1296,13 @@ public class Node {
     public Node setName(String name) {
 	this.name = name;
 	return this;
+    }
+
+    public void addFulltext(String string) {
+	fulltext = string;
+    }
+
+    public String getFulltext() {
+	return fulltext;
     }
 }

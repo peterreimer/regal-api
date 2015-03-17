@@ -169,7 +169,7 @@ public class Resource extends MyController {
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	try {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    if (request().accepts("application/html"))
+	    if (request().accepts("text/html"))
 		return asHtml(pid);
 	    if (request().accepts("application/rdf+xml"))
 		return asRdf(pid);
@@ -495,7 +495,7 @@ public class Resource extends MyController {
 			if ("short".equals(style)) {
 			    return getJsonResult(nodeIds);
 			}
-			List<Node> result = read.getNodesFromCache(nodeIds);
+			List<Node> result = read.getNodes(nodeIds);
 
 			if (request().accepts("text/html")) {
 			    return ok(resource.render(json(result)));
@@ -516,8 +516,12 @@ public class Resource extends MyController {
 		null,
 		node -> {
 		    try {
-			SearchHits hits = Globals.search.query("public_edoweb",
-				queryString, from, until);
+			SearchHits hits = Globals.search.query(new String[] {
+				Globals.PUBLIC_INDEX_PREF
+					+ Globals.namespaces[0],
+				Globals.PDFBOX_OCR_INDEX_PREF
+					+ Globals.namespaces[0] }, queryString,
+				from, until);
 			List<SearchHit> list = Arrays.asList(hits.getHits());
 			List<Map<String, Object>> hitMap = read
 				.hitlistToMap(list);
@@ -571,7 +575,7 @@ public class Resource extends MyController {
 		    if ("short".equals(style)) {
 			return getJsonResult(nodeIds);
 		    }
-		    List<Node> result = read.getNodesFromCache(nodeIds);
+		    List<Node> result = read.getNodes(nodeIds);
 		    return getJsonResult(result);
 		});
     }
@@ -650,8 +654,9 @@ public class Resource extends MyController {
     @ApiOperation(produces = "text/plain", nickname = "asPdfboxTxt", value = "asPdfboxTxt", notes = "Returns text display of a pdf datastream.", response = String.class, httpMethod = "GET")
     public static Promise<Result> asPdfboxTxt(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.pdfbox(pid);
-	    response().setContentType("text/plain");
+	    String result = transform.pdfbox(pid).getFulltext();
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setHeader("Content-Type", "text/plain; charset=utf-8");
 	    return ok(result);
 	});
     }
@@ -726,7 +731,7 @@ public class Resource extends MyController {
 	});
     }
 
-    @ApiOperation(produces = "application/json", nickname = "flattenAll", value = "flattenAll", notes = "flatten is applied to all descendents of type file.", response = String.class, httpMethod = "POST")
+    @ApiOperation(produces = "application/json", nickname = "deleteDescendent", value = "deleteDescendent", notes = "deletes all descendents of a certain contentType", response = String.class, httpMethod = "POST")
     public static Promise<Result> deleteDescendent(
 	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
@@ -746,5 +751,30 @@ public class Resource extends MyController {
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
 	});
+    }
+
+    @ApiOperation(produces = "application/json,text/html", nickname = "getLastModifiedChild", value = "getLastModifiedChild", notes = "Return the last modified object of tree", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> getLastModifiedChild(
+	    @PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
+			response()
+				.setHeader("Access-Control-Allow-Origin", "*");
+			Node result = read.getLastModifiedChild(node);
+			if (request().accepts("text/html")) {
+			    List<Node> nodes = new ArrayList<Node>();
+			    nodes.add(result);
+			    response().setHeader("Content-Type",
+				    "text/html; charset=utf-8");
+			    return ok(resource.render(json(nodes).toString()));
+			} else {
+			    return getJsonResult(result);
+			}
+		    } catch (Exception e) {
+			return JsonMessage(new Message(e, 500));
+		    }
+		});
     }
 }
