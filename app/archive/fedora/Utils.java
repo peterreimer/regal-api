@@ -315,6 +315,21 @@ public class Utils {
 	}
     }
 
+    @SuppressWarnings("javadoc")
+    public void createConfStream(Node node) {
+	try {
+	    Upload request = new Upload(new File(node.getConfFile()));
+	    UploadResponse response = request.execute();
+	    String location = response.getUploadLocation();
+	    new AddDatastream(node.getPid(), "conf").versionable(true)
+		    .dsState("A").dsLabel("json file to configure webharvests")
+		    .controlGroup("M").mimeType("application/json")
+		    .dsLocation(location).execute();
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
+	}
+    }
+
     void createMetadataStream(Node node) {
 
     }
@@ -356,6 +371,27 @@ public class Utils {
 			.dsState("A")
 			.dsLabel(
 				"json array to define the order of child objects")
+			.controlGroup("M").mimeType("application/json")
+			.content(file).execute();
+	    }
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
+	}
+    }
+
+    @SuppressWarnings("javadoc")
+    public void updateConfStream(Node node) {
+	try {
+	    File file = new File(node.getConfFile());
+	    if (dataStreamExists(node.getPid(), "conf")) {
+		new ModifyDatastream(node.getPid(), "conf").versionable(true)
+			.dsLabel("json file to configure webharvests")
+			.dsState("A").controlGroup("M")
+			.mimeType("application/json").content(file).execute();
+	    } else {
+		new AddDatastream(node.getPid(), "conf").versionable(true)
+			.dsState("A")
+			.dsLabel("json file to configure webharvests")
 			.controlGroup("M").mimeType("application/json")
 			.content(file).execute();
 	    }

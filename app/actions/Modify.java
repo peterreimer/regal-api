@@ -34,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import models.DublinCoreData;
+import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -574,6 +575,30 @@ public class Modify extends RegalAction {
      */
     public Node flatten(Node n) {
 	return moveUp(copyMetadata(n, "title", ""));
+    }
+
+    public String updateConf(Node node, String content) {
+	try {
+	    if (content == null) {
+		throw new HttpArchiveException(406, node.getPid()
+			+ " You've tried to upload an empty string."
+			+ " This action is not supported."
+			+ " Use HTTP DELETE instead.\n");
+	    }
+	    play.Logger.info("Write to conf: " + content);
+	    File file = CopyUtils.copyStringToFile(content);
+	    if (node != null) {
+		node.setConfFile(file.getAbsolutePath());
+		play.Logger.info("Update node" + file.getAbsolutePath());
+		Globals.fedora.updateNode(node);
+	    }
+	    updateIndex(node.getPid());
+	    return node.getPid() + " webgatherer conf updated!";
+	} catch (RdfException e) {
+	    throw new HttpArchiveException(400, e);
+	} catch (IOException e) {
+	    throw new UpdateNodeException(e);
+	}
     }
 
     @SuppressWarnings({ "serial" })

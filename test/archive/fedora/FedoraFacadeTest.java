@@ -45,7 +45,7 @@ import base.BaseModelTest;
 public class FedoraFacadeTest extends BaseModelTest {
     final static Logger logger = LoggerFactory
 	    .getLogger(FedoraFacadeTest.class);
-    FedoraInterface facade = null;
+    FedoraFacade facade = null;
     Node object = null;
     String server = null;
 

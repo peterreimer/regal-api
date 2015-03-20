@@ -43,6 +43,8 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
+import models.Gatherconf;
+import models.Gatherstatus;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -227,7 +229,7 @@ public class Resource extends MyController {
 	    @QueryParam("field") String field) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    String result = read.readMetadata(pid, field);
+	    String result = read.readMetadata(node, field);
 	    return ok(result);
 
 	});
@@ -776,5 +778,61 @@ public class Resource extends MyController {
 			return JsonMessage(new Message(e, 500));
 		    }
 		});
+    }
+
+    public static Promise<Result> updateConf(@PathParam("pid") String pid) {
+	return new ModifyAction()
+		.call(pid,
+			node -> {
+			    try {
+				Object o = request().body().asJson();
+				Gatherconf conf = null;
+				if (o != null) {
+				    conf = (Gatherconf) MyController.mapper
+					    .readValue(o.toString(),
+						    Gatherconf.class);
+				}
+				String result = modify.updateConf(node,
+					conf.toString());
+				return JsonMessage(new Message(result, 200));
+			    } catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
+    }
+
+    public static Promise<Result> listConf(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    String result = read.readConf(node);
+	    return ok(result);
+	});
+    }
+
+    public static Promise<Result> getStatus(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    return getJsonResult(new Gatherstatus());
+	});
+    }
+
+    public static Promise<Result> setStatus(@PathParam("pid") String pid) {
+	return new ModifyAction()
+		.call(pid,
+			node -> {
+			    try {
+				Object o = request().body().asJson();
+				Gatherstatus status;
+				if (o != null) {
+
+				    status = (Gatherstatus) MyController.mapper
+					    .readValue(o.toString(),
+						    Gatherstatus.class);
+
+				}
+				return JsonMessage(new Message("", 200));
+			    } catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 }

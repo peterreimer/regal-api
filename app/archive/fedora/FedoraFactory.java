@@ -29,7 +29,7 @@ public class FedoraFactory {
      *            The users password
      * @return An archive object implementing the ArchivInterface.java
      */
-    public static FedoraInterface getFedoraImpl(String host, String user,
+    public static FedoraFacade getFedoraImpl(String host, String user,
 	    String passwd) {
 	return FedoraFacade.getInstance(host, user, passwd);
     }

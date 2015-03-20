@@ -65,12 +65,14 @@ public class Node {
 
     private String metadataFile = null;
     private String seqFile = null;
+    private String confFile = null;
     private String uploadFile = null;
     private List<Link> links = new Vector<Link>();
     private List<Transformer> transformer = new Vector<Transformer>();
 
     private String metadata = null;
     private String seq = null;
+    private String conf = null;
 
     private String pid = null;
 
@@ -323,6 +325,15 @@ public class Node {
      */
     public void setSeqFile(String seqFile) {
 	this.seqFile = seqFile;
+    }
+
+    public void setConfFile(String absolutePath) {
+	this.confFile = absolutePath;
+
+    }
+
+    public String getConfFile() {
+	return confFile;
     }
 
     /**
@@ -604,6 +615,24 @@ public class Node {
     public Node setSeq(String seq) {
 	this.seq = seq;
 	return this;
+    }
+
+    /**
+     * @param conf
+     *            datastream as string
+     * @return this
+     */
+    public Node setConf(String conf) {
+	this.conf = conf;
+	return this;
+    }
+
+    /**
+     * @return the content of conf datastream in a string
+     */
+    @JsonIgnore()
+    public String getConf() {
+	return conf;
     }
 
     /**
@@ -1305,4 +1334,5 @@ public class Node {
     public String getFulltext() {
 	return fulltext;
     }
+
 }

@@ -18,8 +18,8 @@ package models;
 
 import play.Play;
 import archive.fedora.ApplicationProfile;
+import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
-import archive.fedora.FedoraInterface;
 import archive.search.SearchFacade;
 
 /**
@@ -95,7 +95,7 @@ public class Globals {
     /**
      * a globally available entry to Fedora
      */
-    public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
+    public static FedoraFacade fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
 
     /**

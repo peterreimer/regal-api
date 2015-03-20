@@ -342,7 +342,7 @@ public class Read extends RegalAction {
 	return readMetadata(node, field);
     }
 
-    private String readMetadata(Node node, String field) {
+    public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
@@ -354,6 +354,17 @@ public class Read extends RegalAction {
 
 		return value.isEmpty() ? "No " + field : value.get(0);
 	    }
+	} catch (UrlConnectionException e) {
+	    throw new HttpArchiveException(404, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    public String readConf(Node node) {
+	try {
+	    String conf = node.getConf();
+	    return conf;
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
 	} catch (Exception e) {
