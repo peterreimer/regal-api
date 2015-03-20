@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -41,6 +42,9 @@ import models.Pair;
 import models.RegalObject;
 import models.Transformer;
 
+import org.openrdf.model.BNode;
+import org.openrdf.model.Graph;
+import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
@@ -553,6 +557,51 @@ public class Modify extends RegalAction {
 	}
 	updateMetadata(node, metadata);
 	return node;
+    }
+
+    public Node enrichMetadata(Node node) {
+	String metadata = node.getMetadata();
+	if (metadata == null || metadata.isEmpty()) {
+	    return node;
+	}
+	List<String> gndIds = findAllGndIds(metadata);
+	List<Statement> enrichStatements = new ArrayList<Statement>();
+	for (String uri : gndIds) {
+	    enrichStatements.addAll(getStatements(uri));
+	}
+	metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+	updateMetadata(node, metadata);
+	return node;
+    }
+
+    private List<Statement> getStatements(String uri) {
+	List<Statement> filteredStatements = new ArrayList<Statement>();
+	try {
+	    for (Statement s : RdfUtils.readRdfToGraph(new URL(uri
+		    + "/about/rdf"), RDFFormat.RDFXML, " application/rdf+xml")) {
+		boolean isLiteral = s.getObject() instanceof Literal;
+		if (!(s.getSubject() instanceof BNode)) {
+		    if (isLiteral) {
+			filteredStatements.add(s);
+		    }
+		}
+	    }
+	} catch (Exception e) {
+	    play.Logger.warn("Not able to include data from" + uri, e);
+	}
+	return filteredStatements;
+    }
+
+    private List<String> findAllGndIds(String metadata) {
+	List<String> result = new ArrayList<String>();
+	Matcher m = Pattern.compile("http://d-nb.info/gnd/[^>]*").matcher(
+		metadata);
+	while (m.find()) {
+	    String id = m.group();
+	    play.Logger.debug("Found linked data id " + id);
+	    result.add(id);
+	}
+	return result;
     }
 
     /**

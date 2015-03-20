@@ -537,6 +537,33 @@ public class RdfUtils {
 
     }
 
+    public static String replaceTriples(List<Statement> graph,
+	    final String metadata) {
+	try {
+	    InputStream is = new ByteArrayInputStream(
+		    metadata.getBytes("UTF-8"));
+	    RepositoryConnection con = readRdfInputStreamToRepository(is,
+		    RDFFormat.NTRIPLES);
+	    for (Statement st : graph) {
+		RepositoryResult<Statement> statements = con.getStatements(
+			null, null, null, true);
+		while (statements.hasNext()) {
+		    Statement statement = statements.next();
+		    if (statement.getSubject().equals(st.getSubject())
+			    && statement.getPredicate().equals(st.getObject())) {
+			con.remove(statement);
+		    }
+		}
+		con.add(st);
+	    }
+	    return writeStatements(con, RDFFormat.NTRIPLES);
+	} catch (RepositoryException e) {
+	    throw new RdfException(e);
+	} catch (UnsupportedEncodingException e) {
+	    throw new RdfException(e);
+	}
+    }
+
     /**
      * @param subject
      *            the triples subject

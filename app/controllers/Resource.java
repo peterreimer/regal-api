@@ -696,6 +696,18 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json", nickname = "enrichMetadata", value = "enrichMetadata", notes = "Includes linked resources into metadata", response = String.class, httpMethod = "POST")
+    public static Promise<Result> enrichMetadata(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = modify.enrichMetadata(node);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
     @ApiOperation(produces = "application/json", nickname = "flatten", value = "flatten", notes = "Copy the title of your parent and move up one level.", response = String.class, httpMethod = "POST")
     public static Promise<Result> flatten(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
