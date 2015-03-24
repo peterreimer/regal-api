@@ -327,11 +327,18 @@ public class Node {
 	this.seqFile = seqFile;
     }
 
+    /**
+     * @param absolutePath
+     *            to a webharvest config file
+     */
     public void setConfFile(String absolutePath) {
 	this.confFile = absolutePath;
 
     }
 
+    /**
+     * @return absolute path to a webharvest config file
+     */
     public String getConfFile() {
 	return confFile;
     }

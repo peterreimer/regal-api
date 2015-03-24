@@ -40,6 +40,10 @@ public class TaskManager {
 	play.Logger
 		.info("Register Job: urn allocator. Will run every day at 0:23h");
 	addTask("urn allocator", new UrnAllocator(), "0 23 0 * * ?");
+
+	play.Logger
+		.info("Register Job: web gatherer. Will run every hour at min 32");
+	addTask("web gatherer", new Webgatherer(), "0 32 * * * ?");
     }
 
     private void addTask(String name, Runnable r, String cronExpression) {

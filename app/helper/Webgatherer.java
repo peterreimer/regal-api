@@ -14,20 +14,27 @@
  * limitations under the License.
  *
  */
-package models;
+package helper;
 
 /**
  * @author Jan Schnasse
  *
  */
-public class Gatherstatus {
-    @SuppressWarnings("javadoc")
-    public enum JobStatus {
-	queued, running, paused, succeded, failed
+public class Webgatherer implements Runnable {
+
+    @Override
+    public void run() {
+	// get all webpages
+
+	// get all configs
+
+	// find open jobs
+
+	// execute heritrix job
+
+	// create fedora object with unmanaged content pointing to the
+	// respective warc container
+
     }
 
-    /**
-     * the current status of a web harvest job
-     */
-    public JobStatus jobStatus;
 }
