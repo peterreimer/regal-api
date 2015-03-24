@@ -99,6 +99,9 @@ public class Globals {
     public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
 
+    /**
+     * register jobs at taskManager to gain regular executions
+     */
     public static TaskManager taskManager = new TaskManager();
 
     /**
@@ -110,12 +113,6 @@ public class Globals {
      * defines a protocol used by this app
      */
     public static String protocol = "http://";
-
-    /**
-     * if true the application will log a timestamp every 5 sec.
-     */
-    public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
-	    .configuration().getString("regal-api.heartbeatOn"));
 
     /**
      * Urn resolver used for testing urn resolving
