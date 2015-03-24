@@ -85,6 +85,10 @@ public enum ObjectType {
      */
     subject,
 
+    /**
+     * is used by the regal-importer
+     * 
+     */
     rootElement
 
 }

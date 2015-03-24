@@ -1298,10 +1298,17 @@ public class Node {
 	return this;
     }
 
+    /**
+     * @param string
+     *            a string representation of the data
+     */
     public void addFulltext(String string) {
 	fulltext = string;
     }
 
+    /**
+     * @return a string representation of the data
+     */
     public String getFulltext() {
 	return fulltext;
     }

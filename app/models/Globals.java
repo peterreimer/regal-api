@@ -99,6 +99,9 @@ public class Globals {
     public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
 
+    /**
+     * register jobs at taskManager to gain regular executions
+     */
     public static TaskManager taskManager = new TaskManager();
 
     /**
@@ -111,10 +114,14 @@ public class Globals {
      */
     public static String protocol = "http://";
 
-    public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
-
+    /**
+     * prefix for fulltext index
+     */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
 
+    /**
+     * prefix for public index
+     */
     public static final String PUBLIC_INDEX_PREF = "public_";
 
 }
