@@ -16,6 +16,7 @@
  */
 package models;
 
+import helper.TaskManager;
 import play.Play;
 import archive.fedora.ApplicationProfile;
 import archive.fedora.FedoraFactory;
@@ -97,6 +98,8 @@ public class Globals {
      */
     public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
+
+    public static TaskManager taskManager = new TaskManager();
 
     /**
      * labels etc.
