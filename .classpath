@@ -29,7 +29,7 @@
 	<classpathentry kind="lib" path="/opt/play/repository/local/org.slf4j/jcl-over-slf4j/1.7.5/jars/jcl-over-slf4j.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/local/ch.qos.logback/logback-core/1.0.13/jars/logback-core.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/local/ch.qos.logback/logback-classic/1.0.13/jars/logback-classic.jar"/>
-	<classpathentry kind="lib" path="/opt/play/repository/local/com.typesafe.akka/akka-actor_2.10/2.2.0/jars/akka-actor_2.10.jar"/>
+	<classpathentry kind="lib" path="/opt/play/repository/local/com.typesafe.akka/akka-actor_2.10/2.2.0/jars/akka-actor_2.10.jar" sourcepath="/home/jan/.m2/repository/com/typesafe/akka/akka-actor_2.10/2.2.0/akka-actor_2.10-2.2.0-sources.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/local/com.typesafe.akka/akka-slf4j_2.10/2.2.0/bundles/akka-slf4j_2.10.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/local/org.apache.commons/commons-lang3/3.1/jars/commons-lang3.jar"/>
 	<classpathentry kind="lib" path="/opt/play/repository/local/com.ning/async-http-client/1.7.18/jars/async-http-client.jar"/>
