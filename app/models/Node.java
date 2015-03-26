@@ -106,6 +106,8 @@ public class Node {
 
     private String fulltext;
 
+    private boolean isManaged = true;
+
     /**
      * Creates a new Node.
      * 
@@ -269,16 +271,16 @@ public class Node {
 
     /**
      * A Node can be associated to a file and it's containing data.
-     * 
+     *
      * @param localLocation
      *            file location
      * @param mimeType
      *            mime type of the data
      * @return this
      */
-    public Node setUploadData(String localLocation, String mimeType) {
+    public Node setLocalData(String localLocation) {
 	uploadFile = localLocation;
-	setMimeType(mimeType);
+	isManaged = false;
 	return this;
     }
 
@@ -1349,4 +1351,10 @@ public class Node {
 	return fulltext;
     }
 
+    /**
+     * @return true, if the node has a managed data stream
+     */
+    public boolean isManaged() {
+	return isManaged;
+    }
 }

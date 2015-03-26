@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Vector;
@@ -299,6 +300,24 @@ public class Utils {
 	}
     }
 
+    void createUnManagedStream(Node node) {
+	try {
+	    String location = new URL(node.getUploadFile()).toString();
+	    String label = node.getFileLabel();
+	    if (label == null || label.isEmpty())
+		label = location.substring(location.lastIndexOf('/'));
+	    new AddDatastream(node.getPid(), "data").checksumType("DISABLED")
+		    .versionable(true).dsLabel(label).dsState("A")
+		    .controlGroup("E").mimeType(node.getMimeType())
+		    .dsLocation(location).execute();
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(400, e);
+	}
+
+    }
+
     @SuppressWarnings("javadoc")
     public void createSeqStream(Node node) {
 	try {
@@ -351,6 +370,34 @@ public class Utils {
 	    }
 	} catch (FedoraClientException e) {
 	    throw new HttpArchiveException(e.getStatus(), e);
+	}
+    }
+
+    void updateUnManagedStream(Node node) {
+	try {
+	    play.Logger
+		    .debug("Update unmanaged datastream of " + node.getPid());
+	    String localpath = node.getUploadFile();
+
+	    if (dataStreamExists(node.getPid(), "data")) {
+		new ModifyDatastream(node.getPid(), "data")
+			.checksumType("DISABLED").versionable(true)
+			.dsState("A").dsLabel(node.getFileLabel())
+			.dsLocation(localpath).mimeType(node.getMimeType())
+			.controlGroup("E").execute();
+	    } else {
+		play.Logger.debug("Add datastream " + node.getPid()
+			+ "/data with unmanaged content" + localpath);
+		new AddDatastream(node.getPid(), "data")
+			.checksumType("DISABLED").versionable(true)
+			.dsState("A").mimeType(node.getMimeType())
+			.dsLabel(node.getFileLabel()).dsLocation(localpath)
+			.controlGroup("E").execute();
+	    }
+	} catch (FedoraClientException e) {
+	    throw new HttpArchiveException(e.getStatus(), e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(400, e);
 	}
     }
 

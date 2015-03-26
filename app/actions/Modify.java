@@ -34,7 +34,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import models.DublinCoreData;
-import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -83,7 +82,7 @@ public class Modify extends RegalAction {
 	CopyUtils.copy(content, tmp);
 	Node node = new Read().readNode(pid);
 	if (node != null) {
-	    node.setUploadData(tmp.getAbsolutePath(), mimeType);
+	    node.setUploadFile(tmp.getAbsolutePath());
 	    node.setFileLabel(name);
 	    node.setMimeType(mimeType);
 	    Globals.fedora.updateNode(node);
@@ -577,6 +576,13 @@ public class Modify extends RegalAction {
 	return moveUp(copyMetadata(n, "title", ""));
     }
 
+    /**
+     * @param node
+     *            the node to add a conf to
+     * @param content
+     *            json representation of conf
+     * @return a message
+     */
     public String updateConf(Node node, String content) {
 	try {
 	    if (content == null) {

@@ -30,6 +30,7 @@ libraryDependencies ++= Seq(
   "com.sun.jersey" % "jersey-server" % "1.18.1",
   "com.sun.jersey" % "jersey-client" % "1.18.1",
   "com.sun.jersey.contribs" % "jersey-multipart" % "1.18.1",
+  "com.sun.jersey.contribs" % "jersey-apache-client" % "1.18.1",
   "com.sun.jersey" % "jersey-json" % "1.18.1",
   "com.sun.jersey" % "jersey-bundle" % "1.18.1",
   "org.openrdf.sesame" % "sesame-repository-api" % "2.7.10" ,

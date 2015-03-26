@@ -237,27 +237,34 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
-	return new ReadDataAction().call(
-		pid,
-		node -> {
-		    try {
-			response()
-				.setHeader("Access-Control-Allow-Origin", "*");
-			URL url = new URL(Globals.fedoraIntern + "/objects/"
-				+ pid + "/datastreams/data/content");
-			HttpURLConnection connection = (HttpURLConnection) url
-				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType(connection.getContentType());
-			return ok(is);
-		    } catch (FileNotFoundException e) {
-			throw new HttpArchiveException(404, e);
-		    } catch (MalformedURLException e) {
-			throw new HttpArchiveException(500, e);
-		    } catch (IOException e) {
-			throw new HttpArchiveException(500, e);
-		    }
-		});
+	return new ReadDataAction()
+		.call(pid,
+			node -> {
+			    try {
+				response().setHeader(
+					"Access-Control-Allow-Origin", "*");
+				URL url = new URL(Globals.fedoraIntern
+					+ "/objects/" + pid
+					+ "/datastreams/data/content");
+				HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
+				InputStream is = connection.getInputStream();
+				response().setContentType(
+					connection.getContentType());
+				response()
+					.setHeader(
+						"Content-Disposition",
+						connection
+							.getHeaderField("Content-Disposition"));
+				return ok(is);
+			    } catch (FileNotFoundException e) {
+				throw new HttpArchiveException(404, e);
+			    } catch (MalformedURLException e) {
+				throw new HttpArchiveException(500, e);
+			    } catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listDc", value = "listDc", notes = "Shows internal dublin core stream", response = play.mvc.Result.class, httpMethod = "GET")
@@ -834,5 +841,16 @@ public class Resource extends MyController {
 				throw new HttpArchiveException(500, e);
 			    }
 			});
+    }
+
+    public static Promise<Result> createVersion(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = create.createWebpageVersion(node);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		throw new HttpArchiveException(500, e);
+	    }
+	});
     }
 }

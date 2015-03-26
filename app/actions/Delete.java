@@ -47,7 +47,7 @@ public class Delete extends RegalAction {
 		updateIndex(parentPid);
 	    } catch (HttpArchiveException e) {
 		message.append(e.getCode() + " parent " + parentPid
-			+ " allready deleted.");
+			+ " already deleted.");
 	    }
 	}
 	Globals.fedora.deleteNode(n.getPid());

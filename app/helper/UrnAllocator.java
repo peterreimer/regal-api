@@ -34,7 +34,7 @@ public class UrnAllocator implements Runnable {
 	Calendar cal = Calendar.getInstance();
 	cal.add(Calendar.DATE, -7);
 	Date date = cal.getTime();
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	MyUtils.addUrnToAll("edoweb", "hbz:929:02", dateFormat.format(date));
     }
 

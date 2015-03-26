@@ -16,10 +16,14 @@
  */
 package models;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -37,9 +41,10 @@ public class Gatherconf {
 
     @SuppressWarnings("javadoc")
     public enum RobotsPolicy {
-	classic, ignore
+	classic, ignore, obey
     }
 
+    String name;
     String url;
     int deepness;
     RobotsPolicy robotsPolicy;
@@ -55,6 +60,7 @@ public class Gatherconf {
 	robotsPolicy = null;
 	interval = null;
 	startDate = null;
+	name = null;
     }
 
     /**
@@ -130,6 +136,21 @@ public class Gatherconf {
 	this.startDate = startDate;
     }
 
+    /**
+     * @return the name will be used in heritrix as job name
+     */
+    public String getName() {
+	return name;
+    }
+
+    /**
+     * @param name
+     *            he name will be used in heritrix as job name
+     */
+    public void setName(String name) {
+	this.name = name;
+    }
+
     @Override
     public String toString() {
 	ObjectMapper mapper = JsonUtil.mapper();
@@ -140,5 +161,19 @@ public class Gatherconf {
 	    return super.toString();
 	}
 	return w.toString();
+    }
+
+    /**
+     * @param json
+     *            a json represenation
+     * @return a new Gatherconf build from json
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
+    @JsonIgnore
+    public static Gatherconf create(String json) throws JsonParseException,
+	    JsonMappingException, IOException {
+	return (Gatherconf) JsonUtil.mapper().readValue(json, Gatherconf.class);
     }
 }

@@ -16,6 +16,7 @@
  */
 package models;
 
+import helper.Heritrix;
 import helper.TaskManager;
 import play.Play;
 import archive.fedora.ApplicationProfile;
@@ -115,6 +116,12 @@ public class Globals {
     public static String protocol = "http://";
 
     /**
+     * if true the application will log a timestamp every 5 sec.
+     */
+    public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
+	    .configuration().getString("regal-api.heartbeatOn"));
+
+    /**
      * prefix for fulltext index
      */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
@@ -123,5 +130,10 @@ public class Globals {
      * prefix for public index
      */
     public static final String PUBLIC_INDEX_PREF = "public_";
+
+    public static Heritrix heritrix = new Heritrix();
+
+    public static String heritrixData = Play.application().configuration()
+	    .getString("regal-api.heritrix.dataUrl");
 
 }

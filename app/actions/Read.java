@@ -342,6 +342,11 @@ public class Read extends RegalAction {
 	return readMetadata(node, field);
     }
 
+    /**
+     * @param node
+     * @param field
+     * @return the metadata as rdf or just the object of an rdf-triple
+     */
     public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
@@ -361,6 +366,10 @@ public class Read extends RegalAction {
 	}
     }
 
+    /**
+     * @param node
+     * @return a webgather configuration
+     */
     public String readConf(Node node) {
 	try {
 	    String conf = node.getConf();

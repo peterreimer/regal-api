@@ -65,6 +65,7 @@ POST /resource/:pid/data			controllers.Resource.updateData(pid,md5?="")
 POST /resource/:pid/dc				controllers.Resource.updateDc(pid)
 POST /resource/:pid/moveUp			controllers.Resource.moveUp(pid)
 POST /resource/:pid/flatten	        controllers.Resource.flatten(pid)
+POST /resource/:pid/createVersion  controllers.Resource.createVersion(pid)
 POST /resource/:namespace			controllers.Resource.createResource(namespace)
 
 
