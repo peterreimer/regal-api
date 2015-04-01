@@ -67,8 +67,33 @@ public class Read extends RegalAction {
      * returns the lastModified child of the whole tree
      * 
      * @param node
+     * @param contentType
+     *            if set, only parts of specific type will be analysed
      * @return node
      */
+    public Node getLastModifiedChild(Node node, String contentType) {
+	if (contentType == null || contentType.isEmpty()) {
+	    return getLastModifiedChild(node);
+	} else {
+	    Node last = null;
+	    for (Node n : getParts(node)) {
+		Date cur = n.getLastModified();
+		if (contentType.equals(n.getContentType())) {
+		    if (last != null) {
+			if (cur.after(last.getLastModified())) {
+			    last = n;
+			}
+		    } else {
+			last = n;
+		    }
+		}
+	    }
+	    if (last == null)
+		return node;
+	    return last;
+	}
+    }
+
     public Node getLastModifiedChild(Node node) {
 	Node last = node;
 	for (Node n : getParts(node)) {

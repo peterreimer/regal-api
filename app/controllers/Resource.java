@@ -755,14 +755,16 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json,text/html", nickname = "getLastModifiedChild", value = "getLastModifiedChild", notes = "Return the last modified object of tree", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> getLastModifiedChild(
-	    @PathParam("pid") String pid) {
+	    @PathParam("pid") String pid,
+	    @QueryParam("contentType") String contentType) {
 	return new ReadMetadataAction().call(
 		pid,
 		node -> {
 		    try {
 			response()
 				.setHeader("Access-Control-Allow-Origin", "*");
-			Node result = read.getLastModifiedChild(node);
+			Node result = read.getLastModifiedChild(node,
+				contentType);
 			if (request().accepts("text/html")) {
 			    List<Node> nodes = new ArrayList<Node>();
 			    nodes.add(result);
