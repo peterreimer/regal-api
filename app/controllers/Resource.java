@@ -44,7 +44,6 @@ import models.Message;
 import models.Node;
 import models.RegalObject;
 import models.Gatherconf;
-import models.Gatherstatus;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -66,6 +65,7 @@ import archive.fedora.RdfUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -817,30 +817,21 @@ public class Resource extends MyController {
     }
 
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    return getJsonResult(new Gatherstatus());
-	});
-    }
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
+			String hertrixXmlResponse = Globals.heritrix
+				.getJobStatus(node.getPid());
+			XmlMapper xmlMapper = new XmlMapper();
+			Map entries = xmlMapper.readValue(hertrixXmlResponse,
+				Map.class);
 
-    public static Promise<Result> setStatus(@PathParam("pid") String pid) {
-	return new ModifyAction()
-		.call(pid,
-			node -> {
-			    try {
-				Object o = request().body().asJson();
-				Gatherstatus status;
-				if (o != null) {
-
-				    status = (Gatherstatus) MyController.mapper
-					    .readValue(o.toString(),
-						    Gatherstatus.class);
-
-				}
-				return JsonMessage(new Message("", 200));
-			    } catch (IOException e) {
-				throw new HttpArchiveException(500, e);
-			    }
-			});
+			return getJsonResult(entries);
+		    } catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		    }
+		});
     }
 
     public static Promise<Result> createVersion(@PathParam("pid") String pid) {

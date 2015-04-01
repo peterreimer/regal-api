@@ -25,6 +25,7 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "org.codehaus.jackson" % "jackson-core-lgpl" % "1.9.13",
   "org.codehaus.jackson" % "jackson-mapper-lgpl" % "1.9.13" ,
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % "2.4.0" ,
   "com.github.jsonld-java" % "jsonld-java" % "0.3",
   "com.sun.jersey" % "jersey-core" % "1.18.1" ,
   "com.sun.jersey" % "jersey-server" % "1.18.1",

@@ -296,4 +296,17 @@ public class Heritrix {
 	return new File(jobDir + "/" + name).exists();
     }
 
+    public String getJobStatus(String name) {
+	try {
+	    WebResource resource = client.resource(restUrl + "/engine/job/"
+		    + name);
+	    String response = resource.accept("application/xml").get(
+		    String.class);
+	    play.Logger.info(response);
+	    return response;
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
 }
