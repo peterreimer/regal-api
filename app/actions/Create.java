@@ -262,10 +262,15 @@ public class Create extends RegalAction {
 	    regalObject.setIsDescribedBy(prov);
 	    regalObject.setParentPid(n.getPid());
 	    Node webpageVersion = createResource(n.getNamespace(), regalObject);
+	    String label = new SimpleDateFormat("yyyy-MM-dd")
+		    .format(new Date());
+	    new Modify().updateMetadata(webpageVersion,
+		    "<" + webpageVersion.getPid()
+			    + "> <http://purl.org/dc/terms/title> \"" + label
+			    + "\" .");
 	    webpageVersion.setLocalData(localpath);
 	    webpageVersion.setMimeType("application/warc");
-	    webpageVersion.setFileLabel(new SimpleDateFormat("yyyy-MM-dd")
-		    .format(new Date()));
+	    webpageVersion.setFileLabel(label);
 	    return updateResource(webpageVersion);
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
