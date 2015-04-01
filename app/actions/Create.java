@@ -234,6 +234,7 @@ public class Create extends RegalAction {
 	    Gatherconf conf = Gatherconf.create(n.getConf());
 	    play.Logger.debug("Create webpageVersi " + conf.toString());
 	    // execute heritrix job
+	    conf.setName(n.getPid());
 	    if (!Globals.heritrix.jobExists(conf.getName())) {
 		Globals.heritrix.createJob(conf);
 	    }
