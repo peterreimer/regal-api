@@ -16,10 +16,13 @@
  */
 package helper;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.ibm.icu.util.Calendar;
 import com.sun.media.jfxmedia.logging.Logger;
 
@@ -54,6 +57,25 @@ public class Webgatherer implements Runnable {
 	}
     }
 
+    /**
+     * @param n
+     *            a webpage
+     * @param conf
+     *            user definde config
+     * @return nextLaunch
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     */
+    public static Date nextLaunch(Node n) throws Exception {
+	Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
+	Gatherconf conf = Gatherconf.create(n.getConf());
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(lastHarvest);
+	Date nextTimeHarvest = getSchedule(cal, conf);
+	return nextTimeHarvest;
+    }
+
     private boolean isOutstanding(Node n, Gatherconf conf) {
 	Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
 	Calendar cal = Calendar.getInstance();
@@ -69,7 +91,7 @@ public class Webgatherer implements Runnable {
 	return now.after(nextTimeHarvest);
     }
 
-    private Date getSchedule(Calendar cal, Gatherconf conf) {
+    private static Date getSchedule(Calendar cal, Gatherconf conf) {
 	switch (conf.getInterval()) {
 	case daily:
 	    cal.add(Calendar.DATE, 1);

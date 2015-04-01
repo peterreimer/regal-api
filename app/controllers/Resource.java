@@ -18,6 +18,7 @@ package controllers;
 
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
+import helper.Webgatherer;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -817,21 +818,22 @@ public class Resource extends MyController {
     }
 
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    try {
-			String hertrixXmlResponse = Globals.heritrix
-				.getJobStatus(node.getPid());
-			XmlMapper xmlMapper = new XmlMapper();
-			Map entries = xmlMapper.readValue(hertrixXmlResponse,
-				Map.class);
-
-			return getJsonResult(entries);
-		    } catch (Exception e) {
-			throw new HttpArchiveException(500, e);
-		    }
-		});
+	return new ReadMetadataAction()
+		.call(pid,
+			node -> {
+			    try {
+				String hertrixXmlResponse = Globals.heritrix
+					.getJobStatus(node.getPid());
+				XmlMapper xmlMapper = new XmlMapper();
+				Map entries = xmlMapper.readValue(
+					hertrixXmlResponse, Map.class);
+				entries.put("nextLaunch",
+					Webgatherer.nextLaunch(node));
+				return getJsonResult(entries);
+			    } catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 
     public static Promise<Result> createVersion(@PathParam("pid") String pid) {
