@@ -251,7 +251,7 @@ public class Heritrix {
 
     }
 
-    public String findLatestWarc(String name) {
+    public File getCurrentCrawlDir(String name) {
 	File dir = new File(this.jobDir + "/" + name);
 	File[] files = dir.listFiles(file -> {
 	    String now = new SimpleDateFormat("yyyyMMdd")
@@ -267,10 +267,17 @@ public class Heritrix {
 		});
 
 	File latest = files[files.length - 1];
+	return latest;
+    }
+
+    public String findLatestWarc(File latest) {
 	play.Logger.debug(latest.getAbsolutePath() + "/warcs");
 	File warcDir = new File(latest.getAbsolutePath() + "/warcs");
-	return warcDir.listFiles()[0].getAbsolutePath().replace(jobDir, "")
-		.replace(".open", "");
+	return warcDir.listFiles()[0].getAbsolutePath();
+    }
+
+    public String getUriPath(String str) {
+	return str.replace(jobDir, "").replace(".open", "");
     }
 
     private String unpauseJobToHeritrix(String name) {
@@ -302,7 +309,18 @@ public class Heritrix {
 		    + name);
 	    String response = resource.accept("application/xml").get(
 		    String.class);
-	    play.Logger.info(response);
+	    return response;
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    public String getJobStatus(String name, String crawlDir) {
+	try {
+	    WebResource resource = client.resource(restUrl + "/engine/job/"
+		    + name + "/jobdir/" + crawlDir
+		    + "/reports/crawl-report.txt");
+	    String response = resource.get(String.class);
 	    return response;
 	} catch (Exception e) {
 	    throw new RuntimeException(e);

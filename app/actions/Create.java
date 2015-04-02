@@ -248,8 +248,12 @@ public class Create extends RegalAction {
 
 	    Thread.currentThread().sleep(10000);
 
-	    String localpath = Globals.heritrixData + "/heritrix-data"
-		    + Globals.heritrix.findLatestWarc(conf.getName());
+	    File crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
+	    String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
+	    String uriPath = Globals.heritrix.getUriPath(warcPath);
+
+	    String localpath = Globals.heritrixData + "/heritrix-data" + "/"
+		    + uriPath;
 	    play.Logger.debug("Path to WARC " + localpath);
 
 	    // create fedora object with unmanaged content pointing to
@@ -272,7 +276,17 @@ public class Create extends RegalAction {
 	    webpageVersion.setLocalData(localpath);
 	    webpageVersion.setMimeType("application/warc");
 	    webpageVersion.setFileLabel(label);
-	    return updateResource(webpageVersion);
+	    webpageVersion.setAccessScheme(n.getAccessScheme());
+	    webpageVersion.setPublishScheme(n.getPublishScheme());
+	    webpageVersion = updateResource(webpageVersion);
+
+	    conf.setLocalDir(crawlDir.getAbsolutePath());
+	    String msg = new Modify().updateConf(webpageVersion,
+		    conf.toString());
+
+	    play.Logger.info(msg);
+
+	    return webpageVersion;
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
 	}

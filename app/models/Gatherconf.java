@@ -50,6 +50,7 @@ public class Gatherconf {
     RobotsPolicy robotsPolicy;
     Interval interval;
     Date startDate;
+    String localDir;
 
     /**
      * Create a new configuration for the webgatherer
@@ -149,6 +150,20 @@ public class Gatherconf {
      */
     public void setName(String name) {
 	this.name = name;
+    }
+
+    /**
+     * @return a localDir with information stored by heritrix
+     */
+    public String getLocalDir() {
+	return localDir;
+    }
+
+    /**
+     * @param localDir
+     */
+    public void setLocalDir(String localDir) {
+	this.localDir = localDir;
     }
 
     @Override
