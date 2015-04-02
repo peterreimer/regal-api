@@ -32,7 +32,7 @@ GET /resource 						controllers.Resource.listResources(namespace?="",contentType
 GET /resource/:pid/parts			controllers.Resource.listParts(pid,style?="")
 GET /resource/:pid/parents			controllers.Resource.listParents(pid,style?="")
 GET /resource/:pid/seq				controllers.Resource.listSeq(pid)
-GET /resource/:pid/all/lastModified	controllers.Resource.getLastModifiedChild(pid)
+GET /resource/:pid/all/lastModified	controllers.Resource.getLastModifiedChild(pid,contentType?="")
 GET /resource/:pid/all				controllers.Resource.listAllParts(pid)
 GET /resource/:pid/about			controllers.Resource.asRdf(pid)
 
