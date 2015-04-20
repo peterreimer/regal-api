@@ -115,7 +115,6 @@ public class Globals {
      */
     public static String protocol = "http://";
 
-
     /**
      * if true the application will log a timestamp every 5 sec.
      */

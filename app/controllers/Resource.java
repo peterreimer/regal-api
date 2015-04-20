@@ -45,6 +45,7 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
+import models.Urn;
 
 import models.Gatherconf;
 
@@ -863,7 +864,6 @@ public class Resource extends MyController {
 	    }
 	});
     }
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
