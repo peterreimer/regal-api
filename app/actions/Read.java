@@ -22,11 +22,15 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -38,11 +42,14 @@ import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
+import org.w3c.dom.Element;
 
 import play.Logger;
+import play.mvc.Result;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
+import archive.fedora.XmlUtils;
 
 /**
  * 
@@ -367,7 +374,7 @@ public class Read extends RegalAction {
 	return readMetadata(node, field);
     }
 
-    private String readMetadata(Node node, String field) {
+    public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
@@ -479,5 +486,77 @@ public class Read extends RegalAction {
 	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
 		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
 	return linkedObjects;
+    }
+
+    public int getOaiStatus(Node node) {
+	try {
+	    URL url = new URL(Globals.oaiMabXmlAdress + node.getPid());
+	    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	    HttpURLConnection.setFollowRedirects(true);
+	    con.connect();
+	    Element root = XmlUtils.getDocument(con.getInputStream());
+	    List<Element> elements = XmlUtils.getElements("//setSpec", root,
+		    null);
+	    if (elements.isEmpty())
+		return 404;
+	    return con.getResponseCode();
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    public Map<String, String> getLinks(Node node) {
+	String oai = Globals.oaiMabXmlAdress + node.getPid();
+	String aleph = Globals.alephAdress + node.getLegacyId();
+	String lobid = Globals.lobidAdress + node.getLegacyId();
+	String api = this.getHttpUriOfResource(node);
+	String urn = Globals.urnResolverAdress + node.getUrn();
+	String frontend = Globals.urnbase + node.getPid();
+	String digitool = Globals.digitoolAdress
+		+ node.getPid().substring(node.getNamespace().length() + 1);
+
+	Map<String, String> result = new HashMap<String, String>();
+	result.put("oai", oai);
+	result.put("aleph", aleph);
+	result.put("lobid", lobid);
+	result.put("api", api);
+	result.put("urn", urn);
+	result.put("frontend", frontend);
+	result.put("digitool", digitool);
+
+	return result;
+    }
+
+    public Map<String, Object> getStatus(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	result.put("urnStatus", urnStatus(node));
+	result.put("oaiStatus", getOaiStatus(node));
+	result.put("links", getLinks(node));
+	result.put("title", readMetadata(node, "title"));
+	result.put("metadataAccess", node.getPublishScheme());
+	result.put("dataAccess", node.getAccessScheme());
+	result.put("type", node.getContentType());
+	result.put("pid",
+		node.getPid().substring(node.getNamespace().length() + 1));
+	result.put("catalogId", node.getLegacyId());
+	result.put("urn", node.getUrn());
+	return result;
+    }
+
+    private int urnStatus(Node node) {
+	try {
+	    Urn urn = getUrnStatus(node);
+	    int urnStatus = urn == null ? 500 : urn.getResolverStatus();
+	    return urnStatus;
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    public List<Map<String, Object>> getStatus(List<Node> nodes) {
+	return nodes.stream().map((Node n) -> getStatus(n))
+		.collect(Collectors.toList());
     }
 }

@@ -108,6 +108,12 @@ public class Globals {
      */
     public static String protocol = "http://";
 
+    public static String urnResolverAdress = "http://nbn-resolving.org/";
+    public static String oaiMabXmlAdress = "http://api.edoweb-rlp.de/dnb-urn/?verb=GetRecord&metadataPrefix=mabxml-1&identifier=info:fedora/";
+    public static String alephAdress = "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D";
+    public static String lobidAdress = "http://lobid.org/resource/";
+    public static String digitoolAdress = "http://klio.hbz-nrw.de:1801/webclient/DeliveryManager?pid=";
+
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";

@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
+import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -57,6 +59,7 @@ import views.html.mab;
 import views.html.oaidc;
 import views.html.resource;
 import views.html.search;
+import views.html.status;
 import actions.BasicAuth;
 import actions.BulkAction;
 import archive.fedora.RdfUtils;
@@ -778,5 +781,51 @@ public class Resource extends MyController {
 			return JsonMessage(new Message(e, 500));
 		    }
 		});
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Promise<Result> getStatus(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		return getJsonResult(read.getStatus(node));
+	    } catch (Exception e) {
+		throw new HttpArchiveException(500, e);
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", httpMethod = "GET")
+    public static Promise<Result> listResourcesStatus(
+	    @QueryParam("namespace") String namespace,
+	    @QueryParam("contentType") String contentType,
+	    @QueryParam("from") int from, @QueryParam("until") int until) {
+	return new ListAction().call(() -> {
+	    try {
+		List<Node> nodes = read.listRepo(contentType, namespace, from,
+			until);
+		List<Map<String, Object>> stati = read.getStatus(nodes);
+		if (request().accepts("text/html")) {
+		    return htmlStatusList(stati);
+		} else {
+		    return getJsonResult(stati);
+		}
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    private static Result htmlStatusList(List<Map<String, Object>> stati) {
+	try {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setHeader("Content-Type", "text/html; charset=utf-8");
+	    return ok(status.render(json(stati)));
+	} catch (HttpArchiveException e) {
+	    return HtmlMessage(new Message(e, e.getCode()));
+	} catch (Exception e) {
+	    return HtmlMessage(new Message(e, 500));
+	}
     }
 }
