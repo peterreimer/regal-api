@@ -45,7 +45,7 @@ import base.BaseModelTest;
 public class FedoraFacadeTest extends BaseModelTest {
     final static Logger logger = LoggerFactory
 	    .getLogger(FedoraFacadeTest.class);
-    FedoraInterface facade = null;
+    FedoraFacade facade = null;
     Node object = null;
     String server = null;
 
@@ -78,7 +78,8 @@ public class FedoraFacadeTest extends BaseModelTest {
 		+ "/resource/(pid).pdfa"));
 
 	URL url = this.getClass().getResource("/test.pdf");
-	object.setUploadData(url.getPath(), "application/pdf");
+	object.setUploadFile(url.getPath());
+	object.setMimeType("application/pdf");
 	cleanUp();
     }
 
@@ -130,7 +131,8 @@ public class FedoraFacadeTest extends BaseModelTest {
 	object.dublinCoreData.setTitle(newTitle);
 	URL url = Thread.currentThread().getContextClassLoader()
 		.getResource("HT017297166.xml");
-	object.setUploadData(url.getPath(), "text/xml");
+	object.setUploadFile(url.getPath());
+	object.setMimeType("text/xml");
 	object.setFileLabel("HT017297166.xml");
 	facade.updateNode(object);
 
@@ -141,7 +143,8 @@ public class FedoraFacadeTest extends BaseModelTest {
 	Assert.assertEquals("text/xml", object.getMimeType());
 
 	// Object update on the reread object
-	object.setUploadData(url.getPath(), "application/pdf");
+	object.setUploadFile(url.getPath());
+	object.setMimeType("application/pdf");
 	facade.updateNode(object);
 	object = facade.readNode(object.getPid());
 	Assert.assertEquals("application/pdf", object.getMimeType());

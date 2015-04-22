@@ -18,6 +18,7 @@ package controllers;
 
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
+import helper.Webgatherer;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -43,6 +44,7 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
+import models.Gatherconf;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -64,6 +66,7 @@ import archive.fedora.RdfUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -227,7 +230,7 @@ public class Resource extends MyController {
 	    @QueryParam("field") String field) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    String result = read.readMetadata(pid, field);
+	    String result = read.readMetadata(node, field);
 	    return ok(result);
 
 	});
@@ -235,27 +238,34 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
-	return new ReadDataAction().call(
-		pid,
-		node -> {
-		    try {
-			response()
-				.setHeader("Access-Control-Allow-Origin", "*");
-			URL url = new URL(Globals.fedoraIntern + "/objects/"
-				+ pid + "/datastreams/data/content");
-			HttpURLConnection connection = (HttpURLConnection) url
-				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType(connection.getContentType());
-			return ok(is);
-		    } catch (FileNotFoundException e) {
-			throw new HttpArchiveException(404, e);
-		    } catch (MalformedURLException e) {
-			throw new HttpArchiveException(500, e);
-		    } catch (IOException e) {
-			throw new HttpArchiveException(500, e);
-		    }
-		});
+	return new ReadDataAction()
+		.call(pid,
+			node -> {
+			    try {
+				response().setHeader(
+					"Access-Control-Allow-Origin", "*");
+				URL url = new URL(Globals.fedoraIntern
+					+ "/objects/" + pid
+					+ "/datastreams/data/content");
+				HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
+				InputStream is = connection.getInputStream();
+				response().setContentType(
+					connection.getContentType());
+				response()
+					.setHeader(
+						"Content-Disposition",
+						connection
+							.getHeaderField("Content-Disposition"));
+				return ok(is);
+			    } catch (FileNotFoundException e) {
+				throw new HttpArchiveException(404, e);
+			    } catch (MalformedURLException e) {
+				throw new HttpArchiveException(500, e);
+			    } catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listDc", value = "listDc", notes = "Shows internal dublin core stream", response = play.mvc.Result.class, httpMethod = "GET")
@@ -778,5 +788,73 @@ public class Resource extends MyController {
 			return JsonMessage(new Message(e, 500));
 		    }
 		});
+    }
+
+    public static Promise<Result> updateConf(@PathParam("pid") String pid) {
+	return new ModifyAction()
+		.call(pid,
+			node -> {
+			    try {
+				Object o = request().body().asJson();
+				Gatherconf conf = null;
+				if (o != null) {
+				    conf = (Gatherconf) MyController.mapper
+					    .readValue(o.toString(),
+						    Gatherconf.class);
+				}
+				String result = modify.updateConf(node,
+					conf.toString());
+				return JsonMessage(new Message(result, 200));
+			    } catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
+    }
+
+    public static Promise<Result> listConf(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    String result = read.readConf(node);
+	    return ok(result);
+	});
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Promise<Result> getStatus(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    try {
+			if ("version".equals(node.getContentType())) {
+			    return ok(
+				    new java.io.File(Gatherconf.create(
+					    node.getConf()).getLocalDir()
+					    + "/reports/crawl-report.txt")).as(
+				    "text/plain");
+			} else {
+			    String hertrixXmlResponse = Globals.heritrix
+				    .getJobStatus(node.getPid());
+			    XmlMapper xmlMapper = new XmlMapper();
+			    Map entries = xmlMapper.readValue(
+				    hertrixXmlResponse, Map.class);
+			    entries.put("nextLaunch",
+				    Webgatherer.nextLaunch(node));
+			    return getJsonResult(entries);
+			}
+		    } catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		    }
+		});
+    }
+
+    public static Promise<Result> createVersion(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = create.createWebpageVersion(node);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		throw new HttpArchiveException(500, e);
+	    }
+	});
     }
 }

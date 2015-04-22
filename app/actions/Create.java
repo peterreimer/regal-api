@@ -19,12 +19,17 @@ package actions;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
+import models.Gatherconf;
 import models.Globals;
 import models.Node;
 import models.RegalObject;
 import models.Transformer;
+import models.RegalObject.Provenience;
 
 /**
  * @author Jan Schnasse
@@ -40,6 +45,10 @@ public class Create extends RegalAction {
     public Node updateResource(Node node, RegalObject object) {
 	new Index().remove(node);
 	overrideNodeMembers(node, object);
+	return updateResource(node);
+    }
+
+    private Node updateResource(Node node) {
 	Globals.fedora.updateNode(node);
 	updateIndex(node.getPid());
 	return node;
@@ -53,9 +62,7 @@ public class Create extends RegalAction {
     public Node patchResource(Node node, RegalObject object) {
 	new Index().remove(node);
 	setNodeMembers(node, object);
-	Globals.fedora.updateNode(node);
-	updateIndex(node.getPid());
-	return node;
+	return updateResource(node);
     }
 
     /**
@@ -210,4 +217,78 @@ public class Create extends RegalAction {
 	return Globals.fedora.getPid(namespace);
     }
 
+    /**
+     * @param n
+     *            must be of type webpage
+     * @return a new version pointing to a heritrix crawl
+     */
+    public Node createWebpageVersion(Node n) {
+	try {
+	    if (!"webpage".equals(n.getContentType())) {
+		throw new HttpArchiveException(
+			400,
+			n.getContentType()
+				+ " is not supported. Operation works only on regalType:\"webpage\"");
+	    }
+	    play.Logger.debug("Create webpageVersion " + n.getPid());
+	    Gatherconf conf = Gatherconf.create(n.getConf());
+	    play.Logger.debug("Create webpageVersi " + conf.toString());
+	    // execute heritrix job
+	    conf.setName(n.getPid());
+	    if (!Globals.heritrix.jobExists(conf.getName())) {
+		Globals.heritrix.createJob(conf);
+	    }
+	    boolean success = Globals.heritrix.teardown(conf.getName());
+	    play.Logger.debug("Teardown " + conf.getName() + " " + success);
+	    Globals.heritrix.launch(conf.getName());
+
+	    Thread.currentThread().sleep(10000);
+
+	    Globals.heritrix.unpause(conf.getName());
+
+	    Thread.currentThread().sleep(10000);
+
+	    File crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
+	    String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
+	    String uriPath = Globals.heritrix.getUriPath(warcPath);
+
+	    String localpath = Globals.heritrixData + "/heritrix-data" + "/"
+		    + uriPath;
+	    play.Logger.debug("Path to WARC " + localpath);
+
+	    // create fedora object with unmanaged content pointing to
+	    // the respective warc container
+	    RegalObject regalObject = new RegalObject();
+	    regalObject.setContentType("version");
+	    Provenience prov = regalObject.getIsDescribedBy();
+	    prov.setCreatedBy("webgatherer");
+	    prov.setName(conf.getName());
+	    prov.setImportedFrom(conf.getUrl());
+	    regalObject.setIsDescribedBy(prov);
+	    regalObject.setParentPid(n.getPid());
+	    Node webpageVersion = createResource(n.getNamespace(), regalObject);
+	    String label = new SimpleDateFormat("yyyy-MM-dd")
+		    .format(new Date());
+	    new Modify().updateMetadata(webpageVersion,
+		    "<" + webpageVersion.getPid()
+			    + "> <http://purl.org/dc/terms/title> \"" + label
+			    + "\" .");
+	    webpageVersion.setLocalData(localpath);
+	    webpageVersion.setMimeType("application/warc");
+	    webpageVersion.setFileLabel(label);
+	    webpageVersion.setAccessScheme(n.getAccessScheme());
+	    webpageVersion.setPublishScheme(n.getPublishScheme());
+	    webpageVersion = updateResource(webpageVersion);
+
+	    conf.setLocalDir(crawlDir.getAbsolutePath());
+	    String msg = new Modify().updateConf(webpageVersion,
+		    conf.toString());
+
+	    play.Logger.info(msg);
+
+	    return webpageVersion;
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
+    }
 }

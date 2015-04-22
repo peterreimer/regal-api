@@ -20,6 +20,7 @@ import static play.test.Helpers.testServer;
 
 import org.junit.Test;
 
+import controllers.Resource;
 import play.libs.WS;
 
 /**

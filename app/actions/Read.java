@@ -367,7 +367,12 @@ public class Read extends RegalAction {
 	return readMetadata(node, field);
     }
 
-    private String readMetadata(Node node, String field) {
+    /**
+     * @param node
+     * @param field
+     * @return the metadata as rdf or just the object of an rdf-triple
+     */
+    public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
@@ -379,6 +384,21 @@ public class Read extends RegalAction {
 
 		return value.isEmpty() ? "No " + field : value.get(0);
 	    }
+	} catch (UrlConnectionException e) {
+	    throw new HttpArchiveException(404, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    /**
+     * @param node
+     * @return a webgather configuration
+     */
+    public String readConf(Node node) {
+	try {
+	    String conf = node.getConf();
+	    return conf;
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
 	} catch (Exception e) {

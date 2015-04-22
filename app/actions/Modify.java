@@ -82,7 +82,7 @@ public class Modify extends RegalAction {
 	CopyUtils.copy(content, tmp);
 	Node node = new Read().readNode(pid);
 	if (node != null) {
-	    node.setUploadData(tmp.getAbsolutePath(), mimeType);
+	    node.setUploadFile(tmp.getAbsolutePath());
 	    node.setFileLabel(name);
 	    node.setMimeType(mimeType);
 	    Globals.fedora.updateNode(node);
@@ -574,6 +574,37 @@ public class Modify extends RegalAction {
      */
     public Node flatten(Node n) {
 	return moveUp(copyMetadata(n, "title", ""));
+    }
+
+    /**
+     * @param node
+     *            the node to add a conf to
+     * @param content
+     *            json representation of conf
+     * @return a message
+     */
+    public String updateConf(Node node, String content) {
+	try {
+	    if (content == null) {
+		throw new HttpArchiveException(406, node.getPid()
+			+ " You've tried to upload an empty string."
+			+ " This action is not supported."
+			+ " Use HTTP DELETE instead.\n");
+	    }
+	    play.Logger.info("Write to conf: " + content);
+	    File file = CopyUtils.copyStringToFile(content);
+	    if (node != null) {
+		node.setConfFile(file.getAbsolutePath());
+		play.Logger.info("Update node" + file.getAbsolutePath());
+		Globals.fedora.updateNode(node);
+	    }
+	    updateIndex(node.getPid());
+	    return node.getPid() + " webgatherer conf updated!";
+	} catch (RdfException e) {
+	    throw new HttpArchiveException(400, e);
+	} catch (IOException e) {
+	    throw new UpdateNodeException(e);
+	}
     }
 
     @SuppressWarnings({ "serial" })

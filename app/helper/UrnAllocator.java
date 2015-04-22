@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
+ * Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,23 +14,28 @@
  * limitations under the License.
  *
  */
-package archive.fedora;
+package helper;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import com.ibm.icu.util.Calendar;
+
+import controllers.MyUtils;
 
 /**
- * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * @author Jan Schnasse
+ *
  */
-public class FedoraFactory {
-    /**
-     * @param host
-     *            The webadress of the backend system
-     * @param user
-     *            A user to operate in the archive
-     * @param passwd
-     *            The users password
-     * @return An archive object implementing the ArchivInterface.java
-     */
-    public static FedoraFacade getFedoraImpl(String host, String user,
-	    String passwd) {
-	return FedoraFacade.getInstance(host, user, passwd);
+public class UrnAllocator implements Runnable {
+
+    @Override
+    public void run() {
+	Calendar cal = Calendar.getInstance();
+	cal.add(Calendar.DATE, -7);
+	Date date = cal.getTime();
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	MyUtils.addUrnToAll("edoweb", "hbz:929:02", dateFormat.format(date));
     }
+
 }

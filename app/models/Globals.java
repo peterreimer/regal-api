@@ -16,10 +16,12 @@
  */
 package models;
 
+import helper.Heritrix;
+import helper.TaskManager;
 import play.Play;
 import archive.fedora.ApplicationProfile;
+import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
-import archive.fedora.FedoraInterface;
 import archive.search.SearchFacade;
 
 /**
@@ -95,8 +97,13 @@ public class Globals {
     /**
      * a globally available entry to Fedora
      */
-    public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
+    public static FedoraFacade fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
+
+    /**
+     * register jobs at taskManager to gain regular executions
+     */
+    public static TaskManager taskManager = new TaskManager();
 
     /**
      * labels etc.
@@ -108,10 +115,25 @@ public class Globals {
      */
     public static String protocol = "http://";
 
-    public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
+    /**
+     * if true the application will log a timestamp every 5 sec.
+     */
+    public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
+	    .configuration().getString("regal-api.heartbeatOn"));
 
+    /**
+     * prefix for fulltext index
+     */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
 
+    /**
+     * prefix for public index
+     */
     public static final String PUBLIC_INDEX_PREF = "public_";
+
+    public static Heritrix heritrix = new Heritrix();
+
+    public static String heritrixData = Play.application().configuration()
+	    .getString("regal-api.heritrix.dataUrl");
 
 }
