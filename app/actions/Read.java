@@ -20,6 +20,7 @@ import static archive.fedora.Vocabulary.*;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
+import helper.Webgatherer;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -43,6 +44,8 @@ import models.Urn;
 import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import play.Logger;
 import play.mvc.Result;
@@ -561,7 +564,30 @@ public class Read extends RegalAction {
 		node.getPid().substring(node.getNamespace().length() + 1));
 	result.put("catalogId", node.getLegacyId());
 	result.put("urn", node.getUrn());
+	result.put("webgatherer", getGatherStatus(node));
 	return result;
+    }
+
+    private Map<String, Object> getGatherStatus(Node node) {
+	Map<String, Object> entries = null;
+	try {
+	    // if ("version".equals(node.getContentType())) {
+	    //
+	    // new java.io.File(Gatherconf.create(node.getConf())
+	    // .getLocalDir() + "/reports/crawl-report.txt"))
+	    // .as("text/plain");
+	    // } else
+	    if ("webpage".equals(node.getContentType())) {
+		String hertrixXmlResponse = Globals.heritrix.getJobStatus(node
+			.getPid());
+		XmlMapper xmlMapper = new XmlMapper();
+		entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+		entries.put("nextLaunch", Webgatherer.nextLaunch(node));
+	    }
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	}
+	return entries == null ? new HashMap<String, Object>() : entries;
     }
 
     private int urnStatus(Node node) {
