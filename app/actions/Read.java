@@ -490,7 +490,7 @@ public class Read extends RegalAction {
 
     public int getOaiStatus(Node node) {
 	try {
-	    URL url = new URL(Globals.oaiMabXmlAdress + node.getPid());
+	    URL url = new URL(Globals.oaiMabXmlAddress + node.getPid());
 	    HttpURLConnection con = (HttpURLConnection) url.openConnection();
 	    HttpURLConnection.setFollowRedirects(true);
 	    con.connect();
@@ -507,13 +507,13 @@ public class Read extends RegalAction {
     }
 
     public Map<String, String> getLinks(Node node) {
-	String oai = Globals.oaiMabXmlAdress + node.getPid();
-	String aleph = Globals.alephAdress + node.getLegacyId();
-	String lobid = Globals.lobidAdress + node.getLegacyId();
+	String oai = Globals.oaiMabXmlAddress + node.getPid();
+	String aleph = Globals.alephAddress + node.getLegacyId();
+	String lobid = Globals.lobidAddress + node.getLegacyId();
 	String api = this.getHttpUriOfResource(node);
-	String urn = Globals.urnResolverAdress + node.getUrn();
+	String urn = Globals.urnResolverAddress + node.getUrn();
 	String frontend = Globals.urnbase + node.getPid();
-	String digitool = Globals.digitoolAdress
+	String digitool = Globals.digitoolAddress
 		+ node.getPid().substring(node.getNamespace().length() + 1);
 
 	Map<String, String> result = new HashMap<String, String>();

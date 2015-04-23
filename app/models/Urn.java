@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("javadoc")
 public class Urn {
-    String resolver = Globals.urnResolverAdress;
+    String resolver = Globals.urnResolverAddress;
     String urn = null;
     String resolvesTo = "NONE";
     int resolverStatus = 404;
