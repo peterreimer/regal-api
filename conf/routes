@@ -14,6 +14,7 @@ GET     /public/*file               controllers.Assets.at(path="/public", file)
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
+GET /resource/status				controllers.Resource.listResourcesStatus(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
 GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid,field?="")
@@ -35,6 +36,7 @@ GET /resource/:pid/seq				controllers.Resource.listSeq(pid)
 GET /resource/:pid/all/lastModified	controllers.Resource.getLastModifiedChild(pid,contentType?="")
 GET /resource/:pid/all				controllers.Resource.listAllParts(pid)
 GET /resource/:pid/about			controllers.Resource.asRdf(pid)
+GET /resource/:pid/status			controllers.Resource.getStatus(pid)
 
 # list from elasticsearch index
 GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
