@@ -114,17 +114,37 @@ public class Globals {
     public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
 	    .configuration().getString("regal-api.heartbeatOn"));
 
+    /**
+     * Urn resolver used for testing urn resolving
+     * 
+     */
     public static String urnResolverAdress = Play.application().configuration()
 	    .getString("regal-api.urnResolverAdress");
+    /**
+     * Adress of oai provider to test if mabxml is provided properly
+     * 
+     */
     public static String oaiMabXmlAdress = Play.application().configuration()
 	    .getString("regal-api.oaiMabXmlAdress");
+    /**
+     * Catalog address to test if resource is in catalog
+     */
     public static String alephAdress = Play.application().configuration()
 	    .getString("regal-api.alephAdress");
+    /**
+     * Lobid address to test if resource is in lobid
+     */
     public static String lobidAdress = Play.application().configuration()
 	    .getString("regal-api.lobidAdress");
+    /**
+     * Digitool address to link back to old digitool resources
+     */
     public static String digitoolAdress = Play.application().configuration()
 	    .getString("regal-api.digitoolAdress");
 
+    /**
+     * The type for fulltext-extracts made by pdfbox
+     */
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
     /**
@@ -132,6 +152,9 @@ public class Globals {
      */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
 
+    /**
+     * prefix used for public es index
+     */
     public static final String PUBLIC_INDEX_PREF = "public_";
 
 }
