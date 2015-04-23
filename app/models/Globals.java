@@ -125,29 +125,29 @@ public class Globals {
      * Urn resolver used for testing urn resolving
      * 
      */
-    public static String urnResolverAdress = Play.application().configuration()
-	    .getString("regal-api.urnResolverAdress");
+    public static String urnResolverAddress = Play.application()
+	    .configuration().getString("regal-api.urnResolverAddress");
     /**
-     * Adress of oai provider to test if mabxml is provided properly
+     * Address of oai provider to test if mabxml is provided properly
      * 
      */
-    public static String oaiMabXmlAdress = Play.application().configuration()
-	    .getString("regal-api.oaiMabXmlAdress");
+    public static String oaiMabXmlAddress = Play.application().configuration()
+	    .getString("regal-api.oaiMabXmlAddress");
     /**
      * Catalog address to test if resource is in catalog
      */
-    public static String alephAdress = Play.application().configuration()
-	    .getString("regal-api.alephAdress");
+    public static String alephAddress = Play.application().configuration()
+	    .getString("regal-api.alephAddress");
     /**
      * Lobid address to test if resource is in lobid
      */
-    public static String lobidAdress = Play.application().configuration()
-	    .getString("regal-api.lobidAdress");
+    public static String lobidAddress = Play.application().configuration()
+	    .getString("regal-api.lobidAddress");
     /**
      * Digitool address to link back to old digitool resources
      */
-    public static String digitoolAdress = Play.application().configuration()
-	    .getString("regal-api.digitoolAdress");
+    public static String digitoolAddress = Play.application().configuration()
+	    .getString("regal-api.digitoolAddress");
 
     /**
      * The type for fulltext-extracts made by pdfbox
