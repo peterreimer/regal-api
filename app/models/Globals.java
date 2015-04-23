@@ -108,14 +108,28 @@ public class Globals {
      */
     public static String protocol = "http://";
 
-    public static String urnResolverAdress = "http://nbn-resolving.org/";
-    public static String oaiMabXmlAdress = "http://api.edoweb-rlp.de/dnb-urn/?verb=GetRecord&metadataPrefix=mabxml-1&identifier=info:fedora/";
-    public static String alephAdress = "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D";
-    public static String lobidAdress = "http://lobid.org/resource/";
-    public static String digitoolAdress = "http://klio.hbz-nrw.de:1801/webclient/DeliveryManager?pid=";
+    /**
+     * if true the application will log a timestamp every 5 sec.
+     */
+    public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
+	    .configuration().getString("regal-api.heartbeatOn"));
+
+    public static String urnResolverAdress = Play.application().configuration()
+	    .getString("regal-api.urnResolverAdress");
+    public static String oaiMabXmlAdress = Play.application().configuration()
+	    .getString("regal-api.oaiMabXmlAdress");
+    public static String alephAdress = Play.application().configuration()
+	    .getString("regal-api.alephAdress");
+    public static String lobidAdress = Play.application().configuration()
+	    .getString("regal-api.lobidAdress");
+    public static String digitoolAdress = Play.application().configuration()
+	    .getString("regal-api.digitoolAdress");
 
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
+    /**
+     * prefix for fulltext index
+     */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
 
     public static final String PUBLIC_INDEX_PREF = "public_";
