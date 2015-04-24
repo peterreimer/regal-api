@@ -29,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +43,6 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
-import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -783,7 +781,6 @@ public class Resource extends MyController {
 		});
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    try {

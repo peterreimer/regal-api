@@ -85,6 +85,9 @@ public enum ObjectType {
      */
     subject,
 
+    /**
+     * used by importer to mark rootElements during processing.
+     */
     rootElement
 
 }
