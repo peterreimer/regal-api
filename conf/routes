@@ -14,7 +14,7 @@ GET     /public/*file               controllers.Assets.at(path="/public", file)
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
 # Resource
-GET /resource/status				controllers.Resource.listResourcesStatus(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
+GET /resource/status				controllers.Resource.listResourcesStatus(namespace?="",contentType?="",from: Int ?=0, until: Int?=100)
 GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid,field?="")

@@ -51,7 +51,6 @@ import models.Gatherconf;
 
 import models.Urn;
 
-
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
@@ -826,34 +825,6 @@ public class Resource extends MyController {
 	});
     }
 
-//    @SuppressWarnings({ "unchecked", "rawtypes" })
-//    public static Promise<Result> getStatus(@PathParam("pid") String pid) {
-//	return new ReadMetadataAction().call(
-//		pid,
-//		node -> {
-//		    try {
-//			if ("version".equals(node.getContentType())) {
-//			    return ok(
-//				    new java.io.File(Gatherconf.create(
-//					    node.getConf()).getLocalDir()
-//					    + "/reports/crawl-report.txt")).as(
-//				    "text/plain");
-//			} else {
-//			    String hertrixXmlResponse = Globals.heritrix
-//				    .getJobStatus(node.getPid());
-//			    XmlMapper xmlMapper = new XmlMapper();
-//			    Map entries = xmlMapper.readValue(
-//				    hertrixXmlResponse, Map.class);
-//			    entries.put("nextLaunch",
-//				    Webgatherer.nextLaunch(node));
-//			    return getJsonResult(entries);
-//			}
-//		    } catch (Exception e) {
-//			throw new HttpArchiveException(500, e);
-//		    }
-//		});
-//    }
-
     public static Promise<Result> createVersion(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
 	    try {
@@ -864,6 +835,7 @@ public class Resource extends MyController {
 	    }
 	});
     }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
@@ -882,8 +854,11 @@ public class Resource extends MyController {
 	    @QueryParam("from") int from, @QueryParam("until") int until) {
 	return new ListAction().call(() -> {
 	    try {
-		List<Node> nodes = read.listRepo(contentType, namespace, from,
-			until);
+		String ns = namespace;
+		if (ns.isEmpty()) {
+		    ns = Globals.namespaces[0];
+		}
+		List<Node> nodes = read.listRepo(contentType, ns, from, until);
 		List<Map<String, Object>> stati = read.getStatus(nodes);
 		if (request().accepts("text/html")) {
 		    return htmlStatusList(stati);

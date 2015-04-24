@@ -556,7 +556,7 @@ public class Read extends RegalAction {
 	result.put("urnStatus", urnStatus(node));
 	result.put("oaiStatus", getOaiStatus(node));
 	result.put("links", getLinks(node));
-	result.put("title", readMetadata(node, "title"));
+	result.put("title", getTitle(node));
 	result.put("metadataAccess", node.getPublishScheme());
 	result.put("dataAccess", node.getAccessScheme());
 	result.put("type", node.getContentType());
@@ -566,6 +566,14 @@ public class Read extends RegalAction {
 	result.put("urn", node.getUrn());
 	result.put("webgatherer", getGatherStatus(node));
 	return result;
+    }
+
+    private String getTitle(Node node) {
+	try {
+	    return readMetadata(node, "title");
+	} catch (Exception e) {
+	    return "No Title";
+	}
     }
 
     private Map<String, Object> getGatherStatus(Node node) {
