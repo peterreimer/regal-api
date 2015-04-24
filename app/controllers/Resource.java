@@ -18,7 +18,6 @@ package controllers;
 
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
-import helper.Webgatherer;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -30,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,11 +43,8 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
-import models.Urn;
 
 import models.Gatherconf;
-
-import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -72,7 +67,6 @@ import archive.fedora.RdfUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -836,7 +830,6 @@ public class Resource extends MyController {
 	});
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    try {

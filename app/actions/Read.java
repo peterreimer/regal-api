@@ -16,9 +16,11 @@
  */
 package actions;
 
-import static archive.fedora.Vocabulary.*;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
+import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 import helper.Webgatherer;
 
@@ -31,7 +33,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,6 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import play.Logger;
-import play.mvc.Result;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
@@ -104,6 +104,10 @@ public class Read extends RegalAction {
 	}
     }
 
+    /**
+     * @param node
+     * @return child recently modified
+     */
     public Node getLastModifiedChild(Node node) {
 	Node last = node;
 	for (Node n : getParts(node)) {
@@ -511,6 +515,11 @@ public class Read extends RegalAction {
 	return linkedObjects;
     }
 
+    /**
+     * @param node
+     * @return 200 if object can be found at oaiprovider, 404 if not, 500 on
+     *         error
+     */
     public int getOaiStatus(Node node) {
 	try {
 	    URL url = new URL(Globals.oaiMabXmlAddress + node.getPid());
@@ -529,7 +538,7 @@ public class Read extends RegalAction {
 	}
     }
 
-    public Map<String, String> getLinks(Node node) {
+    Map<String, String> getLinks(Node node) {
 	String oai = Globals.oaiMabXmlAddress + node.getPid();
 	String aleph = Globals.alephAddress + node.getLegacyId();
 	String lobid = Globals.lobidAddress + node.getLegacyId();
@@ -551,6 +560,13 @@ public class Read extends RegalAction {
 	return result;
     }
 
+    /**
+     * The status contains information about the object with regard to
+     * thirdparty system
+     * 
+     * @param node
+     * @return a Map with status information
+     */
     public Map<String, Object> getStatus(Node node) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	result.put("urnStatus", urnStatus(node));
@@ -609,6 +625,10 @@ public class Read extends RegalAction {
 	}
     }
 
+    /**
+     * @param nodes
+     * @return status information for many nodes
+     */
     public List<Map<String, Object>> getStatus(List<Node> nodes) {
 	return nodes.stream().map((Node n) -> getStatus(n))
 		.collect(Collectors.toList());

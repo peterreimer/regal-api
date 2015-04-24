@@ -1338,14 +1338,15 @@ public class Node {
 
     /**
      * @param string
-     *            a string representation of the data
+     *            a text extraction of the nodes data
+     * @param string
      */
     public void addFulltext(String string) {
 	fulltext = string;
     }
 
     /**
-     * @return a string representation of the data
+     * @return a text extraction of the nodes data
      */
     public String getFulltext() {
 	return fulltext;

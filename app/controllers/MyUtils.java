@@ -55,8 +55,6 @@ public class MyUtils extends MyController {
     public static Promise<Result> index(@PathParam("pid") String pid,
 	    @QueryParam("index") final String indexName) {
 	return new ModifyAction().call(pid, node -> {
-	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
-		    : indexName;
 	    String result = index.index(node);
 	    return JsonMessage(new Message(result));
 	});
