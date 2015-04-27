@@ -1298,10 +1298,18 @@ public class Node {
 	return this;
     }
 
+    /**
+     * Add a text extraction of the nodes data
+     * 
+     * @param string
+     */
     public void addFulltext(String string) {
 	fulltext = string;
     }
 
+    /**
+     * @return a text extraction of the nodes data
+     */
     public String getFulltext() {
 	return fulltext;
     }

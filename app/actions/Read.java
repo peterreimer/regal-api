@@ -16,15 +16,20 @@
  */
 package actions;
 
-import static archive.fedora.Vocabulary.*;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
+import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -38,11 +43,13 @@ import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.openrdf.rio.RDFFormat;
+import org.w3c.dom.Element;
 
 import play.Logger;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
+import archive.fedora.XmlUtils;
 
 /**
  * 
@@ -94,6 +101,10 @@ public class Read extends RegalAction {
 	}
     }
 
+    /**
+     * @param node
+     * @return child recently modified
+     */
     public Node getLastModifiedChild(Node node) {
 	Node last = node;
 	for (Node n : getParts(node)) {
@@ -367,7 +378,13 @@ public class Read extends RegalAction {
 	return readMetadata(node, field);
     }
 
-    private String readMetadata(Node node, String field) {
+    /**
+     * @param node
+     * @param field
+     *            the shortname of metadata field
+     * @return the ntriples or just one field
+     */
+    public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
@@ -479,5 +496,93 @@ public class Read extends RegalAction {
 	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
 		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
 	return linkedObjects;
+    }
+
+    /**
+     * @param node
+     * @return 200 if object can be found at oaiprovider, 404 if not, 500 on
+     *         error
+     */
+    public int getOaiStatus(Node node) {
+	try {
+	    URL url = new URL(Globals.oaiMabXmlAddress + node.getPid());
+	    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	    HttpURLConnection.setFollowRedirects(true);
+	    con.connect();
+	    Element root = XmlUtils.getDocument(con.getInputStream());
+	    List<Element> elements = XmlUtils.getElements("//setSpec", root,
+		    null);
+	    if (elements.isEmpty())
+		return 404;
+	    return con.getResponseCode();
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    Map<String, String> getLinks(Node node) {
+	String oai = Globals.oaiMabXmlAddress + node.getPid();
+	String aleph = Globals.alephAddress + node.getLegacyId();
+	String lobid = Globals.lobidAddress + node.getLegacyId();
+	String api = this.getHttpUriOfResource(node);
+	String urn = Globals.urnResolverAddress + node.getUrn();
+	String frontend = Globals.urnbase + node.getPid();
+	String digitool = Globals.digitoolAddress
+		+ node.getPid().substring(node.getNamespace().length() + 1);
+
+	Map<String, String> result = new HashMap<String, String>();
+	result.put("oai", oai);
+	result.put("aleph", aleph);
+	result.put("lobid", lobid);
+	result.put("api", api);
+	result.put("urn", urn);
+	result.put("frontend", frontend);
+	result.put("digitool", digitool);
+
+	return result;
+    }
+
+    /**
+     * The status contains information about the object with regard to
+     * thirdparty system
+     * 
+     * @param node
+     * @return a Map with status information
+     */
+    public Map<String, Object> getStatus(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	result.put("urnStatus", urnStatus(node));
+	result.put("oaiStatus", getOaiStatus(node));
+	result.put("links", getLinks(node));
+	result.put("title", readMetadata(node, "title"));
+	result.put("metadataAccess", node.getPublishScheme());
+	result.put("dataAccess", node.getAccessScheme());
+	result.put("type", node.getContentType());
+	result.put("pid",
+		node.getPid().substring(node.getNamespace().length() + 1));
+	result.put("catalogId", node.getLegacyId());
+	result.put("urn", node.getUrn());
+	return result;
+    }
+
+    private int urnStatus(Node node) {
+	try {
+	    Urn urn = getUrnStatus(node);
+	    int urnStatus = urn == null ? 500 : urn.getResolverStatus();
+	    return urnStatus;
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    /**
+     * @param nodes
+     * @return status information for many nodes
+     */
+    public List<Map<String, Object>> getStatus(List<Node> nodes) {
+	return nodes.stream().map((Node n) -> getStatus(n))
+		.collect(Collectors.toList());
     }
 }

@@ -108,10 +108,53 @@ public class Globals {
      */
     public static String protocol = "http://";
 
+    /**
+     * if true the application will log a timestamp every 5 sec.
+     */
+    public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
+	    .configuration().getString("regal-api.heartbeatOn"));
+
+    /**
+     * Urn resolver used for testing urn resolving
+     * 
+     */
+    public static String urnResolverAddress = Play.application()
+	    .configuration().getString("regal-api.urnResolverAddress");
+    /**
+     * Address of oai provider to test if mabxml is provided properly
+     * 
+     */
+    public static String oaiMabXmlAddress = Play.application().configuration()
+	    .getString("regal-api.oaiMabXmlAddress");
+    /**
+     * Catalog address to test if resource is in catalog
+     */
+    public static String alephAddress = Play.application().configuration()
+	    .getString("regal-api.alephAddress");
+    /**
+     * Lobid address to test if resource is in lobid
+     */
+    public static String lobidAddress = Play.application().configuration()
+	    .getString("regal-api.lobidAddress");
+    /**
+     * Digitool address to link back to old digitool resources
+     */
+    public static String digitoolAddress = Play.application().configuration()
+	    .getString("regal-api.digitoolAddress");
+
+    /**
+     * The type for fulltext-extracts made by pdfbox
+     */
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
+    /**
+     * prefix for fulltext index
+     */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
 
+    /**
+     * prefix used for public es index
+     */
     public static final String PUBLIC_INDEX_PREF = "public_";
 
 }
