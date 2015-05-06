@@ -157,14 +157,7 @@ public class MyController extends Controller {
 	StringWriter w = new StringWriter();
 	mapper.writeValue(w, obj);
 	String result = w.toString();
-	debugPrint(result);
 	return result;
-
-    }
-
-    private static void debugPrint(String str) {
-	play.Logger.debug("\nResponse:\nHeaders\n\t"
-		+ mapToString(response().getHeaders()) + "\nBody:\n\t" + str);
     }
 
     /**
@@ -191,8 +184,6 @@ public class MyController extends Controller {
 			"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
-
-	debugPrint(msg.toString());
 	return status(msg.getCode(), msg.toString());
     }
 
