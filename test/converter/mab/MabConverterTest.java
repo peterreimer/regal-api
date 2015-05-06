@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -56,18 +57,20 @@ public class MabConverterTest {
 
     public void transformTestfileAndCompareXmlToExample(String id,
 	    String recordId) throws IOException {
-	InputStream in = getResourceAsStream(id + ".nt");
+	try (InputStream in = getResourceAsStream(id + ".nt")) {
 
-	ByteArrayOutputStream os = transformTestFile(in, recordId);
-	String str = os.toString();
-	System.out.println(str);
-	File output = File.createTempFile("mabconverterOut", "xml");
-	XmlUtils.newStringToFile(output, str);
-	File expected = File.createTempFile("mabconverter", "xml");
-	FileOutputStream out = new FileOutputStream(expected);
-	IOUtils.copy(getResourceAsStream(id + ".xml"), out);
+	    ByteArrayOutputStream os = transformTestFile(in, recordId);
+	    String str = os.toString();
+	    System.out.println(str);
+	    File output = File.createTempFile("mabconverterOut", "xml");
+	    XmlUtils.newStringToFile(output, str);
+	    File expected = File.createTempFile("mabconverter", "xml");
+	    try (FileOutputStream out = new FileOutputStream(expected)) {
+		IOUtils.copy(getResourceAsStream(id + ".xml"), out);
+	    }
 
-	// xmlCompare(output, expected);
+	    // xmlCompare(output, expected);
+	}
     }
 
     @SuppressWarnings("unused")
@@ -75,14 +78,13 @@ public class MabConverterTest {
 	    throws FileNotFoundException, SAXException, IOException {
 	XMLUnit.setIgnoreWhitespace(true);
 	XMLUnit.setIgnoreAttributeOrder(true);
-
-	DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(new FileReader(
-		expected), new FileReader(output)));
-
-	List<?> allDifferences = diff.getAllDifferences();
-	Assert.assertEquals("Differences found: " + diff.toString(), 0,
-		allDifferences.size());
-
+	try (Reader e = new FileReader(expected);
+		Reader o = new FileReader(output)) {
+	    DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(e, o));
+	    List<?> allDifferences = diff.getAllDifferences();
+	    Assert.assertEquals("Differences found: " + diff.toString(), 0,
+		    allDifferences.size());
+	}
     }
 
     private InputStream getResourceAsStream(String name) {

@@ -1337,8 +1337,8 @@ public class Node {
     }
 
     /**
-     * @param string
-     *            a text extraction of the nodes data
+     * Add a text extraction of the nodes data
+     * 
      * @param string
      */
     public void addFulltext(String string) {

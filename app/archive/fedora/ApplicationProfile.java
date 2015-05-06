@@ -77,8 +77,7 @@ public class ApplicationProfile {
     }
 
     private void loadToMap(String fileName) {
-	try {
-	    InputStream in = Play.application().resourceAsStream(fileName);
+	try (InputStream in = Play.application().resourceAsStream(fileName)) {
 	    loadToMap(in);
 	} catch (Exception e) {
 	    e.printStackTrace();

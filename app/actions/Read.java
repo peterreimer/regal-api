@@ -24,6 +24,7 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 import helper.Webgatherer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -292,20 +293,27 @@ public class Read extends RegalAction {
     private List<String> listRepoType(String type) {
 	List<String> typedList;
 	String query = "* <" + REL_CONTENT_TYPE + "> \"" + type + "\"";
-	InputStream in = Globals.fedora.findTriples(query,
-		FedoraVocabulary.SPO, FedoraVocabulary.N3);
-	typedList = RdfUtils.getFedoraSubject(in);
-
-	return typedList;
+	try (InputStream in = Globals.fedora.findTriples(query,
+		FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
+	    typedList = RdfUtils.getFedoraSubject(in);
+	    return typedList;
+	} catch (IOException e) {
+	    play.Logger.warn("", e);
+	}
+	return new ArrayList<String>();
     }
 
     private List<String> listRepoAll() {
 	List<String> typedList;
 	String query = "* <" + REL_IS_NODE_TYPE + "> <" + TYPE_OBJECT + ">";
-	InputStream in = Globals.fedora.findTriples(query,
-		FedoraVocabulary.SPO, FedoraVocabulary.N3);
-	typedList = RdfUtils.getFedoraSubject(in);
-	return typedList;
+	try (InputStream in = Globals.fedora.findTriples(query,
+		FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
+	    typedList = RdfUtils.getFedoraSubject(in);
+	    return typedList;
+	} catch (IOException e) {
+	    play.Logger.warn("", e);
+	}
+	return new ArrayList<String>();
     }
 
     private List<String> listRepoType(String type, int from, int until) {
@@ -384,7 +392,8 @@ public class Read extends RegalAction {
     /**
      * @param node
      * @param field
-     * @return the metadata as rdf or just the object of an rdf-triple
+     *            the shortname of metadata field
+     * @return the ntriples or just one field
      */
     public String readMetadata(Node node, String field) {
 	try {

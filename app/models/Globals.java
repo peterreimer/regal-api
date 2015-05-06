@@ -120,7 +120,6 @@ public class Globals {
      */
     public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
 	    .configuration().getString("regal-api.heartbeatOn"));
-
     /**
      * Urn resolver used for testing urn resolving
      * 

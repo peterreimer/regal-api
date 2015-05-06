@@ -46,6 +46,7 @@ import models.RegalObject;
 
 import models.Gatherconf;
 
+
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
@@ -238,6 +239,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
+
 	return new ReadDataAction()
 		.call(pid,
 			node -> {
@@ -398,13 +400,15 @@ public class Resource extends MyController {
 				}
 				String mimeType = d.getContentType();
 				String name = d.getFilename();
-				FileInputStream content = new FileInputStream(d
-					.getFile());
-				modify.updateData(pid, content, mimeType, name,
-					md5);
-				return JsonMessage(new Message(
-					"File uploaded! Type: " + mimeType
-						+ ", Name: " + name));
+
+				try (FileInputStream content = new FileInputStream(
+					d.getFile())) {
+				    modify.updateData(pid, content, mimeType,
+					    name, md5);
+				    return JsonMessage(new Message(
+					    "File uploaded! Type: " + mimeType
+						    + ", Name: " + name));
+				}
 			    } catch (IOException e) {
 				throw new HttpArchiveException(500, e);
 			    }
@@ -650,9 +654,10 @@ public class Resource extends MyController {
 			url = new URL(redirectUrl);
 			HttpURLConnection connection = (HttpURLConnection) url
 				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType("application/pdf");
-			return ok(is);
+			try (InputStream is = connection.getInputStream()) {
+			    response().setContentType("application/pdf");
+			    return ok(is);
+			}
 		    } catch (MalformedURLException e) {
 			return JsonMessage(new Message(e, 500));
 		    } catch (IOException e) {
