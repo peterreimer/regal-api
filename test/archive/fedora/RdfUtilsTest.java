@@ -1,4 +1,5 @@
 package archive.fedora;
+
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -17,6 +18,7 @@ package archive.fedora;
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
@@ -36,14 +38,16 @@ import archive.fedora.XmlUtils;
 public class RdfUtilsTest {
 
     @Test
-    public void testInputStreamToGraph() throws URISyntaxException {
-	InputStream in = Thread.currentThread().getContextClassLoader()
-		.getResourceAsStream("HT015954381.txt");
-	File expected = new File(Thread.currentThread().getContextClassLoader()
-		.getResource("HT015954381_expected.txt").toURI().getPath());
-	Graph graph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
-	String actual = RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
-	System.out.println(actual);
-	Assert.assertEquals(XmlUtils.fileToString(expected), actual);
+    public void testInputStreamToGraph() throws URISyntaxException, IOException {
+	try (InputStream in = Thread.currentThread().getContextClassLoader()
+		.getResourceAsStream("HT015954381.txt")) {
+	    File expected = new File(Thread.currentThread()
+		    .getContextClassLoader()
+		    .getResource("HT015954381_expected.txt").toURI().getPath());
+	    Graph graph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+	    String actual = RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
+	    System.out.println(actual);
+	    Assert.assertEquals(XmlUtils.fileToString(expected), actual);
+	}
     }
 }

@@ -80,13 +80,17 @@ public class RdfUtils {
      *            the rdf output format
      * @param accept
      *            the accept header for the url
-     * @return a String containing the url in a certain rdf format
+     * @return a rdf string
      */
     public static String readRdfToString(URL url, RDFFormat inf,
 	    RDFFormat outf, String accept) {
-	Graph myGraph = null;
-	myGraph = readRdfToGraph(url, inf, accept);
-	return graphToString(myGraph, outf);
+	try {
+	    Graph myGraph = null;
+	    myGraph = readRdfToGraph(url, inf, accept);
+	    return graphToString(myGraph, outf);
+	} catch (Exception e) {
+	    return "";
+	}
     }
 
     /**
@@ -139,11 +143,13 @@ public class RdfUtils {
      * @param accept
      *            the accept header
      * @return a Graph with the rdf
+     * @throws IOException
      */
-    public static Graph readRdfToGraph(URL url, RDFFormat inf, String accept) {
-
-	InputStream in = urlToInputStream(url, accept);
-	return readRdfToGraph(in, inf, url.toString());
+    public static Graph readRdfToGraph(URL url, RDFFormat inf, String accept)
+	    throws IOException {
+	try (InputStream in = urlToInputStream(url, accept)) {
+	    return readRdfToGraph(in, inf, url.toString());
+	}
     }
 
     private static InputStream urlToInputStream(URL url, String accept) {
@@ -551,11 +557,7 @@ public class RdfUtils {
     public static boolean hasTriple(String subject, String predicate,
 	    String metadata) {
 	try {
-	    InputStream is = new ByteArrayInputStream(
-		    metadata.getBytes("UTF-8"));
-	    RepositoryConnection con = readRdfInputStreamToRepository(is,
-		    RDFFormat.NTRIPLES);
-
+	    RepositoryConnection con = getConnection(metadata);
 	    RepositoryResult<Statement> statements = con.getStatements(null,
 		    null, null, true);
 	    while (statements.hasNext()) {
@@ -565,13 +567,20 @@ public class RdfUtils {
 		    return true;
 		}
 	    }
-
-	} catch (RepositoryException e) {
-	    throw new RdfException(e);
-	} catch (UnsupportedEncodingException e) {
+	} catch (Exception e) {
 	    throw new RdfException(e);
 	}
 	return false;
+    }
+
+    private static RepositoryConnection getConnection(String metadata)
+	    throws UnsupportedEncodingException, IOException {
+	try (InputStream is = new ByteArrayInputStream(
+		metadata.getBytes("UTF-8"))) {
+	    RepositoryConnection con = readRdfInputStreamToRepository(is,
+		    RDFFormat.NTRIPLES);
+	    return con;
+	}
     }
 
     /**

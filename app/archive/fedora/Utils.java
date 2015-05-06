@@ -384,10 +384,9 @@ public class Utils {
     }
 
     void readRelsExt(Node node) throws FedoraClientException {
-	try {
-	    FedoraResponse response = new GetDatastreamDissemination(
-		    node.getPid(), "RELS-EXT").download(true).execute();
-	    InputStream ds = response.getEntityInputStream();
+	FedoraResponse response = new GetDatastreamDissemination(node.getPid(),
+		"RELS-EXT").download(true).execute();
+	try (InputStream ds = response.getEntityInputStream()) {
 	    Repository myRepository = new SailRepository(new MemoryStore());
 	    myRepository.initialize();
 	    RepositoryConnection con = myRepository.getConnection();
@@ -395,7 +394,7 @@ public class Utils {
 	    try {
 		ValueFactory f = myRepository.getValueFactory();
 		URI objectId = f.createURI("info:fedora/" + node.getPid());
-		con.add(new BufferedInputStream(ds), baseURI, RDFFormat.RDFXML);
+		con.add(ds, baseURI, RDFFormat.RDFXML);
 		RepositoryResult<Statement> statements = con.getStatements(
 			objectId, null, null, true);
 		try {

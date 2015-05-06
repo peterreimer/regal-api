@@ -564,12 +564,12 @@ class FedoraFacade implements FedoraInterface {
     }
 
     private List<String> findPidsRdf(String rdfQuery, String queryFormat) {
-	InputStream stream = findTriples(rdfQuery, FedoraVocabulary.SPO,
-		FedoraVocabulary.N3);
+
 	List<String> resultVector = new Vector<String>();
 	RepositoryConnection con = null;
 	Repository myRepository = new SailRepository(new MemoryStore());
-	try {
+	try (InputStream stream = findTriples(rdfQuery, FedoraVocabulary.SPO,
+		FedoraVocabulary.N3)) {
 	    myRepository.initialize();
 	    con = myRepository.getConnection();
 	    String baseURI = "";

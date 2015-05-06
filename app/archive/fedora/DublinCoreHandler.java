@@ -53,9 +53,11 @@ public class DublinCoreHandler {
 
 	FedoraResponse response = new GetDatastreamDissemination(node.getPid(),
 		"DC").download(true).execute();
-	InputStream ds = response.getEntityInputStream();
-	readDcToNode(node, ds, "dc");
-
+	try (InputStream ds = response.getEntityInputStream()) {
+	    readDcToNode(node, ds, "dc");
+	} catch (IOException e) {
+	    throw new FedoraClientException("", e);
+	}
     }
 
     /**

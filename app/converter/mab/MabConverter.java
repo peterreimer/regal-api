@@ -53,9 +53,11 @@ public class MabConverter {
      */
     public MabConverter(String topic) throws IOException {
 	this.topic = topic;
-	InputStream template = Thread.currentThread().getContextClassLoader()
-		.getResourceAsStream("mabxml-string-template-on-record.xml");
-	encoder = new Mabencoder(template);
+	try (InputStream template = Thread.currentThread()
+		.getContextClassLoader()
+		.getResourceAsStream("mabxml-string-template-on-record.xml")) {
+	    encoder = new Mabencoder(template);
+	}
     }
 
     /**

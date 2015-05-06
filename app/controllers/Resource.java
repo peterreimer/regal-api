@@ -246,9 +246,11 @@ public class Resource extends MyController {
 				+ pid + "/datastreams/data/content");
 			HttpURLConnection connection = (HttpURLConnection) url
 				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType(connection.getContentType());
-			return ok(is);
+			try (InputStream is = connection.getInputStream()) {
+			    response().setContentType(
+				    connection.getContentType());
+			    return ok(is);
+			}
 		    } catch (FileNotFoundException e) {
 			throw new HttpArchiveException(404, e);
 		    } catch (MalformedURLException e) {
@@ -389,13 +391,15 @@ public class Resource extends MyController {
 				}
 				String mimeType = d.getContentType();
 				String name = d.getFilename();
-				FileInputStream content = new FileInputStream(d
-					.getFile());
-				modify.updateData(pid, content, mimeType, name,
-					md5);
-				return JsonMessage(new Message(
-					"File uploaded! Type: " + mimeType
-						+ ", Name: " + name));
+
+				try (FileInputStream content = new FileInputStream(
+					d.getFile())) {
+				    modify.updateData(pid, content, mimeType,
+					    name, md5);
+				    return JsonMessage(new Message(
+					    "File uploaded! Type: " + mimeType
+						    + ", Name: " + name));
+				}
 			    } catch (IOException e) {
 				throw new HttpArchiveException(500, e);
 			    }
@@ -641,9 +645,10 @@ public class Resource extends MyController {
 			url = new URL(redirectUrl);
 			HttpURLConnection connection = (HttpURLConnection) url
 				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType("application/pdf");
-			return ok(is);
+			try (InputStream is = connection.getInputStream()) {
+			    response().setContentType("application/pdf");
+			    return ok(is);
+			}
 		    } catch (MalformedURLException e) {
 			return JsonMessage(new Message(e, 500));
 		    } catch (IOException e) {

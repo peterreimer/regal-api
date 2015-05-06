@@ -104,28 +104,25 @@ public class OaiSetBuilder {
 	    URL url = new URL("http://dewey.info/class/" + number
 		    + "/2009-08/about.en");
 	    HttpClient httpClient = new HttpClient();
-
 	    HttpMethod method = new GetMethod(url.toString());
 	    httpClient.executeMethod(method);
-	    InputStream stream = method.getResponseBodyAsStream();
-	    DocumentBuilderFactory factory = DocumentBuilderFactory
-		    .newInstance();
-	    DocumentBuilder docBuilder;
-	    factory.setNamespaceAware(true);
-	    factory.setExpandEntityReferences(false);
-	    docBuilder = factory.newDocumentBuilder();
-
-	    Document doc;
-
-	    doc = docBuilder.parse(stream);
-	    Element root = doc.getDocumentElement();
-	    root.normalize();
-	    try {
-		name = root.getElementsByTagName("skos:prefLabel").item(0)
-			.getTextContent();
-		play.Logger.info("looked up ddc online name: " + name);
-	    } catch (Exception e) {
-		play.Logger.info("Didn't found ddc name for ddc:" + number);
+	    try (InputStream stream = method.getResponseBodyAsStream()) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory
+			.newInstance();
+		DocumentBuilder docBuilder;
+		factory.setNamespaceAware(true);
+		factory.setExpandEntityReferences(false);
+		docBuilder = factory.newDocumentBuilder();
+		Document doc = docBuilder.parse(stream);
+		Element root = doc.getDocumentElement();
+		root.normalize();
+		try {
+		    name = root.getElementsByTagName("skos:prefLabel").item(0)
+			    .getTextContent();
+		    play.Logger.info("looked up ddc online name: " + name);
+		} catch (Exception e) {
+		    play.Logger.info("Didn't found ddc name for ddc:" + number);
+		}
 	    }
 	} catch (MalformedURLException e) {
 	    play.Logger.error(e.getMessage());
