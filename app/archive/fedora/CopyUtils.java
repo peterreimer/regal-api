@@ -154,8 +154,7 @@ public class CopyUtils {
      */
     public static String copyToString(InputStream is, String encoding)
 	    throws IOException {
-	try {
-	    StringWriter writer = new StringWriter();
+	try (StringWriter writer = new StringWriter()) {
 	    IOUtils.copy(is, writer, encoding);
 	    return writer.toString();
 	} finally {
