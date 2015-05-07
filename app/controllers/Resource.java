@@ -248,17 +248,15 @@ public class Resource extends MyController {
 					+ "/datastreams/data/content");
 				HttpURLConnection connection = (HttpURLConnection) url
 					.openConnection();
-				try (InputStream is = connection
-					.getInputStream()) {
-				    response().setContentType(
-					    connection.getContentType());
-				    response()
-					    .setHeader(
-						    "Content-Disposition",
-						    connection
-							    .getHeaderField("Content-Disposition"));
-				    return ok(is);
-				}
+				response().setContentType(
+					connection.getContentType());
+				response()
+					.setHeader(
+						"Content-Disposition",
+						connection
+							.getHeaderField("Content-Disposition"));
+				return ok(connection.getInputStream());
+
 			    } catch (FileNotFoundException e) {
 				throw new HttpArchiveException(404, e);
 			    } catch (MalformedURLException e) {
