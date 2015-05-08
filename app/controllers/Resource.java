@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -558,9 +559,44 @@ public class Resource extends MyController {
 		List<Node> result = read.getParts(node);
 		if (request().accepts("text/html")) {
 		    return ok(resource.render(json(result)));
-		} else {
+		} else if (request().accepts("application/json")) {
 		    return getJsonResult(result);
+		} else {
+		    return asRdf(result);
 		}
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    private static Result asRdf(List<Node> result)
+	    throws UnsupportedEncodingException, Exception {
+	RDFFormat format = RDFFormat.TURTLE;
+	response().setContentType("text/turtle");
+
+	if (request().accepts("application/rdf+xml")) {
+	    format = RDFFormat.RDFXML;
+	    response().setContentType("application/rdf+xml");
+	} else if (request().accepts("text/turtle")) {
+	    format = RDFFormat.TURTLE;
+	    response().setContentType("text/turtle");
+	} else if (request().accepts("text/plain")) {
+	    format = RDFFormat.NTRIPLES;
+	    response().setContentType("text/plain");
+	}
+	String rdf = RdfUtils.readRdfToString(
+		new ByteArrayInputStream(json(result).getBytes("utf-8")),
+		RDFFormat.JSONLD, format, "");
+	return ok(rdf);
+    }
+
+    @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> listAllPartsAsRdf(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		List<Node> result = read.getParts(node);
+		return asRdf(result);
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
 	    }
