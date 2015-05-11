@@ -18,6 +18,9 @@ package helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
+
+import models.Globals;
 
 /**
  * 
@@ -32,14 +35,21 @@ public class TaskManager {
      * register all jobs
      */
     public void init() {
-	// play.Logger
-	// .info("Register Job: heartbeat. Will run every day at 0:23h");
-	// addTask("heartbeat",
-	// () -> play.Logger.debug("Heartbeat every 5 sec: "
-	// + new Date().toString()), "*/5 * * * * ?");
-	play.Logger
-		.info("Register Job: urn allocator. Will run every day at 0:23h");
-	addTask("urn allocator", new UrnAllocator(), "0 23 0 * * ?");
+
+	if (Globals.heartbeatTask != null && !Globals.heartbeatTask.isEmpty()) {
+	    play.Logger.info("Register Job: heartbeat. Will run every "
+		    + Globals.heartbeatTask);
+	    addTask("heartbeat",
+		    () -> play.Logger.debug("Boom: " + new Date().toString()),
+		    Globals.heartbeatTask);
+	}
+
+	if (Globals.urnTask != null && !Globals.urnTask.isEmpty()) {
+	    play.Logger.info("Register Job: urn allocator. Will run every "
+		    + Globals.urnTask);
+	    addTask("urn allocator", new UrnAllocator(), Globals.urnTask);
+	}
+
     }
 
     private void addTask(String name, Runnable r, String cronExpression) {

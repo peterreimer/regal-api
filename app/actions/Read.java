@@ -25,8 +25,12 @@ import helper.HttpArchiveException;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,6 +47,7 @@ import models.Node;
 import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
 
@@ -593,4 +598,28 @@ public class Read extends RegalAction {
 	return nodes.stream().map((Node n) -> getStatus(n))
 		.collect(Collectors.toList());
     }
+
+    public List<SearchHit> list(String namespace, Date from, Date until) {
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	String f = dateFormat.format(from);
+	String u = dateFormat.format(until);
+	String query = "isDescribedBy.created:[" + f + " TO " + u + "]";
+	play.Logger.info("List all from " + f + " to " + u);
+	List<SearchHit> result = new ArrayList<SearchHit>();
+	int step = 100;
+	int start = 0;
+	SearchHits hits = Globals.search.query(new String[] { namespace },
+		query, start, step);
+	long size = hits.getTotalHits();
+
+	result.addAll(Arrays.asList((hits.getHits())));
+	for (int i = 0; i < (size - (size % step)); i += step) {
+	    hits = Globals.search.query(new String[] { namespace }, query, i,
+		    step);
+	    result.addAll(Arrays.asList((hits.getHits())));
+	}
+	return result;
+
+    }
+
 }
