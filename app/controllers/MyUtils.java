@@ -109,7 +109,9 @@ public class MyUtils extends MyController {
 	    Date fromBeforeDate = createDateFromString(fromBefore);
 	    actions.BulkAction bulk = new actions.BulkAction();
 	    bulk.execute(namespace, nodes -> {
-		return modify.addUrnToAll(nodes, snid, fromBeforeDate);
+		String msg = modify.addUrnToAll(nodes, snid, fromBeforeDate);
+		play.Logger.info(msg);
+		return msg;
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());

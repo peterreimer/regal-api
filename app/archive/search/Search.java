@@ -183,6 +183,7 @@ public class Search {
 
     SearchHits query(String[] index, String queryString, int from, int until) {
 	refresh();
+	play.Logger.debug("Search for " + queryString);
 	QueryBuilder query = QueryBuilders.queryString(queryString);
 	SearchResponse response = client.prepareSearch(index).setQuery(query)
 		.setFrom(from).setSize(until - from).execute().actionGet();

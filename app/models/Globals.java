@@ -143,6 +143,24 @@ public class Globals {
 	    .getString("regal-api.digitoolAddress");
 
     /**
+     * if set a urn will be coined and registered at the oai provider
+     */
+    public static String urnTask = Play.application().configuration()
+	    .getString("regal-api.urnTask");
+
+    /**
+     * if set the application will log a message on the defined interval
+     */
+    public static String heartbeatTask = Play.application().configuration()
+	    .getString("regal-api.heartbeatTask");
+
+    /**
+     * A urn subnamespace that belongs to this application
+     */
+    public static String urnSnid = Play.application().configuration()
+	    .getString("regal-api.urnSnid");
+
+    /**
      * The type for fulltext-extracts made by pdfbox
      */
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";

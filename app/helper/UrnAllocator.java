@@ -18,6 +18,15 @@ package helper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import models.Globals;
+
+import org.elasticsearch.search.SearchHit;
+
+import actions.Modify;
+import actions.Read;
 
 import com.ibm.icu.util.Calendar;
 
@@ -31,11 +40,25 @@ public class UrnAllocator implements Runnable {
 
     @Override
     public void run() {
+
 	Calendar cal = Calendar.getInstance();
 	cal.add(Calendar.DATE, -7);
-	Date date = cal.getTime();
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-	MyUtils.addUrnToAll("edoweb", "hbz:929:02", dateFormat.format(date));
-    }
+	Date until = cal.getTime();
 
+	cal = Calendar.getInstance();
+	cal.add(Calendar.DATE, -14);
+	Date from = cal.getTime();
+
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	String d = dateFormat.format(until);
+	play.Logger
+		.info("-XPOST /utils/addUrnToAll?namespace=edoweb&snid=hbz:929:02&dateBefore="
+			+ d);
+	List<SearchHit> hits = new Read().list(Globals.namespaces[0], from,
+		until);
+	List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
+		.collect(Collectors.toList());
+	play.Logger.info(new Modify().addUrnToAll(new Read().getNodes(ids),
+		Globals.urnSnid, until));
+    }
 }
