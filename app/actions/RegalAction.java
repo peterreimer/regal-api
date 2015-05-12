@@ -72,6 +72,7 @@ public class RegalAction {
      */
     public String apply(List<Node> nodes, ProcessNode action) {
 	StringBuffer str = new StringBuffer();
+	str.append("Process " + nodes.size() + " nodes!\n");
 	for (Node n : nodes) {
 	    try {
 		str.append("\n Updated " + action.process(n));
