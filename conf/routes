@@ -35,6 +35,7 @@ GET /resource/:pid/parents			controllers.Resource.listParents(pid,style?="")
 GET /resource/:pid/seq				controllers.Resource.listSeq(pid)
 GET /resource/:pid/all/lastModified	controllers.Resource.getLastModifiedChild(pid,contentType?="")
 GET /resource/:pid/all				controllers.Resource.listAllParts(pid)
+GET /resource/:pid/all.rdf			controllers.Resource.listAllPartsAsRdf(pid)
 GET /resource/:pid/about			controllers.Resource.asRdf(pid)
 GET /resource/:pid/status			controllers.Resource.getStatus(pid)
 

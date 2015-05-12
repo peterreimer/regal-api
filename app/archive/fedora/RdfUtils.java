@@ -177,21 +177,17 @@ public class RdfUtils {
      */
     public static Graph readRdfToGraph(InputStream inputStream, RDFFormat inf,
 	    String baseUrl) {
-	RDFParser rdfParser = Rio.createParser(inf);
-	org.openrdf.model.Graph myGraph = new TreeModel();
-	StatementCollector collector = new StatementCollector(myGraph);
-	rdfParser.setRDFHandler(collector);
 	try {
+	    RDFParser rdfParser = Rio.createParser(inf);
+	    play.Logger.debug(rdfParser.getSupportedSettings().toString());
+	    org.openrdf.model.Graph myGraph = new TreeModel();
+	    StatementCollector collector = new StatementCollector(myGraph);
+	    rdfParser.setRDFHandler(collector);
 	    rdfParser.parse(inputStream, baseUrl);
-	} catch (IOException e) {
-	    throw new RdfException(e);
-	} catch (RDFParseException e) {
-	    throw new RdfException(e);
-	} catch (RDFHandlerException e) {
+	    return myGraph;
+	} catch (Exception e) {
 	    throw new RdfException(e);
 	}
-
-	return myGraph;
     }
 
     /**

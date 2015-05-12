@@ -212,7 +212,8 @@
 		"hasPart": 
 		{
 			"@id": "http://purl.org/dc/terms/hasPart",
-			"@type": "@id"
+			"@type": "@id",
+			"@container": "@list"
 		},
 
 		"isPartOf": 
