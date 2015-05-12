@@ -18,6 +18,7 @@ package helper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,6 @@ public class UrnAllocator implements Runnable {
 
     @Override
     public void run() {
-
 	Calendar cal = Calendar.getInstance();
 	cal.add(Calendar.DATE, -7);
 	Date until = cal.getTime();
