@@ -66,7 +66,7 @@ public class ScheduledTask implements Cancellable {
 				- System.currentTimeMillis(),
 			TimeUnit.MILLISECONDS);
 
-		play.Logger.debug(name + "Next run at " + nextValidTimeAfter);
+		play.Logger.info(name + " next run at " + nextValidTimeAfter);
 
 		Akka.system().scheduler().scheduleOnce(d, () -> {
 		    task.run();
