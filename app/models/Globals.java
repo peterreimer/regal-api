@@ -166,6 +166,7 @@ public class Globals {
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
     /**
+     * 
      * prefix for fulltext index
      */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
