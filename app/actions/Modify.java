@@ -18,6 +18,7 @@ package actions;
 
 import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
 import static archive.fedora.FedoraVocabulary.ITEM_ID;
+import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.OaiSet;
 import helper.OaiSetBuilder;
@@ -29,7 +30,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -344,7 +347,7 @@ public class Modify extends RegalAction {
 	    }
 	    if (node.hasUrn()) {
 		addSet(node, "epicur");
-		String urn = node.getUrn();
+		String urn = node.getUrnFromMetadata();
 		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
 		    addSet(node, "urn-set-1");
 		} else if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
@@ -588,6 +591,39 @@ public class Modify extends RegalAction {
 	UpdateNodeException(Throwable cause) {
 	    super(cause);
 	}
+    }
+
+    public Map<String, Object> addDoi(Node node) {
+	if (node.getDoi() == null || node.getDoi().isEmpty()) {
+	    node.setDoi(createDoiIdentifier(node));
+	    RegalObject o = new RegalObject();
+	    o.getIsDescribedBy().setDoi(node.getDoi());
+	    new Create().patchResource(node, o);
+	}
+	String objectUrl = Globals.urnbase + node.getPid();
+	String doi = node.getDoi();
+	String xml = new Transform().datacite(node);
+	play.Logger.debug(xml);
+	DataciteClient client = new DataciteClient();
+	String registerMetadataResponse = client.registerMetadataAtDatacite(
+		node, xml);
+	String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
+	String makeOaiSetResponse = makeOAISet(node);
+
+	Map<String, Object> result = new HashMap<String, Object>();
+	result.put("Doi", doi);
+	result.put("Metadata", xml);
+	result.put("registerMetadataResponse", registerMetadataResponse);
+	result.put("mintDoiResponse", mintDoiResponse);
+	result.put("makeOaiSetResponse", makeOaiSetResponse);
+	return result;
+    }
+
+    private String createDoiIdentifier(Node node) {
+	String pid = node.getPid();
+	String id = pid.replace(node.getNamespace() + ":", "");
+	String doi = Globals.doiPrefix + "00" + id;
+	return doi;
     }
 
 }

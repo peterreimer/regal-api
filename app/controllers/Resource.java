@@ -640,6 +640,15 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/xml", nickname = "asDatacite", value = "asDatacite", notes = "Returns a Datacite display of the resource", response = Message.class, httpMethod = "GET")
+    public static Promise<Result> asDatacite(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    String result = transform.datacite(node);
+	    response().setContentType("application/xml");
+	    return ok(result);
+	});
+    }
+
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")
     public static Promise<Result> asPdfa(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(
@@ -836,4 +845,18 @@ public class Resource extends MyController {
 	    return HtmlMessage(new Message(e, 500));
 	}
     }
+
+    @ApiOperation(produces = "application/json", nickname = "addDoi", value = "addDoi", notes = "Adds a Doi and performes a registration at Datacite", response = String.class, httpMethod = "POST")
+    public static Promise<Result> addDoi(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+
+		return getJsonResult(modify.addDoi(node));
+
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
 }

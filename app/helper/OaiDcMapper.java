@@ -53,7 +53,13 @@ public class OaiDcMapper {
 	    } else if ("http://purl.org/lobid/lv#hbzID"
 		    .equals(l.getPredicate())) {
 		data.addIdentifier(l.getObject(), "hbz:alephId");
-	    } else if ("http://purl.org/dc/elements/1.1/subjectr".equals(l
+	    } else if ("http://purl.org/ontology/bibo/isbn".equals(l
+		    .getPredicate())) {
+		data.addIdentifier(l.getObject(), "hbz:isbn");
+	    } else if ("http://purl.org/dc/elements/1.1/subject".equals(l
+		    .getPredicate())) {
+		data.addSubject(l.getObject());
+	    } else if ("http://purl.org/dc/terms/subject".equals(l
 		    .getPredicate())) {
 		data.addSubject(l.getObject());
 	    }

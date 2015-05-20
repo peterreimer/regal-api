@@ -16,6 +16,7 @@
  */
 package actions;
 
+import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.OaiDcMapper;
 import helper.PdfText;
@@ -32,11 +33,14 @@ import java.net.URL;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.List;
+import java.util.Map;
 
+import models.DataciteRecord;
 import models.DublinCoreData;
 import models.Globals;
 import models.MabRecord;
 import models.Node;
+import models.Pair;
 
 import org.w3c.dom.Element;
 
@@ -259,6 +263,12 @@ public class Transform {
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
 	}
+    }
+
+    public String datacite(Node node) {
+	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
+		node.getLd());
+	return dc.toString();
     }
 
 }

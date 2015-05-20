@@ -75,7 +75,7 @@ public class Urn {
 	con.getInputStream();
 	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
 		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
-		|| con.getResponseCode() == 307) {
+		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
 	    String redirectUrl = con.getHeaderField("Location");
 
 	    return getFinalURL(redirectUrl);

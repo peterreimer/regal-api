@@ -176,4 +176,32 @@ public class Globals {
      */
     public static final String PUBLIC_INDEX_PREF = "public_";
 
+    /**
+     * Datacite provides a service for minting Dois. Configure your user here.
+     */
+    public static String dataCiteUser = Play.application().configuration()
+	    .getString("regal-api.dataciteUser");
+
+    /**
+     * Datacite provides a service for minting Dois. Configure your password
+     * here.
+     */
+    public static String dataCitePasswd = Play.application().configuration()
+	    .getString("regal-api.datacitePassword");
+    /**
+     * Test Prefix 10.5072 Productive Prefix 10.4126
+     */
+    public static String doiPrefix = Play.application().configuration()
+	    .getString("regal-api.doiPrefix");
+    /**
+     * Keystore Location for regal https connections
+     */
+    public static String keystoreLocation = Play.application().configuration()
+	    .getString("regal-api.keystoreLocation");
+    /**
+     * Keystore password for regal https connections
+     */
+    public static String keystorePassword = Play.application().configuration()
+	    .getString("regal-api.keystorePassword");
+
 }

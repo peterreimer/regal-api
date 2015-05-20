@@ -94,6 +94,18 @@ public abstract class Vocabulary {
 	    + "catalogId";
 
     /**
+     * predicate to link to an urn
+     * 
+     */
+    public final static String REL_HAS_URN = HBZ_MODEL_NAMESPACE + "urn";
+
+    /**
+     * predicate to link to a doi
+     * 
+     */
+    public final static String REL_HAS_DOI = HBZ_MODEL_NAMESPACE + "doi";
+
+    /**
      * All hbzIds from /metadata must be ignored
      * 
      */
