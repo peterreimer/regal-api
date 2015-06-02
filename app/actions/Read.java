@@ -182,12 +182,29 @@ public class Read extends RegalAction {
     public List<Node> getParts(Node node) {
 	List<Node> result = new ArrayList<Node>();
 	result.add(node);
-	List<Node> parts = getNodes(node.getRelatives(HAS_PART).stream()
+	List<Node> parts = getNodes(node.getPartsSorted().stream()
 		.map((Link l) -> l.getObject()).collect(Collectors.toList()));
 	for (Node p : parts) {
 	    result.addAll(getParts(p));
 	}
 	return result;
+    }
+
+    public Map<String, Object> getPartsAsTree(Node node) {
+	Map<String, Object> nm = node.getLdWithoutContext();
+	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
+		.get("hasPart");
+	List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
+	if (parts != null) {
+	    for (Map<String, Object> part : parts) {
+		String id = (String) part.get("@id");
+		Map<String, Object> child = new HashMap<String, Object>();
+		child.put(id, getPartsAsTree(internalReadNode(id)));
+		children.add(child);
+	    }
+	    nm.put("hasPart", children);
+	}
+	return nm;
     }
 
     /**

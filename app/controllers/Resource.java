@@ -556,12 +556,14 @@ public class Resource extends MyController {
     public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    try {
-		List<Node> result = read.getParts(node);
+
 		if (request().accepts("text/html")) {
+		    List<Node> result = read.getParts(node);
 		    return ok(resource.render(json(result)));
 		} else if (request().accepts("application/json")) {
-		    return getJsonResult(result);
+		    return getJsonResult(read.getPartsAsTree(node));
 		} else {
+		    List<Node> result = read.getParts(node);
 		    return asRdf(result);
 		}
 	    } catch (Exception e) {

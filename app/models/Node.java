@@ -1359,4 +1359,10 @@ public class Node {
     public boolean isManaged() {
 	return isManaged;
     }
+
+    public Map<String, Object> getLdWithoutContext() {
+	Map<String, Object> map = getLd();
+	map.remove("@context");
+	return map;
+    }
 }
