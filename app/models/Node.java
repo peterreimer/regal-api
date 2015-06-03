@@ -1314,4 +1314,10 @@ public class Node {
     public String getFulltext() {
 	return fulltext;
     }
+
+    public Map<String, Object> getLdWithoutContext() {
+	Map<String, Object> map = getLd();
+	map.remove("@context");
+	return map;
+    }
 }
