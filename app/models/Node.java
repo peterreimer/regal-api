@@ -1033,6 +1033,7 @@ public class Node {
 	pmap.put("@id", "http://purl.org/dc/terms/hasPart");
 	pmap.put("label", "Kindobjekt");
 	pmap.put("@type", "@id");
+	pmap.put("@container", "@list");
 	cmap.put("hasPart", pmap);
 
 	pmap = new HashMap<String, Object>();
@@ -1360,5 +1361,12 @@ public class Node {
     public Node setUrn(String urn) {
 	this.urn = urn;
 	return this;
+    }
+
+    public Map<String, Object> getLdWithoutContext() {
+	Map<String, Object> map = getLd();
+	map.remove("@context");
+	return map;
+
     }
 }
