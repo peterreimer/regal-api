@@ -184,6 +184,11 @@ public class Read extends RegalAction {
 	return result;
     }
 
+    /**
+     * @param node
+     *            a regal node
+     * @return a tree of regal objects starting with the passed node as root
+     */
     public Map<String, Object> getPartsAsTree(Node node) {
 	Map<String, Object> nm = node.getLdWithoutContext();
 	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
