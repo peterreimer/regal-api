@@ -153,6 +153,7 @@ public class BulkAction {
 		    until = nodes.size();
 		messageOut.write("Process: from: " + from + " until " + until
 			+ "\n");
+
 		try{
 		    List<Node> sublist=nodes.subList(from, until);
 		    play.Logger.info("Going to Process: "+sublist);
