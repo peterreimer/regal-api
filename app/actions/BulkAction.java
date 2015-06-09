@@ -102,6 +102,7 @@ public class BulkAction {
 
     private void bulk(String namespace, ProcessNodes proc) {
 	List<String> nodes = read.listRepoNamespace(namespace);
+	play.Logger.info("Going to process: " + nodes);
 	bulkOnPids(nodes, proc);
     }
 
@@ -153,7 +154,9 @@ public class BulkAction {
 		messageOut.write("Process: from: " + from + " until " + until
 			+ "\n");
 		try {
-		    messageOut.write(proc.process(nodes.subList(from, until)));
+		    List<Node> sublist = nodes.subList(from, until);
+		    play.Logger.info("Going to Process: " + sublist);
+		    messageOut.write(proc.process(sublist));
 		} catch (Exception e) {
 		    play.Logger.warn("", e);
 		}
