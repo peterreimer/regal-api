@@ -112,7 +112,7 @@ public class MyController extends Controller {
      */
     public final static String DATA_ACCESSOR_REMOTE = "remote";
 
-    protected static ObjectMapper mapper = JsonUtil.mapper();
+    public static ObjectMapper mapper = JsonUtil.mapper();
 
     static Read read = new Read();
     static Create create = new Create();

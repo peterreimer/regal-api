@@ -48,6 +48,7 @@ import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 
+import controllers.MyController;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -322,6 +323,26 @@ public class Modify extends RegalAction {
 	return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
 		+ " is not before " + fromBefore + " or contentType "
 		+ contentType + " is not allowed to carry urn.";
+    }
+
+    public String addDoiToAll(List<Node> nodes, Date fromBefore) {
+	return apply(nodes, n -> addDoi(n, fromBefore));
+    }
+
+    private String addDoi(Node n, Date fromBefore) {
+	try {
+	    String contentType = n.getContentType();
+	    if (n.getCreationDate().before(fromBefore)) {
+		if ("monograph".equals(contentType)) {
+		    return MyController.mapper.writeValueAsString(addDoi(n));
+		}
+	    }
+	    return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
+		    + " is not before " + fromBefore + " or contentType "
+		    + contentType + " is not allowed to carry urn.";
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     /**

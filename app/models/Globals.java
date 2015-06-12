@@ -148,6 +148,9 @@ public class Globals {
     public static String urnTask = Play.application().configuration()
 	    .getString("regal-api.urnTask");
 
+    public static String doiTask = Play.application().configuration()
+	    .getString("regal-api.doiTask");
+
     /**
      * if set the application will log a message on the defined interval
      */

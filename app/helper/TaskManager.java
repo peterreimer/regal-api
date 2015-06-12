@@ -50,6 +50,12 @@ public class TaskManager {
 	    addTask("urn allocator", new UrnAllocator(), Globals.urnTask);
 	}
 
+	if (Globals.doiTask != null && !Globals.doiTask.isEmpty()) {
+	    play.Logger.info("Register Job: doi allocator. Will run every "
+		    + Globals.doiTask);
+	    addTask("doi allocator", new DoiAllocator(), Globals.doiTask);
+	}
+
     }
 
     private void addTask(String name, Runnable r, String cronExpression) {
