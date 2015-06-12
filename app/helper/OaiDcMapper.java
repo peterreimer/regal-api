@@ -139,11 +139,14 @@ public class OaiDcMapper {
 		} else if ("http://purl.org/ontology/bibo/Book".equals(l
 			.getObject())) {
 		    data.addType("doc-type:book");
+		} else if ("http://purl.org/lobid/lv#ArchivedWebPage".equals(l
+			.getObject())) {
+		    data.addType("doc-type:Website");
 		}
 	    }
 	}
 	data.addIdentifier(node.getAggregationUri(), "hbz:edowebId");
-	data.addType(node.getContentType());
+	data.addType("regal:" + node.getContentType());
 	return data;
     }
 }

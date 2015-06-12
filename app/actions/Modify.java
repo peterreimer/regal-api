@@ -185,12 +185,21 @@ public class Modify extends RegalAction {
 			+ " Use HTTP DELETE instead.\n");
 	    }
 	    RdfUtils.validate(content);
+
 	    File file = CopyUtils.copyStringToFile(content);
 	    node.setMetadataFile(file.getAbsolutePath());
 	    if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 		node.addTransformer(new Transformer("aleph"));
 	    } else {
 		node.removeTransformer("aleph");
+	    }
+	    if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
+		List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
+			archive.fedora.Vocabulary.REL_LOBID_DOI, content,
+			RDFFormat.NTRIPLES);
+		if (!dois.isEmpty()) {
+		    node.setDoi(dois.get(0));
+		}
 	    }
 	    Globals.fedora.updateNode(node);
 	    reindexNodeAndParent(node);

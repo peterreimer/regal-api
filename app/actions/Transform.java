@@ -33,14 +33,12 @@ import java.net.URL;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.List;
-import java.util.Map;
 
 import models.DataciteRecord;
 import models.DublinCoreData;
 import models.Globals;
 import models.MabRecord;
 import models.Node;
-import models.Pair;
 
 import org.w3c.dom.Element;
 
@@ -67,6 +65,7 @@ public class Transform {
 	    record = mapper.map(new ByteArrayInputStream(node.getMetadata()
 		    .getBytes("utf-8")), node.getPid());
 	    record.httpAdresse = Globals.urnbase + node.getPid();
+	    record.doi = node.getDoi();
 	    return record;
 	} catch (UnsupportedEncodingException e) {
 	    throw new HttpArchiveException(500, e);
@@ -265,6 +264,10 @@ public class Transform {
 	}
     }
 
+    /**
+     * @param node
+     * @return an xml string for datacite
+     */
     public String datacite(Node node) {
 	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
 		node.getLd());
