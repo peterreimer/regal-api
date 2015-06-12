@@ -371,7 +371,7 @@ public class MyController extends Controller {
 		    }
 		    Node node = null;
 		    try {
-			node = read.readNode(pid);
+			node = read.internalReadNode(pid);
 		    } catch (Exception e) {
 			// play.Logger.debug("", e);
 		}

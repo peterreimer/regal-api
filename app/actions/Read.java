@@ -68,6 +68,11 @@ public class Read extends RegalAction {
      */
     public Node readNode(String pid) {
 	Node n = internalReadNode(pid);
+	if ("D".equals(n.getState())) {
+	    throw new HttpArchiveException(
+		    410,
+		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
+	}
 	addLabelsForParts(n);
 	writeNodeToCache(n);
 	return n;
@@ -124,17 +129,12 @@ public class Read extends RegalAction {
      *            the will be read to the node
      * @return a Node containing the data from the repository
      */
-    private Node internalReadNode(String pid) {
+    public Node internalReadNode(String pid) {
 	Node n = readNodeFromCache(pid);
 	if (n != null) {
 	    return n;
 	}
 	n = Globals.fedora.readNode(pid);
-	if ("D".equals(n.getState())) {
-	    throw new HttpArchiveException(
-		    410,
-		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
-	}
 	n.setAggregationUri(createAggregationUri(n.getPid()));
 	n.setRemUri(n.getAggregationUri() + ".rdf");
 	n.setDataUri(n.getAggregationUri() + "/data");
