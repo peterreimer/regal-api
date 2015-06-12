@@ -207,4 +207,10 @@ public class Globals {
     public static String keystorePassword = Play.application().configuration()
 	    .getString("regal-api.keystorePassword");
 
+    /**
+     * The setName for providing oai records to aleph
+     */
+    public static String alephSetName = Play.application().configuration()
+	    .getString("regal-api.alephSetName");
+
 }

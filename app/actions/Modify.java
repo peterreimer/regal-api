@@ -387,7 +387,7 @@ public class Modify extends RegalAction {
 	    if (node.hasLinkToCatalogId()) {
 		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
-		addSet(node, "edo01");
+		addSet(node, Globals.alephSetName);
 	    }
 	    addSet(node, node.getContentType());
 	    updateIndex(node.getPid());
