@@ -221,4 +221,6 @@ public interface FedoraInterface {
      */
     public List<Node> listComplexObject(String pid);
 
+    void purgeNode(String rootPID);
+
 }

@@ -54,6 +54,7 @@ import com.yourmediashelf.fedora.client.request.GetObjectProfile;
 import com.yourmediashelf.fedora.client.request.Ingest;
 import com.yourmediashelf.fedora.client.request.ListDatastreams;
 import com.yourmediashelf.fedora.client.request.ModifyDatastream;
+import com.yourmediashelf.fedora.client.request.ModifyObject;
 import com.yourmediashelf.fedora.client.request.PurgeObject;
 import com.yourmediashelf.fedora.client.request.RiSearch;
 import com.yourmediashelf.fedora.client.response.FedoraResponse;
@@ -248,6 +249,7 @@ class FedoraFacade implements FedoraInterface {
 	node.setPID(pid);
 	node.setNamespace(pid.substring(0, pid.indexOf(':')));
 	getDublinCoreFromFedora(node);
+	getStateFromFedora(node);
 	getRelsExtFromFedora(node);
 	getDatesFromFedora(node);
 	getChecksumFromFedora(node);
@@ -341,6 +343,16 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    private void getStateFromFedora(Node node) {
+	try {
+	    GetObjectProfileResponse prof = new GetObjectProfile(node.getPid())
+		    .execute();
+	    node.setState(prof.getState());
+	} catch (FedoraClientException e) {
+	    throw new ReadNodeException(500, e);
+	}
+    }
+
     @Override
     public List<String> findPids(String rdfQuery, String queryFormat) {
 	if (queryFormat.compareTo(FedoraVocabulary.SIMPLE) == 0) {
@@ -377,6 +389,15 @@ class FedoraFacade implements FedoraInterface {
 
     @Override
     public void deleteNode(String rootPID) {
+	try {
+	    new ModifyObject(rootPID).state("D").execute();
+	} catch (FedoraClientException e) {
+	    throw new DeleteException(e.getStatus(), e);
+	}
+    }
+
+    @Override
+    public void purgeNode(String rootPID) {
 	try {
 	    unlinkParent(rootPID);
 	    new PurgeObject(rootPID).execute();

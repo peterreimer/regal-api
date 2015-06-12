@@ -438,11 +438,15 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
-    public static Promise<Result> deleteResource(@PathParam("pid") String pid) {
+    public static Promise<Result> deleteResource(@PathParam("pid") String pid,
+	    @QueryParam("purge") String purge) {
 	return new BulkActionAccessor().call(() -> {
 	    List<Node> list = Globals.fedora.listComplexObject(pid);
 	    BulkAction bulk = new BulkAction();
 	    bulk.executeOnNodes(list, nodes -> {
+		if ("true".equals(purge)) {
+		    return delete.purge(nodes);
+		}
 		return delete.delete(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -482,10 +486,14 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "deleteResources", value = "deleteResources", notes = "Deletes a set of resources", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResources(
-	    @QueryParam("namespace") String namespace) {
+	    @QueryParam("namespace") String namespace,
+	    @QueryParam("purge") String purge) {
 	return new BulkActionAccessor().call(() -> {
 	    actions.BulkAction bulk = new actions.BulkAction();
 	    bulk.execute(namespace, nodes -> {
+		if ("true".equals(purge)) {
+		    return delete.purge(nodes);
+		}
 		return delete.delete(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");

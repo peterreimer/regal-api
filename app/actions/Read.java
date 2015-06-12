@@ -130,6 +130,11 @@ public class Read extends RegalAction {
 	    return n;
 	}
 	n = Globals.fedora.readNode(pid);
+	if ("D".equals(n.getState())) {
+	    throw new HttpArchiveException(
+		    410,
+		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
+	}
 	n.setAggregationUri(createAggregationUri(n.getPid()));
 	n.setRemUri(n.getAggregationUri() + ".rdf");
 	n.setDataUri(n.getAggregationUri() + "/data");
