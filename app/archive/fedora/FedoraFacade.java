@@ -328,6 +328,11 @@ class FedoraFacade implements FedoraInterface {
 	}
 	utils.linkContentModels(models, node);
 	utils.updateRelsExt(node);
+	try {
+	    new ModifyObject(node.getPid()).state("A").execute();
+	} catch (FedoraClientException e) {
+	    throw new CreateNodeException(e.getStatus(), e);
+	}
 	getDatesFromFedora(node);
     }
 
