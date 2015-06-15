@@ -40,12 +40,15 @@ public class Global extends GlobalSettings {
     public void onStart(Application app) {
 	play.Logger.info("Application has started");
 	Globals.search.init(Globals.namespaces);
+	Globals.taskManager.init();
+	Globals.taskManager.execute();
     }
 
     @Override
     public void onStop(Application app) {
 	// Globals.profile.saveMap();
 	play.Logger.info("Application shutdown...");
+	Globals.taskManager.shutdown();
     }
 
     public Promise<SimpleResult> onHandlerNotFound(RequestHeader request) {

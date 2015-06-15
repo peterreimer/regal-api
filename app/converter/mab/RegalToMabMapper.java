@@ -129,6 +129,8 @@ public class RegalToMabMapper {
 	    record.httpAdresse = obj;
 	else if ("http://purl.org/dc/terms/modified".equals(pred))
 	    record.datumLetzteKorrektur = obj;
+	else if ("http://purl.org/ontology/bibo/doi".equals(pred))
+	    record.doi = obj;
     }
 
     private void handleSubjects(String subj, String pred, String obj) {

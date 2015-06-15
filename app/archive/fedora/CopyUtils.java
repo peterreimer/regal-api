@@ -61,28 +61,14 @@ public class CopyUtils {
      *             if something goes wrong
      */
     public static void copy(InputStream content, File tmp) throws IOException {
-	OutputStream out = null;
-	try {
-
+	try (OutputStream out = new FileOutputStream(tmp);) {
 	    int read = 0;
 	    byte[] bytes = new byte[1024];
-
-	    out = new FileOutputStream(tmp);
 	    while ((read = content.read(bytes)) != -1) {
 		out.write(bytes, 0, read);
 	    }
-
 	} catch (IOException e) {
-
 	    throw new IOException(e);
-	} finally {
-	    try {
-
-		if (out != null)
-		    out.close();
-	    } catch (IOException e) {
-		logger.debug("", e);
-	    }
 	}
     }
 
@@ -94,32 +80,17 @@ public class CopyUtils {
      *             if something goes wrong
      */
     public static File download(URL url) throws IOException {
-	File file = null;
-	InputStream in = null;
-	FileOutputStream out = null;
-	try {
-
-	    file = File.createTempFile("tmp", "bin");
-	    file.deleteOnExit();
-
-	    URLConnection uc = url.openConnection();
-	    uc.connect();
-	    in = uc.getInputStream();
-	    out = new FileOutputStream(file);
-
+	File file = File.createTempFile("tmp", "bin");
+	file.deleteOnExit();
+	URLConnection uc = url.openConnection();
+	uc.connect();
+	try (FileOutputStream out = new FileOutputStream(file);
+		InputStream in = uc.getInputStream()) {
 	    byte[] buffer = new byte[1024];
 	    int bytesRead = -1;
 	    while ((bytesRead = in.read(buffer)) > -1) {
 		out.write(buffer, 0, bytesRead);
 	    }
-
-	} finally {
-
-	    if (in != null)
-		in.close();
-	    if (out != null)
-		out.close();
-
 	}
 	return file;
     }

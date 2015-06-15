@@ -40,6 +40,8 @@ public class RegalObject {
 	String importedFrom = null;
 	String legacyId = null;
 	String name = null;
+	String doi = null;
+	String urn = null;
 
 	/**
 	 * @param createdBy
@@ -101,6 +103,34 @@ public class RegalObject {
 	    return name;
 	}
 
+	/**
+	 * @return the doi as string
+	 */
+	public String getDoi() {
+	    return doi;
+	}
+
+	/**
+	 * @param doi
+	 */
+	public void setDoi(String doi) {
+	    this.doi = doi;
+	}
+
+	/**
+	 * @return the urn as string
+	 */
+	public String getUrn() {
+	    return urn;
+	}
+
+	/**
+	 * @param urn
+	 */
+	public void setUrn(String urn) {
+	    this.urn = urn;
+	}
+
 	@Override
 	public int hashCode() {
 	    int result = 17;
@@ -110,6 +140,8 @@ public class RegalObject {
 		    + (importedFrom != null ? importedFrom.hashCode() : 0);
 	    result = 31 * result + (legacyId != null ? legacyId.hashCode() : 0);
 	    result = 31 * result + (name != null ? name.hashCode() : 0);
+	    result = 31 * result + (doi != null ? doi.hashCode() : 0);
+	    result = 31 * result + (urn != null ? urn.hashCode() : 0);
 	    return result;
 	}
 
@@ -127,7 +159,11 @@ public class RegalObject {
 		    .equals(mt.importedFrom)))
 		return false;
 	    if (!(legacyId == null ? mt.legacyId == null : legacyId
-		    .equals(legacyId)))
+		    .equals(mt.legacyId)))
+		return false;
+	    if (!(doi == null ? mt.doi == null : doi.equals(mt.doi)))
+		return false;
+	    if (!(urn == null ? mt.urn == null : urn.equals(mt.urn)))
 		return false;
 	    return true;
 	}
@@ -309,7 +345,7 @@ public class RegalObject {
 		.equals(mt.contentType)))
 	    return false;
 	if (!(accessScheme == null ? mt.accessScheme == null : accessScheme
-		.equals(accessScheme)))
+		.equals(mt.accessScheme)))
 	    return false;
 	if (!(transformer == null ? mt.transformer == null : transformer
 		.equals(mt.transformer)))

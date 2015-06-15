@@ -16,6 +16,7 @@
  */
 package models;
 
+import helper.TaskManager;
 import play.Play;
 import archive.fedora.ApplicationProfile;
 import archive.fedora.FedoraFactory;
@@ -99,6 +100,11 @@ public class Globals {
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
 
     /**
+     * register jobs at taskManager to gain regular executions
+     */
+    public static TaskManager taskManager = new TaskManager();
+
+    /**
      * labels etc.
      */
     public static ApplicationProfile profile = new ApplicationProfile();
@@ -107,12 +113,6 @@ public class Globals {
      * defines a protocol used by this app
      */
     public static String protocol = "http://";
-
-    /**
-     * if true the application will log a timestamp every 5 sec.
-     */
-    public static boolean heartbeatOn = Boolean.parseBoolean(Play.application()
-	    .configuration().getString("regal-api.heartbeatOn"));
 
     /**
      * Urn resolver used for testing urn resolving
@@ -143,11 +143,33 @@ public class Globals {
 	    .getString("regal-api.digitoolAddress");
 
     /**
+     * if set a urn will be coined and registered at the oai provider
+     */
+    public static String urnTask = Play.application().configuration()
+	    .getString("regal-api.urnTask");
+
+    public static String doiTask = Play.application().configuration()
+	    .getString("regal-api.doiTask");
+
+    /**
+     * if set the application will log a message on the defined interval
+     */
+    public static String heartbeatTask = Play.application().configuration()
+	    .getString("regal-api.heartbeatTask");
+
+    /**
+     * A urn subnamespace that belongs to this application
+     */
+    public static String urnSnid = Play.application().configuration()
+	    .getString("regal-api.urnSnid");
+
+    /**
      * The type for fulltext-extracts made by pdfbox
      */
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
     /**
+     * 
      * prefix for fulltext index
      */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
@@ -156,5 +178,39 @@ public class Globals {
      * prefix used for public es index
      */
     public static final String PUBLIC_INDEX_PREF = "public_";
+
+    /**
+     * Datacite provides a service for minting Dois. Configure your user here.
+     */
+    public static String dataCiteUser = Play.application().configuration()
+	    .getString("regal-api.dataciteUser");
+
+    /**
+     * Datacite provides a service for minting Dois. Configure your password
+     * here.
+     */
+    public static String dataCitePasswd = Play.application().configuration()
+	    .getString("regal-api.datacitePassword");
+    /**
+     * Test Prefix 10.5072 Productive Prefix 10.4126
+     */
+    public static String doiPrefix = Play.application().configuration()
+	    .getString("regal-api.doiPrefix");
+    /**
+     * Keystore Location for regal https connections
+     */
+    public static String keystoreLocation = Play.application().configuration()
+	    .getString("regal-api.keystoreLocation");
+    /**
+     * Keystore password for regal https connections
+     */
+    public static String keystorePassword = Play.application().configuration()
+	    .getString("regal-api.keystorePassword");
+
+    /**
+     * The setName for providing oai records to aleph
+     */
+    public static String alephSetName = Play.application().configuration()
+	    .getString("regal-api.alephSetName");
 
 }
