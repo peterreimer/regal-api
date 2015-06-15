@@ -16,6 +16,7 @@
  */
 package actions;
 
+import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.OaiDcMapper;
 import helper.PdfText;
@@ -33,6 +34,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.util.List;
 
+import models.DataciteRecord;
 import models.DublinCoreData;
 import models.Globals;
 import models.MabRecord;
@@ -63,6 +65,7 @@ public class Transform {
 	    record = mapper.map(new ByteArrayInputStream(node.getMetadata()
 		    .getBytes("utf-8")), node.getPid());
 	    record.httpAdresse = Globals.urnbase + node.getPid();
+	    record.doi = node.getDoi();
 	    return record;
 	} catch (UnsupportedEncodingException e) {
 	    throw new HttpArchiveException(500, e);
@@ -259,6 +262,16 @@ public class Transform {
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
 	}
+    }
+
+    /**
+     * @param node
+     * @return an xml string for datacite
+     */
+    public String datacite(Node node) {
+	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
+		node.getLd());
+	return dc.toString();
     }
 
 }

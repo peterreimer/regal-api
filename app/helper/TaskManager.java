@@ -35,7 +35,6 @@ public class TaskManager {
      * register all jobs
      */
     public void init() {
-
 	play.Logger
 		.info("Register Job: web gatherer. Will run every hour at min 32 (\"32 * * * * ?\")");
 	addTask("web gatherer", new Webgatherer(), "32 * * * * ?");
@@ -47,12 +46,18 @@ public class TaskManager {
 		    () -> play.Logger.debug("Boom: " + new Date().toString()),
 		    Globals.heartbeatTask);
 	}
+
 	if (Globals.urnTask != null && !Globals.urnTask.isEmpty()) {
 	    play.Logger.info("Register Job: urn allocator. Will run every "
 		    + Globals.urnTask);
 	    addTask("urn allocator", new UrnAllocator(), Globals.urnTask);
 	}
 
+	if (Globals.doiTask != null && !Globals.doiTask.isEmpty()) {
+	    play.Logger.info("Register Job: doi allocator. Will run every "
+		    + Globals.doiTask);
+	    addTask("doi allocator", new DoiAllocator(), Globals.doiTask);
+	}
     }
 
     private void addTask(String name, Runnable r, String cronExpression) {

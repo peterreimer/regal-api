@@ -149,6 +149,9 @@ public class Globals {
     public static String urnTask = Play.application().configuration()
 	    .getString("regal-api.urnTask");
 
+    public static String doiTask = Play.application().configuration()
+	    .getString("regal-api.doiTask");
+
     /**
      * if set the application will log a message on the defined interval
      */
@@ -180,5 +183,39 @@ public class Globals {
 
     public static String heritrixData = Play.application().configuration()
 	    .getString("regal-api.heritrix.dataUrl");
+
+    /**
+     * Datacite provides a service for minting Dois. Configure your user here.
+     */
+    public static String dataCiteUser = Play.application().configuration()
+	    .getString("regal-api.dataciteUser");
+
+    /**
+     * Datacite provides a service for minting Dois. Configure your password
+     * here.
+     */
+    public static String dataCitePasswd = Play.application().configuration()
+	    .getString("regal-api.datacitePassword");
+    /**
+     * Test Prefix 10.5072 Productive Prefix 10.4126
+     */
+    public static String doiPrefix = Play.application().configuration()
+	    .getString("regal-api.doiPrefix");
+    /**
+     * Keystore Location for regal https connections
+     */
+    public static String keystoreLocation = Play.application().configuration()
+	    .getString("regal-api.keystoreLocation");
+    /**
+     * Keystore password for regal https connections
+     */
+    public static String keystorePassword = Play.application().configuration()
+	    .getString("regal-api.keystorePassword");
+
+    /**
+     * The setName for providing oai records to aleph
+     */
+    public static String alephSetName = Play.application().configuration()
+	    .getString("regal-api.alephSetName");
 
 }

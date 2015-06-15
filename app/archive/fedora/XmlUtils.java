@@ -130,24 +130,15 @@ public class XmlUtils {
      */
     @Deprecated
     public static File stringToFile(File file, String str) {
-	FileOutputStream writer = null;
 	try {
 	    file.createNewFile();
-
-	    writer = new FileOutputStream(file);
-	    // TODO uhh prevent memory overload
-	    writer.write(str.replace("\n", " ").replace("  ", " ")
-		    .getBytes("utf-8"));
+	    try (FileOutputStream writer = new FileOutputStream(file)) {
+		// TODO uhh prevent memory overload
+		writer.write(str.replace("\n", " ").replace("  ", " ")
+			.getBytes("utf-8"));
+	    }
 	} catch (IOException e) {
 	    throw new ReadException(e);
-	} finally {
-	    if (writer != null)
-		try {
-		    writer.flush();
-		    writer.close();
-		} catch (IOException ignored) {
-		    throw new StreamNotClosedException(ignored);
-		}
 	}
 	str = null;
 	return file;
@@ -161,21 +152,13 @@ public class XmlUtils {
      * @return a file containing the string
      */
     public static File newStringToFile(File file, String str) {
-	FileOutputStream writer = null;
 	try {
 	    file.createNewFile();
-	    writer = new FileOutputStream(file);
-	    writer.write(str.getBytes("utf-8"));
+	    try (FileOutputStream writer = new FileOutputStream(file)) {
+		writer.write(str.getBytes("utf-8"));
+	    }
 	} catch (IOException e) {
 	    throw new ReadException(e);
-	} finally {
-	    if (writer != null)
-		try {
-		    writer.flush();
-		    writer.close();
-		} catch (IOException ignored) {
-		    throw new StreamNotClosedException(ignored);
-		}
 	}
 	str = null;
 	return file;
@@ -191,19 +174,11 @@ public class XmlUtils {
 	    throw new ReadException("");
 	}
 	byte[] buffer = new byte[(int) file.length()];
-	BufferedInputStream f = null;
-	try {
-	    f = new BufferedInputStream(new FileInputStream(file));
+	try (BufferedInputStream f = new BufferedInputStream(
+		new FileInputStream(file))) {
 	    f.read(buffer);
 	} catch (IOException e) {
 	    throw new ReadException(e);
-	} finally {
-	    if (f != null)
-		try {
-		    f.close();
-		} catch (IOException ignored) {
-		    throw new StreamNotClosedException(ignored);
-		}
 	}
 	return new String(buffer);
     }

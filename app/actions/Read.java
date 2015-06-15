@@ -26,12 +26,9 @@ import helper.Webgatherer;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -74,6 +71,11 @@ public class Read extends RegalAction {
      */
     public Node readNode(String pid) {
 	Node n = internalReadNode(pid);
+	if ("D".equals(n.getState())) {
+	    throw new HttpArchiveException(
+		    410,
+		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
+	}
 	addLabelsForParts(n);
 	writeNodeToCache(n);
 	return n;
@@ -130,7 +132,7 @@ public class Read extends RegalAction {
      *            the will be read to the node
      * @return a Node containing the data from the repository
      */
-    private Node internalReadNode(String pid) {
+    public Node internalReadNode(String pid) {
 	Node n = readNodeFromCache(pid);
 	if (n != null) {
 	    return n;
@@ -190,6 +192,11 @@ public class Read extends RegalAction {
 	return result;
     }
 
+    /**
+     * @param node
+     *            a regal node
+     * @return a tree of regal objects starting with the passed node as root
+     */
     public Map<String, Object> getPartsAsTree(Node node) {
 	Map<String, Object> nm = node.getLdWithoutContext();
 	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
@@ -574,7 +581,8 @@ public class Read extends RegalAction {
 	String aleph = Globals.alephAddress + node.getLegacyId();
 	String lobid = Globals.lobidAddress + node.getLegacyId();
 	String api = this.getHttpUriOfResource(node);
-	String urn = Globals.urnResolverAddress + node.getUrn();
+	String urn = Globals.urnResolverAddress + node.getUrnFromMetadata();
+	String doi = "https://dx.doi.org/" + node.getDoi();
 	String frontend = Globals.urnbase + node.getPid();
 	String digitool = Globals.digitoolAddress
 		+ node.getPid().substring(node.getNamespace().length() + 1);
@@ -585,6 +593,7 @@ public class Read extends RegalAction {
 	result.put("lobid", lobid);
 	result.put("api", api);
 	result.put("urn", urn);
+	result.put("doi", doi);
 	result.put("frontend", frontend);
 	result.put("digitool", digitool);
 
@@ -601,6 +610,7 @@ public class Read extends RegalAction {
     public Map<String, Object> getStatus(Node node) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	result.put("urnStatus", urnStatus(node));
+	result.put("doiStatus", doiStatus(node));
 	result.put("oaiStatus", getOaiStatus(node));
 	result.put("links", getLinks(node));
 	result.put("title", getTitle(node));
@@ -609,9 +619,13 @@ public class Read extends RegalAction {
 	result.put("type", node.getContentType());
 	result.put("pid",
 		node.getPid().substring(node.getNamespace().length() + 1));
-	result.put("catalogId", node.getLegacyId());
-	result.put("urn", node.getUrn());
+	result.put("catalogId", node.getLegacyId());	
 	result.put("webgatherer", getGatherStatus(node));
+	/* unsure merge
+	 * result.put("urn", node.getUrn());
+	 */
+	result.put("urn", node.getUrnFromMetadata());
+
 	return result;
     }
 
@@ -656,6 +670,15 @@ public class Read extends RegalAction {
 	}
     }
 
+    private int doiStatus(Node node) {
+	try {
+	    return getFinalResponseCode("https://dx.doi.org/" + node.getDoi());
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
     /**
      * @param nodes
      * @return status information for many nodes
@@ -688,4 +711,19 @@ public class Read extends RegalAction {
 
     }
 
+    private int getFinalResponseCode(String url) throws IOException {
+	HttpURLConnection con = (HttpURLConnection) new URL(url)
+		.openConnection();
+	con.setInstanceFollowRedirects(false);
+	con.connect();
+	con.getInputStream();
+	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
+		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
+	    String redirectUrl = con.getHeaderField("Location");
+
+	    return getFinalResponseCode(redirectUrl);
+	}
+	return con.getResponseCode();
+    }
 }

@@ -36,7 +36,7 @@ public class Delete extends RegalAction {
      *            a node to delete
      * @return a message
      */
-    public String delete(Node n) {
+    public String purge(Node n) {
 	StringBuffer message = new StringBuffer();
 	message.append(new Index().remove(n));
 	removeNodeFromCache(n.getPid());
@@ -50,6 +50,21 @@ public class Delete extends RegalAction {
 			+ " already deleted.");
 	    }
 	}
+	Globals.fedora.purgeNode(n.getPid());
+	return message.toString() + "\n" + n.getPid() + " purged!";
+    }
+
+    /**
+     * Deletes only this single node. Child objects will remain.
+     * 
+     * @param n
+     *            a node to delete
+     * @return a message
+     */
+    public String delete(Node n) {
+	StringBuffer message = new StringBuffer();
+	message.append(new Index().remove(n));
+	removeNodeFromCache(n.getPid());
 	Globals.fedora.deleteNode(n.getPid());
 	return message.toString() + "\n" + n.getPid() + " deleted!";
     }
@@ -63,6 +78,17 @@ public class Delete extends RegalAction {
      */
     public String delete(List<Node> nodes) {
 	return apply(nodes, n -> delete(n));
+    }
+
+    /**
+     * Each node in the list will be deleted. Child objects will remain
+     * 
+     * @param nodes
+     *            a list of nodes to delete.
+     * @return a message
+     */
+    public String purge(List<Node> nodes) {
+	return apply(nodes, n -> purge(n));
     }
 
     /**

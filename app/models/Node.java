@@ -103,6 +103,8 @@ public class Node {
     private String legacyId = null;
     private String catalogId = null;
     private String name = null;
+    private String doi = null;
+    private String urn = null;
 
     private String fulltext;
 
@@ -913,6 +915,10 @@ public class Node {
 	    aboutMap.put("importedFrom", getImportedFrom());
 	if (name != null)
 	    aboutMap.put("name", getName());
+	if (doi != null)
+	    aboutMap.put("doi", getDoi());
+	if (urn != null)
+	    aboutMap.put("urn", getUrn());
 	aboutMap.put("modified", getLastModified());
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
@@ -1022,7 +1028,7 @@ public class Node {
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
-	pmap.put("label", "Angelegt durch");
+	pmap.put("label", "Alternative ID");
 	cmap.put("legacyId", pmap);
 
 	pmap = new HashMap<String, Object>();
@@ -1039,6 +1045,16 @@ public class Node {
 	pmap.put("@id", "http://hbz-nrw.de/regal#publishScheme");
 	pmap.put("label", "Sichtbarkeit Metadaten");
 	cmap.put("publishScheme", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#urn");
+	pmap.put("label", "Urn");
+	cmap.put("urn", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#doi");
+	pmap.put("label", "Doi");
+	cmap.put("doi", pmap);
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#hasData");
@@ -1290,7 +1306,7 @@ public class Node {
     /**
      * @return a urn or null
      */
-    public String getUrn() {
+    public String getUrnFromMetadata() {
 	try {
 	    String hasUrn = "http://purl.org/lobid/lv#urn";
 	    return RdfUtils.findRdfObjects(pid, hasUrn, metadata,
@@ -1354,10 +1370,43 @@ public class Node {
     }
 
     /**
+     * 
      * @return true, if the node has a managed data stream
      */
     public boolean isManaged() {
 	return isManaged;
+    }
+
+    /**
+     * @return a doi for this particular object
+     */
+    public String getDoi() {
+	return doi;
+    }
+
+    /**
+     * @param doi
+     * @return this
+     */
+    public Node setDoi(String doi) {
+	this.doi = doi;
+	return this;
+    }
+
+    /**
+     * @return an urn for this particular object
+     */
+    public String getUrn() {
+	return urn;
+    }
+
+    /**
+     * @param urn
+     * @return this
+     */
+    public Node setUrn(String urn) {
+	this.urn = urn;
+	return this;
     }
 
     public Map<String, Object> getLdWithoutContext() {

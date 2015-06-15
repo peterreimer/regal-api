@@ -58,6 +58,7 @@ public class ApplicationProfile {
 	loadDefaultConfig();
 	loadToMap("regal.turtle");
 	loadToMap("rpb.turtle");
+	loadToMap("ddc.turtle");
 	loadNMap();
     }
 
@@ -197,7 +198,7 @@ public class ApplicationProfile {
 		    entry = pMap.get(l.getObject());
 		    if (entry == null || entry.label == null) {
 			l.setObjectLabel(l.getObject());
-		//	play.Logger.debug("No label for " + l.getObject());
+			// play.Logger.debug("No label for " + l.getObject());
 		    } else {
 			l.setObjectLabel(entry.label);
 		    }

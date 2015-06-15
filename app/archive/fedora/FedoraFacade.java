@@ -54,6 +54,7 @@ import com.yourmediashelf.fedora.client.request.GetObjectProfile;
 import com.yourmediashelf.fedora.client.request.Ingest;
 import com.yourmediashelf.fedora.client.request.ListDatastreams;
 import com.yourmediashelf.fedora.client.request.ModifyDatastream;
+import com.yourmediashelf.fedora.client.request.ModifyObject;
 import com.yourmediashelf.fedora.client.request.PurgeObject;
 import com.yourmediashelf.fedora.client.request.RiSearch;
 import com.yourmediashelf.fedora.client.response.FedoraResponse;
@@ -263,6 +264,7 @@ public class FedoraFacade {
 	node.setPID(pid);
 	node.setNamespace(pid.substring(0, pid.indexOf(':')));
 	getDublinCoreFromFedora(node);
+	getStateFromFedora(node);
 	getRelsExtFromFedora(node);
 	getDatesFromFedora(node);
 	getChecksumFromFedora(node);
@@ -365,6 +367,11 @@ public class FedoraFacade {
 	}
 	utils.linkContentModels(models, node);
 	utils.updateRelsExt(node);
+	try {
+	    new ModifyObject(node.getPid()).state("A").execute();
+	} catch (FedoraClientException e) {
+	    throw new CreateNodeException(e.getStatus(), e);
+	}
 	getDatesFromFedora(node);
     }
 
@@ -375,6 +382,16 @@ public class FedoraFacade {
 	    node.setLabel(prof.getLabel());
 	    node.setLastModified(prof.getLastModifiedDate());
 	    node.setCreationDate(prof.getCreateDate());
+	} catch (FedoraClientException e) {
+	    throw new ReadNodeException(500, e);
+	}
+    }
+
+    private void getStateFromFedora(Node node) {
+	try {
+	    GetObjectProfileResponse prof = new GetObjectProfile(node.getPid())
+		    .execute();
+	    node.setState(prof.getState());
 	} catch (FedoraClientException e) {
 	    throw new ReadNodeException(500, e);
 	}
@@ -429,6 +446,14 @@ public class FedoraFacade {
      * @param rootPID
      */
     public void deleteNode(String rootPID) {
+	try {
+	    new ModifyObject(rootPID).state("D").execute();
+	} catch (FedoraClientException e) {
+	    throw new DeleteException(e.getStatus(), e);
+	}
+    }
+
+    public void purgeNode(String rootPID) {
 	try {
 	    unlinkParent(rootPID);
 	    new PurgeObject(rootPID).execute();
