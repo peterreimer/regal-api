@@ -203,7 +203,6 @@ class FedoraFacade implements FedoraInterface {
 	    return me;
     }
 
-    @Override
     public void createNode(Node node) {
 	try {
 	    new Ingest(node.getPid()).label(node.getLabel()).execute();
@@ -229,7 +228,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public Node createRootObject(String namespace) {
 	Node rootObject = null;
 	String pid = getPid(namespace);
@@ -241,7 +239,6 @@ class FedoraFacade implements FedoraInterface {
 	return rootObject;
     }
 
-    @Override
     public Node readNode(String pid) {
 	if (!nodeExists(pid))
 	    throw new NodeNotFoundException(404, pid);
@@ -310,7 +307,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public void updateNode(Node node) {
 	DublinCoreHandler.updateDc(node);
 	List<Transformer> models = node.getTransformer();
@@ -358,7 +354,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public List<String> findPids(String rdfQuery, String queryFormat) {
 	if (queryFormat.compareTo(FedoraVocabulary.SIMPLE) == 0) {
 	    return utils.findPidsSimple(rdfQuery);
@@ -367,7 +362,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public String getPid(String namespace) {
 	try {
 	    GetNextPIDResponse response = new GetNextPID().namespace(namespace)
@@ -378,7 +372,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public String[] getPids(String namespace, int number) {
 	try {
 	    GetNextPIDResponse response = new GetNextPID().namespace(namespace)
@@ -392,7 +385,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public void deleteNode(String rootPID) {
 	try {
 	    new ModifyObject(rootPID).state("D").execute();
@@ -401,7 +393,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public void purgeNode(String rootPID) {
 	try {
 	    unlinkParent(rootPID);
@@ -412,7 +403,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public void deleteDatastream(String pid, String datastream) {
 	try {
 	    new ModifyDatastream(pid, datastream).dsState("D").execute();
@@ -421,17 +411,14 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public boolean nodeExists(String pid) {
 	return utils.nodeExists(pid);
     }
 
-    @Override
     public void updateContentModels(List<Transformer> cms) {
 	utils.updateContentModels(cms);
     }
 
-    @Override
     public InputStream findTriples(String query, String queryFormat,
 	    String outputformat) {
 	try {
@@ -443,27 +430,22 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public String removeUriPrefix(String pred) {
 	return utils.removeUriPrefix(pred);
     }
 
-    @Override
     public String addUriPrefix(String pid) {
 	return utils.addUriPrefix(pid);
     }
 
-    @Override
     public List<String> findNodes(String searchTerm) {
 	return findPids(searchTerm, SIMPLE);
     }
 
-    @Override
     public void readDcToNode(Node node, InputStream in, String dcNamespace) {
 	DublinCoreHandler.readDcToNode(node, in, dcNamespace);
     }
 
-    @Override
     public List<Node> deleteComplexObject(String rootPID) {
 	if (!nodeExists(rootPID)) {
 	    throw new NodeNotFoundException(404, "Can not find: " + rootPID);
@@ -475,7 +457,6 @@ class FedoraFacade implements FedoraInterface {
 	return list;
     }
 
-    @Override
     public List<Node> listComplexObject(String rootPID) {
 	List<Node> result = new ArrayList<Node>();
 	if (!nodeExists(rootPID)) {
@@ -508,7 +489,6 @@ class FedoraFacade implements FedoraInterface {
 	return result;
     }
 
-    @Override
     public String getNodeParent(Node node) {
 	List<Link> links = node.getRelsExt();
 	for (Link link : links) {
@@ -534,14 +514,12 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public void unlinkParent(Node node) {
 	Node parent = readNode(node.getParentPid());
 	parent.removeRelation(HAS_PART, node.getPid());
 	updateNode(parent);
     }
 
-    @Override
     public void linkToParent(Node node, String parentPid) {
 	node.removeRelations(IS_PART_OF);
 	Link link = new Link();
@@ -552,7 +530,6 @@ class FedoraFacade implements FedoraInterface {
 	updateNode(node);
     }
 
-    @Override
     public void linkParentToNode(String parentPid, String pid) {
 	try {
 	    Node parent = readNode(parentPid);
@@ -568,7 +545,6 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
-    @Override
     public boolean dataStreamExists(String pid, String datastreamId) {
 	try {
 	    ListDatastreamsResponse response = new ListDatastreams(pid)
