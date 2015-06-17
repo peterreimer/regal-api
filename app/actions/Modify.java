@@ -655,29 +655,34 @@ public class Modify extends RegalAction {
     }
 
     public Map<String, Object> addDoi(Node node) {
-	if (node.getDoi() == null || node.getDoi().isEmpty()) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	String doi = node.getDoi();
+	result.put("Doi", doi);
+	if (doi == null || doi.isEmpty()) {
 	    node.setDoi(createDoiIdentifier(node));
 	    RegalObject o = new RegalObject();
 	    o.getIsDescribedBy().setDoi(node.getDoi());
 	    new Create().patchResource(node, o);
-	}
-	String objectUrl = Globals.urnbase + node.getPid();
-	String doi = node.getDoi();
-	String xml = new Transform().datacite(node);
-	play.Logger.debug(xml);
-	DataciteClient client = new DataciteClient();
-	String registerMetadataResponse = client.registerMetadataAtDatacite(
-		node, xml);
-	String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
-	String makeOaiSetResponse = makeOAISet(node);
+	    String objectUrl = Globals.urnbase + node.getPid();
 
-	Map<String, Object> result = new HashMap<String, Object>();
-	result.put("Doi", doi);
-	result.put("Metadata", xml);
-	result.put("registerMetadataResponse", registerMetadataResponse);
-	result.put("mintDoiResponse", mintDoiResponse);
-	result.put("makeOaiSetResponse", makeOaiSetResponse);
-	return result;
+	    String xml = new Transform().datacite(node);
+	    play.Logger.debug(xml);
+	    DataciteClient client = new DataciteClient();
+	    String registerMetadataResponse = client
+		    .registerMetadataAtDatacite(node, xml);
+	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
+	    String makeOaiSetResponse = makeOAISet(node);
+
+	    result.put("Metadata", xml);
+	    result.put("registerMetadataResponse", registerMetadataResponse);
+	    result.put("mintDoiResponse", mintDoiResponse);
+	    result.put("makeOaiSetResponse", makeOaiSetResponse);
+	    return result;
+	} else {
+	    throw new HttpArchiveException(409, node.getPid()
+		    + " already has a doi. Leave unmodified!");
+	}
+
     }
 
     private String createDoiIdentifier(Node node) {

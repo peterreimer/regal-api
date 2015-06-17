@@ -1047,7 +1047,7 @@ public class Node {
 	cmap.put("publishScheme", pmap);
 
 	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#urn");
+	pmap.put("@id", "http://purl.org/lobid/lv#urn");
 	pmap.put("label", "Urn");
 	cmap.put("urn", pmap);
 

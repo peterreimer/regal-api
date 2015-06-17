@@ -203,6 +203,7 @@ public class FedoraFacade {
 	    return me;
     }
 
+
     /**
      * @param node
      */
@@ -238,6 +239,7 @@ public class FedoraFacade {
 	}
     }
 
+
     /**
      * @param namespace
      * @return
@@ -252,6 +254,7 @@ public class FedoraFacade {
 	createNode(rootObject);
 	return rootObject;
     }
+
 
     /**
      * @param pid
@@ -397,6 +400,7 @@ public class FedoraFacade {
 	}
     }
 
+
     /**
      * @param rdfQuery
      * @param queryFormat
@@ -482,6 +486,7 @@ public class FedoraFacade {
     public boolean nodeExists(String pid) {
 	return utils.nodeExists(pid);
     }
+
 
     /**
      * @param cms
