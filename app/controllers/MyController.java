@@ -112,7 +112,7 @@ public class MyController extends Controller {
      */
     public final static String DATA_ACCESSOR_REMOTE = "remote";
 
-    protected static ObjectMapper mapper = JsonUtil.mapper();
+    public static ObjectMapper mapper = JsonUtil.mapper();
 
     static Read read = new Read();
     static Create create = new Create();
@@ -371,7 +371,7 @@ public class MyController extends Controller {
 		    }
 		    Node node = null;
 		    try {
-			node = read.readNode(pid);
+			node = read.internalReadNode(pid);
 		    } catch (Exception e) {
 			// play.Logger.debug("", e);
 		}

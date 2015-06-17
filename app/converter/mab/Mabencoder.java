@@ -86,10 +86,10 @@ public class Mabencoder {
 
     private ByteArrayOutputStream render() {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	PrintWriter writer = new PrintWriter(out);
-	writer.append(st.render());
-	writer.close();
-	return out;
+	try (PrintWriter writer = new PrintWriter(out)) {
+	    writer.append(st.render());
+	    return out;
+	}
     }
 
 }

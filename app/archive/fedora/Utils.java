@@ -44,6 +44,8 @@ import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_LEGACY_ID;
 import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import static archive.fedora.Vocabulary.REL_NAME;
+import static archive.fedora.Vocabulary.REL_HAS_DOI;
+import static archive.fedora.Vocabulary.REL_HAS_URN;
 import helper.HttpArchiveException;
 
 import java.io.BufferedInputStream;
@@ -446,6 +448,12 @@ public class Utils {
 			} else if (IS_PART_OF.equals(pred)) {
 			    node.setParentPid(link.getObject());
 			    continue;
+			} else if (REL_HAS_DOI.equals(pred)) {
+			    node.setDoi(link.getObject());
+			    continue;
+			} else if (REL_HAS_URN.equals(pred)) {
+			    node.setUrn(link.getObject());
+			    continue;
 			}
 			link.setLiteral(objUri instanceof Literal);
 			node.addRelation(link);
@@ -652,6 +660,15 @@ public class Utils {
 	link.setObject(node.getParentPid(), true);
 	link.setPredicate(IS_PART_OF);
 	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getDoi(), true);
+	link.setPredicate(REL_HAS_DOI);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getUrn(), true);
+	link.setPredicate(REL_HAS_URN);
+	node.addRelation(link);
+
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());
     }
 

@@ -75,7 +75,7 @@ public class Urn {
 	con.getInputStream();
 	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
 		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
-		|| con.getResponseCode() == 307) {
+		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
 	    String redirectUrl = con.getHeaderField("Location");
 
 	    return getFinalURL(redirectUrl);
@@ -89,15 +89,13 @@ public class Urn {
 	    String httpUriOfResource) {
 	String pid = httpUriOfResource.substring(httpUriOfResource
 		.lastIndexOf('/'));
-	Scanner scn = new Scanner(inputStream, "UTF-8");
-	try {
+
+	try (Scanner scn = new Scanner(inputStream, "UTF-8")) {
 	    String content = scn.useDelimiter("\\A").next();
 	    Pattern pattern = Pattern.compile("\"(http://.*" + pid + ")\"");
 	    Matcher matcher = pattern.matcher(content);
 	    matcher.find();
 	    return matcher.group(1);
-	} finally {
-	    scn.close();
 	}
     }
 

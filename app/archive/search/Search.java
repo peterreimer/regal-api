@@ -183,6 +183,7 @@ public class Search {
 
     SearchHits query(String[] index, String queryString, int from, int until) {
 	refresh();
+	play.Logger.debug("Search for " + queryString);
 	QueryBuilder query = QueryBuilders.queryString(queryString);
 	SearchResponse response = client.prepareSearch(index).setQuery(query)
 		.setFrom(from).setSize(until - from).execute().actionGet();
@@ -232,6 +233,8 @@ public class Search {
 
 	for (Node node : list) {
 	    try {
+		play.Logger.debug("Going to add " + node.getPid()
+			+ " to bulk action");
 		StringBuffer msg = new StringBuffer("Index " + node.getPid()
 			+ " to ");
 		String source = node.toString();
@@ -270,7 +273,8 @@ public class Search {
 		result.add(msg.toString());
 		play.Logger.debug("Add " + node.getPid() + " to bulk action");
 	    } catch (Exception e) {
-		result.add("A problem occured");
+		play.Logger.warn("", e);
+		result.add("A problem occured: " + e.getMessage());
 	    }
 	}
 	try {
