@@ -1,12 +1,14 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DataciteRecord {
     public String doi = null;
     public String identifier = null;
-    public List<Pair<String, String>> creators = new ArrayList<Pair<String, String>>();
+    public Set<Pair<String, String>> creators = new HashSet<Pair<String, String>>();
     public List<Pair<String, String>> titles = new ArrayList<Pair<String, String>>();
     public String publisher = null;
     public String publicationYear = null;
