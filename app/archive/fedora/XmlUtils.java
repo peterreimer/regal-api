@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -368,4 +369,17 @@ public class XmlUtils {
 
     }
 
+    public static String docToString(Document doc) {
+	try {
+	    DOMSource domSource = new DOMSource(doc);
+	    StringWriter writer = new StringWriter();
+	    StreamResult result = new StreamResult(writer);
+	    TransformerFactory tf = TransformerFactory.newInstance();
+	    Transformer transformer = tf.newTransformer();
+	    transformer.transform(domSource, result);
+	    return writer.toString();
+	} catch (TransformerException e) {
+	    throw new XmlException(e);
+	}
+    }
 }
