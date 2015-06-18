@@ -211,12 +211,12 @@ public class DataciteMapper {
 		rec.subjects.add(new Pair<String, String>(subject, type));
 	    }
 	}
-	List<String> freeSubjects = (List<String>) ld.get("dc:subject");
-	if (freeSubjects != null) {
-	    for (String item : freeSubjects) {
-		rec.subjects.add(new Pair<String, String>(item, "FREE"));
-	    }
-	}
+	// List<String> freeSubjects = (List<String>) ld.get("dc:subject");
+	// if (freeSubjects != null) {
+	// for (String item : freeSubjects) {
+	// rec.subjects.add(new Pair<String, String>(item, "FREE"));
+	// }
+	// }
     }
 
 }
