@@ -142,6 +142,9 @@ public class OaiDcMapper {
 		} else if ("http://purl.org/lobid/lv#ArchivedWebPage".equals(l
 			.getObject())) {
 		    data.addType("doc-type:Website");
+		} else if ("http://purl.org/ontology/bibo/Thesis".equals(l
+			.getObject())) {
+		    data.addType("doc-type:doctoralThesis");
 		}
 	    }
 	}
