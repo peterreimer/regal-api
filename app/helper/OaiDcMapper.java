@@ -103,10 +103,10 @@ public class OaiDcMapper {
 		data.addDate(l.getObject());
 	    } else if ("http://purl.org/dc/elements/1.1/contributor".equals(l
 		    .getPredicate())) {
-		data.addContributor(l.getObjectLabel());
+		data.addContributor(l.getObject());
 	    } else if ("http://purl.org/dc/elements/1.1/creator".equals(l
 		    .getPredicate())) {
-		data.addCreator(l.getObjectLabel());
+		data.addCreator(l.getObject());
 	    } else if ("http://purl.org/dc/terms/contributor".equals(l
 		    .getPredicate())) {
 		data.addContributor(l.getObjectLabel());
@@ -126,7 +126,7 @@ public class OaiDcMapper {
 		data.addIdentifier(l.getObject(), "hbz:isbn");
 	    } else if ("http://purl.org/dc/elements/1.1/subject".equals(l
 		    .getPredicate())) {
-		data.addSubject(l.getObjectLabel());
+		data.addSubject(l.getObject());
 	    } else if ("http://purl.org/dc/terms/subject".equals(l
 		    .getPredicate())) {
 		data.addSubject(l.getObjectLabel());
