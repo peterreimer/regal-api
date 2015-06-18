@@ -14,3 +14,4 @@ regal-default.ntriple
 log
 .cache
 data
+.settings
