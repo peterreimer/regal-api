@@ -623,6 +623,12 @@ public class Modify extends RegalAction {
 	}
     }
 
+    /**
+     * Creates a new doi identifier and registers to datacite
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
     public Map<String, Object> addDoi(Node node) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	String doi = node.getDoi();
@@ -652,6 +658,38 @@ public class Modify extends RegalAction {
 		    + " already has a doi. Leave unmodified!");
 	}
 
+    }
+
+    /**
+     * Updates an existing doi's metadata and url
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
+    public Map<String, Object> updateDoi(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	String doi = node.getDoi();
+	result.put("Doi", doi);
+	if (doi == null || doi.isEmpty()) {
+	    throw new HttpArchiveException(
+		    412,
+		    node.getPid()
+			    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
+	} else {
+	    String objectUrl = Globals.urnbase + node.getPid();
+	    String xml = new Transform().datacite(node);
+	    play.Logger.debug(xml);
+	    DataciteClient client = new DataciteClient();
+	    String registerMetadataResponse = client
+		    .registerMetadataAtDatacite(node, xml);
+	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
+	    String makeOaiSetResponse = makeOAISet(node);
+	    result.put("Metadata", xml);
+	    result.put("registerMetadataResponse", registerMetadataResponse);
+	    result.put("mintDoiResponse", mintDoiResponse);
+	    result.put("makeOaiSetResponse", makeOaiSetResponse);
+	    return result;
+	}
     }
 
     private String createDoiIdentifier(Node node) {
