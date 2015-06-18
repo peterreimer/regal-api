@@ -372,7 +372,7 @@ public class Modify extends RegalAction {
 		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
 	    }
 
-	    if ("".equals(node.getAccessScheme())) {
+	    if ("public".equals(node.getAccessScheme())) {
 		addSet(node, "open_access");
 	    }
 	    if (node.hasUrn()) {
