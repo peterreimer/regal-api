@@ -15,7 +15,7 @@ import archive.fedora.XmlUtils;
 
 public class DataciteRecord {
     public String doi = null;
-    public String identifier = null;
+
     public Set<Pair<String, String>> creators = new HashSet<Pair<String, String>>();
     public List<Pair<String, String>> titles = new ArrayList<Pair<String, String>>();
     public String publisher = null;
@@ -50,10 +50,10 @@ public class DataciteRecord {
 		    "xsi:schemaLocation",
 		    "http://datacite.org/schema/kernel-2.2 http://schema.datacite.org/meta/kernel-2.2/metadata.xsd");
 
-	    if (identifier != null) {
+	    if (doi != null) {
 		Element i = doc.createElement("identifier");
 		i.setAttribute("identifierType", "DOI");
-		i.appendChild(doc.createTextNode(identifier));
+		i.appendChild(doc.createTextNode(doi));
 		root.appendChild(i);
 	    }
 	    if (creators != null && !creators.isEmpty()) {
