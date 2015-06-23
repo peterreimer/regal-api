@@ -76,6 +76,13 @@ public abstract class Vocabulary {
 	    + "createdBy";
 
     /**
+     * Used to identify the last modifier of the regal resource
+     * 
+     */
+    public final static String REL_LAST_MODIFIED_BY = HBZ_MODEL_NAMESPACE
+	    + "lastModifiedBy";
+
+    /**
      * An id once used to identify the object
      * 
      */
