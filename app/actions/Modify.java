@@ -633,7 +633,6 @@ public class Modify extends RegalAction {
 	    o.getIsDescribedBy().setDoi(node.getDoi());
 	    new Create().patchResource(node, o);
 	    String objectUrl = Globals.urnbase + node.getPid();
-
 	    String xml = new Transform().datacite(node);
 	    play.Logger.debug(xml);
 	    DataciteClient client = new DataciteClient();

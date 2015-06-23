@@ -896,13 +896,10 @@ public class Resource extends MyController {
     public static Promise<Result> addDoi(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
 	    try {
-
 		return getJsonResult(modify.addDoi(node));
-
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
 	    }
 	});
     }
-
 }
