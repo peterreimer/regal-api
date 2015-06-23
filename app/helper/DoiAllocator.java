@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import models.Globals;
+import models.Node;
 
 import org.elasticsearch.search.SearchHit;
 
@@ -53,8 +54,9 @@ public class DoiAllocator implements Runnable {
 		until);
 	List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
 		.collect(Collectors.toList());
-	play.Logger.info(new Modify().addDoiToAll(new Read().getNodes(ids),
-		until));
+	List<Node> nodes = new Read().getNodes(ids);
+	nodes.stream().forEach(n -> n.setLastModifiedBy("DoiAllocator"));
+	play.Logger.info(new Modify().addDoiToAll(nodes, until));
     }
 
 }

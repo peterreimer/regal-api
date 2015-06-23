@@ -40,7 +40,7 @@ public class BulkAction {
      * @param proc
      *            a function to apply to all pids
      */
-    public void execute(String namespace, ProcessNodes proc) {
+    public void execute(String namespace, String userId, ProcessNodes proc) {
 	chunks = new StringChunks() {
 	    public void onReady(Chunks.Out<String> out) {
 		setMessageQueue(out);
@@ -62,7 +62,8 @@ public class BulkAction {
      * @param proc
      *            a function to apply to all nodes
      */
-    public void executeOnPids(List<String> nodes, ProcessNodes proc) {
+    public void executeOnPids(List<String> nodes, String userId,
+	    ProcessNodes proc) {
 	chunks = new StringChunks() {
 	    public void onReady(Chunks.Out<String> out) {
 		setMessageQueue(out);
@@ -84,9 +85,11 @@ public class BulkAction {
      * @param proc
      *            a function to apply to all nodes
      */
-    public void executeOnNodes(List<Node> nodes, ProcessNodes proc) {
+    public void executeOnNodes(List<Node> nodes, String userId,
+	    ProcessNodes proc) {
 	chunks = new StringChunks() {
 	    public void onReady(Chunks.Out<String> out) {
+		nodes.stream().forEach(n -> n.setLastModifiedBy(userId));
 		setMessageQueue(out);
 		ExecutorService executorService = Executors
 			.newSingleThreadExecutor();

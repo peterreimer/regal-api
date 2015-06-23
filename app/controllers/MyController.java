@@ -264,7 +264,7 @@ public class MyController extends Controller {
     }
 
     interface Action {
-	Result exec();
+	Result exec(String userId);
     }
 
     /**
@@ -345,7 +345,7 @@ public class MyController extends Controller {
 		    if (!readMetadata_accessIsAllowed("private", role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -404,7 +404,7 @@ public class MyController extends Controller {
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -427,7 +427,7 @@ public class MyController extends Controller {
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
