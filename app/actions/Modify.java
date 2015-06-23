@@ -372,7 +372,7 @@ public class Modify extends RegalAction {
 		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
 	    }
 
-	    if ("".equals(node.getAccessScheme())) {
+	    if ("public".equals(node.getAccessScheme())) {
 		addSet(node, "open_access");
 	    }
 	    if (node.hasUrn()) {
@@ -609,37 +609,6 @@ public class Modify extends RegalAction {
 	return moveUp(copyMetadata(n, "title", ""));
     }
 
-    /**
-     * @param node
-     *            the node to add a conf to
-     * @param content
-     *            json representation of conf
-     * @return a message
-     */
-    public String updateConf(Node node, String content) {
-	try {
-	    if (content == null) {
-		throw new HttpArchiveException(406, node.getPid()
-			+ " You've tried to upload an empty string."
-			+ " This action is not supported."
-			+ " Use HTTP DELETE instead.\n");
-	    }
-	    play.Logger.info("Write to conf: " + content);
-	    File file = CopyUtils.copyStringToFile(content);
-	    if (node != null) {
-		node.setConfFile(file.getAbsolutePath());
-		play.Logger.info("Update node" + file.getAbsolutePath());
-		Globals.fedora.updateNode(node);
-	    }
-	    updateIndex(node.getPid());
-	    return node.getPid() + " webgatherer conf updated!";
-	} catch (RdfException e) {
-	    throw new HttpArchiveException(400, e);
-	} catch (IOException e) {
-	    throw new UpdateNodeException(e);
-	}
-    }
-
     @SuppressWarnings({ "serial" })
     class MetadataNotFoundException extends RuntimeException {
 	MetadataNotFoundException(Throwable e) {
@@ -654,6 +623,12 @@ public class Modify extends RegalAction {
 	}
     }
 
+    /**
+     * Creates a new doi identifier and registers to datacite
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
     public Map<String, Object> addDoi(Node node) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	String doi = node.getDoi();
@@ -685,11 +660,74 @@ public class Modify extends RegalAction {
 
     }
 
+    /**
+     * Updates an existing doi's metadata and url
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
+    public Map<String, Object> g(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	String doi = node.getDoi();
+	result.put("Doi", doi);
+	if (doi == null || doi.isEmpty()) {
+	    throw new HttpArchiveException(
+		    412,
+		    node.getPid()
+			    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
+	} else {
+	    String objectUrl = Globals.urnbase + node.getPid();
+	    String xml = new Transform().datacite(node);
+	    play.Logger.debug(xml);
+	    DataciteClient client = new DataciteClient();
+	    String registerMetadataResponse = client
+		    .registerMetadataAtDatacite(node, xml);
+	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
+	    String makeOaiSetResponse = makeOAISet(node);
+	    result.put("Metadata", xml);
+	    result.put("registerMetadataResponse", registerMetadataResponse);
+	    result.put("mintDoiResponse", mintDoiResponse);
+	    result.put("makeOaiSetResponse", makeOaiSetResponse);
+	    return result;
+	}
+    }
+
     private String createDoiIdentifier(Node node) {
 	String pid = node.getPid();
 	String id = pid.replace(node.getNamespace() + ":", "");
 	String doi = Globals.doiPrefix + "00" + id;
 	return doi;
+    }
+
+    /**
+     * @param node
+     *            the node to add a conf to
+     * @param content
+     *            json representation of conf
+     * @return a message
+     */
+    public String updateConf(Node node, String content) {
+	try {
+	    if (content == null) {
+		throw new HttpArchiveException(406, node.getPid()
+			+ " You've tried to upload an empty string."
+			+ " This action is not supported."
+			+ " Use HTTP DELETE instead.\n");
+	    }
+	    play.Logger.info("Write to conf: " + content);
+	    File file = CopyUtils.copyStringToFile(content);
+	    if (node != null) {
+		node.setConfFile(file.getAbsolutePath());
+		play.Logger.info("Update node" + file.getAbsolutePath());
+		Globals.fedora.updateNode(node);
+	    }
+	    updateIndex(node.getPid());
+	    return node.getPid() + " webgatherer conf updated!";
+	} catch (RdfException e) {
+	    throw new HttpArchiveException(400, e);
+	} catch (IOException e) {
+	    throw new UpdateNodeException(e);
+	}
     }
 
 }

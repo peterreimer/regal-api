@@ -16,16 +16,11 @@
  */
 package helper;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.ibm.icu.util.Calendar;
-import com.sun.media.jfxmedia.logging.Logger;
-
 import models.Gatherconf;
 import models.Node;
 import actions.Create;
@@ -63,9 +58,8 @@ public class Webgatherer implements Runnable {
      * @param conf
      *            user definde config
      * @return nextLaunch
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
+     * @throws Exception
+     *             can be IOException or Json related Exceptions
      */
     public static Date nextLaunch(Node n) throws Exception {
 	Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();

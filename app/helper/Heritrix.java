@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Comparator;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -41,13 +40,14 @@ import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 import play.Play;
 import models.Gatherconf;
-import models.Globals;
 
 /**
  * @author Jan Schnasse
  *
  */
 public class Heritrix {
+    public static String openwaybackLink = Play.application().configuration()
+	    .getString("regal-api.heritrix.openwaybackLink");
 
     class HeritrixWebclient {
 	public Client createWebclient() {
@@ -105,7 +105,7 @@ public class Heritrix {
 
     /**
      * @param name
-     * @return
+     * @return true if teardown did work
      */
     public boolean teardown(String name) {
 	try {
@@ -251,6 +251,11 @@ public class Heritrix {
 
     }
 
+    /**
+     * @param name
+     *            the jobs name e.g. the pid
+     * @return the servers directory where to store the data
+     */
     public File getCurrentCrawlDir(String name) {
 	File dir = new File(this.jobDir + "/" + name);
 	File[] files = dir.listFiles(file -> {
@@ -270,12 +275,21 @@ public class Heritrix {
 	return latest;
     }
 
+    /**
+     * @param latest
+     *            dir of the latest (most recent) job
+     * @return local path of the latest harvested warc
+     */
     public String findLatestWarc(File latest) {
 	play.Logger.debug(latest.getAbsolutePath() + "/warcs");
 	File warcDir = new File(latest.getAbsolutePath() + "/warcs");
 	return warcDir.listFiles()[0].getAbsolutePath();
     }
 
+    /**
+     * @param str
+     * @return
+     */
     public String getUriPath(String str) {
 	return str.replace(jobDir, "").replace(".open", "");
     }
@@ -303,6 +317,10 @@ public class Heritrix {
 	return new File(jobDir + "/" + name).exists();
     }
 
+    /**
+     * @param name
+     * @return pass the job status file
+     */
     public String getJobStatus(String name) {
 	try {
 	    WebResource resource = client.resource(restUrl + "/engine/job/"
@@ -315,6 +333,11 @@ public class Heritrix {
 	}
     }
 
+    /**
+     * @param name
+     * @param crawlDir
+     * @return
+     */
     public String getJobStatus(String name, String crawlDir) {
 	try {
 	    WebResource resource = client.resource(restUrl + "/engine/job/"

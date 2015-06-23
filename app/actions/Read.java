@@ -39,6 +39,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
+import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -49,7 +50,9 @@ import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import play.Logger;
 import archive.fedora.FedoraVocabulary;
@@ -449,8 +452,14 @@ public class Read extends RegalAction {
      */
     public String readConf(Node node) {
 	try {
-	    String conf = node.getConf();
-	    return conf;
+	    String confstring = node.getConf();
+	    ObjectMapper mapper = JsonUtil.mapper();
+	    Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
+	    String owDatestamp = new SimpleDateFormat("yyyyMMdd")
+		    .format(new Date());
+	    conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink
+		    + owDatestamp + "/" + conf.getUrl());
+	    return conf.toString();
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
 	} catch (Exception e) {
@@ -619,10 +628,10 @@ public class Read extends RegalAction {
 	result.put("type", node.getContentType());
 	result.put("pid",
 		node.getPid().substring(node.getNamespace().length() + 1));
-	result.put("catalogId", node.getLegacyId());	
+	result.put("catalogId", node.getLegacyId());
 	result.put("webgatherer", getGatherStatus(node));
-	/* unsure merge
-	 * result.put("urn", node.getUrn());
+	/*
+	 * unsure merge result.put("urn", node.getUrn());
 	 */
 	result.put("urn", node.getUrnFromMetadata());
 

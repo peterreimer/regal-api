@@ -51,6 +51,7 @@ public class Gatherconf {
     Interval interval;
     Date startDate;
     String localDir;
+    String openWaybackLink;
 
     /**
      * Create a new configuration for the webgatherer
@@ -62,6 +63,7 @@ public class Gatherconf {
 	interval = null;
 	startDate = null;
 	name = null;
+	openWaybackLink = null;
     }
 
     /**
@@ -180,7 +182,7 @@ public class Gatherconf {
 
     /**
      * @param json
-     *            a json represenation
+     *            a json representation
      * @return a new Gatherconf build from json
      * @throws JsonParseException
      * @throws JsonMappingException
@@ -190,5 +192,22 @@ public class Gatherconf {
     public static Gatherconf create(String json) throws JsonParseException,
 	    JsonMappingException, IOException {
 	return (Gatherconf) JsonUtil.mapper().readValue(json, Gatherconf.class);
+    }
+
+    /**
+     * Appropriate link to an openwayback instance to display the harvested warc
+     * 
+     * @param openWaybackLink
+     */
+    public void setOpenWaybackLink(String openWaybackLink) {
+	this.openWaybackLink = openWaybackLink;
+    }
+
+    /**
+     * @return allink to an openwayback instance that displays the harvested
+     *         warc
+     */
+    public String getOpenWaybackLink() {
+	return openWaybackLink;
     }
 }
