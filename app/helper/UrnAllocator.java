@@ -18,11 +18,11 @@ package helper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 import models.Globals;
+import models.Node;
 
 import org.elasticsearch.search.SearchHit;
 
@@ -58,7 +58,9 @@ public class UrnAllocator implements Runnable {
 		until);
 	List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
 		.collect(Collectors.toList());
-	play.Logger.info(new Modify().addUrnToAll(new Read().getNodes(ids),
-		Globals.urnSnid, until));
+	List<Node> nodes = new Read().getNodes(ids);
+	nodes.stream().forEach(n -> n.setLastModifiedBy("UrnAllocator"));
+	play.Logger.info(new Modify()
+		.addUrnToAll(nodes, Globals.urnSnid, until));
     }
 }

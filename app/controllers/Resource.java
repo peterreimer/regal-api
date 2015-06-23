@@ -97,7 +97,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Promise<Result> listNodes(@QueryParam("ids") String ids) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		List<String> is = Arrays.asList(ids.split(","));
 		return getJsonResult(read.getNodes(is));
@@ -138,7 +138,7 @@ public class Resource extends MyController {
 
     private static Promise<Result> jsonList(String namespace,
 	    String contentType, int from, int until) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		List<Node> nodes = read.listRepo(contentType, namespace, from,
 			until);
@@ -153,7 +153,7 @@ public class Resource extends MyController {
 
     private static Promise<Result> htmlList(String namespace,
 	    String contentType, int from, int until) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response()
@@ -292,11 +292,11 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "patchResources", value = "patchResources", notes = "Applies the PATCH object to the resource and to all child resources", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> patchResources(@PathParam("pid") String pid) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    RegalObject object = getRegalObject(request().body().asJson());
 	    List<Node> list = Globals.fedora.listComplexObject(pid);
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		return create.patchResources(nodes, object);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -329,7 +329,7 @@ public class Resource extends MyController {
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> createResource(
 	    @PathParam("namespace") String namespace) {
-	return new CreateAction().call(() -> {
+	return new CreateAction().call((userId) -> {
 	    RegalObject object = getRegalObject(request().body().asJson());
 	    Node newNode = create.createResource(namespace, object);
 	    String result = newNode.getPid() + " created/updated!";
@@ -442,10 +442,10 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResource(@PathParam("pid") String pid,
 	    @QueryParam("purge") String purge) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Node> list = Globals.fedora.listComplexObject(pid);
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		if ("true".equals(purge)) {
 		    return delete.purge(nodes);
 		}
@@ -490,9 +490,9 @@ public class Resource extends MyController {
     public static Promise<Result> deleteResources(
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("purge") String purge) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(namespace, nodes -> {
+	    bulk.execute(namespace, userId, nodes -> {
 		if ("true".equals(purge)) {
 		    return delete.purge(nodes);
 		}
@@ -780,7 +780,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "flattenAll", value = "flattenAll", notes = "flatten is applied to all descendents of type contentType or type \"file\"(default).", response = String.class, httpMethod = "POST")
     public static Promise<Result> flattenAll(@PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Node> list = null;
 	    if (contentType != null && !contentType.isEmpty()) {
 		list = Globals.fedora.listComplexObject(pid).stream()
@@ -792,7 +792,7 @@ public class Resource extends MyController {
 			.collect(Collectors.toList());
 	    }
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		return modify.flattenAll(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -804,7 +804,7 @@ public class Resource extends MyController {
     public static Promise<Result> deleteDescendent(
 	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Node> list = null;
 	    if (contentType != null && !contentType.isEmpty()) {
 		list = Globals.fedora.listComplexObject(pid).stream()
@@ -814,7 +814,7 @@ public class Resource extends MyController {
 		list = Globals.fedora.listComplexObject(pid);
 	    }
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		return delete.delete(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -904,7 +904,7 @@ public class Resource extends MyController {
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("contentType") String contentType,
 	    @QueryParam("from") int from, @QueryParam("until") int until) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		String ns = namespace;
 		if (ns.isEmpty()) {
@@ -941,13 +941,10 @@ public class Resource extends MyController {
     public static Promise<Result> addDoi(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
 	    try {
-
 		return getJsonResult(modify.addDoi(node));
-
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
 	    }
 	});
     }
-
 }

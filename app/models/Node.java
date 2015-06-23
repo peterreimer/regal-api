@@ -99,6 +99,7 @@ public class Node {
     private String contextDocumentUri = null;
 
     private String createdBy = null;
+    private String lastModifiedBy = null;
     private String importedFrom = null;
     private String legacyId = null;
     private String catalogId = null;
@@ -919,6 +920,8 @@ public class Node {
 	    aboutMap.put("doi", getDoi());
 	if (urn != null)
 	    aboutMap.put("urn", getUrn());
+	if (lastModifiedBy != null)
+	    aboutMap.put("lastModifiedBy", getLastModifiedBy());
 	aboutMap.put("modified", getLastModified());
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
@@ -1413,5 +1416,21 @@ public class Node {
 	Map<String, Object> map = getLd();
 	map.remove("@context");
 	return map;
+    }
+
+    /**
+     * @param userId
+     * @return this
+     */
+    public Node setLastModifiedBy(String userId) {
+	lastModifiedBy = userId;
+	return this;
+    }
+
+    /**
+     * @return user id of last modifying user
+     */
+    public String getLastModifiedBy() {
+	return lastModifiedBy;
     }
 }
