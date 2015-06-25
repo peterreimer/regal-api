@@ -52,9 +52,9 @@ public class Heritrix {
     class HeritrixWebclient {
 	public Client createWebclient() {
 	    String keystoreLoc = Play.application().configuration()
-		    .getString("regal-api.heritrix.keystoreloc");
+		    .getString("regal-api.keystoreLocation");
 	    String keystorePass = Play.application().configuration()
-		    .getString("regal-api.heritrix.keystorepwd");
+		    .getString("regal-api.keystorePassword");
 	    String heritrixUser = Play.application().configuration()
 		    .getString("regal-api.heritrix.user");
 	    String heritrixPwd = Play.application().configuration()
