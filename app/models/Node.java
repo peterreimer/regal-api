@@ -1366,6 +1366,9 @@ public class Node {
 	return this;
     }
 
+    /**
+     * @return a map without the context document
+     */
     public Map<String, Object> getLdWithoutContext() {
 	Map<String, Object> map = getLd();
 	map.remove("@context");
@@ -1387,5 +1390,13 @@ public class Node {
      */
     public String getLastModifiedBy() {
 	return lastModifiedBy;
+    }
+
+    /**
+     * @return returns true if doi is not null and not empty
+     */
+    public boolean hasDoi() {
+	String doi = this.getDoi();
+	return doi != null && !doi.isEmpty();
     }
 }
