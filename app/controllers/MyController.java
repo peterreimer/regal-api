@@ -112,6 +112,9 @@ public class MyController extends Controller {
      */
     public final static String DATA_ACCESSOR_REMOTE = "remote";
 
+    /**
+     * a mapper for all
+     */
     public static ObjectMapper mapper = JsonUtil.mapper();
 
     static Read read = new Read();
@@ -375,12 +378,12 @@ public class MyController extends Controller {
 		    Node node = null;
 		    try {
 			node = read.internalReadNode(pid);
+			node.setLastModifiedBy(userId);
 		    } catch (Exception e) {
 			play.Logger.debug(
 				"Try to modify resource that can not be read!",
 				e);
 		    }
-		    node.setLastModifiedBy(userId);
 		    return ca.exec(node);
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
