@@ -196,6 +196,7 @@ public class Read extends RegalAction {
      */
     public Map<String, Object> getPartsAsTree(Node node) {
 	Map<String, Object> nm = node.getLdWithoutContext();
+	@SuppressWarnings("unchecked")
 	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
 		.get("hasPart");
 	List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
@@ -635,6 +636,12 @@ public class Read extends RegalAction {
 		.collect(Collectors.toList());
     }
 
+    /**
+     * @param namespace
+     * @param from
+     * @param until
+     * @return a list of elasticsearch hits of objects within the given range
+     */
     public List<SearchHit> list(String namespace, Date from, Date until) {
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	String f = dateFormat.format(from);

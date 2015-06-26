@@ -31,8 +31,6 @@ import actions.Read;
 
 import com.ibm.icu.util.Calendar;
 
-import controllers.MyUtils;
-
 /**
  * @author Jan Schnasse
  *

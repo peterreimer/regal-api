@@ -369,6 +369,10 @@ public class XmlUtils {
 
     }
 
+    /**
+     * @param doc
+     * @return a xml string representing the passed document
+     */
     public static String docToString(Document doc) {
 	try {
 	    DOMSource domSource = new DOMSource(doc);

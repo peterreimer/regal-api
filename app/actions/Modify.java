@@ -329,6 +329,13 @@ public class Modify extends RegalAction {
 		+ contentType + " is not allowed to carry urn.";
     }
 
+    /**
+     * @param nodes
+     *            a list of nodes
+     * @param fromBefore
+     *            only nodes from before the given Date will be modified
+     * @return a message for client
+     */
     public String addDoiToAll(List<Node> nodes, Date fromBefore) {
 	return apply(nodes, n -> addDoi(n, fromBefore));
     }
