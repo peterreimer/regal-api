@@ -329,6 +329,13 @@ public class Modify extends RegalAction {
 		+ contentType + " is not allowed to carry urn.";
     }
 
+    /**
+     * @param nodes
+     *            a list of nodes
+     * @param fromBefore
+     *            only nodes from before the given Date will be modified
+     * @return a message for client
+     */
     public String addDoiToAll(List<Node> nodes, Date fromBefore) {
 	return apply(nodes, n -> addDoi(n, fromBefore));
     }
@@ -669,7 +676,7 @@ public class Modify extends RegalAction {
      * @param node
      * @return a key value structure as feedback to the client
      */
-    public Map<String, Object> g(Node node) {
+    public Map<String, Object> updateDoi(Node node) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	String doi = node.getDoi();
 	result.put("Doi", doi);

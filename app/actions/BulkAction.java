@@ -37,6 +37,8 @@ public class BulkAction {
     /**
      * @param namespace
      *            a namespace to retrieve all pids from
+     * @param userId
+     *            id of user who modifies
      * @param proc
      *            a function to apply to all pids
      */
@@ -59,6 +61,8 @@ public class BulkAction {
     /**
      * @param nodes
      *            a list of node pids
+     * @param userId
+     *            id of a user who modifies
      * @param proc
      *            a function to apply to all nodes
      */
@@ -82,6 +86,8 @@ public class BulkAction {
     /**
      * @param nodes
      *            a list of nodes
+     * @param userId
+     *            id of user who modifies
      * @param proc
      *            a function to apply to all nodes
      */

@@ -16,7 +16,6 @@
  */
 package helper;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +46,8 @@ public class DoiAllocator implements Runnable {
 	cal.add(Calendar.DATE, -14);
 	Date from = cal.getTime();
 
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	String d = dateFormat.format(until);
+	// SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	// String d = dateFormat.format(until);
 
 	List<SearchHit> hits = new Read().list(Globals.namespaces[0], from,
 		until);

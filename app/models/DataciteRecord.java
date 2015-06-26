@@ -1,12 +1,40 @@
+/*
+ * Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+/**
+ * @author Jan Schnasse
+ *
+ */
 public class DataciteRecord {
     public String doi = null;
-    public String identifier = null;
-    public List<Pair<String, String>> creators = new ArrayList<Pair<String, String>>();
+
+    public Set<Pair<String, String>> creators = new HashSet<Pair<String, String>>();
     public List<Pair<String, String>> titles = new ArrayList<Pair<String, String>>();
     public String publisher = null;
     public String publicationYear = null;
@@ -23,110 +51,130 @@ public class DataciteRecord {
     }
 
     public String toString() {
-	StringBuilder xml = new StringBuilder();
-	xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-	xml.append("<resource xmlns=\"http://datacite.org/schema/kernel-2.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://datacite.org/schema/kernel-2.2 http://schema.datacite.org/meta/kernel-2.2/metadata.xsd\">");
-	xml.append("<identifier identifierType=\"DOI\">" + doi
-		+ "</identifier>");
-	if (creators != null && !creators.isEmpty()) {
-	    xml.append("<creators>");
-	    for (Pair<String, String> c : creators) {
-		xml.append("<creator>");
-		xml.append("<creatorName>");
-		xml.append(c.getLeft());
-		xml.append("</creatorName>");
-		xml.append("</creator>");
+	try {
+	    DocumentBuilderFactory.newInstance();
+	    DocumentBuilderFactory factory = DocumentBuilderFactory
+		    .newInstance();
+	    factory.setNamespaceAware(true);
+	    factory.isValidating();
+	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
+	    Document doc = docBuilder.newDocument();
+
+	    Element root = doc.createElement("resource");
+	    root.setAttribute("xmlns", "http://datacite.org/schema/kernel-2.2");
+	    root.setAttribute("xmlns:xsi",
+		    "http://www.w3.org/2001/XMLSchema-instance");
+	    root.setAttribute(
+		    "xsi:schemaLocation",
+		    "http://datacite.org/schema/kernel-2.2 http://schema.datacite.org/meta/kernel-2.2/metadata.xsd");
+
+	    if (doi != null) {
+		Element i = doc.createElement("identifier");
+		i.setAttribute("identifierType", "DOI");
+		i.appendChild(doc.createTextNode(doi));
+		root.appendChild(i);
 	    }
-	    xml.append("</creators>");
-	}
-	if (titles != null && !titles.isEmpty()) {
-	    xml.append("<titles>");
-	    for (Pair<String, String> c : titles) {
-		xml.append("<title>");
-		xml.append(c.getLeft());
-		xml.append("</title>");
-	    }
-	    xml.append("</titles>");
-	}
-	if (publisher != null && !publisher.isEmpty()) {
-	    xml.append("<publisher>");
-	    xml.append(publisher);
-	    xml.append("</publisher>");
-	}
-	if (publicationYear != null && !publicationYear.isEmpty()) {
-	    xml.append("<publicationYear>");
-	    xml.append(publicationYear);
-	    xml.append("</publicationYear>");
-	}
-	if (subjects != null && !subjects.isEmpty()) {
-	    xml.append("<subjects>");
-	    for (Pair<String, String> c : subjects) {
-		if (c.getRight().isEmpty()) {
-		    xml.append("<subject>");
-		} else {
-		    xml.append("<subject subjectScheme=\"" + c.getRight()
-			    + "\">");
+	    if (creators != null && !creators.isEmpty()) {
+		Element cs = doc.createElement("creators");
+		for (Pair<String, String> c : creators) {
+		    Element cr = doc.createElement("creator");
+		    Element cn = doc.createElement("creatorName");
+
+		    cn.appendChild(doc.createTextNode(c.getLeft()));
+		    cr.appendChild(cn);
+		    cs.appendChild(cr);
 		}
-
-		xml.append(c.getLeft());
-		xml.append("</subject>");
+		root.appendChild(cs);
 	    }
-	    xml.append("</subjects>");
-	}
 
-	if (dates != null && !dates.isEmpty()) {
-	    xml.append("<dates>");
-	    for (Pair<String, String> c : dates) {
-		if (c.getRight().isEmpty()) {
-		    xml.append("<date>");
-		} else {
-		    xml.append("<date dateType=\"" + c.getRight() + "\">");
+	    if (titles != null && !titles.isEmpty()) {
+		Element ts = doc.createElement("titles");
+		for (Pair<String, String> c : titles) {
+		    Element t = doc.createElement("title");
+		    t.appendChild(doc.createTextNode(c.getLeft()));
+		    ts.appendChild(t);
 		}
-
-		xml.append(c.getLeft());
-		xml.append("</date>");
+		root.appendChild(ts);
 	    }
-	    xml.append("</dates>");
-	}
-	if (language != null && !language.isEmpty()) {
-	    xml.append("<language>");
-	    xml.append(language);
-	    xml.append("</language>");
-	}
-	if (alternateIdentifiers != null && !alternateIdentifiers.isEmpty()) {
-	    xml.append("<alternateIdentifiers>");
-	    for (Pair<String, String> c : alternateIdentifiers) {
-		if (c.getRight().isEmpty()) {
-		    xml.append("<alternateIdentifier>");
-		} else {
-		    xml.append("<alternateIdentifier alternateIdentifierType=\""
-			    + c.getRight() + "\">");
+	    if (publisher != null && !publisher.isEmpty()) {
+		Element p = doc.createElement("publisher");
+		p.appendChild(doc.createTextNode(publisher));
+		root.appendChild(p);
+	    }
+	    if (publicationYear != null && !publicationYear.isEmpty()) {
+		Element py = doc.createElement("publicationYear");
+		py.appendChild(doc.createTextNode(publicationYear));
+		root.appendChild(py);
+	    }
+	    if (subjects != null && !subjects.isEmpty()) {
+		Element s = doc.createElement("subjects");
+		for (Pair<String, String> c : subjects) {
+		    Element sub = doc.createElement("subject");
+		    if (!c.getRight().isEmpty()) {
+			sub.setAttribute("subjectScheme", c.getRight());
+		    }
+
+		    sub.appendChild(doc.createTextNode(c.getLeft()));
+		    s.appendChild(sub);
 		}
+		root.appendChild(s);
+	    }
 
-		xml.append(c.getLeft());
-		xml.append("</alternateIdentifier>");
+	    if (dates != null && !dates.isEmpty()) {
+		Element ds = doc.createElement("dates");
+
+		for (Pair<String, String> c : dates) {
+		    Element d = doc.createElement("date");
+		    if (!c.getRight().isEmpty()) {
+			d.setAttribute("dateType", c.getRight());
+		    }
+
+		    d.appendChild(doc.createTextNode(c.getLeft()));
+		    ds.appendChild(d);
+		}
+		root.appendChild(ds);
 	    }
-	    xml.append("</alternateIdentifiers>");
-	}
-	if (sizes != null && !sizes.isEmpty()) {
-	    xml.append("<sizes>");
-	    for (Pair<String, String> c : sizes) {
-		xml.append("<size>");
-		xml.append(c.getLeft());
-		xml.append("</size>");
+	    if (language != null && !language.isEmpty()) {
+		Element l = doc.createElement("language");
+		l.appendChild(doc.createTextNode(language));
+		root.appendChild(l);
 	    }
-	    xml.append("</sizes>");
-	}
-	if (formats != null && !formats.isEmpty()) {
-	    xml.append("<formats>");
-	    for (Pair<String, String> c : formats) {
-		xml.append("<format>");
-		xml.append(c.getLeft());
-		xml.append("</format>");
+	    if (alternateIdentifiers != null && !alternateIdentifiers.isEmpty()) {
+		Element ais = doc.createElement("alternateIdentifiers");
+		for (Pair<String, String> c : alternateIdentifiers) {
+		    Element ai = doc.createElement("alternateIdentifier");
+		    if (!c.getRight().isEmpty()) {
+			ai.setAttribute("alternateIdentifierType", c.getRight());
+		    }
+
+		    ai.appendChild(doc.createTextNode(c.getLeft()));
+		    ais.appendChild(ai);
+		}
+		root.appendChild(ais);
 	    }
-	    xml.append("</formats>");
+	    if (sizes != null && !sizes.isEmpty()) {
+		Element sizs = doc.createElement("sizes");
+		for (Pair<String, String> c : sizes) {
+		    Element siz = doc.createElement("size");
+
+		    siz.appendChild(doc.createTextNode(c.getLeft()));
+		    sizs.appendChild(siz);
+		}
+		root.appendChild(sizs);
+	    }
+	    if (formats != null && !formats.isEmpty()) {
+		Element forms = doc.createElement("formats");
+		for (Pair<String, String> c : formats) {
+		    Element form = doc.createElement("format");
+		    form.appendChild(doc.createTextNode(c.getLeft()));
+		    forms.appendChild(form);
+		}
+		root.appendChild(forms);
+	    }
+	    doc.appendChild(root);
+	    return archive.fedora.XmlUtils.docToString(doc);
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
 	}
-	xml.append("</resource>");
-	return xml.toString();
     }
 }

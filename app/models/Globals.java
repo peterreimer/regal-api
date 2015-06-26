@@ -149,6 +149,9 @@ public class Globals {
     public static String urnTask = Play.application().configuration()
 	    .getString("regal-api.urnTask");
 
+    /**
+     * This task performs calls against datacite doi api
+     */
     public static String doiTask = Play.application().configuration()
 	    .getString("regal-api.doiTask");
 

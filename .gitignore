@@ -14,3 +14,6 @@ regal-default.ntriple
 log
 .cache
 data
+.settings
+.classpath
+bin

@@ -203,7 +203,6 @@ public class FedoraFacade {
 	    return me;
     }
 
-
     /**
      * @param node
      */
@@ -235,10 +234,10 @@ public class FedoraFacade {
 	    utils.updateRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();
+	    play.Logger.debug(node.toString());
 	    throw new CreateNodeException(500, e);
 	}
     }
-
 
     /**
      * @param namespace
@@ -254,7 +253,6 @@ public class FedoraFacade {
 	createNode(rootObject);
 	return rootObject;
     }
-
 
     /**
      * @param pid
@@ -400,7 +398,6 @@ public class FedoraFacade {
 	}
     }
 
-
     /**
      * @param rdfQuery
      * @param queryFormat
@@ -462,7 +459,6 @@ public class FedoraFacade {
 	    unlinkParent(rootPID);
 	    new PurgeObject(rootPID).execute();
 	} catch (FedoraClientException e) {
-
 	    throw new DeleteException(e.getStatus(), e);
 	}
     }
@@ -486,7 +482,6 @@ public class FedoraFacade {
     public boolean nodeExists(String pid) {
 	return utils.nodeExists(pid);
     }
-
 
     /**
      * @param cms
@@ -545,25 +540,6 @@ public class FedoraFacade {
 	DublinCoreHandler.readDcToNode(node, in, dcNamespace);
     }
 
-    /**
-     * @param rootPID
-     * @return
-     */
-    public List<Node> deleteComplexObject(String rootPID) {
-	if (!nodeExists(rootPID)) {
-	    throw new NodeNotFoundException(404, "Can not find: " + rootPID);
-	}
-	List<Node> list = listComplexObject(rootPID);
-	for (Node n : list) {
-	    deleteNode(n.getPid());
-	}
-	return list;
-    }
-
-    /**
-     * @param rootPID
-     * @return
-     */
     public List<Node> listComplexObject(String rootPID) {
 	List<Node> result = new ArrayList<Node>();
 	if (!nodeExists(rootPID)) {

@@ -36,7 +36,7 @@ public class Delete extends RegalAction {
      *            a node to delete
      * @return a message
      */
-    public String purge(Node n) {
+    private String purge(Node n) {
 	StringBuffer message = new StringBuffer();
 	message.append(new Index().remove(n));
 	removeNodeFromCache(n.getPid());
@@ -61,7 +61,7 @@ public class Delete extends RegalAction {
      *            a node to delete
      * @return a message
      */
-    public String delete(Node n) {
+    private String delete(Node n) {
 	StringBuffer message = new StringBuffer();
 	message.append(new Index().remove(n));
 	removeNodeFromCache(n.getPid());
@@ -77,7 +77,44 @@ public class Delete extends RegalAction {
      * @return a message
      */
     public String delete(List<Node> nodes) {
-	return apply(nodes, n -> delete(n));
+	/*- 
+	 * Special case: if a single node should be deleted.
+	 *	- check whether the node has urn or doi
+	 *	- if not: purge!
+	 *	- if : mark as deleted!
+	 */
+	if (nodes.size() == 1) {
+	    Node n = nodes.get(0);
+	    if (!nodesArePersistent(nodes)) {
+		return purge(n);
+	    } else {
+		return delete(n);
+	    }
+	} else {
+	    /*- 
+	     * Normal case: complexe object should be deleted.
+	     * 	- check whether all nodes have doi or urn
+	     * 	- if not: purge all!
+	     *  - if: throw exception!
+	     */
+	    if (!nodesArePersistent(nodes)) {
+		return purge(nodes);
+	    }
+	}
+
+	throw new HttpArchiveException(
+		405,
+		"At least one of the child objects has a urn or doi. Therefore the whole structure will not be deleted.");
+    }
+
+    private boolean nodesArePersistent(List<Node> nodes) {
+	for (Node n : nodes) {
+	    if (n.hasUrn())
+		return true;
+	    if (n.hasDoi())
+		return true;
+	}
+	return false;
     }
 
     /**

@@ -916,8 +916,6 @@ public class Node {
 	    aboutMap.put("importedFrom", getImportedFrom());
 	if (name != null)
 	    aboutMap.put("name", getName());
-	if (doi != null)
-	    aboutMap.put("doi", getDoi());
 	if (urn != null)
 	    aboutMap.put("urn", getUrn());
 	if (lastModifiedBy != null)
@@ -926,6 +924,8 @@ public class Node {
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
 	rdf.put("isDescribedBy", aboutMap);
+	if (doi != null)
+	    rdf.put("doi", getDoi());
 	if (parentPid != null)
 	    rdf.put("parentPid", parentPid);
 
@@ -1056,7 +1056,7 @@ public class Node {
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#doi");
-	pmap.put("label", "Doi");
+	pmap.put("label", "Regal-Doi");
 	cmap.put("doi", pmap);
 
 	pmap = new HashMap<String, Object>();
@@ -1412,6 +1412,9 @@ public class Node {
 	return this;
     }
 
+    /**
+     * @return a map without the context document
+     */
     public Map<String, Object> getLdWithoutContext() {
 	Map<String, Object> map = getLd();
 	map.remove("@context");
@@ -1432,5 +1435,13 @@ public class Node {
      */
     public String getLastModifiedBy() {
 	return lastModifiedBy;
+    }
+
+    /**
+     * @return returns true if doi is not null and not empty
+     */
+    public boolean hasDoi() {
+	String doi = this.getDoi();
+	return doi != null && !doi.isEmpty();
     }
 }

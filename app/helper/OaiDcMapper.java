@@ -101,22 +101,27 @@ public class OaiDcMapper {
 	    } else if ("http://purl.org/dc/terms/issued".equals(l
 		    .getPredicate())) {
 		data.addDate(l.getObject());
-	    } else if ("http://purl.org/dc/elements/1.1/contributor".equals(l
-		    .getPredicate())) {
-		data.addContributor(l.getObjectLabel());
-	    } else if ("http://purl.org/dc/elements/1.1/creator".equals(l
-		    .getPredicate())) {
-		data.addCreator(l.getObjectLabel());
-	    } else if ("http://purl.org/dc/terms/contributor".equals(l
+	    }
+	    // else if ("http://purl.org/dc/elements/1.1/contributor".equals(l
+	    // .getPredicate())) {
+	    // data.addContributor(l.getObject());
+	    // }
+	    // else if ("http://purl.org/dc/elements/1.1/creator".equals(l
+	    // .getPredicate())) {
+	    // data.addCreator(l.getObject());
+	    // }
+	    else if ("http://purl.org/dc/terms/contributor".equals(l
 		    .getPredicate())) {
 		data.addContributor(l.getObjectLabel());
 	    } else if ("http://purl.org/dc/terms/creator".equals(l
 		    .getPredicate())) {
 		data.addCreator(l.getObjectLabel());
-	    } else if ("http://purl.org/dc/elements/1.1/publisher".equals(l
-		    .getPredicate())) {
-		data.addPublisher(l.getObject());
-	    } else if ("http://purl.org/lobid/lv#urn".equals(l.getPredicate())) {
+	    }
+	    // else if ("http://purl.org/dc/elements/1.1/publisher".equals(l
+	    // .getPredicate())) {
+	    // data.addPublisher(l.getObject());
+	    // }
+	    else if ("http://purl.org/lobid/lv#urn".equals(l.getPredicate())) {
 		data.addIdentifier(l.getObject(), "hbz:urn");
 	    } else if ("http://purl.org/lobid/lv#hbzID"
 		    .equals(l.getPredicate())) {
@@ -124,11 +129,13 @@ public class OaiDcMapper {
 	    } else if ("http://purl.org/ontology/bibo/isbn".equals(l
 		    .getPredicate())) {
 		data.addIdentifier(l.getObject(), "hbz:isbn");
-	    } else if ("http://purl.org/dc/elements/1.1/subject".equals(l
-		    .getPredicate())) {
-		data.addSubject(l.getObjectLabel());
-	    } else if ("http://purl.org/dc/terms/subject".equals(l
-		    .getPredicate())) {
+	    }
+	    // else if ("http://purl.org/dc/elements/1.1/subject".equals(l
+	    // .getPredicate())) {
+	    // data.addSubject(l.getObject());
+	    // }
+	    else if ("http://purl.org/dc/terms/subject"
+		    .equals(l.getPredicate())) {
 		data.addSubject(l.getObjectLabel());
 	    } else if ("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 		    .equals(l.getPredicate())) {
@@ -142,6 +149,9 @@ public class OaiDcMapper {
 		} else if ("http://purl.org/lobid/lv#ArchivedWebPage".equals(l
 			.getObject())) {
 		    data.addType("doc-type:Website");
+		} else if ("http://purl.org/ontology/bibo/Thesis".equals(l
+			.getObject())) {
+		    data.addType("doc-type:doctoralThesis");
 		}
 	    }
 	}
