@@ -897,6 +897,23 @@ public class Resource extends MyController {
 	return new ModifyAction().call(pid, node -> {
 	    try {
 		return getJsonResult(modify.addDoi(node));
+	    } catch (HttpArchiveException e) {
+		return HtmlMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
+    public static Promise<Result> updateDoi(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+
+		return getJsonResult(modify.updateDoi(node));
+
+	    } catch (HttpArchiveException e) {
+		return HtmlMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
 	    }

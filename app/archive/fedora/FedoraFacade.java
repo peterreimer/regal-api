@@ -224,6 +224,7 @@ class FedoraFacade implements FedoraInterface {
 	    utils.updateRelsExt(node);
 	} catch (Exception e) {
 	    e.printStackTrace();
+	    play.Logger.debug(node.toString());
 	    throw new CreateNodeException(500, e);
 	}
     }
@@ -398,7 +399,6 @@ class FedoraFacade implements FedoraInterface {
 	    unlinkParent(rootPID);
 	    new PurgeObject(rootPID).execute();
 	} catch (FedoraClientException e) {
-
 	    throw new DeleteException(e.getStatus(), e);
 	}
     }
@@ -444,17 +444,6 @@ class FedoraFacade implements FedoraInterface {
 
     public void readDcToNode(Node node, InputStream in, String dcNamespace) {
 	DublinCoreHandler.readDcToNode(node, in, dcNamespace);
-    }
-
-    public List<Node> deleteComplexObject(String rootPID) {
-	if (!nodeExists(rootPID)) {
-	    throw new NodeNotFoundException(404, "Can not find: " + rootPID);
-	}
-	List<Node> list = listComplexObject(rootPID);
-	for (Node n : list) {
-	    deleteNode(n.getPid());
-	}
-	return list;
     }
 
     public List<Node> listComplexObject(String rootPID) {
