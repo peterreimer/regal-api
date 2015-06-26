@@ -165,13 +165,6 @@ public interface FedoraInterface {
     public List<String> findNodes(String searchTerm);
 
     /**
-     * @param pid
-     *            The pid that must be deleted
-     * @return The pid that has been deleted
-     */
-    public List<Node> deleteComplexObject(String pid);
-
-    /**
      * @param namespace
      *            The namespace of the new object
      * @return The new created object.
