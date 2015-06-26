@@ -229,11 +229,12 @@ public class Modify extends RegalAction {
      *            usually the namespace
      * @param snid
      *            the urn subnamespace id e.g."hbz:929:02"
+     * @param userId
      * @return the urn
      */
-    public String addUrn(String id, String namespace, String snid) {
+    public String addUrn(String id, String namespace, String snid, String userId) {
 	String pid = namespace + ":" + id;
-	return addUrn(pid, snid);
+	return addUrn(pid, snid, userId);
     }
 
     /**
@@ -245,8 +246,9 @@ public class Modify extends RegalAction {
      *            the urn subnamespace id e.g."hbz:929:02"
      * @return the urn
      */
-    String addUrn(String pid, String snid) {
+    String addUrn(String pid, String snid, String userId) {
 	Node node = new Read().readNode(pid);
+	node.setLastModifiedBy(userId);
 	return addUrn(node, snid);
     }
 
@@ -283,15 +285,17 @@ public class Modify extends RegalAction {
      *            the object
      * @param snid
      *            the urn subnamespace id
+     * @param userId
      * @return the urn
      */
-    public String replaceUrn(Node node, String snid) {
+    public String replaceUrn(Node node, String snid, String userId) {
 	String subject = node.getPid();
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = node.getMetadata();
 	String urn = generateUrn(subject, snid);
 	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
 	node.addTransformer(new Transformer("epicur"));
+	node.setLastModifiedBy(userId);
 	updateMetadata(node, metadata);
 	return "Update " + subject + " metadata " + metadata;
     }
@@ -633,7 +637,6 @@ public class Modify extends RegalAction {
 	    o.getIsDescribedBy().setDoi(node.getDoi());
 	    new Create().patchResource(node, o);
 	    String objectUrl = Globals.urnbase + node.getPid();
-
 	    String xml = new Transform().datacite(node);
 	    play.Logger.debug(xml);
 	    DataciteClient client = new DataciteClient();

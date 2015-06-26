@@ -199,6 +199,7 @@ public class Create extends RegalAction {
      * 
      * @param cms
      *            a List of Transformers
+     * @param userId
      * @return a message
      */
     public String contentModelsInit(List<Transformer> cms) {

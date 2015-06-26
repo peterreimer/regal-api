@@ -264,7 +264,7 @@ public class MyController extends Controller {
     }
 
     interface Action {
-	Result exec();
+	Result exec(String userId);
     }
 
     /**
@@ -345,7 +345,7 @@ public class MyController extends Controller {
 		    if (!readMetadata_accessIsAllowed("private", role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -362,10 +362,13 @@ public class MyController extends Controller {
     public static class ModifyAction {
 	Promise<Result> call(String pid, NodeAction ca) {
 	    return Promise.promise(() -> {
+		String userId = "0";
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
-		    play.Logger.debug("Try to access with role: " + role);
+		    userId = request().getHeader("UserId");
+		    play.Logger.debug("Try to access with role: " + role
+			    + "and user id " + userId);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
@@ -373,15 +376,18 @@ public class MyController extends Controller {
 		    try {
 			node = read.internalReadNode(pid);
 		    } catch (Exception e) {
-			// play.Logger.debug("", e);
+			play.Logger.debug(
+				"Try to modify resource that can not be read!",
+				e);
+		    }
+		    node.setLastModifiedBy(userId);
+		    return ca.exec(node);
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
 		}
-		return ca.exec(node);
-	    } catch (HttpArchiveException e) {
-		return JsonMessage(new Message(e, e.getCode()));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
-	})  ;
+	    });
 	}
     }
 
@@ -398,7 +404,7 @@ public class MyController extends Controller {
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -421,7 +427,7 @@ public class MyController extends Controller {
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {

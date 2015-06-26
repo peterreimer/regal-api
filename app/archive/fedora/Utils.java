@@ -39,6 +39,7 @@ import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
 import static archive.fedora.Vocabulary.REL_CATALOG_ID;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
+import static archive.fedora.Vocabulary.REL_LAST_MODIFIED_BY;
 import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_LEGACY_ID;
@@ -436,6 +437,9 @@ public class Utils {
 			} else if (REL_CREATED_BY.equals(pred)) {
 			    node.setCreatedBy(link.getObject());
 			    continue;
+			} else if (REL_LAST_MODIFIED_BY.equals(pred)) {
+			    node.setLastModifiedBy(link.getObject());
+			    continue;
 			} else if (REL_LEGACY_ID.equals(pred)) {
 			    node.setLegacyId(link.getObject());
 			    continue;
@@ -643,6 +647,10 @@ public class Utils {
 	link = new Link();
 	link.setObject(node.getCreatedBy(), true);
 	link.setPredicate(REL_CREATED_BY);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getLastModifiedBy(), true);
+	link.setPredicate(REL_LAST_MODIFIED_BY);
 	node.addRelation(link);
 	link = new Link();
 	link.setObject(node.getLegacyId(), true);
