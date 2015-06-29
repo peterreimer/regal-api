@@ -146,6 +146,7 @@ public class Heritrix {
 	    play.Logger.debug("", e);
 	}
 	try {
+	    play.Logger.debug(" addJobDirToHeritrix(dir) " + dir);
 	    addJobDirToHeritrix(dir);
 	} catch (Exception e) {
 	    if (dir.exists())
@@ -163,7 +164,8 @@ public class Heritrix {
 	    File dir = new File(jobDir + "/" + conf.getName());
 	    dir.mkdirs();
 	    // Copy Job-Config to JobDirectory
-	    File crawlerConf = Play.application().getFile("crawler-beans.cxml");
+	    File crawlerConf = Play.application().getFile(
+		    "conf/crawler-beans.cxml");
 
 	    /*
 	     * metadata.operatorContactUrl=${OPERATOR_URL}
@@ -261,9 +263,13 @@ public class Heritrix {
 	File[] files = dir.listFiles(file -> {
 	    String now = new SimpleDateFormat("yyyyMMdd")
 		    .format(new java.util.Date());
-	    play.Logger.debug(now);
+	    play.Logger.debug("Directory must start with " + now);
 	    return file.isDirectory() && file.getName().startsWith(now);
 	});
+	play.Logger.debug(java.util.Arrays.toString(files));
+	if (files == null || files.length <= 0) {
+	    throw new RuntimeException("No directory with timestamp created!");
+	}
 	Arrays.sort(
 		files,
 		(f1, f2) -> {
