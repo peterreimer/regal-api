@@ -19,14 +19,19 @@ package controllers;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.culturegraph.mf.morph.functions.Regexp;
+
+import models.Globals;
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
@@ -42,6 +47,7 @@ import actions.Read;
 import actions.Transform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.InetAddresses;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
@@ -203,6 +209,13 @@ public class MyController extends Controller {
 	    if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
 		return true;
 	    } else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
+		if (isWhitelisted(request().remoteAddress())) {
+		    play.Logger
+			    .info("IP "
+				    + request().remoteAddress()
+				    + " is white listed. Access to restricted data granted.");
+		    return true;
+		}
 		if (EDITOR_ROLE.equals(role) || READER_ROLE.equals(role)
 			|| SUBSCRIBER_ROLE.equals(role)
 			|| REMOTE_ROLE.equals(role)) {
@@ -226,6 +239,10 @@ public class MyController extends Controller {
 	    return true;
 	}
 	return false;
+    }
+
+    private static boolean isWhitelisted(String remoteAddress) {
+	return Globals.ipWhiteList.containsKey(remoteAddress);
     }
 
     /**
