@@ -64,7 +64,8 @@ libraryDependencies ++= Seq(
   "xmlunit" % "xmlunit" % "1.5",
   "com.sun.xml.bind" % "jaxb-impl" % "2.2.6",
   "javax.xml.bind" % "jaxb-api" % "2.2.6",
-  "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2"
+  "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2",
+  "net.sf.supercsv" %"super-csv" %"2.3.1"
 )
 
 play.Project.playJavaSettings

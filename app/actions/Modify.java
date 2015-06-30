@@ -489,6 +489,18 @@ public class Modify extends RegalAction {
 	if (alephid.isEmpty()) {
 	    throw new HttpArchiveException(500, pid + " no Catalog-Id found");
 	}
+	return lobidify(node, alephid);
+    }
+
+    /**
+     * @param node
+     *            generate metadatafile with lobid data for this node
+     * @param alephid
+     *            id to take metadata from
+     * @return a short message
+     */
+    public String lobidify(Node node, String alephid) {
+	String pid = node.getPid();
 	String lobidUri = "http://lobid.org/resource/" + alephid;
 	try {
 	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid

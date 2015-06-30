@@ -175,7 +175,7 @@ public class Create extends RegalAction {
 	    updateIndex(node.getPid());
 	    updateIndex(parentPid);
 	} catch (Exception e) {
-	    play.Logger.debug("", e);
+	    // play.Logger.debug("", e);
 	}
     }
 

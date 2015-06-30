@@ -16,6 +16,8 @@
  */
 package controllers;
 
+import helper.GatherconfImporter;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -25,16 +27,19 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.Message;
+import models.Node;
+import models.RegalObject;
 import models.Transformer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import models.Gatherconf;
 
 import play.libs.F.Promise;
 import play.mvc.Result;
 import actions.BasicAuth;
+import actions.Create;
 
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiImplicitParam;
+import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
@@ -49,7 +54,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "/utils", description = "The utils endpoint provides rpc style methods.")
 @SuppressWarnings("javadoc")
 public class MyUtils extends MyController {
-    final static Logger logger = LoggerFactory.getLogger(MyUtils.class);
 
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Promise<Result> index(@PathParam("pid") String pid,
@@ -181,5 +185,31 @@ public class MyUtils extends MyController {
 		    + "pdfbox, " + namespace + "aleph";
 	    return JsonMessage(new Message(result));
 	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "importGatherconf", value = "importGatherconf", notes = "Import Gatherconf", httpMethod = "POST")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+    public static Promise<Result> importGatherConf(
+	    @QueryParam("namespace") final String namespace) {
+
+	return new BulkActionAccessor().call((userId) -> {
+	    List<Gatherconf> list = new Vector<Gatherconf>();
+	    String csv = request().body().asText();
+	    list = GatherconfImporter.read(csv);
+
+	    for (Gatherconf conf : list) {
+		RegalObject object = new RegalObject();
+		object.setContentType("webpage");
+		object.setAccessScheme("public");
+		object.setPublishScheme("public");
+		Node webpage = new Create().createResource(namespace, object);
+		new actions.Modify().updateConf(webpage, conf.toString());
+		new actions.Modify().lobidify(webpage, conf.getName());
+		play.Logger.info("Import Webpage: " + webpage.getPid());
+	    }
+
+	    return getJsonResult(list);
+	});
+
     }
 }

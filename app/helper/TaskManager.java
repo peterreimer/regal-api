@@ -35,16 +35,18 @@ public class TaskManager {
      * register all jobs
      */
     public void init() {
-	play.Logger
-		.info("Register Job: web gatherer. Will run every hour at min 32 (\"32 * * * * ?\")");
-	addTask("web gatherer", new Webgatherer(), "32 * * * * ?");
-
 	if (Globals.heartbeatTask != null && !Globals.heartbeatTask.isEmpty()) {
 	    play.Logger.info("Register Job: heartbeat. Will run every "
 		    + Globals.heartbeatTask);
 	    addTask("heartbeat",
 		    () -> play.Logger.debug("Boom: " + new Date().toString()),
 		    Globals.heartbeatTask);
+	}
+
+	if (Globals.webgatherTask != null && !Globals.webgatherTask.isEmpty()) {
+	    play.Logger.info("Register Job: wabgatherer. Will run every "
+		    + Globals.webgatherTask);
+	    addTask("web gatherer", new Webgatherer(), Globals.webgatherTask);
 	}
 
 	if (Globals.urnTask != null && !Globals.urnTask.isEmpty()) {

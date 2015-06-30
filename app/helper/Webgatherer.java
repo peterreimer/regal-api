@@ -19,9 +19,14 @@ package helper;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.elasticsearch.search.SearchHit;
 
 import com.ibm.icu.util.Calendar;
+
 import models.Gatherconf;
+import models.Globals;
 import models.Node;
 import actions.Create;
 import actions.Read;
@@ -35,8 +40,8 @@ public class Webgatherer implements Runnable {
     @Override
     public void run() {
 	// get all webpages
-	List<Node> webpages = new Read()
-		.listRepo("webpage", "edoweb", 0, 50000);
+	List<Node> webpages = new Read().listRepo("webpage",
+		Globals.namespaces[0], 0, 50000);
 	// get all configs
 	for (Node n : webpages) {
 	    try {

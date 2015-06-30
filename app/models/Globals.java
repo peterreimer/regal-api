@@ -182,8 +182,14 @@ public class Globals {
      */
     public static final String PUBLIC_INDEX_PREF = "public_";
 
+    /**
+     * Global heritrix instance
+     */
     public static Heritrix heritrix = new Heritrix();
 
+    /**
+     * Url to heritrix data directory
+     */
     public static String heritrixData = Play.application().configuration()
 	    .getString("regal-api.heritrix.dataUrl");
 
@@ -220,5 +226,11 @@ public class Globals {
      */
     public static String alephSetName = Play.application().configuration()
 	    .getString("regal-api.alephSetName");
+
+    /**
+     * Read cron expression for the webgatherer
+     */
+    public static String webgatherTask = Play.application().configuration()
+	    .getString("regal-api.webgatherTask");
 
 }
