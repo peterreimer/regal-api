@@ -16,7 +16,16 @@
  */
 package models;
 
+
 import helper.Heritrix;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.common.net.InetAddresses;
+
+import controllers.MyController;
+
 import helper.TaskManager;
 import play.Play;
 import archive.fedora.ApplicationProfile;
@@ -233,4 +242,34 @@ public class Globals {
     public static String webgatherTask = Play.application().configuration()
 	    .getString("regal-api.webgatherTask");
 
+    /*
+     * The setName for providing oai records to aleph
+     */
+    public static Map<String, String> ipWhiteList = buildIpList(Play
+	    .application().configuration().getString("regal-api.ipWhiteList")
+	    .split("\\s*,[,\\s]*"));
+
+    public static Map<String, String> buildIpList(String[] ipWhiteList) {
+	Map<String, String> ips = new HashMap<String, String>();
+	for (String address : ipWhiteList) {
+	    if (InetAddresses.isInetAddress(address)) {
+		ips.put(address, address);
+	    } else {
+		ips.putAll(computeRange(address));
+	    }
+	}
+	play.Logger
+		.info("The following IPs can access restricted data with anonymous login: "
+			+ ips);
+	return ips;
+    }
+
+    private static Map<String, String> computeRange(String address) {
+	Map<String, String> ips = new HashMap<String, String>();
+	if (address.matches("^(?:[0-9]{1,3}\\.){2}[0-9]{1,3}$")) {
+	    for (int i = 0; i < 255; i++)
+		ips.put(address + "." + i, address + "." + i);
+	}
+	return ips;
+    }
 }
