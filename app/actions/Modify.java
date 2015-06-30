@@ -176,7 +176,7 @@ public class Modify extends RegalAction {
      *            The metadata as rdf string
      * @return a short message
      */
-    String updateMetadata(Node node, String content) {
+    public String updateMetadata(Node node, String content) {
 	try {
 	    String pid = node.getPid();
 	    if (content == null) {

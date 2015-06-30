@@ -192,24 +192,38 @@ public class MyUtils extends MyController {
     public static Promise<Result> importGatherConf(
 	    @QueryParam("namespace") final String namespace) {
 
-	return new BulkActionAccessor().call((userId) -> {
-	    List<Gatherconf> list = new Vector<Gatherconf>();
-	    String csv = request().body().asText();
-	    list = GatherconfImporter.read(csv);
+	return new BulkActionAccessor()
+		.call((userId) -> {
+		    List<Gatherconf> list = new Vector<Gatherconf>();
+		    String csv = request().body().asText();
+		    list = GatherconfImporter.read(csv);
 
-	    for (Gatherconf conf : list) {
-		RegalObject object = new RegalObject();
-		object.setContentType("webpage");
-		object.setAccessScheme("public");
-		object.setPublishScheme("public");
-		Node webpage = new Create().createResource(namespace, object);
-		new actions.Modify().updateConf(webpage, conf.toString());
-		new actions.Modify().lobidify(webpage, conf.getName());
-		play.Logger.info("Import Webpage: " + webpage.getPid());
-	    }
+		    for (Gatherconf conf : list) {
+			RegalObject object = new RegalObject();
+			object.setContentType("webpage");
+			object.setAccessScheme("public");
+			object.setPublishScheme("public");
+			Node webpage = new Create().createResource(namespace,
+				object);
+			new actions.Modify().updateConf(webpage,
+				conf.toString());
+			String ht = conf.getName();
+			if (ht == null || ht.isEmpty()) {
+			    new actions.Modify().updateMetadata(
+				    webpage,
+				    "<"
+					    + webpage.getPid()
+					    + "> <http://purl.org/dc/terms/title> \""
+					    + conf.getUrl()
+					    + "\"^^<http://www.w3.org/2001/XMLSchema#string> .");
+			} else {
+			    new actions.Modify().lobidify(webpage, ht);
+			}
+			play.Logger.info("Import Webpage: " + webpage.getPid());
+		    }
 
-	    return getJsonResult(list);
-	});
+		    return getJsonResult(list);
+		});
 
     }
 }
