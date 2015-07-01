@@ -27,6 +27,7 @@ import com.ibm.icu.util.Calendar;
 
 import models.Gatherconf;
 import models.Globals;
+import models.Link;
 import models.Node;
 import actions.Create;
 import actions.Read;
@@ -40,8 +41,12 @@ public class Webgatherer implements Runnable {
     @Override
     public void run() {
 	// get all webpages
+
+	play.Logger.info("List 50000 resources of type webpage from namespace "
+		+ Globals.namespaces[0] + ".");
 	List<Node> webpages = new Read().listRepo("webpage",
 		Globals.namespaces[0], 0, 50000);
+	play.Logger.info("Found " + webpages.size() + " webpages.");
 	// get all configs
 	for (Node n : webpages) {
 	    try {
@@ -76,6 +81,12 @@ public class Webgatherer implements Runnable {
     }
 
     private boolean isOutstanding(Node n, Gatherconf conf) {
+	if (new Date().before(conf.getStartDate()))
+	    return false;
+	List<Link> parts = n
+		.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
+	if (parts == null || parts.isEmpty())
+	    return true;
 	Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
 	Calendar cal = Calendar.getInstance();
 	Date now = cal.getTime();

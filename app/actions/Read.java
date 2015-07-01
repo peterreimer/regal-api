@@ -117,7 +117,8 @@ public class Read extends RegalAction {
 
     /**
      * @param node
-     * @return child recently modified
+     * @return returns the recently modified node of list containing the passed
+     *         node itself and all of it's children nodes.
      */
     public Node getLastModifiedChild(Node node) {
 	Node last = node;
