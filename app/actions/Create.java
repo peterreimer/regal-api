@@ -231,6 +231,10 @@ public class Create extends RegalAction {
      */
     public Node createWebpageVersion(Node n) {
 	try {
+	    if (Globals.heritrix.isBusy()) {
+		throw new HttpArchiveException(403,
+			"Webgatherer is too busy! Please try again later.");
+	    }
 	    if (!"webpage".equals(n.getContentType())) {
 		throw new HttpArchiveException(
 			400,

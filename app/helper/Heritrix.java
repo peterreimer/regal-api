@@ -73,6 +73,10 @@ public class Heritrix {
 	    webclient = Client.create(cc);
 	    webclient.addFilter(new HTTPDigestAuthFilter(heritrixUser,
 		    heritrixPwd));
+	    // 10min
+	    webclient.setConnectTimeout(1000 * 60 * 10);
+	    // 10sec
+	    webclient.setReadTimeout(1000 * 10);
 	    return webclient;
 	}
 
@@ -356,4 +360,13 @@ public class Heritrix {
 	}
     }
 
+    public boolean isBusy() {
+	try {
+	    WebResource resource = client.resource(restUrl + "/engine/");
+	    resource.get(String.class);
+	    return false;
+	} catch (Exception e) {
+	    return true;
+	}
+    }
 }
