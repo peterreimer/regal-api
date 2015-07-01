@@ -37,6 +37,15 @@ import models.RegalObject.Provenience;
  */
 public class Create extends RegalAction {
 
+    @SuppressWarnings({ "javadoc", "serial" })
+    public class WebgathererTooBusyException extends HttpArchiveException {
+
+	public WebgathererTooBusyException(int status, String msg) {
+	    super(status, msg);
+	}
+
+    }
+
     /**
      * @param node
      * @param object
@@ -232,7 +241,7 @@ public class Create extends RegalAction {
     public Node createWebpageVersion(Node n) {
 	try {
 	    if (Globals.heritrix.isBusy()) {
-		throw new HttpArchiveException(403,
+		throw new WebgathererTooBusyException(403,
 			"Webgatherer is too busy! Please try again later.");
 	    }
 	    if (!"webpage".equals(n.getContentType())) {

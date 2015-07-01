@@ -30,6 +30,7 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import actions.Create;
+import actions.Create.WebgathererTooBusyException;
 import actions.Read;
 
 /**
@@ -47,18 +48,25 @@ public class Webgatherer implements Runnable {
 	List<Node> webpages = new Read().listRepo("webpage",
 		Globals.namespaces[0], 0, 50000);
 	play.Logger.info("Found " + webpages.size() + " webpages.");
+	int count = 0;
+	int limit = 5;
 	// get all configs
 	for (Node n : webpages) {
 	    try {
 		Gatherconf conf = Gatherconf.create(n.getConf());
 		// find open jobs
 		if (isOutstanding(n, conf)) {
+		    count++;
 		    new Create().createWebpageVersion(n);
 		}
 
+	    } catch (WebgathererTooBusyException e) {
+		play.Logger.error("Webgatherer stopped! Heritrix is too busy.");
 	    } catch (Exception e) {
 		play.Logger.error("", e);
 	    }
+	    if (count >= limit)
+		break;
 	}
     }
 

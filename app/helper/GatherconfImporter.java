@@ -16,6 +16,8 @@ import org.supercsv.io.CsvMapReader;
 import org.supercsv.io.ICsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
+import com.ibm.icu.util.Calendar;
+
 import models.Gatherconf;
 
 public class GatherconfImporter {
@@ -26,15 +28,18 @@ public class GatherconfImporter {
     public static List<Gatherconf> read(String csv) {
 	try (ICsvMapReader mapReader = new CsvMapReader(new StringReader(csv),
 		PIPE_DELIMITED)) {
+	    Calendar cal = Calendar.getInstance();
 	    List<Gatherconf> result = new ArrayList<Gatherconf>();
 	    final String[] header = mapReader.getHeader(true);
 	    final CellProcessor[] processors = getProcessors();
 	    Map<String, Object> row;
 	    while ((row = mapReader.read(header, processors)) != null) {
+		cal.add(Calendar.HOUR, 2);
+		Date startDate = cal.getTime();
 		Gatherconf conf = new Gatherconf();
+		conf.setStartDate(startDate);
 		conf.setDeepness(-1);
 		String intervallString = (String) row.get("INTERVALL_H");
-
 		if ("null".equals(intervallString)) {
 		    conf.setInterval(Gatherconf.Interval.annually);
 		} else {
@@ -46,14 +51,13 @@ public class GatherconfImporter {
 		    }
 		}
 		String robots = (String) row.get("IGNORE_ROBOTS");
-		if ("null".equals(robots)) {
-		    conf.setRobotsPolicy(Gatherconf.RobotsPolicy.classic);
-		} else {
-		    conf.setRobotsPolicy(Gatherconf.RobotsPolicy.ignore);
+		if (robots != null) {
+		    play.Logger.warn("Robots for " + conf.getUrl() + " is "
+			    + robots);
 		}
+		conf.setRobotsPolicy(Gatherconf.RobotsPolicy.classic);
 		conf.setUrl((String) row.get("URL"));
 		conf.setName((String) row.get("ALEPHIDN"));
-		conf.setStartDate(new Date());
 		result.add(conf);
 	    }
 	    return result;
