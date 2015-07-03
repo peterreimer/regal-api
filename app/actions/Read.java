@@ -732,6 +732,7 @@ public class Read extends RegalAction {
 	HttpURLConnection con = (HttpURLConnection) new URL(url)
 		.openConnection();
 	con.setInstanceFollowRedirects(false);
+	con.setReadTimeout(1000 * 2);
 	con.connect();
 	con.getInputStream();
 	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM

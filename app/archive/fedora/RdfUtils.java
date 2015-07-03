@@ -178,7 +178,7 @@ public class RdfUtils {
 	    String baseUrl) {
 	try {
 	    RDFParser rdfParser = Rio.createParser(inf);
-	    play.Logger.debug(rdfParser.getSupportedSettings().toString());
+	    // play.Logger.debug(rdfParser.getSupportedSettings().toString());
 	    org.openrdf.model.Graph myGraph = new TreeModel();
 	    StatementCollector collector = new StatementCollector(myGraph);
 	    rdfParser.setRDFHandler(collector);

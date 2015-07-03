@@ -54,9 +54,12 @@ public class Webgatherer implements Runnable {
 	for (Node n : webpages) {
 	    try {
 		Gatherconf conf = Gatherconf.create(n.getConf());
+		play.Logger.info("Test if " + n.getPid() + " is scheduled.");
 		// find open jobs
 		if (isOutstanding(n, conf)) {
 		    count++;
+		    play.Logger.info("Create new version for: " + n.getPid()
+			    + ".");
 		    new Create().createWebpageVersion(n);
 		}
 

@@ -54,6 +54,7 @@ public class Urn {
 		URL url = new URL(resolver + urn);
 		HttpURLConnection con = (HttpURLConnection) url
 			.openConnection();
+		con.setReadTimeout(1000 * 2);
 		HttpURLConnection.setFollowRedirects(true);
 		con.connect();
 		resolverStatus = con.getResponseCode();
@@ -70,6 +71,7 @@ public class Urn {
     public String getFinalURL(String url) throws IOException {
 	HttpURLConnection con = (HttpURLConnection) new URL(url)
 		.openConnection();
+	con.setReadTimeout(1000 * 2);
 	con.setInstanceFollowRedirects(false);
 	con.connect();
 	con.getInputStream();

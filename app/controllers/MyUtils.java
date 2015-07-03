@@ -17,6 +17,7 @@
 package controllers;
 
 import helper.GatherconfImporter;
+import helper.Webgatherer;
 
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,6 @@ import models.Node;
 import models.RegalObject;
 import models.Transformer;
 import models.Gatherconf;
-
 import play.libs.F.Promise;
 import play.mvc.Result;
 import actions.BasicAuth;
@@ -197,18 +197,26 @@ public class MyUtils extends MyController {
 		    List<Gatherconf> list = new Vector<Gatherconf>();
 		    String csv = request().body().asText();
 		    list = GatherconfImporter.read(csv);
-
+		    int id = 0;
 		    for (Gatherconf conf : list) {
 			RegalObject object = new RegalObject();
 			object.setContentType("webpage");
 			object.setAccessScheme("public");
 			object.setPublishScheme("public");
-			Node webpage = new Create().createResource(namespace,
-				object);
+			String pid = namespace + ":" + conf.getId();
+			play.Logger.info("Create webpage with id " + pid + ".");
+			Node webpage = null;
+			try {
+			    Node node = read.readNode(pid);
+			    webpage = new Create().updateResource(node, object);
+			} catch (Exception e) {
+			    webpage = new Create().createResource(conf.getId(),
+				    namespace, object);
+			}
 			new actions.Modify().updateConf(webpage,
 				conf.toString());
 			String ht = conf.getName();
-			if (ht == null || ht.isEmpty()) {
+			if ("null".equals(ht) || ht == null || ht.isEmpty()) {
 			    new actions.Modify().updateMetadata(
 				    webpage,
 				    "<"
@@ -225,5 +233,15 @@ public class MyUtils extends MyController {
 		    return getJsonResult(list);
 		});
 
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "runGatherer", value = "runGatherer", notes = "Runs the webgatherer", httpMethod = "POST")
+    @ApiImplicitParams({ @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+    public static Promise<Result> runGatherer() {
+	return new BulkActionAccessor().call((userId) -> {
+	    Webgatherer gatherer = new Webgatherer();
+	    gatherer.run();
+	    return ok();
+	});
     }
 }

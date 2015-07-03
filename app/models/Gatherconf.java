@@ -52,6 +52,7 @@ public class Gatherconf {
     Date startDate;
     String localDir;
     String openWaybackLink;
+    String id;
 
     /**
      * Create a new configuration for the webgatherer
@@ -64,6 +65,7 @@ public class Gatherconf {
 	startDate = null;
 	name = null;
 	openWaybackLink = null;
+	id = null;
     }
 
     /**
@@ -209,5 +211,20 @@ public class Gatherconf {
      */
     public String getOpenWaybackLink() {
 	return openWaybackLink;
+    }
+
+    /**
+     * @return an internal id
+     */
+    public String getId() {
+	return id;
+    }
+
+    /**
+     * @param id
+     *            an internal id
+     */
+    public void setId(String id) {
+	this.id = id;
     }
 }
