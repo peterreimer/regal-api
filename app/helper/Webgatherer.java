@@ -19,9 +19,6 @@ package helper;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.elasticsearch.search.SearchHit;
 
 import com.ibm.icu.util.Calendar;
 
