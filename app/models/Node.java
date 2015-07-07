@@ -982,6 +982,11 @@ public class Node {
 	cmap.put("catalogId", pmap);
 
 	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#lastModifiedBy");
+	pmap.put("label", "Bearbeitet durch");
+	cmap.put("lastModifiedBy", pmap);
+
+	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#importedFrom");
 	pmap.put("label", "Original Quelle");
 	cmap.put("importedFrom", pmap);
