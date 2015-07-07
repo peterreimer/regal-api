@@ -216,22 +216,34 @@ public class MyController extends Controller {
 				    + " is white listed. Access to restricted data granted.");
 		    return true;
 		}
-		if (EDITOR_ROLE.equals(role) || READER_ROLE.equals(role)
-			|| SUBSCRIBER_ROLE.equals(role)
+		if (READER_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)
 			|| REMOTE_ROLE.equals(role)) {
+		    if (isWhitelisted(request().getHeader("UserIp"))) {
+			play.Logger
+				.info("IP "
+					+ request().remoteAddress()
+					+ " is white listed. Access to restricted data granted.");
+			return true;
+		    }
+		}
+		if (EDITOR_ROLE.equals(role)) {
 		    return true;
 		}
 	    } else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
 		if (EDITOR_ROLE.equals(role))
 		    return true;
 	    } else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)) {
+		if (EDITOR_ROLE.equals(role)) {// ||
+					       // SUBSCRIBER_ROLE.equals(role))
+					       // {
 		    return true;
 		}
 	    } else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role) || REMOTE_ROLE.equals(role)
-			|| READER_ROLE.equals(role)
-			|| SUBSCRIBER_ROLE.equals(role)) {
+		if (EDITOR_ROLE.equals(role)) { // || REMOTE_ROLE.equals(role)
+						// || READER_ROLE.equals(role)
+						// ||
+						// SUBSCRIBER_ROLE.equals(role))
+						// {
 		    return true;
 		}
 	    }
