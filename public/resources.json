@@ -392,6 +392,7 @@
 		"checksum": "http://downlode.org/Code/RDF/File_Properties/schema#checksum",
 		"hasTransformer": "http://hbz-nrw.de/regal#hasTransformer",
 		"hasData": "http://hbz-nrw.de/regal#hasData",
-		"isAggregatedBy": "http://www.openarchives.org/ore/terms/isAggregatedBy"
+		"isAggregatedBy": "http://www.openarchives.org/ore/terms/isAggregatedBy",
+		"lastModifiedBy": "http://hbz-nrw.de/regal#lastModifiedBy"
 	}
 }
