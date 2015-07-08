@@ -2,7 +2,7 @@ import com.github.play2war.plugin._
 
 name := "regal-api"
 
-version := "0.7.0-SNAPSHOT"
+version := "0.7.0"
 
 Play2WarPlugin.play2WarSettings
 
