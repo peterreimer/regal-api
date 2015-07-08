@@ -221,7 +221,7 @@ public class MyController extends Controller {
 		    if (isWhitelisted(request().getHeader("UserIp"))) {
 			play.Logger
 				.info("IP "
-					+ request().remoteAddress()
+					+ request().getHeader("UserIp")
 					+ " is white listed. Access to restricted data granted.");
 			return true;
 		    }
