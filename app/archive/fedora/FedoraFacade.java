@@ -179,7 +179,6 @@ class FedoraFacade implements FedoraInterface {
 	    FedoraClient fedora = new com.yourmediashelf.fedora.client.FedoraClient(
 		    credentials);
 	    FedoraRequest.setDefaultClient(fedora);
-
 	} catch (MalformedURLException e) {
 	    throw new InitializeFedoraFacadeException(500, e);
 	}
@@ -219,7 +218,6 @@ class FedoraFacade implements FedoraInterface {
 	    if (node.getSeqFile() != null) {
 		utils.createSeqStream(node);
 	    }
-
 	    // utils.createRelsExt(node);
 	    utils.updateRelsExt(node);
 	} catch (Exception e) {
@@ -337,7 +335,7 @@ class FedoraFacade implements FedoraInterface {
 	try {
 	    GetObjectProfileResponse prof = new GetObjectProfile(node.getPid())
 		    .execute();
-	    node.setLabel(prof.getLabel());
+	    node.setFileLabel(prof.getLabel());
 	    node.setLastModified(prof.getLastModifiedDate());
 	    node.setCreationDate(prof.getCreateDate());
 	} catch (FedoraClientException e) {
