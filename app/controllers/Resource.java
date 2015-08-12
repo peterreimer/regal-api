@@ -47,7 +47,6 @@ import models.RegalObject;
 
 import models.Gatherconf;
 
-
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
@@ -240,34 +239,28 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
-
-	return new ReadDataAction()
-		.call(pid,
-			node -> {
-			    try {
-				response().setHeader(
-					"Access-Control-Allow-Origin", "*");
-				URL url = new URL(Globals.fedoraIntern
-					+ "/objects/" + pid
-					+ "/datastreams/data/content");
-				HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
-				response().setContentType(
-					connection.getContentType());
-				response()
-					.setHeader(
-						"Content-Disposition",
-						connection
-							.getHeaderField("Content-Disposition"));
-				return ok(connection.getInputStream());
-			    } catch (FileNotFoundException e) {
-				throw new HttpArchiveException(404, e);
-			    } catch (MalformedURLException e) {
-				throw new HttpArchiveException(500, e);
-			    } catch (IOException e) {
-				throw new HttpArchiveException(500, e);
-			    }
-			});
+	return new ReadDataAction().call(
+		pid,
+		node -> {
+		    try {
+			response()
+				.setHeader("Access-Control-Allow-Origin", "*");
+			URL url = new URL(Globals.fedoraIntern + "/objects/"
+				+ pid + "/datastreams/data/content");
+			HttpURLConnection connection = (HttpURLConnection) url
+				.openConnection();
+			response().setContentType(connection.getContentType());
+			response().setHeader("Content-Disposition",
+				node.getFileLabel());
+			return ok(connection.getInputStream());
+		    } catch (FileNotFoundException e) {
+			throw new HttpArchiveException(404, e);
+		    } catch (MalformedURLException e) {
+			throw new HttpArchiveException(500, e);
+		    } catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		    }
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listDc", value = "listDc", notes = "Shows internal dublin core stream", response = play.mvc.Result.class, httpMethod = "GET")
@@ -400,7 +393,6 @@ public class Resource extends MyController {
 				}
 				String mimeType = d.getContentType();
 				String name = d.getFilename();
-
 				try (FileInputStream content = new FileInputStream(
 					d.getFile())) {
 				    modify.updateData(pid, content, mimeType,

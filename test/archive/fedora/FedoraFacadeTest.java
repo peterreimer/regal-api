@@ -53,8 +53,7 @@ public class FedoraFacadeTest extends BaseModelTest {
     public void setUp() throws IOException {
 
 	Properties properties = new Properties();
-	properties.load(Play.application().resourceAsStream(
-		"resources/test.properties"));
+	properties.load(Play.application().resourceAsStream("test.properties"));
 
 	facade = FedoraFactory.getFedoraImpl(
 		properties.getProperty("fedoraUrl"),
@@ -69,7 +68,7 @@ public class FedoraFacadeTest extends BaseModelTest {
 	object.dublinCoreData.addTitle("Ein Testtitel");
 	object.dublinCoreData.addCreator("Jan Schnasse");
 	object.setMetadataFile(Thread.currentThread().getContextClassLoader()
-		.getResource("resources/test.nt").getFile());
+		.getResource("test.nt").getFile());
 
 	object.addTransformer(new Transformer("testepicur", "epicur", server
 		+ "/resource/(pid).epicur"));
@@ -79,7 +78,7 @@ public class FedoraFacadeTest extends BaseModelTest {
 		+ "/resource/(pid).pdfa"));
 
 	URL url = Thread.currentThread().getContextClassLoader()
-		.getResource("resources/test.pdf");
+		.getResource("test.pdf");
 	play.Logger.info("Upload data from: " + url.getPath());
 	object.setUploadFile(url.getPath());
 	object.setMimeType("text/xml");
@@ -143,7 +142,7 @@ public class FedoraFacadeTest extends BaseModelTest {
 	object = facade.readNode(object.getPid());
 	Assert.assertEquals("Neuer Titel",
 		object.dublinCoreData.getFirstTitle());
-	Assert.assertEquals("resources/HT017297166.xml", object.getFileLabel());
+	Assert.assertEquals("HT017297166.xml", object.getFileLabel());
 	Assert.assertEquals("text/xml", object.getMimeType());
 
 	// Object update on the reread object
