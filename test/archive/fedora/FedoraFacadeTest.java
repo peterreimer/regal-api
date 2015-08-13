@@ -77,7 +77,9 @@ public class FedoraFacadeTest extends BaseModelTest {
 	object.addTransformer(new Transformer("testpdfa", "pdfa", server
 		+ "/resource/(pid).pdfa"));
 
-	URL url = this.getClass().getResource("/test.pdf");
+	URL url = Thread.currentThread().getContextClassLoader()
+		.getResource("test.pdf");
+	play.Logger.info("Upload data from: " + url.getPath());
 	object.setUploadData(url.getPath(), "application/pdf");
 	cleanUp();
     }
@@ -168,7 +170,7 @@ public class FedoraFacadeTest extends BaseModelTest {
 	if (!facade.nodeExists(object.getPid()))
 	    facade.createNode(object);
 
-	facade.deleteNode(object.getPid());
+	facade.purgeNode(object.getPid());
 	Assert.assertFalse(facade.nodeExists(object.getPid()));
     }
 
@@ -179,7 +181,7 @@ public class FedoraFacadeTest extends BaseModelTest {
 
 	Node child = new Node().setNamespace("test").setPID("test:2345")
 		.setLabel("Ein Testobjekt").setFileLabel("test")
-		.setType(Vocabulary.TYPE_OBJECT);
+		.setType(Vocabulary.TYPE_OBJECT).setParentPid(object.getPid());
 	child.setContentType("monograph");
 	facade.createNode(child);
 	facade.unlinkParent(child);
@@ -188,14 +190,14 @@ public class FedoraFacadeTest extends BaseModelTest {
 
 	Node grandchild = new Node().setNamespace("test").setPID("test:23456")
 		.setLabel("Ein Testobjekt").setFileLabel("test")
-		.setType(Vocabulary.TYPE_OBJECT);
+		.setType(Vocabulary.TYPE_OBJECT).setParentPid(child.getPid());
 	grandchild.setContentType("monograph");
 	facade.createNode(grandchild);
 	facade.unlinkParent(grandchild);
 	facade.linkToParent(grandchild, child.getPid());
 	facade.linkParentToNode(child.getPid(), grandchild.getPid());
 
-	System.out.println(facade.deleteComplexObject(object.getPid()));
+	System.out.println(deleteComplexObject(object.getPid()));
 
 	Assert.assertFalse(facade.nodeExists(object.getPid()));
 	System.out.println("Deleted: " + object.getPid());
@@ -203,6 +205,15 @@ public class FedoraFacadeTest extends BaseModelTest {
 	System.out.println("Deleted: " + child.getPid());
 	Assert.assertFalse(facade.nodeExists(grandchild.getPid()));
 	System.out.println("Deleted: " + grandchild.getPid());
+    }
+
+    public List<Node> deleteComplexObject(String rootPID) {
+
+	List<Node> list = facade.listComplexObject(rootPID);
+	for (Node n : list) {
+	    facade.purgeNode(n.getPid());
+	}
+	return list;
     }
 
     @Test
@@ -277,11 +288,11 @@ public class FedoraFacadeTest extends BaseModelTest {
 	List<String> result = facade.findPids("CM:test*",
 		FedoraVocabulary.SIMPLE);
 	for (String pid : result) {
-	    facade.deleteNode(pid);
+	    facade.purgeNode(pid);
 	}
 	result = facade.findPids("test:*", FedoraVocabulary.SIMPLE);
 	for (String pid : result) {
-	    facade.deleteNode(pid);
+	    facade.purgeNode(pid);
 	}
     }
 

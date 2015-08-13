@@ -16,15 +16,22 @@
  */
 package actions;
 
-import static archive.fedora.Vocabulary.*;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
+import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -37,12 +44,15 @@ import models.Node;
 import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
+import org.w3c.dom.Element;
 
 import play.Logger;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
+import archive.fedora.XmlUtils;
 
 /**
  * 
@@ -58,6 +68,11 @@ public class Read extends RegalAction {
      */
     public Node readNode(String pid) {
 	Node n = internalReadNode(pid);
+	if ("D".equals(n.getState())) {
+	    throw new HttpArchiveException(
+		    410,
+		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
+	}
 	addLabelsForParts(n);
 	writeNodeToCache(n);
 	return n;
@@ -67,7 +82,36 @@ public class Read extends RegalAction {
      * returns the lastModified child of the whole tree
      * 
      * @param node
+     * @param contentType
+     *            if set, only parts of specific type will be analysed
      * @return node
+     */
+    public Node getLastModifiedChild(Node node, String contentType) {
+	if (contentType == null || contentType.isEmpty()) {
+	    return getLastModifiedChild(node);
+	} else {
+	    Node last = null;
+	    for (Node n : getParts(node)) {
+		Date cur = n.getLastModified();
+		if (contentType.equals(n.getContentType())) {
+		    if (last != null) {
+			if (cur.after(last.getLastModified())) {
+			    last = n;
+			}
+		    } else {
+			last = n;
+		    }
+		}
+	    }
+	    if (last == null)
+		return node;
+	    return last;
+	}
+    }
+
+    /**
+     * @param node
+     * @return child recently modified
      */
     public Node getLastModifiedChild(Node node) {
 	Node last = node;
@@ -85,7 +129,7 @@ public class Read extends RegalAction {
      *            the will be read to the node
      * @return a Node containing the data from the repository
      */
-    private Node internalReadNode(String pid) {
+    public Node internalReadNode(String pid) {
 	Node n = readNodeFromCache(pid);
 	if (n != null) {
 	    return n;
@@ -137,12 +181,35 @@ public class Read extends RegalAction {
     public List<Node> getParts(Node node) {
 	List<Node> result = new ArrayList<Node>();
 	result.add(node);
-	List<Node> parts = getNodes(node.getRelatives(HAS_PART).stream()
+	List<Node> parts = getNodes(node.getPartsSorted().stream()
 		.map((Link l) -> l.getObject()).collect(Collectors.toList()));
 	for (Node p : parts) {
 	    result.addAll(getParts(p));
 	}
 	return result;
+    }
+
+    /**
+     * @param node
+     *            a regal node
+     * @return a tree of regal objects starting with the passed node as root
+     */
+    public Map<String, Object> getPartsAsTree(Node node) {
+	Map<String, Object> nm = node.getLdWithoutContext();
+	@SuppressWarnings("unchecked")
+	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
+		.get("hasPart");
+	List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
+	if (parts != null) {
+	    for (Map<String, Object> part : parts) {
+		String id = (String) part.get("@id");
+		Map<String, Object> child = new HashMap<String, Object>();
+		child.put(id, getPartsAsTree(internalReadNode(id)));
+		children.add(child);
+	    }
+	    nm.put("hasPart", children);
+	}
+	return nm;
     }
 
     /**
@@ -253,20 +320,27 @@ public class Read extends RegalAction {
     private List<String> listRepoType(String type) {
 	List<String> typedList;
 	String query = "* <" + REL_CONTENT_TYPE + "> \"" + type + "\"";
-	InputStream in = Globals.fedora.findTriples(query,
-		FedoraVocabulary.SPO, FedoraVocabulary.N3);
-	typedList = RdfUtils.getFedoraSubject(in);
-
-	return typedList;
+	try (InputStream in = Globals.fedora.findTriples(query,
+		FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
+	    typedList = RdfUtils.getFedoraSubject(in);
+	    return typedList;
+	} catch (IOException e) {
+	    play.Logger.warn("", e);
+	}
+	return new ArrayList<String>();
     }
 
     private List<String> listRepoAll() {
 	List<String> typedList;
 	String query = "* <" + REL_IS_NODE_TYPE + "> <" + TYPE_OBJECT + ">";
-	InputStream in = Globals.fedora.findTriples(query,
-		FedoraVocabulary.SPO, FedoraVocabulary.N3);
-	typedList = RdfUtils.getFedoraSubject(in);
-	return typedList;
+	try (InputStream in = Globals.fedora.findTriples(query,
+		FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
+	    typedList = RdfUtils.getFedoraSubject(in);
+	    return typedList;
+	} catch (IOException e) {
+	    play.Logger.warn("", e);
+	}
+	return new ArrayList<String>();
     }
 
     private List<String> listRepoType(String type, int from, int until) {
@@ -342,7 +416,13 @@ public class Read extends RegalAction {
 	return readMetadata(node, field);
     }
 
-    private String readMetadata(Node node, String field) {
+    /**
+     * @param node
+     * @param field
+     *            the shortname of metadata field
+     * @return the ntriples or just one field
+     */
+    public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
 	    if (field == null || field.isEmpty()) {
@@ -454,5 +534,150 @@ public class Read extends RegalAction {
 	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
 		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
 	return linkedObjects;
+    }
+
+    /**
+     * @param node
+     * @return 200 if object can be found at oaiprovider, 404 if not, 500 on
+     *         error
+     */
+    public int getOaiStatus(Node node) {
+	try {
+	    URL url = new URL(Globals.oaiMabXmlAddress + node.getPid());
+	    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	    HttpURLConnection.setFollowRedirects(true);
+	    con.connect();
+	    Element root = XmlUtils.getDocument(con.getInputStream());
+	    List<Element> elements = XmlUtils.getElements("//setSpec", root,
+		    null);
+	    if (elements.isEmpty())
+		return 404;
+	    return con.getResponseCode();
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    Map<String, String> getLinks(Node node) {
+	String oai = Globals.oaiMabXmlAddress + node.getPid();
+	String aleph = Globals.alephAddress + node.getLegacyId();
+	String lobid = Globals.lobidAddress + node.getLegacyId();
+	String api = this.getHttpUriOfResource(node);
+	String urn = Globals.urnResolverAddress + node.getUrnFromMetadata();
+	String doi = "https://dx.doi.org/" + node.getDoi();
+	String frontend = Globals.urnbase + node.getPid();
+	String digitool = Globals.digitoolAddress
+		+ node.getPid().substring(node.getNamespace().length() + 1);
+
+	Map<String, String> result = new HashMap<String, String>();
+	result.put("oai", oai);
+	result.put("aleph", aleph);
+	result.put("lobid", lobid);
+	result.put("api", api);
+	result.put("urn", urn);
+	result.put("doi", doi);
+	result.put("frontend", frontend);
+	result.put("digitool", digitool);
+
+	return result;
+    }
+
+    /**
+     * The status contains information about the object with regard to
+     * thirdparty system
+     * 
+     * @param node
+     * @return a Map with status information
+     */
+    public Map<String, Object> getStatus(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	result.put("urnStatus", urnStatus(node));
+	result.put("doiStatus", doiStatus(node));
+	result.put("oaiStatus", getOaiStatus(node));
+	result.put("links", getLinks(node));
+	result.put("title", readMetadata(node, "title"));
+	result.put("metadataAccess", node.getPublishScheme());
+	result.put("dataAccess", node.getAccessScheme());
+	result.put("type", node.getContentType());
+	result.put("pid",
+		node.getPid().substring(node.getNamespace().length() + 1));
+	result.put("catalogId", node.getLegacyId());
+	result.put("urn", node.getUrnFromMetadata());
+	return result;
+    }
+
+    private int urnStatus(Node node) {
+	try {
+	    Urn urn = getUrnStatus(node);
+	    int urnStatus = urn == null ? 500 : urn.getResolverStatus();
+	    return urnStatus;
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    private int doiStatus(Node node) {
+	try {
+	    return getFinalResponseCode("https://dx.doi.org/" + node.getDoi());
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	    return 500;
+	}
+    }
+
+    /**
+     * @param nodes
+     * @return status information for many nodes
+     */
+    public List<Map<String, Object>> getStatus(List<Node> nodes) {
+	return nodes.stream().map((Node n) -> getStatus(n))
+		.collect(Collectors.toList());
+    }
+
+    /**
+     * @param namespace
+     * @param from
+     * @param until
+     * @return a list of elasticsearch hits of objects within the given range
+     */
+    public List<SearchHit> list(String namespace, Date from, Date until) {
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	String f = dateFormat.format(from);
+	String u = dateFormat.format(until);
+	String query = "isDescribedBy.created:[" + f + " TO " + u + "]";
+	play.Logger.info("List all from " + f + " to " + u);
+	List<SearchHit> result = new ArrayList<SearchHit>();
+	int step = 100;
+	int start = 0;
+	SearchHits hits = Globals.search.query(new String[] { namespace },
+		query, start, step);
+	long size = hits.getTotalHits();
+
+	result.addAll(Arrays.asList((hits.getHits())));
+	for (int i = 0; i < (size - (size % step)); i += step) {
+	    hits = Globals.search.query(new String[] { namespace }, query, i,
+		    step);
+	    result.addAll(Arrays.asList((hits.getHits())));
+	}
+	return result;
+
+    }
+
+    private int getFinalResponseCode(String url) throws IOException {
+	HttpURLConnection con = (HttpURLConnection) new URL(url)
+		.openConnection();
+	con.setInstanceFollowRedirects(false);
+	con.connect();
+	con.getInputStream();
+	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
+		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
+	    String redirectUrl = con.getHeaderField("Location");
+
+	    return getFinalResponseCode(redirectUrl);
+	}
+	return con.getResponseCode();
     }
 }

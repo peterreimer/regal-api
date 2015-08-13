@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Objects;
+
 /**
  * 
  * Stolen from
@@ -32,7 +34,7 @@ public class Pair<L, R> {
 
     @Override
     public int hashCode() {
-	return left.hashCode() ^ right.hashCode();
+	return Objects.hashCode(left) ^ Objects.hashCode(right);
     }
 
     @Override

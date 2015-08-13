@@ -39,11 +39,14 @@ import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
 import static archive.fedora.Vocabulary.REL_CATALOG_ID;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
+import static archive.fedora.Vocabulary.REL_LAST_MODIFIED_BY;
 import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_LEGACY_ID;
 import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import static archive.fedora.Vocabulary.REL_NAME;
+import static archive.fedora.Vocabulary.REL_HAS_DOI;
+import static archive.fedora.Vocabulary.REL_HAS_URN;
 import helper.HttpArchiveException;
 
 import java.io.BufferedInputStream;
@@ -384,10 +387,9 @@ public class Utils {
     }
 
     void readRelsExt(Node node) throws FedoraClientException {
-	try {
-	    FedoraResponse response = new GetDatastreamDissemination(
-		    node.getPid(), "RELS-EXT").download(true).execute();
-	    InputStream ds = response.getEntityInputStream();
+	FedoraResponse response = new GetDatastreamDissemination(node.getPid(),
+		"RELS-EXT").download(true).execute();
+	try (InputStream ds = response.getEntityInputStream()) {
 	    Repository myRepository = new SailRepository(new MemoryStore());
 	    myRepository.initialize();
 	    RepositoryConnection con = myRepository.getConnection();
@@ -395,7 +397,7 @@ public class Utils {
 	    try {
 		ValueFactory f = myRepository.getValueFactory();
 		URI objectId = f.createURI("info:fedora/" + node.getPid());
-		con.add(new BufferedInputStream(ds), baseURI, RDFFormat.RDFXML);
+		con.add(ds, baseURI, RDFFormat.RDFXML);
 		RepositoryResult<Statement> statements = con.getStatements(
 			objectId, null, null, true);
 		try {
@@ -435,6 +437,9 @@ public class Utils {
 			} else if (REL_CREATED_BY.equals(pred)) {
 			    node.setCreatedBy(link.getObject());
 			    continue;
+			} else if (REL_LAST_MODIFIED_BY.equals(pred)) {
+			    node.setLastModifiedBy(link.getObject());
+			    continue;
 			} else if (REL_LEGACY_ID.equals(pred)) {
 			    node.setLegacyId(link.getObject());
 			    continue;
@@ -446,6 +451,12 @@ public class Utils {
 			    continue;
 			} else if (IS_PART_OF.equals(pred)) {
 			    node.setParentPid(link.getObject());
+			    continue;
+			} else if (REL_HAS_DOI.equals(pred)) {
+			    node.setDoi(link.getObject());
+			    continue;
+			} else if (REL_HAS_URN.equals(pred)) {
+			    node.setUrn(link.getObject());
 			    continue;
 			}
 			link.setLiteral(objUri instanceof Literal);
@@ -638,6 +649,10 @@ public class Utils {
 	link.setPredicate(REL_CREATED_BY);
 	node.addRelation(link);
 	link = new Link();
+	link.setObject(node.getLastModifiedBy(), true);
+	link.setPredicate(REL_LAST_MODIFIED_BY);
+	node.addRelation(link);
+	link = new Link();
 	link.setObject(node.getLegacyId(), true);
 	link.setPredicate(REL_LEGACY_ID);
 	node.addRelation(link);
@@ -653,6 +668,15 @@ public class Utils {
 	link.setObject(node.getParentPid(), true);
 	link.setPredicate(IS_PART_OF);
 	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getDoi(), true);
+	link.setPredicate(REL_HAS_DOI);
+	node.addRelation(link);
+	link = new Link();
+	link.setObject(node.getUrn(), true);
+	link.setPredicate(REL_HAS_URN);
+	node.addRelation(link);
+
 	updateFedoraXmlForRelsExt(pid, node.getRelsExt());
     }
 

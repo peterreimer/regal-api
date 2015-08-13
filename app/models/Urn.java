@@ -16,6 +16,7 @@
  */
 package models;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("javadoc")
 public class Urn {
-    String resolver = "http://nbn-resolving.org/";
+    String resolver = Globals.urnResolverAddress;
     String urn = null;
     String resolvesTo = "NONE";
     int resolverStatus = 404;
@@ -45,33 +46,56 @@ public class Urn {
 
     public void init(String httpUriOfResource) {
 	try {
-	    URL url = new URL(resolver + urn);
-	    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-	    HttpURLConnection.setFollowRedirects(true);
-	    con.connect();
-	    resolverStatus = con.getResponseCode();
-	    resolvesTo = parseAdressFromHtml(con.getInputStream(),
-		    httpUriOfResource);
-	    if (resolvesTo.equals(httpUriOfResource))
+
+	    if (getFinalURL(resolver + urn).toString()
+		    .equals(httpUriOfResource)) {
 		success = true;
+	    } else {
+		URL url = new URL(resolver + urn);
+		HttpURLConnection con = (HttpURLConnection) url
+			.openConnection();
+		HttpURLConnection.setFollowRedirects(true);
+		con.connect();
+		resolverStatus = con.getResponseCode();
+		resolvesTo = parseAdressFromHtml(con.getInputStream(),
+			httpUriOfResource);
+		if (resolvesTo.equals(httpUriOfResource))
+		    success = true;
+	    }
 	} catch (Exception e) {
 
 	}
+    }
+
+    public String getFinalURL(String url) throws IOException {
+	HttpURLConnection con = (HttpURLConnection) new URL(url)
+		.openConnection();
+	con.setInstanceFollowRedirects(false);
+	con.connect();
+	con.getInputStream();
+	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
+		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
+	    String redirectUrl = con.getHeaderField("Location");
+
+	    return getFinalURL(redirectUrl);
+	}
+	resolverStatus = con.getResponseCode();
+	resolvesTo = con.getURL().toString();
+	return url;
     }
 
     private String parseAdressFromHtml(InputStream inputStream,
 	    String httpUriOfResource) {
 	String pid = httpUriOfResource.substring(httpUriOfResource
 		.lastIndexOf('/'));
-	Scanner scn = new Scanner(inputStream, "UTF-8");
-	try {
+
+	try (Scanner scn = new Scanner(inputStream, "UTF-8")) {
 	    String content = scn.useDelimiter("\\A").next();
 	    Pattern pattern = Pattern.compile("\"(http://.*" + pid + ")\"");
 	    Matcher matcher = pattern.matcher(content);
 	    matcher.find();
 	    return matcher.group(1);
-	} finally {
-	    scn.close();
 	}
     }
 

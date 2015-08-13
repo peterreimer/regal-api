@@ -55,8 +55,6 @@ public class MyUtils extends MyController {
     public static Promise<Result> index(@PathParam("pid") String pid,
 	    @QueryParam("index") final String indexName) {
 	return new ModifyAction().call(pid, node -> {
-	    String curIndex = indexName.isEmpty() ? pid.split(":")[0]
-		    : indexName;
 	    String result = index.index(node);
 	    return JsonMessage(new Message(result));
 	});
@@ -65,10 +63,10 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "indexAll", value = "indexAll", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Promise<Result> indexAll(
 	    @QueryParam("index") final String indexName) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    String indexNameWithDatestamp = indexName + "-" + getCurrentDate();
 	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(indexName, nodes -> {
+	    bulk.execute(indexName, userId, nodes -> {
 		return index.indexAll(nodes, indexNameWithDatestamp);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -79,9 +77,9 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "reinitOaisets", value = "reinitOaisets", notes = "Updates the oaisets of all resources", response = List.class, httpMethod = "POST")
     public static Promise<Result> reinitOaisets(
 	    @QueryParam("namespace") final String namespace) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(namespace, nodes -> {
+	    bulk.execute(namespace, userId, nodes -> {
 		return modify.reinitOaiSets(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -92,9 +90,9 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidifyAll", value = "lobidifyAll", notes = "Updates the bibliographic metadata of all resources", response = List.class, httpMethod = "POST")
     public static Promise<Result> lobidifyAll(
 	    @QueryParam("namespace") final String namespace) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(namespace, nodes -> {
+	    bulk.execute(namespace, userId, nodes -> {
 		return modify.lobidify(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -107,11 +105,13 @@ public class MyUtils extends MyController {
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid,
 	    @QueryParam("fromBefore") final String fromBefore) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    Date fromBeforeDate = createDateFromString(fromBefore);
 	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(namespace, nodes -> {
-		return modify.addUrnToAll(nodes, snid, fromBeforeDate);
+	    bulk.execute(namespace, userId, nodes -> {
+		String msg = modify.addUrnToAll(nodes, snid, fromBeforeDate);
+		play.Logger.info(msg);
+		return msg;
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
@@ -138,8 +138,8 @@ public class MyUtils extends MyController {
     public static Promise<Result> addUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	return new BulkActionAccessor().call(() -> {
-	    String result = modify.addUrn(id, namespace, snid);
+	return new BulkActionAccessor().call((userId) -> {
+	    String result = modify.addUrn(id, namespace, snid, userId);
 	    return JsonMessage(new Message(result));
 	});
     }
@@ -148,9 +148,9 @@ public class MyUtils extends MyController {
     public static Promise<Result> replaceUrn(@QueryParam("id") final String id,
 	    @QueryParam("namespace") final String namespace,
 	    @QueryParam("snid") final String snid) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    String result = modify.replaceUrn(
-		    read.readNode(namespace + ":" + id), snid);
+		    read.readNode(namespace + ":" + id), snid, userId);
 	    return JsonMessage(new Message(result));
 	});
     }
@@ -158,7 +158,7 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "initContentModels", value = "initContentModels", notes = "Initializes default transformers.", httpMethod = "POST")
     public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
 		    "http://edoweb-anonymous:nopwd@" + "localhost:9000"

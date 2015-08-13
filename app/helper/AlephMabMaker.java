@@ -52,10 +52,12 @@ public class AlephMabMaker {
 	try {
 	    String pid = node.getPid();
 	    String metadata = uriPrefix + "/resource/" + pid + "/metadata";
-	    InputStream input;
-	    input = new URL(metadata).openConnection().getInputStream();
-	    MabConverter converter = new MabConverter(node.getPid());
-	    return new String(converter.convert(input).toByteArray(), "utf-8");
+	    try (InputStream input = new URL(metadata).openConnection()
+		    .getInputStream()) {
+		MabConverter converter = new MabConverter(node.getPid());
+		return new String(converter.convert(input).toByteArray(),
+			"utf-8");
+	    }
 
 	} catch (Exception e) {
 	    throw new AlephException("Conversion Problem!", e);

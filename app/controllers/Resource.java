@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -57,6 +58,7 @@ import views.html.mab;
 import views.html.oaidc;
 import views.html.resource;
 import views.html.search;
+import views.html.status;
 import actions.BasicAuth;
 import actions.BulkAction;
 import archive.fedora.RdfUtils;
@@ -92,7 +94,7 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "listNodes", value = "listNodes", notes = "Returns all nodes for a list of ids", httpMethod = "GET")
     public static Promise<Result> listNodes(@QueryParam("ids") String ids) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		List<String> is = Arrays.asList(ids.split(","));
 		return getJsonResult(read.getNodes(is));
@@ -133,7 +135,7 @@ public class Resource extends MyController {
 
     private static Promise<Result> jsonList(String namespace,
 	    String contentType, int from, int until) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		List<Node> nodes = read.listRepo(contentType, namespace, from,
 			until);
@@ -148,7 +150,7 @@ public class Resource extends MyController {
 
     private static Promise<Result> htmlList(String namespace,
 	    String contentType, int from, int until) {
-	return new ListAction().call(() -> {
+	return new ListAction().call((userId) -> {
 	    try {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response()
@@ -235,27 +237,35 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listData(@PathParam("pid") String pid) {
-	return new ReadDataAction().call(
-		pid,
-		node -> {
-		    try {
-			response()
-				.setHeader("Access-Control-Allow-Origin", "*");
-			URL url = new URL(Globals.fedoraIntern + "/objects/"
-				+ pid + "/datastreams/data/content");
-			HttpURLConnection connection = (HttpURLConnection) url
-				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType(connection.getContentType());
-			return ok(is);
-		    } catch (FileNotFoundException e) {
-			throw new HttpArchiveException(404, e);
-		    } catch (MalformedURLException e) {
-			throw new HttpArchiveException(500, e);
-		    } catch (IOException e) {
-			throw new HttpArchiveException(500, e);
-		    }
-		});
+
+	return new ReadDataAction()
+		.call(pid,
+			node -> {
+			    try {
+				response().setHeader(
+					"Access-Control-Allow-Origin", "*");
+				URL url = new URL(Globals.fedoraIntern
+					+ "/objects/" + pid
+					+ "/datastreams/data/content");
+				HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
+				response().setContentType(
+					connection.getContentType());
+				response()
+					.setHeader(
+						"Content-Disposition",
+						connection
+							.getHeaderField("Content-Disposition"));
+				return ok(connection.getInputStream());
+
+			    } catch (FileNotFoundException e) {
+				throw new HttpArchiveException(404, e);
+			    } catch (MalformedURLException e) {
+				throw new HttpArchiveException(500, e);
+			    } catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			    }
+			});
     }
 
     @ApiOperation(produces = "application/json", nickname = "listDc", value = "listDc", notes = "Shows internal dublin core stream", response = play.mvc.Result.class, httpMethod = "GET")
@@ -280,11 +290,11 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "patchResources", value = "patchResources", notes = "Applies the PATCH object to the resource and to all child resources", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> patchResources(@PathParam("pid") String pid) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    RegalObject object = getRegalObject(request().body().asJson());
 	    List<Node> list = Globals.fedora.listComplexObject(pid);
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		return create.patchResources(nodes, object);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -317,7 +327,7 @@ public class Resource extends MyController {
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> createResource(
 	    @PathParam("namespace") String namespace) {
-	return new CreateAction().call(() -> {
+	return new CreateAction().call((userId) -> {
 	    RegalObject object = getRegalObject(request().body().asJson());
 	    Node newNode = create.createResource(namespace, object);
 	    String result = newNode.getPid() + " created/updated!";
@@ -388,13 +398,15 @@ public class Resource extends MyController {
 				}
 				String mimeType = d.getContentType();
 				String name = d.getFilename();
-				FileInputStream content = new FileInputStream(d
-					.getFile());
-				modify.updateData(pid, content, mimeType, name,
-					md5);
-				return JsonMessage(new Message(
-					"File uploaded! Type: " + mimeType
-						+ ", Name: " + name));
+
+				try (FileInputStream content = new FileInputStream(
+					d.getFile())) {
+				    modify.updateData(pid, content, mimeType,
+					    name, md5);
+				    return JsonMessage(new Message(
+					    "File uploaded! Type: " + mimeType
+						    + ", Name: " + name));
+				}
 			    } catch (IOException e) {
 				throw new HttpArchiveException(500, e);
 			    }
@@ -426,11 +438,15 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
-    public static Promise<Result> deleteResource(@PathParam("pid") String pid) {
-	return new BulkActionAccessor().call(() -> {
+    public static Promise<Result> deleteResource(@PathParam("pid") String pid,
+	    @QueryParam("purge") String purge) {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Node> list = Globals.fedora.listComplexObject(pid);
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
+		if ("true".equals(purge)) {
+		    return delete.purge(nodes);
+		}
 		return delete.delete(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -470,10 +486,14 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "deleteResources", value = "deleteResources", notes = "Deletes a set of resources", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResources(
-	    @QueryParam("namespace") String namespace) {
-	return new BulkActionAccessor().call(() -> {
+	    @QueryParam("namespace") String namespace,
+	    @QueryParam("purge") String purge) {
+	return new BulkActionAccessor().call((userId) -> {
 	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(namespace, nodes -> {
+	    bulk.execute(namespace, userId, nodes -> {
+		if ("true".equals(purge)) {
+		    return delete.purge(nodes);
+		}
 		return delete.delete(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -542,12 +562,49 @@ public class Resource extends MyController {
     public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
 	    try {
-		List<Node> result = read.getParts(node);
+
 		if (request().accepts("text/html")) {
+		    List<Node> result = read.getParts(node);
 		    return ok(resource.render(json(result)));
+		} else if (request().accepts("application/json")) {
+		    return getJsonResult(read.getPartsAsTree(node));
 		} else {
-		    return getJsonResult(result);
+		    List<Node> result = read.getParts(node);
+		    return asRdf(result);
 		}
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    private static Result asRdf(List<Node> result)
+	    throws UnsupportedEncodingException, Exception {
+	RDFFormat format = RDFFormat.TURTLE;
+	response().setContentType("text/turtle");
+
+	if (request().accepts("application/rdf+xml")) {
+	    format = RDFFormat.RDFXML;
+	    response().setContentType("application/rdf+xml");
+	} else if (request().accepts("text/turtle")) {
+	    format = RDFFormat.TURTLE;
+	    response().setContentType("text/turtle");
+	} else if (request().accepts("text/plain")) {
+	    format = RDFFormat.NTRIPLES;
+	    response().setContentType("text/plain");
+	}
+	String rdf = RdfUtils.readRdfToString(
+		new ByteArrayInputStream(json(result).getBytes("utf-8")),
+		RDFFormat.JSONLD, format, "");
+	return ok(rdf);
+    }
+
+    @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
+    public static Promise<Result> listAllPartsAsRdf(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		List<Node> result = read.getParts(node);
+		return asRdf(result);
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
 	    }
@@ -629,6 +686,15 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/xml", nickname = "asDatacite", value = "asDatacite", notes = "Returns a Datacite display of the resource", response = Message.class, httpMethod = "GET")
+    public static Promise<Result> asDatacite(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    String result = transform.datacite(node);
+	    response().setContentType("application/xml");
+	    return ok(result);
+	});
+    }
+
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")
     public static Promise<Result> asPdfa(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(
@@ -640,9 +706,10 @@ public class Resource extends MyController {
 			url = new URL(redirectUrl);
 			HttpURLConnection connection = (HttpURLConnection) url
 				.openConnection();
-			InputStream is = connection.getInputStream();
-			response().setContentType("application/pdf");
-			return ok(is);
+			try (InputStream is = connection.getInputStream()) {
+			    response().setContentType("application/pdf");
+			    return ok(is);
+			}
 		    } catch (MalformedURLException e) {
 			return JsonMessage(new Message(e, 500));
 		    } catch (IOException e) {
@@ -711,7 +778,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "flattenAll", value = "flattenAll", notes = "flatten is applied to all descendents of type contentType or type \"file\"(default).", response = String.class, httpMethod = "POST")
     public static Promise<Result> flattenAll(@PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Node> list = null;
 	    if (contentType != null && !contentType.isEmpty()) {
 		list = Globals.fedora.listComplexObject(pid).stream()
@@ -723,7 +790,7 @@ public class Resource extends MyController {
 			.collect(Collectors.toList());
 	    }
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		return modify.flattenAll(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -735,7 +802,7 @@ public class Resource extends MyController {
     public static Promise<Result> deleteDescendent(
 	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
-	return new BulkActionAccessor().call(() -> {
+	return new BulkActionAccessor().call((userId) -> {
 	    List<Node> list = null;
 	    if (contentType != null && !contentType.isEmpty()) {
 		list = Globals.fedora.listComplexObject(pid).stream()
@@ -745,7 +812,7 @@ public class Resource extends MyController {
 		list = Globals.fedora.listComplexObject(pid);
 	    }
 	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, nodes -> {
+	    bulk.executeOnNodes(list, userId, nodes -> {
 		return delete.delete(nodes);
 	    });
 	    response().setHeader("Transfer-Encoding", "Chunked");
@@ -755,14 +822,16 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json,text/html", nickname = "getLastModifiedChild", value = "getLastModifiedChild", notes = "Return the last modified object of tree", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> getLastModifiedChild(
-	    @PathParam("pid") String pid) {
+	    @PathParam("pid") String pid,
+	    @QueryParam("contentType") String contentType) {
 	return new ReadMetadataAction().call(
 		pid,
 		node -> {
 		    try {
 			response()
 				.setHeader("Access-Control-Allow-Origin", "*");
-			Node result = read.getLastModifiedChild(node);
+			Node result = read.getLastModifiedChild(node,
+				contentType);
 			if (request().accepts("text/html")) {
 			    List<Node> nodes = new ArrayList<Node>();
 			    nodes.add(result);
@@ -776,5 +845,78 @@ public class Resource extends MyController {
 			return JsonMessage(new Message(e, 500));
 		    }
 		});
+    }
+
+    public static Promise<Result> getStatus(@PathParam("pid") String pid) {
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		return getJsonResult(read.getStatus(node));
+	    } catch (Exception e) {
+		throw new HttpArchiveException(500, e);
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listResources", value = "listResources", notes = "Returns a list of ids", httpMethod = "GET")
+    public static Promise<Result> listResourcesStatus(
+	    @QueryParam("namespace") String namespace,
+	    @QueryParam("contentType") String contentType,
+	    @QueryParam("from") int from, @QueryParam("until") int until) {
+	return new ListAction().call((userId) -> {
+	    try {
+		List<Node> nodes = read.listRepo(contentType, namespace, from,
+			until);
+		List<Map<String, Object>> stati = read.getStatus(nodes);
+		if (request().accepts("text/html")) {
+		    return htmlStatusList(stati);
+		} else {
+		    return getJsonResult(stati);
+		}
+	    } catch (HttpArchiveException e) {
+		return JsonMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    private static Result htmlStatusList(List<Map<String, Object>> stati) {
+	try {
+	    response().setHeader("Access-Control-Allow-Origin", "*");
+	    response().setHeader("Content-Type", "text/html; charset=utf-8");
+	    return ok(status.render(json(stati)));
+	} catch (HttpArchiveException e) {
+	    return HtmlMessage(new Message(e, e.getCode()));
+	} catch (Exception e) {
+	    return HtmlMessage(new Message(e, 500));
+	}
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "addDoi", value = "addDoi", notes = "Adds a Doi and performes a registration at Datacite", response = String.class, httpMethod = "POST")
+    public static Promise<Result> addDoi(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		return getJsonResult(modify.addDoi(node));
+	    } catch (HttpArchiveException e) {
+		return HtmlMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
+    public static Promise<Result> updateDoi(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+
+		return getJsonResult(modify.updateDoi(node));
+
+	    } catch (HttpArchiveException e) {
+		return HtmlMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
     }
 }

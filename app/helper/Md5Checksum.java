@@ -26,18 +26,14 @@ public class Md5Checksum {
      * @param file
      *            the file you want to get the checksum from
      * @return checksum as byte array
+     * @throws IOException
      */
-    public byte[] createChecksum(File file) {
-
-	InputStream fis;
-	try {
-	    fis = new FileInputStream(file);
-
+    public byte[] createChecksum(File file) throws IOException {
+	try (InputStream fis = new FileInputStream(file)) {
 	    return createChecksum(fis);
 	} catch (FileNotFoundException e) {
 	    throw new Md5ChecksumException(e);
 	}
-
     }
 
     /**
@@ -86,13 +82,18 @@ public class Md5Checksum {
      * @return the checksum as string
      */
     public String getMd5Checksum(File file) {
-	byte[] b = createChecksum(file);
-	String result = "";
+	try {
+	    byte[] b = createChecksum(file);
+	    String result = "";
 
-	for (int i = 0; i < b.length; i++) {
-	    result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+	    for (int i = 0; i < b.length; i++) {
+		result += Integer.toString((b[i] & 0xff) + 0x100, 16)
+			.substring(1);
+	    }
+	    return result;
+	} catch (IOException e) {
+	    throw new Md5ChecksumException(e);
 	}
-	return result;
     }
 
     /**

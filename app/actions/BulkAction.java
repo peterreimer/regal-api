@@ -37,10 +37,12 @@ public class BulkAction {
     /**
      * @param namespace
      *            a namespace to retrieve all pids from
+     * @param userId
+     *            id of user who modifies
      * @param proc
      *            a function to apply to all pids
      */
-    public void execute(String namespace, ProcessNodes proc) {
+    public void execute(String namespace, String userId, ProcessNodes proc) {
 	chunks = new StringChunks() {
 	    public void onReady(Chunks.Out<String> out) {
 		setMessageQueue(out);
@@ -59,10 +61,13 @@ public class BulkAction {
     /**
      * @param nodes
      *            a list of node pids
+     * @param userId
+     *            id of a user who modifies
      * @param proc
      *            a function to apply to all nodes
      */
-    public void executeOnPids(List<String> nodes, ProcessNodes proc) {
+    public void executeOnPids(List<String> nodes, String userId,
+	    ProcessNodes proc) {
 	chunks = new StringChunks() {
 	    public void onReady(Chunks.Out<String> out) {
 		setMessageQueue(out);
@@ -81,12 +86,16 @@ public class BulkAction {
     /**
      * @param nodes
      *            a list of nodes
+     * @param userId
+     *            id of user who modifies
      * @param proc
      *            a function to apply to all nodes
      */
-    public void executeOnNodes(List<Node> nodes, ProcessNodes proc) {
+    public void executeOnNodes(List<Node> nodes, String userId,
+	    ProcessNodes proc) {
 	chunks = new StringChunks() {
 	    public void onReady(Chunks.Out<String> out) {
+		nodes.stream().forEach(n -> n.setLastModifiedBy(userId));
 		setMessageQueue(out);
 		ExecutorService executorService = Executors
 			.newSingleThreadExecutor();
@@ -102,6 +111,7 @@ public class BulkAction {
 
     private void bulk(String namespace, ProcessNodes proc) {
 	List<String> nodes = read.listRepoNamespace(namespace);
+	play.Logger.info("Going to process: " + nodes);
 	bulkOnPids(nodes, proc);
     }
 
@@ -121,9 +131,12 @@ public class BulkAction {
 
 		messageOut.write("Process: from: " + from + " until " + until
 			+ "\n");
-
-		messageOut.write(proc.process(read.getNodes(nodes.subList(from,
-			until))));
+		try {
+		    messageOut.write(proc.process(read.getNodes(nodes.subList(
+			    from, until))));
+		} catch (Exception e) {
+		    play.Logger.warn("", e);
+		}
 	    } while (until < nodes.size());
 	    messageOut.write("Process " + nodes.size() + " nodes!");
 	    messageOut.write("\nSuccessfully Finished\n");
@@ -149,7 +162,13 @@ public class BulkAction {
 		    until = nodes.size();
 		messageOut.write("Process: from: " + from + " until " + until
 			+ "\n");
-		messageOut.write(proc.process(nodes.subList(from, until)));
+		try {
+		    List<Node> sublist = nodes.subList(from, until);
+		    play.Logger.info("Going to Process: " + sublist);
+		    messageOut.write(proc.process(sublist));
+		} catch (Exception e) {
+		    play.Logger.warn("", e);
+		}
 	    } while (until < nodes.size());
 	    messageOut.write("Process " + nodes.size() + " nodes!");
 	    messageOut.write("\nSuccessfully Finished\n");

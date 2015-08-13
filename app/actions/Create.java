@@ -127,6 +127,10 @@ public class Create extends RegalAction {
 	    node.setName(object.getIsDescribedBy().getName());
 	if (object.getTransformer() != null)
 	    updateTransformer(object.getTransformer(), node);
+	if (object.getIsDescribedBy().getDoi() != null)
+	    node.setDoi(object.getIsDescribedBy().getDoi());
+	if (object.getIsDescribedBy().getUrn() != null)
+	    node.setUrn(object.getIsDescribedBy().getUrn());
     }
 
     private void overrideNodeMembers(Node node, RegalObject object) {
@@ -138,6 +142,8 @@ public class Create extends RegalAction {
 	node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 	node.setLegacyId(object.getIsDescribedBy().getLegacyId());
 	node.setName(object.getIsDescribedBy().getName());
+	node.setDoi(object.getIsDescribedBy().getDoi());
+	node.setUrn(object.getIsDescribedBy().getUrn());
 	updateTransformer(object.getTransformer(), node);
     }
 
@@ -193,6 +199,7 @@ public class Create extends RegalAction {
      * 
      * @param cms
      *            a List of Transformers
+     * @param userId
      * @return a message
      */
     public String contentModelsInit(List<Transformer> cms) {

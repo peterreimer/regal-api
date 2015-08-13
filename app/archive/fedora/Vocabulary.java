@@ -76,6 +76,13 @@ public abstract class Vocabulary {
 	    + "createdBy";
 
     /**
+     * Used to identify the last modifier of the regal resource
+     * 
+     */
+    public final static String REL_LAST_MODIFIED_BY = HBZ_MODEL_NAMESPACE
+	    + "lastModifiedBy";
+
+    /**
      * An id once used to identify the object
      * 
      */
@@ -94,6 +101,18 @@ public abstract class Vocabulary {
 	    + "catalogId";
 
     /**
+     * predicate to link to an urn
+     * 
+     */
+    public final static String REL_HAS_URN = HBZ_MODEL_NAMESPACE + "urn";
+
+    /**
+     * predicate to link to a doi
+     * 
+     */
+    public final static String REL_HAS_DOI = HBZ_MODEL_NAMESPACE + "doi";
+
+    /**
      * All hbzIds from /metadata must be ignored
      * 
      */
@@ -103,4 +122,6 @@ public abstract class Vocabulary {
      * Regal uses this predicate to link to parallel title resources
      */
     public final static String REL_MAB_527 = "http://hbz-nrw.de/regal#parallelEdition";
+
+    public final static String REL_LOBID_DOI = "http://purl.org/ontology/bibo/doi";
 }

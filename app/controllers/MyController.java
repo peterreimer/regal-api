@@ -19,14 +19,19 @@ package controllers;
 import helper.HttpArchiveException;
 
 import java.io.StringWriter;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.culturegraph.mf.morph.functions.Regexp;
+
+import models.Globals;
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
@@ -42,6 +47,7 @@ import actions.Read;
 import actions.Transform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.InetAddresses;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
@@ -112,7 +118,10 @@ public class MyController extends Controller {
      */
     public final static String DATA_ACCESSOR_REMOTE = "remote";
 
-    protected static ObjectMapper mapper = JsonUtil.mapper();
+    /**
+     * a mapper for all
+     */
+    public static ObjectMapper mapper = JsonUtil.mapper();
 
     static Read read = new Read();
     static Create create = new Create();
@@ -157,14 +166,7 @@ public class MyController extends Controller {
 	StringWriter w = new StringWriter();
 	mapper.writeValue(w, obj);
 	String result = w.toString();
-	debugPrint(result);
 	return result;
-
-    }
-
-    private static void debugPrint(String str) {
-	play.Logger.debug("\nResponse:\nHeaders\n\t"
-		+ mapToString(response().getHeaders()) + "\nBody:\n\t" + str);
     }
 
     /**
@@ -191,8 +193,6 @@ public class MyController extends Controller {
 			"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
 	response().setHeader("Access-Control-Allow-Credentials", "true");
 	response().setHeader("Content-Type", "application/json; charset=utf-8");
-
-	debugPrint(msg.toString());
 	return status(msg.getCode(), msg.toString());
     }
 
@@ -209,22 +209,41 @@ public class MyController extends Controller {
 	    if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
 		return true;
 	    } else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role) || READER_ROLE.equals(role)
-			|| SUBSCRIBER_ROLE.equals(role)
+		if (isWhitelisted(request().remoteAddress())) {
+		    play.Logger
+			    .info("IP "
+				    + request().remoteAddress()
+				    + " is white listed. Access to restricted data granted.");
+		    return true;
+		}
+		if (READER_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)
 			|| REMOTE_ROLE.equals(role)) {
+		    if (isWhitelisted(request().getHeader("UserIp"))) {
+			play.Logger
+				.info("IP "
+					+ request().remoteAddress()
+					+ " is white listed. Access to restricted data granted.");
+			return true;
+		    }
+		}
+		if (EDITOR_ROLE.equals(role)) {
 		    return true;
 		}
 	    } else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
 		if (EDITOR_ROLE.equals(role))
 		    return true;
 	    } else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)) {
+		if (EDITOR_ROLE.equals(role)) {// ||
+					       // SUBSCRIBER_ROLE.equals(role))
+					       // {
 		    return true;
 		}
 	    } else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role) || REMOTE_ROLE.equals(role)
-			|| READER_ROLE.equals(role)
-			|| SUBSCRIBER_ROLE.equals(role)) {
+		if (EDITOR_ROLE.equals(role)) { // || REMOTE_ROLE.equals(role)
+						// || READER_ROLE.equals(role)
+						// ||
+						// SUBSCRIBER_ROLE.equals(role))
+						// {
 		    return true;
 		}
 	    }
@@ -232,6 +251,10 @@ public class MyController extends Controller {
 	    return true;
 	}
 	return false;
+    }
+
+    private static boolean isWhitelisted(String remoteAddress) {
+	return Globals.ipWhiteList.containsKey(remoteAddress);
     }
 
     /**
@@ -273,7 +296,7 @@ public class MyController extends Controller {
     }
 
     interface Action {
-	Result exec();
+	Result exec(String userId);
     }
 
     /**
@@ -354,7 +377,7 @@ public class MyController extends Controller {
 		    if (!readMetadata_accessIsAllowed("private", role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -371,26 +394,32 @@ public class MyController extends Controller {
     public static class ModifyAction {
 	Promise<Result> call(String pid, NodeAction ca) {
 	    return Promise.promise(() -> {
+		String userId = "0";
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
-		    play.Logger.debug("Try to access with role: " + role);
+		    userId = request().getHeader("UserId");
+		    play.Logger.debug("Try to access with role: " + role
+			    + "and user id " + userId);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
 		    Node node = null;
 		    try {
-			node = read.readNode(pid);
+			node = read.internalReadNode(pid);
+			node.setLastModifiedBy(userId);
 		    } catch (Exception e) {
-			// play.Logger.debug("", e);
+			play.Logger.debug(
+				"Try to modify resource that can not be read!",
+				e);
+		    }
+		    return ca.exec(node);
+		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (Exception e) {
+		    return JsonMessage(new Message(e, 500));
 		}
-		return ca.exec(node);
-	    } catch (HttpArchiveException e) {
-		return JsonMessage(new Message(e, e.getCode()));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
-	})  ;
+	    });
 	}
     }
 
@@ -407,7 +436,7 @@ public class MyController extends Controller {
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
@@ -430,7 +459,7 @@ public class MyController extends Controller {
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
-		    return ca.exec();
+		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {

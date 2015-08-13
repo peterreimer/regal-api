@@ -18,6 +18,7 @@ package actions;
 
 import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
 import static archive.fedora.FedoraVocabulary.ITEM_ID;
+import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.OaiSet;
 import helper.OaiSetBuilder;
@@ -29,7 +30,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +48,7 @@ import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 
+import controllers.MyController;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -182,12 +186,21 @@ public class Modify extends RegalAction {
 			+ " Use HTTP DELETE instead.\n");
 	    }
 	    RdfUtils.validate(content);
+
 	    File file = CopyUtils.copyStringToFile(content);
 	    node.setMetadataFile(file.getAbsolutePath());
 	    if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 		node.addTransformer(new Transformer("aleph"));
 	    } else {
 		node.removeTransformer("aleph");
+	    }
+	    if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
+		List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
+			archive.fedora.Vocabulary.REL_LOBID_DOI, content,
+			RDFFormat.NTRIPLES);
+		if (!dois.isEmpty()) {
+		    node.setDoi(dois.get(0));
+		}
 	    }
 	    Globals.fedora.updateNode(node);
 	    reindexNodeAndParent(node);
@@ -216,11 +229,12 @@ public class Modify extends RegalAction {
      *            usually the namespace
      * @param snid
      *            the urn subnamespace id e.g."hbz:929:02"
+     * @param userId
      * @return the urn
      */
-    public String addUrn(String id, String namespace, String snid) {
+    public String addUrn(String id, String namespace, String snid, String userId) {
 	String pid = namespace + ":" + id;
-	return addUrn(pid, snid);
+	return addUrn(pid, snid, userId);
     }
 
     /**
@@ -232,8 +246,9 @@ public class Modify extends RegalAction {
      *            the urn subnamespace id e.g."hbz:929:02"
      * @return the urn
      */
-    String addUrn(String pid, String snid) {
+    String addUrn(String pid, String snid, String userId) {
 	Node node = new Read().readNode(pid);
+	node.setLastModifiedBy(userId);
 	return addUrn(node, snid);
     }
 
@@ -270,15 +285,17 @@ public class Modify extends RegalAction {
      *            the object
      * @param snid
      *            the urn subnamespace id
+     * @param userId
      * @return the urn
      */
-    public String replaceUrn(Node node, String snid) {
+    public String replaceUrn(Node node, String snid, String userId) {
 	String subject = node.getPid();
 	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String metadata = node.getMetadata();
 	String urn = generateUrn(subject, snid);
 	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
 	node.addTransformer(new Transformer("epicur"));
+	node.setLastModifiedBy(userId);
 	updateMetadata(node, metadata);
 	return "Update " + subject + " metadata " + metadata;
     }
@@ -313,6 +330,33 @@ public class Modify extends RegalAction {
     }
 
     /**
+     * @param nodes
+     *            a list of nodes
+     * @param fromBefore
+     *            only nodes from before the given Date will be modified
+     * @return a message for client
+     */
+    public String addDoiToAll(List<Node> nodes, Date fromBefore) {
+	return apply(nodes, n -> addDoi(n, fromBefore));
+    }
+
+    private String addDoi(Node n, Date fromBefore) {
+	try {
+	    String contentType = n.getContentType();
+	    if (n.getCreationDate().before(fromBefore)) {
+		if ("monograph".equals(contentType)) {
+		    return MyController.mapper.writeValueAsString(addDoi(n));
+		}
+	    }
+	    return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
+		    + " is not before " + fromBefore + " or contentType "
+		    + contentType + " is not allowed to carry urn.";
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    /**
      * @param node
      *            the node to be published on the oai interface
      * @return A short message.
@@ -339,12 +383,12 @@ public class Modify extends RegalAction {
 		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
 	    }
 
-	    if ("".equals(node.getAccessScheme())) {
+	    if ("public".equals(node.getAccessScheme())) {
 		addSet(node, "open_access");
 	    }
 	    if (node.hasUrn()) {
 		addSet(node, "epicur");
-		String urn = node.getUrn();
+		String urn = node.getUrnFromMetadata();
 		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
 		    addSet(node, "urn-set-1");
 		} else if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
@@ -354,7 +398,7 @@ public class Modify extends RegalAction {
 	    if (node.hasLinkToCatalogId()) {
 		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
-		addSet(node, "edo01");
+		addSet(node, Globals.alephSetName);
 	    }
 	    addSet(node, node.getContentType());
 	    updateIndex(node.getPid());
@@ -588,6 +632,81 @@ public class Modify extends RegalAction {
 	UpdateNodeException(Throwable cause) {
 	    super(cause);
 	}
+    }
+
+    /**
+     * Creates a new doi identifier and registers to datacite
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
+    public Map<String, Object> addDoi(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	String doi = node.getDoi();
+	result.put("Doi", doi);
+	if (doi == null || doi.isEmpty()) {
+	    node.setDoi(createDoiIdentifier(node));
+	    RegalObject o = new RegalObject();
+	    o.getIsDescribedBy().setDoi(node.getDoi());
+	    new Create().patchResource(node, o);
+	    String objectUrl = Globals.urnbase + node.getPid();
+	    String xml = new Transform().datacite(node);
+	    play.Logger.debug(xml);
+	    DataciteClient client = new DataciteClient();
+	    String registerMetadataResponse = client
+		    .registerMetadataAtDatacite(node, xml);
+	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
+	    String makeOaiSetResponse = makeOAISet(node);
+
+	    result.put("Metadata", xml);
+	    result.put("registerMetadataResponse", registerMetadataResponse);
+	    result.put("mintDoiResponse", mintDoiResponse);
+	    result.put("makeOaiSetResponse", makeOaiSetResponse);
+	    return result;
+	} else {
+	    throw new HttpArchiveException(409, node.getPid()
+		    + " already has a doi. Leave unmodified!");
+	}
+
+    }
+
+    /**
+     * Updates an existing doi's metadata and url
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
+    public Map<String, Object> updateDoi(Node node) {
+	Map<String, Object> result = new HashMap<String, Object>();
+	String doi = node.getDoi();
+	result.put("Doi", doi);
+	if (doi == null || doi.isEmpty()) {
+	    throw new HttpArchiveException(
+		    412,
+		    node.getPid()
+			    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
+	} else {
+	    String objectUrl = Globals.urnbase + node.getPid();
+	    String xml = new Transform().datacite(node);
+	    play.Logger.debug(xml);
+	    DataciteClient client = new DataciteClient();
+	    String registerMetadataResponse = client
+		    .registerMetadataAtDatacite(node, xml);
+	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
+	    String makeOaiSetResponse = makeOAISet(node);
+	    result.put("Metadata", xml);
+	    result.put("registerMetadataResponse", registerMetadataResponse);
+	    result.put("mintDoiResponse", mintDoiResponse);
+	    result.put("makeOaiSetResponse", makeOaiSetResponse);
+	    return result;
+	}
+    }
+
+    private String createDoiIdentifier(Node node) {
+	String pid = node.getPid();
+	String id = pid.replace(node.getNamespace() + ":", "");
+	String doi = Globals.doiPrefix + "00" + id;
+	return doi;
     }
 
 }

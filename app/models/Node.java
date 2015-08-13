@@ -97,10 +97,13 @@ public class Node {
     private String contextDocumentUri = null;
 
     private String createdBy = null;
+    private String lastModifiedBy = null;
     private String importedFrom = null;
     private String legacyId = null;
     private String catalogId = null;
     private String name = null;
+    private String doi = null;
+    private String urn = null;
 
     private String fulltext;
 
@@ -875,10 +878,16 @@ public class Node {
 	    aboutMap.put("importedFrom", getImportedFrom());
 	if (name != null)
 	    aboutMap.put("name", getName());
+	if (urn != null)
+	    aboutMap.put("urn", getUrn());
+	if (lastModifiedBy != null)
+	    aboutMap.put("lastModifiedBy", getLastModifiedBy());
 	aboutMap.put("modified", getLastModified());
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
 	rdf.put("isDescribedBy", aboutMap);
+	if (doi != null)
+	    rdf.put("doi", getDoi());
 	if (parentPid != null)
 	    rdf.put("parentPid", parentPid);
 
@@ -973,6 +982,11 @@ public class Node {
 	cmap.put("catalogId", pmap);
 
 	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#lastModifiedBy");
+	pmap.put("label", "Bearbeitet durch");
+	cmap.put("lastModifiedBy", pmap);
+
+	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#importedFrom");
 	pmap.put("label", "Original Quelle");
 	cmap.put("importedFrom", pmap);
@@ -984,7 +998,7 @@ public class Node {
 
 	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
-	pmap.put("label", "Angelegt durch");
+	pmap.put("label", "Alternative ID");
 	cmap.put("legacyId", pmap);
 
 	pmap = new HashMap<String, Object>();
@@ -1003,6 +1017,16 @@ public class Node {
 	cmap.put("publishScheme", pmap);
 
 	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://purl.org/lobid/lv#urn");
+	pmap.put("label", "Urn");
+	cmap.put("urn", pmap);
+
+	pmap = new HashMap<String, Object>();
+	pmap.put("@id", "http://hbz-nrw.de/regal#doi");
+	pmap.put("label", "Regal-Doi");
+	cmap.put("doi", pmap);
+
+	pmap = new HashMap<String, Object>();
 	pmap.put("@id", "http://hbz-nrw.de/regal#hasData");
 	pmap.put("label", "Daten");
 	cmap.put("hasData", pmap);
@@ -1017,6 +1041,7 @@ public class Node {
 	pmap.put("@id", "http://purl.org/dc/terms/hasPart");
 	pmap.put("label", "Kindobjekt");
 	pmap.put("@type", "@id");
+	pmap.put("@container", "@list");
 	cmap.put("hasPart", pmap);
 
 	pmap = new HashMap<String, Object>();
@@ -1251,7 +1276,7 @@ public class Node {
     /**
      * @return a urn or null
      */
-    public String getUrn() {
+    public String getUrnFromMetadata() {
 	try {
 	    String hasUrn = "http://purl.org/lobid/lv#urn";
 	    return RdfUtils.findRdfObjects(pid, hasUrn, metadata,
@@ -1298,11 +1323,85 @@ public class Node {
 	return this;
     }
 
+    /**
+     * Add a text extraction of the nodes data
+     * 
+     * @param string
+     */
     public void addFulltext(String string) {
 	fulltext = string;
     }
 
+    /**
+     * @return a text extraction of the nodes data
+     */
     public String getFulltext() {
 	return fulltext;
+    }
+
+    /**
+     * @return a doi for this particular object
+     */
+    public String getDoi() {
+	return doi;
+    }
+
+    /**
+     * @param doi
+     * @return this
+     */
+    public Node setDoi(String doi) {
+	this.doi = doi;
+	return this;
+    }
+
+    /**
+     * @return an urn for this particular object
+     */
+    public String getUrn() {
+	return urn;
+    }
+
+    /**
+     * @param urn
+     * @return this
+     */
+    public Node setUrn(String urn) {
+	this.urn = urn;
+	return this;
+    }
+
+    /**
+     * @return a map without the context document
+     */
+    public Map<String, Object> getLdWithoutContext() {
+	Map<String, Object> map = getLd();
+	map.remove("@context");
+	return map;
+
+    }
+
+    /**
+     * @param userId
+     * @return this
+     */
+    public Node setLastModifiedBy(String userId) {
+	lastModifiedBy = userId;
+	return this;
+    }
+
+    /**
+     * @return user id of last modifying user
+     */
+    public String getLastModifiedBy() {
+	return lastModifiedBy;
+    }
+
+    /**
+     * @return returns true if doi is not null and not empty
+     */
+    public boolean hasDoi() {
+	String doi = this.getDoi();
+	return doi != null && !doi.isEmpty();
     }
 }

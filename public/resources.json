@@ -212,8 +212,7 @@
 		"hasPart": 
 		{
 			"@id": "http://purl.org/dc/terms/hasPart",
-			"@type": "@id",
-			"@container": "@list"
+			"@type": "@id"
 		},
 
 		"isPartOf": 
@@ -394,14 +393,6 @@
 		"hasTransformer": "http://hbz-nrw.de/regal#hasTransformer",
 		"hasData": "http://hbz-nrw.de/regal#hasData",
 		"isAggregatedBy": "http://www.openarchives.org/ore/terms/isAggregatedBy",
-		"createdBy": {
-			"@id": "http://hbz-nrw.de/regal#createdBy",
-			"label": "Angelegt durch"
-		},
-		"isDescribedBy":{
-			"@type":"@id",
-			"@id":"http://www.openarchives.org/ore/terms/isDescribedBy",
-			"label":"Beschrieben durch"
-		}
+		"lastModifiedBy": "http://hbz-nrw.de/regal#lastModifiedBy"
 	}
 }
