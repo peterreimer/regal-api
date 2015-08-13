@@ -174,12 +174,18 @@ public class Create extends RegalAction {
 
     private void updateTransformer(List<String> transformers, Node node) {
 	node.removeAllContentModels();
+
 	if ("public".equals(node.getPublishScheme())) {
 	    node.addTransformer(new Transformer("oaidc"));
 	}
+	String type = node.getContentType();
 	if (node.hasUrn()) {
 	    node.addTransformer(new Transformer("epicur"));
-	    node.addTransformer(new Transformer("aleph"));
+	    if ("monograph".equals(type) || "journal".equals(type)
+		    || "webpage".equals(type))
+		if (node.hasLinkToCatalogId()) {
+		    node.addTransformer(new Transformer("aleph"));
+		}
 	}
 
 	if (transformers != null) {
