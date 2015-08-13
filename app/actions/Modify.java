@@ -189,11 +189,7 @@ public class Modify extends RegalAction {
 
 	    File file = CopyUtils.copyStringToFile(content);
 	    node.setMetadataFile(file.getAbsolutePath());
-	    if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
-		node.addTransformer(new Transformer("aleph"));
-	    } else {
-		node.removeTransformer("aleph");
-	    }
+
 	    if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
 		List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
 			archive.fedora.Vocabulary.REL_LOBID_DOI, content,
@@ -202,6 +198,7 @@ public class Modify extends RegalAction {
 		    node.setDoi(dois.get(0));
 		}
 	    }
+	    updateTransformer(node.getTransformer(), node);
 	    Globals.fedora.updateNode(node);
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
@@ -210,6 +207,11 @@ public class Modify extends RegalAction {
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
 	}
+    }
+
+    private void updateTransformer(List<Transformer> transformer, Node node) {
+	// TODO Auto-generated method stub
+
     }
 
     private void reindexNodeAndParent(Node node) {
