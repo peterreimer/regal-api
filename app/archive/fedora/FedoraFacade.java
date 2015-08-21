@@ -229,6 +229,7 @@ public class FedoraFacade {
 	    if (node.getConfFile() != null) {
 		utils.createConfStream(node);
 	    }
+
 	    // utils.createRelsExt(node);
 	    utils.updateRelsExt(node);
 	} catch (Exception e) {
