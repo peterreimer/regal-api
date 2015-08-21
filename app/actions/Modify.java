@@ -265,19 +265,13 @@ public class Modify extends RegalAction {
      */
     String addUrn(Node node, String snid) {
 	String subject = node.getPid();
-	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = node.getMetadata();
 	if (node.hasUrn())
 	    throw new HttpArchiveException(409, subject
 		    + " already has a urn. Leave unmodified!");
+	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String urn = generateUrn(subject, snid);
-	metadata = RdfUtils.addTriple(subject, hasUrn, urn, true, metadata,
-		RDFFormat.NTRIPLES);
 	node.addTransformer(new Transformer("epicur"));
-	updateMetadata(node, metadata);
-	node = new Read().readNode(node.getPid());
-	makeOAISet(node);
-	return "Update " + subject + "! Urn has been added.";
+	return addMetadataField(node, hasUrn, urn);
     }
 
     /**
@@ -711,4 +705,14 @@ public class Modify extends RegalAction {
 	return doi;
     }
 
+    public String addMetadataField(Node node, String pred, String obj) {
+	String metadata = node.getMetadata();
+	metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata,
+		RDFFormat.NTRIPLES);
+	updateMetadata(node, metadata);
+	node = new Read().readNode(node.getPid());
+	makeOAISet(node);
+	return "Update " + node.getPid() + "! " + pred + " has been added.";
+
+    }
 }
