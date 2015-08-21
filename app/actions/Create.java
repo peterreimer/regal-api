@@ -165,7 +165,12 @@ public class Create extends RegalAction {
 	    }
 	    Globals.fedora.linkToParent(node, parentPid);
 	    Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	    updateIndex(node.getPid());
+	    String title = new Read().readMetadata(node, "title");
+	    String parentTitle = new Read().readMetadata(parentPid, "title");
+	    if (title == null && parentTitle != null) {
+		new Modify().addMetadataField(node,
+			Globals.profile.nMap.get("title").uri, parentTitle);
+	    }
 	    updateIndex(parentPid);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
