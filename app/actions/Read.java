@@ -413,7 +413,8 @@ public class Read extends RegalAction {
      */
     public String readMetadata(String pid, String field) {
 	Node node = internalReadNode(pid);
-	return readMetadata(node, field);
+	String result = readMetadata(node, field);
+	return result == null ? "No " + field : result;
     }
 
     /**
@@ -432,7 +433,7 @@ public class Read extends RegalAction {
 		List<String> value = RdfUtils.findRdfObjects(node.getPid(),
 			pred, metadata, RDFFormat.NTRIPLES);
 
-		return value.isEmpty() ? "No " + field : value.get(0);
+		return value.isEmpty() ? null : value.get(0);
 	    }
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
