@@ -444,6 +444,13 @@ public class Resource extends MyController {
 		}
 		return delete.delete(nodes);
 	    });
+	    List<Throwable> errors = bulk.getErrors();
+	    if (!errors.isEmpty()) {
+		if (errors.size() == 1) {
+		    return JsonMessage(new Message(errors.get(0), 500));
+		}
+		return JsonMessage(new Message(errors.toString(), 500));
+	    }
 	    response().setHeader("Transfer-Encoding", "Chunked");
 	    return ok(bulk.getChunks());
 	});
