@@ -16,6 +16,7 @@
  */
 package actions;
 
+import helper.HttpArchiveError;
 import helper.HttpArchiveException;
 
 import java.util.List;
@@ -102,9 +103,8 @@ public class Delete extends RegalAction {
 	    }
 	}
 
-	throw new HttpArchiveException(
-		405,
-		"At least one of the child objects has a urn or doi. Therefore the whole structure will not be deleted.");
+	throw new HttpArchiveError(405,
+		"At least one of the child objects has a urn or doi. Deletion aborted!");
     }
 
     public boolean nodesArePersistent(List<Node> nodes) {
