@@ -198,7 +198,6 @@ public class Modify extends RegalAction {
 		    node.setDoi(dois.get(0));
 		}
 	    }
-	    updateTransformer(node.getTransformer(), node);
 	    Globals.fedora.updateNode(node);
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
@@ -207,11 +206,6 @@ public class Modify extends RegalAction {
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
 	}
-    }
-
-    private void updateTransformer(List<Transformer> transformer, Node node) {
-	// TODO Auto-generated method stub
-
     }
 
     private void reindexNodeAndParent(Node node) {
@@ -320,7 +314,7 @@ public class Modify extends RegalAction {
 		return addUrn(n, snid);
 	    }
 	}
-	return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
+	return "Not Updated " + n.getPid() + " " + n.getCreationDate()
 		+ " is not before " + fromBefore + " or contentType "
 		+ contentType + " is not allowed to carry urn.";
     }
@@ -344,7 +338,7 @@ public class Modify extends RegalAction {
 		    return MyController.mapper.writeValueAsString(addDoi(n));
 		}
 	    }
-	    return "\n Not Updated " + n.getPid() + " " + n.getCreationDate()
+	    return "Not Updated " + n.getPid() + " " + n.getCreationDate()
 		    + " is not before " + fromBefore + " or contentType "
 		    + contentType + " is not allowed to carry urn.";
 	} catch (Exception e) {
