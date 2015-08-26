@@ -435,18 +435,25 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
     public static Promise<Result> deleteResource(@PathParam("pid") String pid,
 	    @QueryParam("purge") String purge) {
-	return new BulkActionAccessor().call((userId) -> {
-	    List<Node> list = Globals.fedora.listComplexObject(pid);
-	    BulkAction bulk = new BulkAction();
-	    bulk.executeOnNodes(list, userId, nodes -> {
-		if ("true".equals(purge)) {
-		    return delete.purge(nodes);
-		}
-		return delete.delete(nodes);
-	    });
-	    response().setHeader("Transfer-Encoding", "Chunked");
-	    return ok(bulk.getChunks());
-	});
+	return new BulkActionAccessor()
+		.call((userId) -> {
+		    List<Node> list = Globals.fedora.listComplexObject(pid);
+		    BulkAction bulk = new BulkAction();
+		    bulk.executeOnNodes(
+			    list,
+			    userId,
+			    nodes -> {
+				if ("true".equals(purge)) {
+				    return delete.purge(nodes);
+				}
+				if (delete.nodesArePersistent(list))
+				    throw new HttpArchiveException(405,
+					    "Structure contains persistent objects with urn or doi! Deletion aborted!)");
+				return delete.delete(nodes);
+			    });
+		    response().setHeader("Transfer-Encoding", "Chunked");
+		    return ok(bulk.getChunks());
+		});
     }
 
     @ApiOperation(produces = "application/json", nickname = "deleteSeq", value = "deleteSeq", notes = "Deletes a resources ordering definition for it's children objects", response = Message.class, httpMethod = "DELETE")
@@ -483,17 +490,24 @@ public class Resource extends MyController {
     public static Promise<Result> deleteResources(
 	    @QueryParam("namespace") String namespace,
 	    @QueryParam("purge") String purge) {
-	return new BulkActionAccessor().call((userId) -> {
-	    actions.BulkAction bulk = new actions.BulkAction();
-	    bulk.execute(namespace, userId, nodes -> {
-		if ("true".equals(purge)) {
-		    return delete.purge(nodes);
-		}
-		return delete.delete(nodes);
-	    });
-	    response().setHeader("Transfer-Encoding", "Chunked");
-	    return ok(bulk.getChunks());
-	});
+	return new BulkActionAccessor()
+		.call((userId) -> {
+		    actions.BulkAction bulk = new actions.BulkAction();
+		    bulk.execute(
+			    namespace,
+			    userId,
+			    nodes -> {
+				if ("true".equals(purge)) {
+				    return delete.purge(nodes);
+				}
+				if (delete.nodesArePersistent(nodes))
+				    throw new HttpArchiveException(405,
+					    "Structure contains persistent objects with urn or doi! Deletion aborted!)");
+				return delete.delete(nodes);
+			    });
+		    response().setHeader("Transfer-Encoding", "Chunked");
+		    return ok(bulk.getChunks());
+		});
     }
 
     @ApiOperation(produces = "application/json,text/html", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
