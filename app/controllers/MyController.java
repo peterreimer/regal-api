@@ -403,35 +403,42 @@ public class MyController extends Controller {
      */
     public static class ModifyAction {
 	Promise<Result> call(String pid, NodeAction ca) {
-	    return Promise.promise(() -> {
-		String userId = "0";
-		try {
-		    String role = (String) Http.Context.current().args
-			    .get("role");
-		    userId = request().getHeader("UserId");
-		    play.Logger.debug("Try to access with role: " + role
-			    + "and user id " + userId);
-		    if (!modifyingAccessIsAllowed(role)) {
-			return AccessDenied();
-		    }
-		    Node node = null;
-		    try {
-			node = read.internalReadNode(pid);
-			node.setLastModifiedBy(userId);
-		    } catch (Exception e) {
-			play.Logger.debug(
-				"Try to modify resource that can not be read!",
-				e);
-		    }
-		    return ca.exec(node);
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (HttpArchiveError e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
-		}
-	    });
+	    return Promise
+		    .promise(() -> {
+			String userId = "0";
+			try {
+			    String role = (String) Http.Context.current().args
+				    .get("role");
+			    userId = request().getHeader("UserId");
+			    play.Logger.debug("Try to access with role: "
+				    + role + "and user id " + userId);
+			    if (!modifyingAccessIsAllowed(role)) {
+				return AccessDenied();
+			    }
+			    Node node = null;
+			    try {
+				node = read.internalReadNode(pid);
+				node.setLastModifiedBy(userId);
+			    } catch (Exception e) {
+				play.Logger
+					.debug("Try to modify resource that can not be read!",
+						e);
+			    }
+
+			    Result result = ca.exec(node);
+			    if (userId != null && !userId.equals("0")
+				    && !userId.equals("1")
+				    && !userId.equals("UrnAllocator")) {
+				play.Logger.info(json(modify
+					.setObjectTimestamp(node)));
+			    }
+			    return result;
+			} catch (HttpArchiveException e) {
+			    return JsonMessage(new Message(e, e.getCode()));
+			} catch (Exception e) {
+			    return JsonMessage(new Message(e, 500));
+			}
+		    });
 	}
     }
 
