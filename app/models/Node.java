@@ -66,11 +66,13 @@ public class Node {
     private String metadataFile = null;
     private String seqFile = null;
     private String uploadFile = null;
+    private String objectTimestampFile = null;
     private List<Link> links = new Vector<Link>();
     private List<Transformer> transformer = new Vector<Transformer>();
 
     private String metadata = null;
     private String seq = null;
+    private String objectTimestamp = null;
 
     private String pid = null;
 
@@ -883,6 +885,11 @@ public class Node {
 	if (lastModifiedBy != null)
 	    aboutMap.put("lastModifiedBy", getLastModifiedBy());
 	aboutMap.put("modified", getLastModified());
+	if (objectTimestamp != null) {
+	    aboutMap.put("objectTimestamp", objectTimestamp);
+	} else {
+	    aboutMap.put("objectTimestamp", getLastModified());
+	}
 	aboutMap.put("created", getCreationDate());
 	aboutMap.put("describes", this.getAggregationUri());
 	rdf.put("isDescribedBy", aboutMap);
@@ -969,6 +976,7 @@ public class Node {
 	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
 	cmap.put("nodeType", REL_IS_NODE_TYPE);
 	cmap.put("modified", "http://purl.org/dc/terms/modified");
+	cmap.put("objectTimestamp", "http://hbz-nrw.de/regal#objectTimestamp");
 	cmap.put("created", "http://purl.org/dc/terms/created");
 
 	pmap = new HashMap<String, Object>();
@@ -1404,4 +1412,21 @@ public class Node {
 	String doi = this.getDoi();
 	return doi != null && !doi.isEmpty();
     }
+
+    public String getObjectTimestampFile() {
+	return objectTimestampFile;
+    }
+
+    public void setObjectTimestampFile(String path) {
+	this.objectTimestampFile = path;
+    }
+
+    public void setObjectTimestamp(String timestamp) {
+	objectTimestamp = timestamp;
+    }
+
+    public String getObjectTimestamp() {
+	return objectTimestamp;
+    }
+
 }
