@@ -16,20 +16,18 @@
  */
 package controllers;
 
+import helper.HttpArchiveError;
 import helper.HttpArchiveException;
 
+import java.io.IOException;
 import java.io.StringWriter;
-import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.culturegraph.mf.morph.functions.Regexp;
 
 import models.Globals;
 import models.Message;
@@ -47,7 +45,6 @@ import actions.Read;
 import actions.Transform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.InetAddresses;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
@@ -162,11 +159,15 @@ public class MyController extends Controller {
 	}
     }
 
-    protected static String json(Object obj) throws Exception {
-	StringWriter w = new StringWriter();
-	mapper.writeValue(w, obj);
-	String result = w.toString();
-	return result;
+    protected static String json(Object obj) {
+	try {
+	    StringWriter w = new StringWriter();
+	    mapper.writeValue(w, obj);
+	    String result = w.toString();
+	    return result;
+	} catch (IOException e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     /**
@@ -325,6 +326,11 @@ public class MyController extends Controller {
 				return HtmlMessage(new Message(e, e.getCode()));
 			    }
 			    return JsonMessage(new Message(e, e.getCode()));
+			} catch (HttpArchiveError e) {
+			    if (request().accepts("text/html")) {
+				return HtmlMessage(new Message(e, e.getCode()));
+			    }
+			    return JsonMessage(new Message(e, e.getCode()));
 			} catch (Exception e) {
 			    if (request().accepts("text/html")) {
 				return HtmlMessage(new Message(e, 500));
@@ -356,6 +362,8 @@ public class MyController extends Controller {
 		    return ca.exec(node);
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (HttpArchiveError e) {
+		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
 		    return JsonMessage(new Message(e, 500));
 		}
@@ -379,6 +387,8 @@ public class MyController extends Controller {
 		    }
 		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (HttpArchiveError e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
 		    return JsonMessage(new Message(e, 500));
@@ -416,6 +426,8 @@ public class MyController extends Controller {
 		    return ca.exec(node);
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (HttpArchiveError e) {
+		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
 		    return JsonMessage(new Message(e, 500));
 		}
@@ -439,6 +451,8 @@ public class MyController extends Controller {
 		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (HttpArchiveError e) {
+		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
 		    return JsonMessage(new Message(e, 500));
 		}
@@ -461,6 +475,8 @@ public class MyController extends Controller {
 		    }
 		    return ca.exec(request().getHeader("UserId"));
 		} catch (HttpArchiveException e) {
+		    return JsonMessage(new Message(e, e.getCode()));
+		} catch (HttpArchiveError e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {
 		    return JsonMessage(new Message(e, 500));
