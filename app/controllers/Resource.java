@@ -168,28 +168,14 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
-	try {
-	    response().setHeader("Access-Control-Allow-Origin", "*");
-	    if (request().accepts("text/html"))
-		return asHtml(pid);
-	    if (request().accepts("application/rdf+xml"))
-		return asRdf(pid);
-	    if (request().accepts("text/plain"))
-		return asRdf(pid);
-	    return asJson(pid);
-	} catch (HttpArchiveException e) {
-	    return Promise.promise(new Function0<Result>() {
-		public Result apply() {
-		    return JsonMessage(new Message(e, e.getCode()));
-		}
-	    });
-	} catch (Exception e) {
-	    return Promise.promise(new Function0<Result>() {
-		public Result apply() {
-		    return JsonMessage(new Message(e, 500));
-		}
-	    });
-	}
+	response().setHeader("Access-Control-Allow-Origin", "*");
+	if (request().accepts("text/html"))
+	    return asHtml(pid);
+	if (request().accepts("application/rdf+xml"))
+	    return asRdf(pid);
+	if (request().accepts("text/plain"))
+	    return asRdf(pid);
+	return asJson(pid);
     }
 
     @ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
@@ -612,15 +598,10 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asHtml(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    try {
-		List<Node> nodes = new ArrayList<Node>();
-		nodes.add(node);
-		response()
-			.setHeader("Content-Type", "text/html; charset=utf-8");
-		return ok(resource.render(json(nodes).toString()));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	    List<Node> nodes = new ArrayList<Node>();
+	    nodes.add(node);
+	    response().setHeader("Content-Type", "text/html; charset=utf-8");
+	    return ok(resource.render(json(nodes).toString()));
 	});
     }
 
