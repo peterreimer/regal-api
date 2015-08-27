@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -911,6 +912,39 @@ public class Node {
 	return rdf;
     }
 
+    public Map<String, Object> getLdShortStyle() {
+	List<Link> ls = getLinks();
+	Map<String, Object> rdf = new HashMap<String, Object>();
+	rdf.put("@id", getPid());
+	for (Link l : ls) {
+	    if (Globals.profile.nMap.get("title").uri.equals(l.getPredicate())) {
+		addLinkToJsonMap(rdf, l);
+		break;
+	    }
+	}
+	addPartsToJsonMap(rdf);
+	rdf.remove("isNodeType");
+	rdf.put("contentType", getContentType());
+	if (parentPid != null)
+	    rdf.put("parentPid", parentPid);
+	if (getMimeType() != null && !getMimeType().isEmpty()) {
+	    Map<String, Object> hasDataMap = new HashMap<String, Object>();
+	    hasDataMap.put("@id", getDataUri());
+	    hasDataMap.put("format", getMimeType());
+	    hasDataMap.put("size", getFileSize());
+	    if (getChecksum() != null) {
+		Map<String, Object> checksum = new HashMap<String, Object>();
+		checksum.put("checksumValue", getChecksum());
+		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
+		checksum.put("type",
+			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		hasDataMap.put("checksum", checksum);
+	    }
+	    rdf.put("hasData", hasDataMap);
+	}
+	return rdf;
+    }
+
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
 
 	Map<String, Object> resolvedObject = null;
@@ -1379,6 +1413,15 @@ public class Node {
 	map.remove("@context");
 	return map;
 
+    }
+
+    /**
+     * @return a map without the context document
+     */
+    public Map<String, Object> getLdWithoutContextShortStyle() {
+	Map<String, Object> map = getLdShortStyle();
+	map.remove("@context");
+	return map;
     }
 
     /**
