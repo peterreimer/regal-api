@@ -16,6 +16,8 @@
  */
 package actions;
 
+import helper.HttpArchiveError;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -139,6 +141,9 @@ public class BulkAction {
 		} catch (Exception e) {
 		    play.Logger.warn("", e);
 		    errors.add(e);
+		} catch (HttpArchiveError e) {
+		    play.Logger.warn("", e);
+		    errors.add(e);
 		}
 	    } while (until < nodes.size());
 	    messageOut.write("Process " + nodes.size() + " nodes!\n");
@@ -148,8 +153,12 @@ public class BulkAction {
 	    } else {
 		messageOut.write("\nSuccessfully Finished\n");
 	    }
+
 	} catch (Exception e) {
 	    play.Logger.error("", e);
+	    errors.add(e);
+	} catch (HttpArchiveError e) {
+	    play.Logger.warn("", e);
 	    errors.add(e);
 	} finally {
 	    messageOut.close();
@@ -178,6 +187,9 @@ public class BulkAction {
 		} catch (Exception e) {
 		    play.Logger.warn("", e);
 		    errors.add(e);
+		} catch (HttpArchiveError e) {
+		    play.Logger.warn("", e);
+		    errors.add(e);
 		}
 	    } while (until < nodes.size());
 	    messageOut.write("Process " + nodes.size() + " nodes!\n");
@@ -189,6 +201,9 @@ public class BulkAction {
 	    }
 	} catch (Exception e) {
 	    play.Logger.error("", e);
+	    errors.add(e);
+	} catch (HttpArchiveError e) {
+	    play.Logger.warn("", e);
 	    errors.add(e);
 	} finally {
 	    messageOut.close();
