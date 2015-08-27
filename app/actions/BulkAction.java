@@ -141,8 +141,10 @@ public class BulkAction {
 		    errors.add(e);
 		}
 	    } while (until < nodes.size());
+	    messageOut.write("Process " + nodes.size() + " nodes!\n");
 	    if (!errors.isEmpty()) {
-		messageOut.write(errors.size() + " errors occured!\n" + errors);
+		messageOut.write(errors.size() + " errors occured!\n" + errors
+			+ "\n");
 	    } else {
 		messageOut.write("\nSuccessfully Finished\n");
 	    }
@@ -178,9 +180,10 @@ public class BulkAction {
 		    errors.add(e);
 		}
 	    } while (until < nodes.size());
-	    messageOut.write("Process " + nodes.size() + " nodes!");
+	    messageOut.write("Process " + nodes.size() + " nodes!\n");
 	    if (!errors.isEmpty()) {
-		messageOut.write(errors.size() + " errors occured!\n" + errors);
+		messageOut.write(errors.size() + " errors occured!\n" + errors
+			+ "\n");
 	    } else {
 		messageOut.write("\nSuccessfully Finished\n");
 	    }
