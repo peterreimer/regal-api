@@ -69,9 +69,8 @@ public class Read extends RegalAction {
     public Node readNode(String pid) {
 	Node n = internalReadNode(pid);
 	if ("D".equals(n.getState())) {
-	    throw new HttpArchiveException(
-		    410,
-		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
+	    throw new HttpArchiveException(410, "The requested resource " + pid
+		    + " has been marked as deleted.");
 	}
 	addLabelsForParts(n);
 	writeNodeToCache(n);
