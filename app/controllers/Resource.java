@@ -538,18 +538,28 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
-    public static Promise<Result> listAllParts(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    if (request().accepts("text/html")) {
-		List<Node> result = read.getParts(node);
-		return ok(resource.render(json(result)));
-	    } else if (request().accepts("application/json")) {
-		return getJsonResult(read.getPartsAsTree(node));
-	    } else {
-		List<Node> result = read.getParts(node);
-		return asRdf(result);
-	    }
-	});
+	public static Promise<Result> listAllParts(@PathParam("pid") String pid,
+						   @QueryParam("style") String style) {
+	return new ReadMetadataAction().call(
+					     pid,
+					     node -> {
+						 try {
+
+						     if (request().accepts("text/html")) {
+							 List<Node> result = read.getParts(node);
+							 return ok(resource.render(json(result)));
+						     } else if (request().accepts("application/json")) {
+							 Map<String, Object> result = read.getPartsAsTree(
+													  node, style);
+							 return asJson(result);
+						     } else {
+							 List<Node> result = read.getParts(node);
+							 return asRdf(result);
+						     }
+						 } catch (Exception e) {
+						     return JsonMessage(new Message(e, 500));
+						 }
+					     });
     }
 
     private static Result asRdf(List<Node> result) {
