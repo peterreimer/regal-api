@@ -69,9 +69,8 @@ public class Read extends RegalAction {
     public Node readNode(String pid) {
 	Node n = internalReadNode(pid);
 	if ("D".equals(n.getState())) {
-	    throw new HttpArchiveException(
-		    410,
-		    "The requested resource has been marked as deleted. Please contact server's webmaster to receive an archived copy.");
+	    throw new HttpArchiveException(410, "The requested resource " + pid
+		    + " has been marked as deleted.");
 	}
 	addLabelsForParts(n);
 	writeNodeToCache(n);
@@ -194,8 +193,13 @@ public class Read extends RegalAction {
      *            a regal node
      * @return a tree of regal objects starting with the passed node as root
      */
-    public Map<String, Object> getPartsAsTree(Node node) {
-	Map<String, Object> nm = node.getLdWithoutContext();
+    public Map<String, Object> getPartsAsTree(Node node, String style) {
+	Map<String, Object> nm = null;
+	if ("short".equals(style)) {
+	    nm = node.getLdWithoutContextShortStyle();
+	} else {
+	    nm = node.getLdWithoutContext();
+	}
 	@SuppressWarnings("unchecked")
 	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
 		.get("hasPart");
@@ -204,7 +208,7 @@ public class Read extends RegalAction {
 	    for (Map<String, Object> part : parts) {
 		String id = (String) part.get("@id");
 		Map<String, Object> child = new HashMap<String, Object>();
-		child.put(id, getPartsAsTree(internalReadNode(id)));
+		child.put(id, getPartsAsTree(internalReadNode(id), style));
 		children.add(child);
 	    }
 	    nm.put("hasPart", children);
