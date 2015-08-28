@@ -728,6 +728,7 @@ public class Modify extends RegalAction {
 		Node parent = new Read().readNode(pp);
 		result.put("parent", setObjectTimestamp(parent));
 	    }
+	    updateIndex(node.getPid());
 	    return result;
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
