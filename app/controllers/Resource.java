@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -488,17 +489,26 @@ public class Resource extends MyController {
 	return new ReadMetadataAction().call(
 		pid,
 		node -> {
-		    List<String> nodeIds = node.getPartsSorted().stream()
-			    .map((Link l) -> l.getObject())
-			    .collect(Collectors.toList());
-		    if ("short".equals(style)) {
-			return getJsonResult(nodeIds);
+		    try {
+
+			List<String> nodeIds = node.getPartsSorted().stream()
+				.map((Link l) -> l.getObject())
+				.collect(Collectors.toList());
+			if ("short".equals(style)) {
+			    return getJsonResult(nodeIds);
+			}
+			List<Node> result = read.getNodes(nodeIds);
+
+			if (request().accepts("text/html")) {
+			    return ok(resource.render(result.stream()
+				    .map(n -> n.getLd())
+				    .collect(Collectors.toList())));
+			} else {
+			    return getJsonResult(result);
+			}
+		    } catch (Exception e) {
+			return JsonMessage(new Message(e, 500));
 		    }
-		    List<Node> result = read.getNodes(nodeIds);
-		    if (request().accepts("text/html")) {
-			return ok(resource.render(json(result)));
-		    }
-		    return getJsonResult(result);
 
 		});
     }
@@ -506,47 +516,52 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json,text/html", nickname = "search", value = "search", notes = "Find resources", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> search(@QueryParam("q") String queryString,
 	    @QueryParam("from") int from, @QueryParam("until") int until) {
-	return new ReadMetadataAction().call(
-		null,
-		node -> {
-		    try {
-			SearchHits hits = Globals.search.query(new String[] {
-				Globals.PUBLIC_INDEX_PREF
-					+ Globals.namespaces[0],
-				Globals.PDFBOX_OCR_INDEX_PREF
-					+ Globals.namespaces[0] }, queryString,
-				from, until);
-			List<SearchHit> list = Arrays.asList(hits.getHits());
-			List<Map<String, Object>> hitMap = read
-				.hitlistToMap(list);
-			if (request().accepts("text/html")) {
-			    return ok(search.render(hitMap, queryString,
-				    hits.getTotalHits(), from, until));
-			} else {
-			    return getJsonResult(hitMap);
-			}
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
-		    }
-		    return getJsonResult(hitMap);
-		});
+	return new ReadMetadataAction()
+		.call(null,
+			node -> {
+			    List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
+			    try {
+				SearchHits hits = Globals.search
+					.query(new String[] {
+						Globals.PUBLIC_INDEX_PREF
+							+ Globals.namespaces[0],
+						Globals.PDFBOX_OCR_INDEX_PREF
+							+ Globals.namespaces[0] },
+						queryString, from, until);
+				List<SearchHit> list = Arrays.asList(hits
+					.getHits());
+				hitMap = read.hitlistToMap(list);
+				if (request().accepts("text/html")) {
+				    return ok(search.render(hitMap,
+					    queryString, hits.getTotalHits(),
+					    from, until));
+				} else {
+				    return getJsonResult(hitMap);
+				}
+			    } catch (Exception e) {
+				return JsonMessage(new Message(e, 500));
+			    }
+			});
     }
 
     @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listAllParts(@PathParam("pid") String pid,
-	    @QueryParam("style") String style) {
-	return new ReadMetadataAction().call(
-		pid,
+	    @QueryParam("style") String s) {
+	return new ReadMetadataAction().call(pid,
 		node -> {
 		    try {
-
+			String style = "short";
+			if (!"short".equals(s)) {
+			    style = "long";
+			}
 			if (request().accepts("text/html")) {
 			    List<Node> result = read.getParts(node);
-			    return ok(resource.render(json(result)));
+			    return ok(resource.render(result.stream()
+				    .map(n -> n.getLd())
+				    .collect(Collectors.toList())));
 			} else if (request().accepts("application/json")) {
-			    Map<String, Object> result = read.getPartsAsTree(
-				    node, style);
-			    return asJson(result);
+			    return getJsonResult(read.getPartsAsTree(node,
+				    style));
 			} else {
 			    List<Node> result = read.getParts(node);
 			    return asRdf(result);
