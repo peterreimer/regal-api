@@ -1,5 +1,5 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
-@(hits: List[Map[String,Object]])
+@(hits: List[Map[String,Object]],namespace: String)
 
 @main("") {
 
@@ -20,7 +20,7 @@
 <div class="container-fluid">
 <div class="row">
 	<div  class="col-md-11">
-		@tags.resourceView(hit,hit.get("@context").asInstanceOf[Map[String,Object]])
+		@tags.resourceView(hit,hit.get("@context").asInstanceOf[Map[String,Object]],namespace)
 	</div>
 <div class="col-md-1">
 <button type="button" class="btn btn-default" disabled ><span class="fa fa-edit"/>

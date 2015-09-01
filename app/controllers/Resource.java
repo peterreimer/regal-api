@@ -29,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -158,7 +157,7 @@ public class Resource extends MyController {
 		List<Node> nodes = read.listRepo(contentType, namespace, from,
 			until);
 		return ok(resource.render(nodes.stream().map(n -> n.getLd())
-			.collect(Collectors.toList())));
+			.collect(Collectors.toList()), Globals.namespaces[0]));
 	    } catch (HttpArchiveException e) {
 		return HtmlMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
@@ -500,9 +499,10 @@ public class Resource extends MyController {
 			List<Node> result = read.getNodes(nodeIds);
 
 			if (request().accepts("text/html")) {
-			    return ok(resource.render(result.stream()
-				    .map(n -> n.getLd())
-				    .collect(Collectors.toList())));
+			    return ok(resource.render(
+				    result.stream().map(n -> n.getLd())
+					    .collect(Collectors.toList()),
+				    Globals.namespaces[0]));
 			} else {
 			    return getJsonResult(result);
 			}
@@ -534,7 +534,7 @@ public class Resource extends MyController {
 				if (request().accepts("text/html")) {
 				    return ok(search.render(hitMap,
 					    queryString, hits.getTotalHits(),
-					    from, until));
+					    from, until, Globals.namespaces[0]));
 				} else {
 				    return getJsonResult(hitMap);
 				}
@@ -547,29 +547,28 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listAllParts(@PathParam("pid") String pid,
 	    @QueryParam("style") String s) {
-	return new ReadMetadataAction().call(pid,
-		node -> {
-		    try {
-			String style = "short";
-			if (!"short".equals(s)) {
-			    style = "long";
-			}
-			if (request().accepts("text/html")) {
-			    List<Node> result = read.getParts(node);
-			    return ok(resource.render(result.stream()
-				    .map(n -> n.getLd())
-				    .collect(Collectors.toList())));
-			} else if (request().accepts("application/json")) {
-			    return getJsonResult(read.getPartsAsTree(node,
-				    style));
-			} else {
-			    List<Node> result = read.getParts(node);
-			    return asRdf(result);
-			}
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
-		    }
-		});
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		String style = "short";
+		if (!"short".equals(s)) {
+		    style = "long";
+		}
+		if (request().accepts("text/html")) {
+		    List<Node> result = read.getParts(node);
+		    return ok(resource.render(
+			    result.stream().map(n -> n.getLd())
+				    .collect(Collectors.toList()),
+			    Globals.namespaces[0]));
+		} else if (request().accepts("application/json")) {
+		    return getJsonResult(read.getPartsAsTree(node, style));
+		} else {
+		    List<Node> result = read.getParts(node);
+		    return asRdf(result);
+		}
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
     }
 
     private static Result asRdf(List<Node> result) {
@@ -648,21 +647,18 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asHtml(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    try {
-			List<Node> nodes = new ArrayList<Node>();
-			nodes.add(node);
-			response().setHeader("Content-Type",
-				"text/html; charset=utf-8");
-			return ok(resource.render(nodes.stream()
-				.map(n -> n.getLd())
-				.collect(Collectors.toList())));
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
-		    }
-		});
+	return new ReadMetadataAction().call(pid, node -> {
+	    try {
+		List<Node> nodes = new ArrayList<Node>();
+		nodes.add(node);
+		response()
+			.setHeader("Content-Type", "text/html; charset=utf-8");
+		return ok(resource.render(nodes.stream().map(n -> n.getLd())
+			.collect(Collectors.toList()), Globals.namespaces[0]));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
@@ -846,9 +842,10 @@ public class Resource extends MyController {
 			    nodes.add(result);
 			    response().setHeader("Content-Type",
 				    "text/html; charset=utf-8");
-			    return ok(resource.render(nodes.stream()
-				    .map(n -> n.getLd())
-				    .collect(Collectors.toList())));
+			    return ok(resource.render(
+				    nodes.stream().map(n -> n.getLd())
+					    .collect(Collectors.toList()),
+				    Globals.namespaces[0]));
 			} else {
 			    return getJsonResult(result);
 			}

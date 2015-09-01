@@ -1,6 +1,6 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@(hit: Map[String,Object],context:Map[String,Object])
+@(hit: Map[String,Object],context:Map[String,Object],namespace:String)
 
 <table class="table table-striped table-condensed">
 	@context match{
@@ -68,7 +68,7 @@
 		case a if v.startsWith("http") => {
 			@v
 		}
-		case a if v.startsWith("edoweb") => {
+		case a if v.startsWith(namespace) => {
 			/resource/@v
 		}
 		case _ => {
