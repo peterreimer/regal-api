@@ -102,9 +102,13 @@ public class Read extends RegalAction {
     }
 
     private Node compareDates(Node currentNode, Node oldestNode) {
-	Date currentNodeDate = currentNode.getLastModified();
+	Date currentNodeDate = currentNode.getObjectTimestamp();
+	if (currentNodeDate == null)
+	    currentNodeDate = currentNode.getLastModified();
 	if (oldestNode != null) {
-	    Date oldestNodeDate = oldestNode.getLastModified();
+	    Date oldestNodeDate = oldestNode.getObjectTimestamp();
+	    if (oldestNodeDate == null)
+		oldestNodeDate = oldestNode.getLastModified();
 	    if (currentNodeDate.after(oldestNodeDate)) {
 		oldestNode = currentNode;
 	    }

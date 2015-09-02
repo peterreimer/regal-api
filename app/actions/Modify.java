@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -715,9 +714,7 @@ public class Modify extends RegalAction {
 	    String userId) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	try {
-	    SimpleDateFormat dateFormat = new SimpleDateFormat(
-		    "yyyy-MM-dd'T'HH:mm:ssZ");
-	    String content = dateFormat.format(date);
+	    String content = Globals.dateFormat.format(date);
 	    File file = CopyUtils.copyStringToFile(content);
 	    node.setObjectTimestampFile(file.getAbsolutePath());
 	    node.setLastModifiedBy(userId);
