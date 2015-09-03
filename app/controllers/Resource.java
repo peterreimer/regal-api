@@ -37,14 +37,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.DublinCoreData;
+import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
-
-import models.Gatherconf;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -887,22 +886,14 @@ public class Resource extends MyController {
 
     public static Promise<Result> createVersion(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    try {
-		Node result = create.createWebpageVersion(node);
-		return getJsonResult(result);
-	    } catch (Exception e) {
-		throw new HttpArchiveException(500, e);
-	    }
+	    Node result = create.createWebpageVersion(node);
+	    return getJsonResult(result);
 	});
     }
 
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    try {
-		return getJsonResult(read.getStatus(node));
-	    } catch (Exception e) {
-		throw new HttpArchiveException(500, e);
-	    }
+	    return getJsonResult(read.getStatus(node));
 	});
     }
 
