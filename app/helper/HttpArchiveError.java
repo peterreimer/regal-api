@@ -14,28 +14,37 @@
  * limitations under the License.
  *
  */
-
-import org.junit.Test;
+package helper;
 
 /**
- * @author Jan Schnasse, schnasse@hbz-nrw.de Simple
- * 
- *         (JUnit) tests that can call all parts of a play app. If you are
- *         interested in mocking a whole application, see the wiki for more
- *         details.
+ * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
-@SuppressWarnings("javadoc")
-public class ApplicationTest {
+@SuppressWarnings({ "serial", "javadoc" })
+public class HttpArchiveError extends Error {
 
-    @Test
-    public void simpleCheck() {
-	int a = 1 + 1;
+    int code = 500;
+
+    public HttpArchiveError(int httpCode, String message) {
+	super(message);
+	code = httpCode;
     }
 
-    @Test
-    public void renderTemplate() {
+    public HttpArchiveError(int httpCode, Exception e) {
+	super(e);
+	code = httpCode;
+    }
 
+    public HttpArchiveError(int httpCode) {
+	code = httpCode;
+    }
+
+    public int getCode() {
+	return code;
+    }
+
+    public void setCode(int code) {
+	this.code = code;
     }
 
 }

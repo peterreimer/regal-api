@@ -1,4 +1,3 @@
-import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.running;
 import static play.test.Helpers.testServer;
 
@@ -13,10 +12,8 @@ import models.RegalObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import play.libs.WS;
 import actions.Create;
 import actions.Modify;
-import controllers.*;
 
 public class HeritrixTest {
     Create create;

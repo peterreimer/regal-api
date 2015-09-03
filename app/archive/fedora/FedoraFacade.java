@@ -220,16 +220,16 @@ public class FedoraFacade {
 		    utils.createUnManagedStream(node);
 		}
 	    }
-	    if (node.getMetadataFile() != null) {
-		utils.createMetadataStream(node);
-	    }
+
 	    if (node.getSeqFile() != null) {
 		utils.createSeqStream(node);
 	    }
 	    if (node.getConfFile() != null) {
 		utils.createConfStream(node);
 	    }
-
+	    if (node.getObjectTimestampFile() != null) {
+		utils.createObjectTimestampStream(node);
+	    }
 	    // utils.createRelsExt(node);
 	    utils.updateRelsExt(node);
 	} catch (Exception e) {
@@ -272,7 +272,19 @@ public class FedoraFacade {
 	getMetadataFromFedora(node);
 	getDataFromFedora(pid, node);
 	getConfFromFedora(pid, node);
+	getObjectTimestampFromFedora(node);
 	return node;
+    }
+
+    private void getObjectTimestampFromFedora(Node node) {
+	try {
+	    FedoraResponse response = new GetDatastreamDissemination(
+		    node.getPid(), "objectTimestamp").execute();
+	    node.setObjectTimestamp(CopyUtils.copyToString(
+		    response.getEntityInputStream(), "utf-8"));
+	} catch (Exception e) {
+	    // datastream with name metadata is optional
+	}
     }
 
     private void getDataFromFedora(String pid, Node node) {
@@ -365,6 +377,9 @@ public class FedoraFacade {
 	if (node.getConfFile() != null) {
 	    play.Logger.info("Write conf file to fedora");
 	    utils.updateConfStream(node);
+	}
+	if (node.getObjectTimestampFile() != null) {
+	    utils.updateObjectTimestampStream(node);
 	}
 	utils.linkContentModels(models, node);
 	utils.updateRelsExt(node);
