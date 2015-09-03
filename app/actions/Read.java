@@ -50,15 +50,15 @@ import org.elasticsearch.search.SearchHits;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.wordnik.swagger.core.util.JsonUtil;
-
 import play.Logger;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
 import archive.fedora.XmlUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * 
@@ -477,6 +477,8 @@ public class Read extends RegalAction {
     public String readConf(Node node) {
 	try {
 	    String confstring = node.getConf();
+	    if (confstring == null)
+		return "";
 	    ObjectMapper mapper = JsonUtil.mapper();
 	    Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
 	    String owDatestamp = new SimpleDateFormat("yyyyMMdd")
