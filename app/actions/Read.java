@@ -82,30 +82,50 @@ public class Read extends RegalAction {
      * 
      * @param node
      * @param contentType
-     *            if set, only parts of specific type will be analysed
+     *            if set, only parts of specific type will be analyzed
      * @return node
      */
     public Node getLastModifiedChild(Node node, String contentType) {
 	if (contentType == null || contentType.isEmpty()) {
 	    return getLastModifiedChild(node);
 	} else {
-	    Node last = null;
+	    Node oldestNode = null;
 	    for (Node n : getParts(node)) {
-		Date cur = n.getLastModified();
 		if (contentType.equals(n.getContentType())) {
-		    if (last != null) {
-			if (cur.after(last.getLastModified())) {
-			    last = n;
-			}
-		    } else {
-			last = n;
-		    }
+		    oldestNode = compareDates(n, oldestNode);
 		}
 	    }
-	    if (last == null)
+	    if (oldestNode == null)
 		return node;
-	    return last;
+	    return oldestNode;
 	}
+    }
+
+    private Node compareDates(Node currentNode, Node oldestNode) {
+	Date currentNodeDate = currentNode.getObjectTimestamp();
+	if (currentNodeDate == null)
+	    currentNodeDate = currentNode.getLastModified();
+	if (oldestNode != null) {
+	    Date oldestNodeDate = oldestNode.getObjectTimestamp();
+	    if (oldestNodeDate == null)
+		oldestNodeDate = oldestNode.getLastModified();
+	    if (currentNodeDate.after(oldestNodeDate)) {
+		oldestNode = currentNode;
+	    }
+	    // Special case: Since input has not to be sorted in any way, we
+	    // need a condition to prefer child nodes over parent nodes.
+	    // If both nodes have the same timestamp, the currentNode
+	    // will win, if it is NOT a parent the oldest.
+	    if (currentNodeDate.equals(oldestNodeDate)) {
+		if (!currentNode.getPid().equals(oldestNode.getParentPid())) {
+		    oldestNode = currentNode;
+		}
+	    }
+	} else {
+	    return currentNode;
+	}
+	return oldestNode;
+
     }
 
     /**
@@ -113,14 +133,11 @@ public class Read extends RegalAction {
      * @return child recently modified
      */
     public Node getLastModifiedChild(Node node) {
-	Node last = node;
+	Node oldestNode = node;
 	for (Node n : getParts(node)) {
-	    Date cur = n.getLastModified();
-	    if (cur.after(last.getLastModified())) {
-		last = n;
-	    }
+	    oldestNode = compareDates(n, oldestNode);
 	}
-	return last;
+	return oldestNode;
     }
 
     /**

@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -74,7 +73,7 @@ public class Node {
 
     private String metadata = null;
     private String seq = null;
-    private String objectTimestamp = null;
+    private Date objectTimestamp = null;
 
     private String pid = null;
 
@@ -1465,11 +1464,11 @@ public class Node {
 	this.objectTimestampFile = path;
     }
 
-    public void setObjectTimestamp(String timestamp) {
+    public void setObjectTimestamp(Date timestamp) {
 	objectTimestamp = timestamp;
     }
 
-    public String getObjectTimestamp() {
+    public Date getObjectTimestamp() {
 	return objectTimestamp;
     }
 
