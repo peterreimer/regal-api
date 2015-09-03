@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -754,22 +753,21 @@ public class Modify extends RegalAction {
 
     }
 
-    public Map<String, Object> setObjectTimestamp(Node node) {
+    public Map<String, Object> setObjectTimestamp(Node node, Date date,
+	    String userId) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	try {
-	    Date date = new Date();
-	    SimpleDateFormat dateFormat = new SimpleDateFormat(
-		    "yyyy-MM-dd'T'HH:mm:ssZ");
-	    String content = dateFormat.format(date);
+	    String content = Globals.dateFormat.format(date);
 	    File file = CopyUtils.copyStringToFile(content);
 	    node.setObjectTimestampFile(file.getAbsolutePath());
+	    node.setLastModifiedBy(userId);
 	    result.put("pid", node.getPid());
 	    result.put("timestamp", content);
 	    Globals.fedora.updateNode(node);
 	    String pp = node.getParentPid();
 	    if (pp != null) {
 		Node parent = new Read().readNode(pp);
-		result.put("parent", setObjectTimestamp(parent));
+		result.put("parent", setObjectTimestamp(parent, date, userId));
 	    }
 	    updateIndex(node.getPid());
 	    return result;

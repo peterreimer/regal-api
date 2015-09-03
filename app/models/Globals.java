@@ -16,22 +16,20 @@
  */
 package models;
 
-
 import helper.Heritrix;
+import helper.TaskManager;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.net.InetAddresses;
-
-import controllers.MyController;
-
-import helper.TaskManager;
 import play.Play;
 import archive.fedora.ApplicationProfile;
 import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
 import archive.search.SearchFacade;
+
+import com.google.common.net.InetAddresses;
 
 /**
  * Global Settings and accessors for Elasticsearch and Fedora
@@ -248,6 +246,9 @@ public class Globals {
     public static Map<String, String> ipWhiteList = buildIpList(Play
 	    .application().configuration().getString("regal-api.ipWhiteList")
 	    .split("\\s*,[,\\s]*"));
+
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat(
+	    "yyyy-MM-dd'T'HH:mm:ssZ");
 
     public static Map<String, String> buildIpList(String[] ipWhiteList) {
 	Map<String, String> ips = new HashMap<String, String>();

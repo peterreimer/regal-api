@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import models.Globals;
 import models.Link;
 import models.Node;
 import models.Transformer;
@@ -280,10 +281,11 @@ public class FedoraFacade {
 	try {
 	    FedoraResponse response = new GetDatastreamDissemination(
 		    node.getPid(), "objectTimestamp").execute();
-	    node.setObjectTimestamp(CopyUtils.copyToString(
-		    response.getEntityInputStream(), "utf-8"));
+	    String objectTimestamp = CopyUtils.copyToString(
+		    response.getEntityInputStream(), "utf-8");
+	    node.setObjectTimestamp(Globals.dateFormat.parse(objectTimestamp));
 	} catch (Exception e) {
-	    // datastream with name metadata is optional
+	    play.Logger.debug(node.getPid() + ": No objectTimestamp found");
 	}
     }
 

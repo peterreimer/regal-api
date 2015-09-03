@@ -77,7 +77,7 @@ public class Node {
 
     private String conf = null;
 
-    private String objectTimestamp = null;
+    private Date objectTimestamp = null;
 
     private String pid = null;
 
@@ -1511,11 +1511,11 @@ public class Node {
 	this.objectTimestampFile = path;
     }
 
-    public void setObjectTimestamp(String timestamp) {
+    public void setObjectTimestamp(Date timestamp) {
 	objectTimestamp = timestamp;
     }
 
-    public String getObjectTimestamp() {
+    public Date getObjectTimestamp() {
 	return objectTimestamp;
     }
 
