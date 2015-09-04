@@ -54,7 +54,7 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "index", value = "index", notes = "Adds resource to private elasticsearch index", response = List.class, httpMethod = "POST")
     public static Promise<Result> index(@PathParam("pid") String pid,
 	    @QueryParam("index") final String indexName) {
-	return new ModifyAction().call(pid, node -> {
+	return new IndexAction().call(pid, node -> {
 	    String result = index.index(node);
 	    return JsonMessage(new Message(result));
 	});

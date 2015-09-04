@@ -446,6 +446,40 @@ public class MyController extends Controller {
      * @author Jan Schnasse
      *
      */
+    public static class IndexAction {
+	Promise<Result> call(String pid, NodeAction ca) {
+	    return Promise
+		    .promise(() -> {
+			try {
+			    String role = (String) Http.Context.current().args
+				    .get("role");
+			    play.Logger.debug("Try to access with role: "
+				    + role + ".");
+			    if (!modifyingAccessIsAllowed(role)) {
+				return AccessDenied();
+			    }
+			    Node node = null;
+			    try {
+				node = read.readNode(pid);
+			    } catch (Exception e) {
+				play.Logger
+					.debug("Try to modify resource that can not be read!",
+						e);
+			    }
+			    return ca.exec(node);
+			} catch (HttpArchiveException e) {
+			    return JsonMessage(new Message(e, e.getCode()));
+			} catch (Exception e) {
+			    return JsonMessage(new Message(e, 500));
+			}
+		    });
+	}
+    }
+
+    /**
+     * @author Jan Schnasse
+     *
+     */
     public static class CreateAction {
 	Promise<Result> call(Action ca) {
 	    return Promise.promise(() -> {
