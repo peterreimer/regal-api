@@ -1,5 +1,3 @@
-package archive.fedora;
-
 /*
  * Copyright 2012 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -17,6 +15,8 @@ package archive.fedora;
  *
  */
 
+package archive.fedora;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,15 +27,14 @@ import org.junit.Test;
 import org.openrdf.model.Graph;
 import org.openrdf.rio.RDFFormat;
 
-import archive.fedora.RdfUtils;
-import archive.fedora.XmlUtils;
+import base.BaseModelTest;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
 @SuppressWarnings("javadoc")
-public class RdfUtilsTest {
+public class RdfUtilsTest extends BaseModelTest {
 
     @Test
     public void testInputStreamToGraph() throws URISyntaxException, IOException {
