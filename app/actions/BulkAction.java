@@ -233,8 +233,4 @@ public class BulkAction {
     public Chunks<String> getChunks() {
 	return chunks;
     }
-
-    public List<Throwable> getErrors() {
-	return errors;
-    }
 }

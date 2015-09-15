@@ -23,6 +23,9 @@ import java.security.KeyStore;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import models.Globals;
+import models.Node;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -31,9 +34,6 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.impl.MultiPartWriter;
-
-import models.Globals;
-import models.Node;
 
 /**
  * @author Jan Schnasse
@@ -44,6 +44,9 @@ public class DataciteClient {
     Client webclient = null;
     boolean testMode = false;
 
+    /**
+     * The DataciteClient can mint and register dois via the datacite api
+     */
     public DataciteClient() {
 	String user = Globals.dataCiteUser;
 	String password = Globals.dataCitePasswd;
@@ -76,10 +79,21 @@ public class DataciteClient {
 	}
     }
 
+    /**
+     * @param t
+     *            if true, all calls will be made in testmode
+     */
     public void setTestMode(boolean t) {
 	testMode = t;
     }
 
+    /**
+     * @param doi
+     *            the identifier
+     * @param objectUrl
+     *            the url
+     * @return the http response as string
+     */
     public String mintDoiAtDatacite(String doi, String objectUrl) {
 	String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
 		: "https://mds.datacite.org/doi";
@@ -91,6 +105,13 @@ public class DataciteClient {
 	return response;
     }
 
+    /**
+     * @param node
+     *            the node
+     * @param xml
+     *            the datacite xml
+     * @return the http response as string
+     */
     public String registerMetadataAtDatacite(Node node, String xml) {
 	String url = testMode ? "https://mds.datacite.org/metadata?testMode=true"
 		: "https://mds.datacite.org/metadata";

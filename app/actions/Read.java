@@ -215,6 +215,9 @@ public class Read extends RegalAction {
     /**
      * @param node
      *            a regal node
+     * @param style
+     *            if "short".equals(style), a shortened representation will be
+     *            returned
      * @return a tree of regal objects starting with the passed node as root
      */
     public Map<String, Object> getPartsAsTree(Node node, String style) {

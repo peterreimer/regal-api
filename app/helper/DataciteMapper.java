@@ -29,8 +29,16 @@ import models.Pair;
  * @author Jan Schnasse
  *
  */
+@SuppressWarnings("unchecked")
 public class DataciteMapper {
 
+    /**
+     * @param doi
+     *            the doi identifier
+     * @param ld
+     *            the object as json-ld linked data in a map
+     * @return an object containing data for datacite
+     */
     public static DataciteRecord getDataciteRecord(String doi,
 	    Map<String, Object> ld) {
 	DataciteRecord rec = new DataciteRecord(doi);
@@ -58,7 +66,8 @@ public class DataciteMapper {
 	    rec.formats
 		    .add(new Pair<String, String>("application/pdf", "mime"));
 	} catch (NullPointerException e) {
-	    play.Logger.debug("", e);
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'Format' not found!");
 	}
     }
 
@@ -70,7 +79,8 @@ public class DataciteMapper {
 		rec.sizes.add(new Pair<String, String>(bibDetails, null));
 	    }
 	} catch (NullPointerException e) {
-	    play.Logger.debug("", e);
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'Sizes' not found!");
 	}
     }
 
@@ -108,13 +118,15 @@ public class DataciteMapper {
 
     private static void addDates(Map<String, Object> ld, DataciteRecord rec) {
 	try {
+
 	    Date creationDate = (Date) ((Map<String, Object>) ld
 		    .get("isDescribedBy")).get("created");
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	    rec.dates.add(new Pair<String, String>(dateFormat
 		    .format(creationDate), "Submitted"));
 	} catch (NullPointerException e) {
-	    play.Logger.debug("", e);
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'Submitted' not found!");
 	}
     }
 
@@ -129,7 +141,8 @@ public class DataciteMapper {
 		}
 	    }
 	} catch (NullPointerException e) {
-	    play.Logger.debug("", e);
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'Language' not found!");
 	}
     }
 
@@ -138,7 +151,8 @@ public class DataciteMapper {
 	try {
 	    rec.publicationYear = ((List<String>) ld.get("issued")).get(0);
 	} catch (NullPointerException e) {
-	    play.Logger.debug("", e);
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'PublicationYear' not found!");
 	}
     }
 
@@ -146,7 +160,8 @@ public class DataciteMapper {
 	try {
 	    rec.publisher = ((List<String>) ld.get("dc:publisher")).get(0);
 	} catch (NullPointerException e) {
-	    play.Logger.debug("", e);
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'Publisher' not found!");
 	}
     }
 
@@ -197,7 +212,6 @@ public class DataciteMapper {
 	    if (creators != null) {
 		for (Map<String, Object> item : creators) {
 		    String subject = (String) item.get("prefLabel");
-		    String id = (String) item.get("@id");
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
@@ -206,7 +220,6 @@ public class DataciteMapper {
 	    if (contributors != null) {
 		for (Map<String, Object> item : contributors) {
 		    String subject = (String) item.get("prefLabel");
-		    String id = (String) item.get("@id");
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }

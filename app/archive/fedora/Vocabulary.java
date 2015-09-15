@@ -123,5 +123,8 @@ public abstract class Vocabulary {
      */
     public final static String REL_MAB_527 = "http://hbz-nrw.de/regal#parallelEdition";
 
+    /**
+     * This is how lobid stores DOIs
+     */
     public final static String REL_LOBID_DOI = "http://purl.org/ontology/bibo/doi";
 }

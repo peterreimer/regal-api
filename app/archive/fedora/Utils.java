@@ -175,7 +175,6 @@ public class Utils {
     }
 
     void purgeRelationships(String pid, List<Link> list) {
-
 	for (Link link : list) {
 	    System.out.println("PURGE: " + addUriPrefix(pid) + " <"
 		    + link.getPredicate() + "> " + link.getObject());
@@ -184,8 +183,7 @@ public class Utils {
 			.predicate(link.getPredicate())
 			.object(link.getObject(), link.isLiteral()).execute();
 	    } catch (FedoraClientException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		play.Logger.debug("", e);
 	    }
 	}
     }
@@ -352,6 +350,12 @@ public class Utils {
 	}
     }
 
+    /**
+     * Sets a datastream objectTimestamp to the node
+     * 
+     * @param node
+     *            the node to update
+     */
     public void updateObjectTimestampStream(Node node) {
 	try {
 	    File file = new File(node.getObjectTimestampFile());
@@ -371,6 +375,11 @@ public class Utils {
 	}
     }
 
+    /**
+     * creates a objectTimestamp on node
+     * 
+     * @param node
+     */
     public void createObjectTimestampStream(Node node) {
 	try {
 	    Upload request = new Upload(new File(node.getObjectTimestampFile()));

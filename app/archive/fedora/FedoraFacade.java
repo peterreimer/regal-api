@@ -397,7 +397,7 @@ public class FedoraFacade {
 	try {
 	    GetObjectProfileResponse prof = new GetObjectProfile(node.getPid())
 		    .execute();
-	    node.setFileLabel(prof.getLabel());
+	    node.setLabel(prof.getLabel());
 	    node.setLastModified(prof.getLastModifiedDate());
 	    node.setCreationDate(prof.getCreateDate());
 	} catch (FedoraClientException e) {

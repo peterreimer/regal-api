@@ -48,6 +48,10 @@ import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 
+import actions.Create;
+import actions.Read;
+import actions.RegalAction;
+import actions.Transform;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
@@ -643,11 +647,22 @@ public class Modify extends RegalAction {
      * @return a key value structure as feedback to the client
      */
     public Map<String, Object> addDoi(Node node) {
+	String contentType = node.getContentType();
+	if ("file".equals(contentType) || "issue".equals(contentType)
+		|| "volume".equals(contentType)) {
+	    throw new HttpArchiveException(
+		    412,
+		    node.getPid()
+			    + " resource is of type "
+			    + contentType
+			    + ". It is not allowed to mint Dois for this type. Leave unmodified!");
+	}
 	Map<String, Object> result = new HashMap<String, Object>();
 	String doi = node.getDoi();
 	result.put("Doi", doi);
 	if (doi == null || doi.isEmpty()) {
-	    node.setDoi(createDoiIdentifier(node));
+	    doi = createDoiIdentifier(node);
+	    node.setDoi(doi);
 	    RegalObject o = new RegalObject();
 	    o.getIsDescribedBy().setDoi(node.getDoi());
 	    new Create().patchResource(node, o);
@@ -742,6 +757,15 @@ public class Modify extends RegalAction {
 	}
     }
 
+    /**
+     * the node
+     * 
+     * @param pred
+     *            Rdf-Predicate will be added to /metadata of node
+     * @param obj
+     *            Rdf-Object will be added to /metadata of node
+     * @return a user message as string
+     */
     public String addMetadataField(Node node, String pred, String obj) {
 	String metadata = node.getMetadata();
 	metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata,
@@ -753,6 +777,15 @@ public class Modify extends RegalAction {
 
     }
 
+    /**
+     * @param node
+     *            what was modified?
+     * @param date
+     *            when was modified?
+     * @param userId
+     *            who has modified?
+     * @return a user message in form of a map
+     */
     public Map<String, Object> setObjectTimestamp(Node node, Date date,
 	    String userId) {
 	Map<String, Object> result = new HashMap<String, Object>();

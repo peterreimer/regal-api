@@ -959,6 +959,10 @@ public class Node {
 	return rdf;
     }
 
+    /**
+     * @return linked data json optimized for displaying large trees. Most of
+     *         the metadata has been left out.
+     */
     public Map<String, Object> getLdShortStyle() {
 	List<Link> ls = getLinks();
 	Map<String, Object> rdf = new HashMap<String, Object>();
@@ -1503,18 +1507,32 @@ public class Node {
 	return doi != null && !doi.isEmpty();
     }
 
+    /**
+     * @return the objectTimestamp as file
+     */
     public String getObjectTimestampFile() {
 	return objectTimestampFile;
     }
 
+    /**
+     * @param path
+     *            a local file
+     */
     public void setObjectTimestampFile(String path) {
 	this.objectTimestampFile = path;
     }
 
+    /**
+     * @param timestamp
+     */
     public void setObjectTimestamp(Date timestamp) {
 	objectTimestamp = timestamp;
     }
 
+    /**
+     * @return the objectTimestamp is a date that tells a user about the recent
+     *         modification in an object tree
+     */
     public Date getObjectTimestamp() {
 	return objectTimestamp;
     }

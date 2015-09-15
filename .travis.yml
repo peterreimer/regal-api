@@ -4,8 +4,14 @@ env:
   - ACTIVATOR_VERSION=1.3.5
 jdk: oraclejdk8
 before_script:
+  - pwd
+  - mkdir -p ./opt/regal
+  - wget http://sourceforge.net/projects/fedora-commons/files/fedora/3.7.1/fcrepo-installer-3.7.1.jar
+  - export FEDORA_HOME=./opt/regal/fedora; java -jar fcrepo-installer-3.7.1.jar ./conf/install.properties
+  - cp ./conf/fedora-users.xml ./opt/regal/fedora/server/config
+  - cp ./conf/tomcat-users.xml ./opt/regal/fedora/tomcat/conf
   - wget http://downloads.typesafe.com/typesafe-activator/${ACTIVATOR_VERSION}/typesafe-activator-${ACTIVATOR_VERSION}-minimal.zip
   - unzip typesafe-activator-${ACTIVATOR_VERSION}-minimal.zip
+  - ./opt/regal/fedora/tomcat/bin/startup.sh
 script:
-  - ./activator-${ACTIVATOR_VERSION}-minimal/activator "testOnly ApplicationTest"
-  - ./activator-${ACTIVATOR_VERSION}-minimal/activator "testOnly archive.search.SearchTest"
+  - ./activator-${ACTIVATOR_VERSION}-minimal/activator test

@@ -42,9 +42,9 @@ import base.BaseModelTest;
  * 
  */
 @SuppressWarnings("javadoc")
-public class FedoraFacadeTest extends BaseModelTest {
-    final static Logger logger = LoggerFactory
-	    .getLogger(FedoraFacadeTest.class);
+public class RepositoryTest extends BaseModelTest {
+    final static Logger logger = LoggerFactory.getLogger(RepositoryTest.class);
+
     FedoraFacade facade = null;
     Node object = null;
     String server = null;
@@ -54,7 +54,6 @@ public class FedoraFacadeTest extends BaseModelTest {
 
 	Properties properties = new Properties();
 	properties.load(Play.application().resourceAsStream("test.properties"));
-
 	facade = FedoraFactory.getFedoraImpl(
 		properties.getProperty("fedoraUrl"),
 		properties.getProperty("user"),
@@ -299,5 +298,4 @@ public class FedoraFacadeTest extends BaseModelTest {
 	    facade.purgeNode(pid);
 	}
     }
-
 }

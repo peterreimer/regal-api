@@ -32,20 +32,61 @@ import org.w3c.dom.Element;
  *
  */
 public class DataciteRecord {
+
+    /**
+     * the doi
+     */
     public String doi = null;
 
+    /**
+     * List of creators. Only left part of pair is used.
+     */
     public Set<Pair<String, String>> creators = new HashSet<Pair<String, String>>();
+    /**
+     * List of titles. Only left part of pair is used.
+     */
     public List<Pair<String, String>> titles = new ArrayList<Pair<String, String>>();
+    /**
+     * A Publisher
+     */
     public String publisher = null;
+    /**
+     * publication year
+     */
     public String publicationYear = null;
+    /**
+     * Subjects. The right part is used to set attribute "subjectScheme"
+     */
     public List<Pair<String, String>> subjects = new ArrayList<Pair<String, String>>();
+    /**
+     * Dates. The right part is used to set attribute "dateType"
+     */
     public List<Pair<String, String>> dates = new ArrayList<Pair<String, String>>();
+    /**
+     * Language.
+     */
     public String language = null;
+    /**
+     * AlternateIdentifiers.The right part is used to set attribute
+     * "alternateIdentifierType"
+     */
     public List<Pair<String, String>> alternateIdentifiers = new ArrayList<Pair<String, String>>();
+    /**
+     * Sizes.
+     */
     public List<Pair<String, String>> sizes = new ArrayList<Pair<String, String>>();
+    /**
+     * Formats.
+     */
     public List<Pair<String, String>> formats = new ArrayList<Pair<String, String>>();
+    /**
+     * Type.
+     */
     public String type = null;
 
+    /**
+     * @param doi
+     */
     public DataciteRecord(String doi) {
 	this.doi = doi;
     }

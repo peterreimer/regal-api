@@ -107,6 +107,11 @@ public class Delete extends RegalAction {
 		"At least one of the child objects has a urn or doi. Deletion aborted!");
     }
 
+    /**
+     * @param nodes
+     *            a list of nodes to evaluate
+     * @return true if one node in list has a persistent identifier
+     */
     public boolean nodesArePersistent(List<Node> nodes) {
 	for (Node n : nodes) {
 	    if (n.hasUrn())

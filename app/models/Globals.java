@@ -247,9 +247,16 @@ public class Globals {
 	    .application().configuration().getString("regal-api.ipWhiteList")
 	    .split("\\s*,[,\\s]*"));
 
+    /**
+     * This formatter shall be used wherever dates are written
+     */
     public static SimpleDateFormat dateFormat = new SimpleDateFormat(
 	    "yyyy-MM-dd'T'HH:mm:ssZ");
 
+    /**
+     * @param ipWhiteList
+     * @return a Map with ips
+     */
     public static Map<String, String> buildIpList(String[] ipWhiteList) {
 	Map<String, String> ips = new HashMap<String, String>();
 	for (String address : ipWhiteList) {
