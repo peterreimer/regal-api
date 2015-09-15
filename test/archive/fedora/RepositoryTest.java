@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import models.Globals;
 import models.Node;
 import models.Transformer;
 
@@ -50,14 +49,11 @@ public class RepositoryTest extends BaseModelTest {
     Node object = null;
     String server = null;
 
-    private String namespace;
-
     @Before
     public void setUp() throws IOException {
 
 	Properties properties = new Properties();
 	properties.load(Play.application().resourceAsStream("test.properties"));
-	namespace = Globals.namespaces[0];
 	facade = FedoraFactory.getFedoraImpl(
 		properties.getProperty("fedoraUrl"),
 		properties.getProperty("user"),

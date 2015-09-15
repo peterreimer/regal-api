@@ -710,6 +710,15 @@ public class Modify extends RegalAction {
 	return doi;
     }
 
+    /**
+     * @param node
+     *            the node
+     * @param pred
+     *            Rdf-Predicate will be added to /metadata of node
+     * @param obj
+     *            Rdf-Object will be added to /metadata of node
+     * @return a user message as string
+     */
     public String addMetadataField(Node node, String pred, String obj) {
 	String metadata = node.getMetadata();
 	metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata,
@@ -721,6 +730,15 @@ public class Modify extends RegalAction {
 
     }
 
+    /**
+     * @param node
+     *            what was modified?
+     * @param date
+     *            when was modified?
+     * @param userId
+     *            who has modified?
+     * @return a user message in form of a map
+     */
     public Map<String, Object> setObjectTimestamp(Node node, Date date,
 	    String userId) {
 	Map<String, Object> result = new HashMap<String, Object>();

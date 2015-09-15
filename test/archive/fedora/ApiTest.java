@@ -112,6 +112,7 @@ public class ApiTest extends BaseModelTest {
 	return result;
     }
 
+    @SuppressWarnings("unused")
     private JsonNode asJson(Result result) {
 	try {
 	    return JsonUtil.mapper().readTree(Helpers.contentAsString(result));
