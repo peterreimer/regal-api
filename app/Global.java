@@ -30,6 +30,7 @@ import play.mvc.Action;
 import play.mvc.Http.Request;
 import play.mvc.Http.RequestHeader;
 import play.mvc.Result;
+import controllers.MyUtils;
 
 /**
  * @author Jan Schnasse
@@ -39,6 +40,10 @@ public class Global extends GlobalSettings {
     @Override
     public void onStart(Application app) {
 	play.Logger.info("Application has started");
+	for (int i = 0; i < Globals.namespaces.length; i++) {
+	    MyUtils.initContentModels(Globals.namespaces[i]);
+	}
+	MyUtils.initContentModels("");
 	Globals.search.init(Globals.namespaces);
 	Globals.taskManager.init();
 	Globals.taskManager.execute();
