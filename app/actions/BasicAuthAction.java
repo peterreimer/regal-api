@@ -39,6 +39,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
     public F.Promise<Result> call(Http.Context context) throws Throwable {
 
 	String authHeader = context.request().getHeader(AUTHORIZATION);
+
 	if (authHeader == null) {
 	    return unauthorized(context);
 	}

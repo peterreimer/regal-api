@@ -323,6 +323,7 @@ public class Resource extends MyController {
     private static RegalObject getRegalObject(JsonNode json) {
 	try {
 	    RegalObject object;
+	    play.Logger.debug("Json Body: " + json);
 	    if (json != null) {
 		object = (RegalObject) MyController.mapper.readValue(
 			json.toString(), RegalObject.class);

@@ -39,14 +39,14 @@ import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
 import static archive.fedora.Vocabulary.REL_CATALOG_ID;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
-import static archive.fedora.Vocabulary.REL_LAST_MODIFIED_BY;
-import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
-import static archive.fedora.Vocabulary.REL_LEGACY_ID;
-import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
-import static archive.fedora.Vocabulary.REL_NAME;
 import static archive.fedora.Vocabulary.REL_HAS_DOI;
 import static archive.fedora.Vocabulary.REL_HAS_URN;
+import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
+import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
+import static archive.fedora.Vocabulary.REL_LAST_MODIFIED_BY;
+import static archive.fedora.Vocabulary.REL_LEGACY_ID;
+import static archive.fedora.Vocabulary.REL_NAME;
+import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
 import helper.HttpArchiveException;
 
 import java.io.BufferedInputStream;
@@ -174,7 +174,6 @@ public class Utils {
     }
 
     void purgeRelationships(String pid, List<Link> list) {
-
 	for (Link link : list) {
 	    System.out.println("PURGE: " + addUriPrefix(pid) + " <"
 		    + link.getPredicate() + "> " + link.getObject());
@@ -183,8 +182,7 @@ public class Utils {
 			.predicate(link.getPredicate())
 			.object(link.getObject(), link.isLiteral()).execute();
 	    } catch (FedoraClientException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		play.Logger.debug("", e);
 	    }
 	}
     }
@@ -318,6 +316,12 @@ public class Utils {
 	}
     }
 
+    /**
+     * Sets a datastream objectTimestamp to the node
+     * 
+     * @param node
+     *            the node to update
+     */
     public void updateObjectTimestampStream(Node node) {
 	try {
 	    File file = new File(node.getObjectTimestampFile());
@@ -337,6 +341,11 @@ public class Utils {
 	}
     }
 
+    /**
+     * creates a objectTimestamp on node
+     * 
+     * @param node
+     */
     public void createObjectTimestampStream(Node node) {
 	try {
 	    Upload request = new Upload(new File(node.getObjectTimestampFile()));

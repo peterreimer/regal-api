@@ -29,8 +29,16 @@ import models.Pair;
  * @author Jan Schnasse
  *
  */
+@SuppressWarnings("unchecked")
 public class DataciteMapper {
 
+    /**
+     * @param doi
+     *            the doi identifier
+     * @param ld
+     *            the object as json-ld linked data in a map
+     * @return an object containing data for datacite
+     */
     public static DataciteRecord getDataciteRecord(String doi,
 	    Map<String, Object> ld) {
 	DataciteRecord rec = new DataciteRecord(doi);
@@ -110,6 +118,7 @@ public class DataciteMapper {
 
     private static void addDates(Map<String, Object> ld, DataciteRecord rec) {
 	try {
+
 	    Date creationDate = (Date) ((Map<String, Object>) ld
 		    .get("isDescribedBy")).get("created");
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -203,7 +212,6 @@ public class DataciteMapper {
 	    if (creators != null) {
 		for (Map<String, Object> item : creators) {
 		    String subject = (String) item.get("prefLabel");
-		    String id = (String) item.get("@id");
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
@@ -212,7 +220,6 @@ public class DataciteMapper {
 	    if (contributors != null) {
 		for (Map<String, Object> item : contributors) {
 		    String subject = (String) item.get("prefLabel");
-		    String id = (String) item.get("@id");
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
