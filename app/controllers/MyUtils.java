@@ -127,10 +127,16 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
-    public static Promise<Result> lobidify(@PathParam("pid") String pid) {
+    public static Promise<Result> lobidify(@PathParam("pid") String pid,
+	    @QueryParam("alephid") String alephid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = modify.lobidify(node);
-	    return JsonMessage(new Message(result));
+	    if (alephid != null && !alephid.isEmpty()) {
+		String result = modify.lobidify(node, alephid);
+		return JsonMessage(new Message(result));
+	    } else {
+		String result = modify.lobidify(node);
+		return JsonMessage(new Message(result));
+	    }
 	});
     }
 
