@@ -393,6 +393,9 @@
 		"hasTransformer": "http://hbz-nrw.de/regal#hasTransformer",
 		"hasData": "http://hbz-nrw.de/regal#hasData",
 		"isAggregatedBy": "http://www.openarchives.org/ore/terms/isAggregatedBy",
-		"lastModifiedBy": "http://hbz-nrw.de/regal#lastModifiedBy"
+		"lastModifiedBy": "http://hbz-nrw.de/regal#lastModifiedBy",
+		"institution" : "http://fr.dbpedia.org/ontology/institution",
+		"thesisInformation" : "http://rdaregistry.info/Elements/u/P60489",
+		"parallelEdition" : "http://hbz-nrw.de/regal#parallelEdition"
 	}
 }
