@@ -203,11 +203,11 @@ public class XmlUtils {
 	try {
 	    elements = (NodeList) xpath.evaluate(xPathStr, root,
 		    XPathConstants.NODESET);
-
 	    List<Element> result = new Vector<Element>();
 	    for (int i = 0; i < elements.getLength(); i++) {
 		try {
 		    Element element = (Element) elements.item(i);
+
 		    result.add(element);
 		} catch (ClassCastException e) {
 		    logger.warn(e.getMessage());
@@ -385,5 +385,12 @@ public class XmlUtils {
 	} catch (TransformerException e) {
 	    throw new XmlException(e);
 	}
+    }
+
+    public static List<Element> getElements(String xPathStr, InputStream in,
+	    NamespaceContext nscontext) {
+	return XmlUtils.getElements(xPathStr, XmlUtils.getDocument(in),
+		nscontext);
+
     }
 }
