@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,15 +47,18 @@ import models.RegalObject;
 import models.Transformer;
 
 import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
+import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
+import archive.fedora.XmlUtils;
 import controllers.MyController;
 
 /**
@@ -470,6 +474,11 @@ public class Modify extends RegalAction {
      * @return a short message
      */
     public String lobidify(Node node) {
+	String alephid = findAlephid(node);
+	return lobidify(node, alephid);
+    }
+
+    private String findAlephid(Node node) {
 	String pid = node.getPid();
 	List<Pair<String, String>> identifier = node.getDublinCoreData()
 		.getIdentifier();
@@ -481,36 +490,21 @@ public class Modify extends RegalAction {
 	    }
 	}
 	if (alephid.isEmpty()) {
-	    throw new HttpArchiveException(500, pid + " no Catalog-Id found");
-	}
-	String lobidUri = "http://lobid.org/resource/" + alephid;
-	try {
-	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid
-		    + "/about");
-	    RDFFormat inFormat = RDFFormat.TURTLE;
-	    String accept = "text/turtle";
-	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
-		    RDFFormat.NTRIPLES, accept);
-	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
-		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat,
-			accept);
+	    alephid = getIdOfParallelEdition(node);
+	    if (alephid == null || alephid.isEmpty()) {
+		throw new HttpArchiveException(500, pid
+			+ " no Catalog-Id found");
 	    }
-	    str = Pattern.compile(lobidUri).matcher(str)
-		    .replaceAll(Matcher.quoteReplacement(pid))
-		    + "<"
-		    + pid
-		    + "> <"
-		    + archive.fedora.Vocabulary.REL_MAB_527
-		    + "> <" + lobidUri + "> .";
-
-	    return updateMetadata(node, str);
-
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
 	}
+	return alephid;
+    }
 
+    private String getIdOfParallelEdition(Node node) {
+	String alephid;
+	alephid = new Read().readMetadata(node, "parallelEdition");
+	alephid = alephid.substring(alephid.lastIndexOf('/') + 1,
+		alephid.length());
+	return alephid;
     }
 
     /**
@@ -599,20 +593,54 @@ public class Modify extends RegalAction {
 	    return node;
 	}
 	List<String> gndIds = findAllGndIds(metadata);
+
 	List<Statement> enrichStatements = new ArrayList<Statement>();
 	for (String uri : gndIds) {
+	    play.Logger.debug("Add data from " + uri);
 	    enrichStatements.addAll(getStatements(uri));
 	}
+	List<Statement> institutions = findInstitution(node);
+	enrichStatements.addAll(institutions);
 	metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 	updateMetadata(node, metadata);
 	return node;
+    }
+
+    private List<Statement> findInstitution(Node node) {
+	String alephid = getIdOfParallelEdition(node);
+	try (InputStream in = new URL(Globals.lobidAddress + alephid
+		+ "/about?format=source").openStream()) {
+	    String gndEndpoint = "http://d-nb.info/gnd/";
+	    List<Element> institutionHack = XmlUtils
+		    .getElements(
+			    "//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield",
+			    in, null);
+	    List<Statement> result = new ArrayList<Statement>();
+	    for (Element el : institutionHack) {
+		String gndId = gndEndpoint
+			+ el.getTextContent().replaceFirst(
+				"38\\ M:\\ ellinet;\\ GND: \\([^)]*\\)", "");
+		play.Logger.debug("Add data from " + gndId);
+		ValueFactory v = new ValueFactoryImpl();
+		Statement link = v
+			.createStatement(
+				v.createURI(node.getPid()),
+				v.createURI("http://fr.dbpedia.org/ontology/institution"),
+				v.createURI(gndId));
+		result.add(link);
+		result.addAll(getStatements(gndId));
+	    }
+	    return result;
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
     }
 
     private List<Statement> getStatements(String uri) {
 	List<Statement> filteredStatements = new ArrayList<Statement>();
 	try {
 	    for (Statement s : RdfUtils.readRdfToGraph(new URL(uri
-		    + "/about/rdf"), RDFFormat.RDFXML, " application/rdf+xml")) {
+		    + "/about/lds"), RDFFormat.RDFXML, "application/rdf+xml")) {
 		boolean isLiteral = s.getObject() instanceof Literal;
 		if (!(s.getSubject() instanceof BNode)) {
 		    if (isLiteral) {
@@ -621,21 +649,20 @@ public class Modify extends RegalAction {
 		}
 	    }
 	} catch (Exception e) {
-	    play.Logger.warn("Not able to include data from" + uri, e);
+	    play.Logger.warn("Not able to include data from" + uri);
 	}
 	return filteredStatements;
     }
 
     private List<String> findAllGndIds(String metadata) {
-	List<String> result = new ArrayList<String>();
+	HashMap<String, String> result = new HashMap<String, String>();
 	Matcher m = Pattern.compile("http://d-nb.info/gnd/[^>]*").matcher(
 		metadata);
 	while (m.find()) {
 	    String id = m.group();
-	    play.Logger.debug("Found linked data id " + id);
-	    result.add(id);
+	    result.put(id, id);
 	}
-	return result;
+	return new Vector<String>(result.keySet());
     }
 
     /**
@@ -809,5 +836,35 @@ public class Modify extends RegalAction {
 	} catch (IOException e) {
 	    throw new HttpArchiveException(500, e);
 	}
+    }
+
+    public String lobidify(Node node, String alephid) {
+	String pid = node.getPid();
+	String lobidUri = "http://lobid.org/resource/" + alephid;
+	try {
+	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid
+		    + "/about");
+	    RDFFormat inFormat = RDFFormat.TURTLE;
+	    String accept = "text/turtle";
+	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
+		    RDFFormat.NTRIPLES, accept);
+	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
+		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat,
+			accept);
+	    }
+	    str = Pattern.compile(lobidUri).matcher(str)
+		    .replaceAll(Matcher.quoteReplacement(pid))
+		    + "<"
+		    + pid
+		    + "> <"
+		    + archive.fedora.Vocabulary.REL_MAB_527
+		    + "> <" + lobidUri + "> .";
+	    return updateMetadata(node, str);
+	} catch (MalformedURLException e) {
+	    throw new HttpArchiveException(500, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+
     }
 }
