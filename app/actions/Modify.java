@@ -617,8 +617,11 @@ public class Modify extends RegalAction {
 			    in, null);
 	    List<Statement> result = new ArrayList<Statement>();
 	    for (Element el : institutionHack) {
+		String marker = el.getTextContent();
+		if (!marker.contains("ellinet"))
+		    continue;
 		String gndId = gndEndpoint
-			+ el.getTextContent().replaceFirst(
+			+ marker.replaceFirst(
 				"38\\ M:\\ ellinet;\\ GND: \\([^)]*\\)", "");
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
