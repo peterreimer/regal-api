@@ -61,6 +61,7 @@ PATCH /resource/:pid/all			controllers.Resource.patchResources(pid)
 
 POST /resource/:pid/all/flatten	    controllers.Resource.flattenAll(pid,contentType?="")
 POST /resource/:pid/parts			controllers.Resource.updateSeq(pid)
+POST /resource/:pid/metadata/enrich controllers.Resource.enrichMetadata(pid)
 POST /resource/:pid/metadata/copy	controllers.Resource.copyMetadata(pid,field?="title",copySource?="")
 POST /resource/:pid/metadata		controllers.Resource.updateMetadata(pid)
 POST /resource/:pid/data			controllers.Resource.updateData(pid,md5?="")
