@@ -18,6 +18,7 @@ package controllers;
 
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import helper.HttpArchiveException;
+import helper.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -157,8 +158,10 @@ public class Resource extends MyController {
 			.setHeader("Content-Type", "text/html; charset=utf-8");
 		List<Node> nodes = read.listRepo(contentType, namespace, from,
 			until);
-		return ok(resource.render(nodes.stream().map(n -> n.getLd())
-			.collect(Collectors.toList()), Globals.namespaces[0]));
+		return ok(resource.render(
+			nodes.stream().map(n -> new JsonMapper(n).getLd())
+				.collect(Collectors.toList()),
+			Globals.namespaces[0]));
 	    } catch (HttpArchiveException e) {
 		return HtmlMessage(new Message(e, e.getCode()));
 	    } catch (Exception e) {
@@ -487,32 +490,36 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json,text/html", nickname = "listParts", value = "listParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
     public static Promise<Result> listParts(@PathParam("pid") String pid,
 	    @QueryParam("style") String style) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    try {
+	return new ReadMetadataAction()
+		.call(pid,
+			node -> {
+			    try {
 
-			List<String> nodeIds = node.getPartsSorted().stream()
-				.map((Link l) -> l.getObject())
-				.collect(Collectors.toList());
-			if ("short".equals(style)) {
-			    return getJsonResult(nodeIds);
-			}
-			List<Node> result = read.getNodes(nodeIds);
+				List<String> nodeIds = node.getPartsSorted()
+					.stream()
+					.map((Link l) -> l.getObject())
+					.collect(Collectors.toList());
+				if ("short".equals(style)) {
+				    return getJsonResult(nodeIds);
+				}
+				List<Node> result = read.getNodes(nodeIds);
 
-			if (request().accepts("text/html")) {
-			    return ok(resource.render(
-				    result.stream().map(n -> n.getLd())
-					    .collect(Collectors.toList()),
-				    Globals.namespaces[0]));
-			} else {
-			    return getJsonResult(result);
-			}
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
-		    }
+				if (request().accepts("text/html")) {
+				    return ok(resource.render(
+					    result.stream()
+						    .map(n -> new JsonMapper(n)
+							    .getLd())
+						    .collect(
+							    Collectors.toList()),
+					    Globals.namespaces[0]));
+				} else {
+				    return getJsonResult(result);
+				}
+			    } catch (Exception e) {
+				return JsonMessage(new Message(e, 500));
+			    }
 
-		});
+			});
     }
 
     @ApiOperation(produces = "application/json,text/html", nickname = "search", value = "search", notes = "Find resources", response = play.mvc.Result.class, httpMethod = "GET")
@@ -558,7 +565,7 @@ public class Resource extends MyController {
 		if (request().accepts("text/html")) {
 		    List<Node> result = read.getParts(node);
 		    return ok(resource.render(
-			    result.stream().map(n -> n.getLd())
+			    result.stream().map(n -> new JsonMapper(n).getLd())
 				    .collect(Collectors.toList()),
 			    Globals.namespaces[0]));
 		} else if (request().accepts("application/json")) {
@@ -655,8 +662,10 @@ public class Resource extends MyController {
 		nodes.add(node);
 		response()
 			.setHeader("Content-Type", "text/html; charset=utf-8");
-		return ok(resource.render(nodes.stream().map(n -> n.getLd())
-			.collect(Collectors.toList()), Globals.namespaces[0]));
+		return ok(resource.render(
+			nodes.stream().map(n -> new JsonMapper(n).getLd())
+				.collect(Collectors.toList()),
+			Globals.namespaces[0]));
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
 	    }
@@ -852,30 +861,33 @@ public class Resource extends MyController {
     public static Promise<Result> getLastModifiedChild(
 	    @PathParam("pid") String pid,
 	    @QueryParam("contentType") String contentType) {
-	return new ReadMetadataAction().call(
-		pid,
-		node -> {
-		    try {
-			response()
-				.setHeader("Access-Control-Allow-Origin", "*");
-			Node result = read.getLastModifiedChild(node,
-				contentType);
-			if (request().accepts("text/html")) {
-			    List<Node> nodes = new ArrayList<Node>();
-			    nodes.add(result);
-			    response().setHeader("Content-Type",
-				    "text/html; charset=utf-8");
-			    return ok(resource.render(
-				    nodes.stream().map(n -> n.getLd())
-					    .collect(Collectors.toList()),
-				    Globals.namespaces[0]));
-			} else {
-			    return getJsonResult(result);
-			}
-		    } catch (Exception e) {
-			return JsonMessage(new Message(e, 500));
-		    }
-		});
+	return new ReadMetadataAction()
+		.call(pid,
+			node -> {
+			    try {
+				response().setHeader(
+					"Access-Control-Allow-Origin", "*");
+				Node result = read.getLastModifiedChild(node,
+					contentType);
+				if (request().accepts("text/html")) {
+				    List<Node> nodes = new ArrayList<Node>();
+				    nodes.add(result);
+				    response().setHeader("Content-Type",
+					    "text/html; charset=utf-8");
+				    return ok(resource.render(
+					    nodes.stream()
+						    .map(n -> new JsonMapper(n)
+							    .getLd())
+						    .collect(
+							    Collectors.toList()),
+					    Globals.namespaces[0]));
+				} else {
+				    return getJsonResult(result);
+				}
+			    } catch (Exception e) {
+				return JsonMessage(new Message(e, 500));
+			    }
+			});
     }
 
     public static Promise<Result> getStatus(@PathParam("pid") String pid) {

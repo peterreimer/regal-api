@@ -18,6 +18,7 @@ package actions;
 
 import helper.DataciteMapper;
 import helper.HttpArchiveException;
+import helper.JsonMapper;
 import helper.OaiDcMapper;
 import helper.PdfText;
 
@@ -29,9 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import org.apache.commons.codec.binary.Base64;
-
 import java.util.List;
 
 import models.DataciteRecord;
@@ -40,6 +38,7 @@ import models.Globals;
 import models.MabRecord;
 import models.Node;
 
+import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
@@ -270,7 +269,7 @@ public class Transform {
      */
     public String datacite(Node node) {
 	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
-		node.getLd());
+		new JsonMapper(node).getLd());
 	return dc.toString();
     }
 

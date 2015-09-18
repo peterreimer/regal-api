@@ -17,11 +17,9 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
-import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import static archive.fedora.Vocabulary.REL_HBZ_ID;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.REL_MAB_527;
 import helper.HttpArchiveException;
+import helper.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -30,11 +28,9 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -841,321 +837,6 @@ public class Node {
     }
 
     /**
-     * @return a map representing the rdf data on this object
-     */
-    @JsonValue
-    public Map<String, Object> getLd() {
-	List<Link> ls = getLinks();
-	Map<String, Object> rdf = new TreeMap<String, Object>();
-	rdf.put("@id", getPid());
-	rdf.put("primaryTopic", getPid());
-	for (Link l : ls) {
-	    if (HAS_PART.equals(l.getPredicate()))
-		continue;
-	    if (REL_HBZ_ID.equals(l.getPredicate()))
-		continue;
-	    if (IS_PART_OF.equals(l.getPredicate()))
-		continue;
-	    addLinkToJsonMap(rdf, l);
-	}
-	addPartsToJsonMap(rdf);
-	rdf.remove("isNodeType");
-
-	rdf.put("contentType", getContentType());
-	rdf.put("accessScheme", getAccessScheme());
-	rdf.put("publishScheme", getPublishScheme());
-	rdf.put("transformer", getTransformer().stream().map(t -> t.getId())
-		.collect(Collectors.toList()));
-	rdf.put("catalogId", getCatalogId());
-
-	if (fulltext != null)
-	    rdf.put("fulltext-ocr", fulltext);
-
-	Map<String, Object> aboutMap = new TreeMap<String, Object>();
-	aboutMap.put("@id", this.getAggregationUri() + ".rdf");
-	if (createdBy != null)
-	    aboutMap.put("createdBy", getCreatedBy());
-	if (legacyId != null)
-	    aboutMap.put("legacyId", getLegacyId());
-	if (importedFrom != null)
-	    aboutMap.put("importedFrom", getImportedFrom());
-	if (name != null)
-	    aboutMap.put("name", getName());
-	if (urn != null)
-	    aboutMap.put("urn", getUrn());
-	if (lastModifiedBy != null)
-	    aboutMap.put("lastModifiedBy", getLastModifiedBy());
-	aboutMap.put("modified", getLastModified());
-	if (objectTimestamp != null) {
-	    aboutMap.put("objectTimestamp", objectTimestamp);
-	} else {
-	    aboutMap.put("objectTimestamp", getLastModified());
-	}
-	aboutMap.put("created", getCreationDate());
-	aboutMap.put("describes", this.getAggregationUri());
-	rdf.put("isDescribedBy", aboutMap);
-	if (doi != null)
-	    rdf.put("doi", getDoi());
-	if (parentPid != null)
-	    rdf.put("parentPid", parentPid);
-
-	if (getMimeType() != null && !getMimeType().isEmpty()) {
-	    Map<String, Object> hasDataMap = new TreeMap<String, Object>();
-	    hasDataMap.put("@id", getDataUri());
-	    hasDataMap.put("format", getMimeType());
-	    hasDataMap.put("size", getFileSize());
-	    if (getChecksum() != null) {
-		Map<String, Object> checksum = new TreeMap<String, Object>();
-		checksum.put("checksumValue", getChecksum());
-		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
-		checksum.put("type",
-			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
-		hasDataMap.put("checksum", checksum);
-	    }
-	    rdf.put("hasData", hasDataMap);
-	}
-
-	rdf.put("@context", getContext());
-	return rdf;
-    }
-
-    /**
-     * @return linked data json optimized for displaying large trees. Most of
-     *         the metadata has been left out.
-     */
-    public Map<String, Object> getLdShortStyle() {
-	List<Link> ls = getLinks();
-	Map<String, Object> rdf = new HashMap<String, Object>();
-	rdf.put("@id", getPid());
-	for (Link l : ls) {
-	    if (Globals.profile.nMap.get("title").uri.equals(l.getPredicate())) {
-		addLinkToJsonMap(rdf, l);
-		break;
-	    }
-	}
-	addPartsToJsonMap(rdf);
-	rdf.remove("isNodeType");
-	rdf.put("contentType", getContentType());
-	if (parentPid != null)
-	    rdf.put("parentPid", parentPid);
-	if (getMimeType() != null && !getMimeType().isEmpty()) {
-	    Map<String, Object> hasDataMap = new HashMap<String, Object>();
-	    hasDataMap.put("@id", getDataUri());
-	    hasDataMap.put("format", getMimeType());
-	    hasDataMap.put("size", getFileSize());
-	    if (getChecksum() != null) {
-		Map<String, Object> checksum = new HashMap<String, Object>();
-		checksum.put("checksumValue", getChecksum());
-		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
-		checksum.put("type",
-			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
-		hasDataMap.put("checksum", checksum);
-	    }
-	    rdf.put("hasData", hasDataMap);
-	}
-	return rdf;
-    }
-
-    private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
-
-	Map<String, Object> resolvedObject = null;
-	if (l.getObjectLabel() != null) {
-	    String id = l.getObject();
-	    String value = l.getObjectLabel();
-	    resolvedObject = new HashMap<String, Object>();
-	    resolvedObject.put("@id", id);
-	    resolvedObject.put("prefLabel", value);
-	}
-	if (rdf.containsKey(l.getShortName())) {
-	    @SuppressWarnings("unchecked")
-	    List<Object> list = (List<Object>) rdf.get(l.getShortName());
-	    if (resolvedObject == null) {
-		list.add(l.getObject());
-	    } else {
-		list.add(resolvedObject);
-	    }
-	} else {
-	    List<Object> list = new ArrayList<Object>();
-	    if (resolvedObject == null) {
-		list.add(l.getObject());
-	    } else {
-		list.add(resolvedObject);
-	    }
-	    rdf.put(l.getShortName(), list);
-	}
-    }
-
-    private void addPartsToJsonMap(Map<String, Object> rdf) {
-	for (Link l : getPartsSorted()) {
-	    if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
-		l.setObjectLabel(l.getObject());
-	    addLinkToJsonMap(rdf, l);
-	}
-    }
-
-    /**
-     * @return a Map representing additional information about the shortnames
-     *         used in getLd
-     */
-    public Map<String, Object> getContext() {
-	List<Link> ls = getLinks();
-	Map<String, Object> pmap;
-	Map<String, Object> cmap = new HashMap<String, Object>();
-	for (Link l : ls) {
-	    pmap = new HashMap<String, Object>();
-	    pmap.put("@id", l.getPredicate());
-	    pmap.put("label", l.getPredicateLabel());
-	    if (!l.isLiteral) {
-		pmap.put("@type", "@id");
-	    }
-	    cmap.put(l.getShortName(), pmap);
-	}
-
-	cmap.put("label", "http://www.w3.org/2000/01/rdf-schema#label");
-	cmap.put("nodeType", REL_IS_NODE_TYPE);
-	cmap.put("modified", "http://purl.org/dc/terms/modified");
-	cmap.put("objectTimestamp", "http://hbz-nrw.de/regal#objectTimestamp");
-	cmap.put("created", "http://purl.org/dc/terms/created");
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#contentType");
-	pmap.put("label", "Regaltyp");
-	cmap.put("contentType", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://purl.org/lobid/lv#hbzID");
-	pmap.put("label", "Katalog Nr.");
-	cmap.put("catalogId", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#lastModifiedBy");
-	pmap.put("label", "Bearbeitet durch");
-	cmap.put("lastModifiedBy", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#importedFrom");
-	pmap.put("label", "Original Quelle");
-	cmap.put("importedFrom", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#createdBy");
-	pmap.put("label", "Angelegt durch");
-	cmap.put("createdBy", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#legacyId");
-	pmap.put("label", "Alternative ID");
-	cmap.put("legacyId", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#name");
-	pmap.put("label", "Interner Name");
-	cmap.put("name", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#accessScheme");
-	pmap.put("label", "Sichtbarkeit Daten");
-	cmap.put("accessScheme", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#publishScheme");
-	pmap.put("label", "Sichtbarkeit Metadaten");
-	cmap.put("publishScheme", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://purl.org/lobid/lv#urn");
-	pmap.put("label", "Urn");
-	cmap.put("urn", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#doi");
-	pmap.put("label", "Regal-Doi");
-	cmap.put("doi", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://hbz-nrw.de/regal#hasData");
-	pmap.put("label", "Daten");
-	cmap.put("hasData", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://xmlns.com/foaf/0.1/primaryTopic");
-	pmap.put("label", "Vgl.");
-	pmap.put("@type", "@id");
-	cmap.put("primaryTopic", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://purl.org/dc/terms/hasPart");
-	pmap.put("label", "Kindobjekt");
-	pmap.put("@type", "@id");
-	pmap.put("@container", "@list");
-	cmap.put("hasPart", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
-	pmap.put("label", "Überordnung");
-	pmap.put("@type", "@id");
-	cmap.put("isPartOf", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://purl.org/dc/terms/isPartOf");
-	pmap.put("label", "Überordnung");
-	pmap.put("@type", "@id");
-	cmap.put("parentPid", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://purl.org/dc/terms/format");
-	pmap.put("label", "Mime Type");
-	cmap.put("format", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id",
-		"http://downlode.org/Code/RDF/File_Properties/schema#size");
-	pmap.put("label", "Bytes");
-	cmap.put("size", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id",
-		"http://downlode.org/Code/RDF/File_Properties/schema#checksum");
-	pmap.put("label", "MD5");
-	cmap.put("checksumValue", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id",
-		"http://downlode.org/Code/RDF/File_Properties/schema#generator");
-	pmap.put("label", "Generator");
-	pmap.put("@type", "@id");
-	cmap.put("generator", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id",
-		"http://downlode.org/Code/RDF/File_Properties/schema#checksum");
-	pmap.put("label", "Checksum");
-	pmap.put("@type", "@id");
-	cmap.put("checksum", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://www.openarchives.org/ore/terms/describes");
-	pmap.put("label", "Beschreibt");
-	pmap.put("@type", "@id");
-	cmap.put("describes", pmap);
-
-	pmap = new HashMap<String, Object>();
-	pmap.put("@id", "http://www.openarchives.org/ore/terms/isDescribedBy");
-	pmap.put("label", "Beschrieben durch");
-	pmap.put("@type", "@id");
-	cmap.put("isDescribedBy", pmap);
-
-	// pmap = new HashMap<String, Object>();
-	// pmap.put("@id", "http://hbz-nrw.de/regal#fulltext-ocr");
-	// pmap.put("label", "Volltext-OCR");
-	// cmap.put("fulltext-ocr", pmap);
-
-	cmap.put("prefLabel", "http://www.w3.org/2004/02/skos/core#prefLabel");
-
-	return cmap;
-    }
-
-    /**
      * Returns a list of pids of related objects. Looks for other objects those
      * are connected to the pid by a certain relation
      * 
@@ -1418,25 +1099,6 @@ public class Node {
     }
 
     /**
-     * @return a map without the context document
-     */
-    public Map<String, Object> getLdWithoutContext() {
-	Map<String, Object> map = getLd();
-	map.remove("@context");
-	return map;
-
-    }
-
-    /**
-     * @return a map without the context document
-     */
-    public Map<String, Object> getLdWithoutContextShortStyle() {
-	Map<String, Object> map = getLdShortStyle();
-	map.remove("@context");
-	return map;
-    }
-
-    /**
      * @param userId
      * @return this
      */
@@ -1488,6 +1150,14 @@ public class Node {
      */
     public Date getObjectTimestamp() {
 	return objectTimestamp;
+    }
+
+    /**
+     * @return a map representing the rdf data on this object
+     */
+    @JsonValue
+    public Map<String, Object> getLd() {
+	return new JsonMapper(this).getLd();
     }
 
 }
