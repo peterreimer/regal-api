@@ -178,7 +178,6 @@ public class RdfUtils {
 	    String baseUrl) {
 	try {
 	    RDFParser rdfParser = Rio.createParser(inf);
-	    play.Logger.debug(rdfParser.getSupportedSettings().toString());
 	    org.openrdf.model.Graph myGraph = new TreeModel();
 	    StatementCollector collector = new StatementCollector(myGraph);
 	    rdfParser.setRDFHandler(collector);
@@ -536,6 +535,34 @@ public class RdfUtils {
 	    throw new RdfException(e);
 	}
 
+    }
+
+    public static String replaceTriples(List<Statement> graph,
+	    final String metadata) {
+	try {
+	    InputStream is = new ByteArrayInputStream(
+		    metadata.getBytes("UTF-8"));
+	    RepositoryConnection con = readRdfInputStreamToRepository(is,
+		    RDFFormat.NTRIPLES);
+	    for (Statement st : graph) {
+		RepositoryResult<Statement> statements = con.getStatements(
+			null, null, null, true);
+		while (statements.hasNext()) {
+		    Statement statement = statements.next();
+		    if (statement.getSubject().equals(st.getSubject())
+			    && statement.getPredicate().equals(
+				    st.getPredicate())) {
+			con.remove(statement);
+		    }
+		}
+		con.add(st);
+	    }
+	    return writeStatements(con, RDFFormat.NTRIPLES);
+	} catch (RepositoryException e) {
+	    throw new RdfException(e);
+	} catch (UnsupportedEncodingException e) {
+	    throw new RdfException(e);
+	}
     }
 
     /**

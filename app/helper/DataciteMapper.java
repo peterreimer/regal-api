@@ -159,9 +159,19 @@ public class DataciteMapper {
     private static void addPublisher(Map<String, Object> ld, DataciteRecord rec) {
 	try {
 	    rec.publisher = ((List<String>) ld.get("dc:publisher")).get(0);
+
 	} catch (NullPointerException e) {
 	    play.Logger
 		    .debug("DataciteMapper: Metadatafield 'Publisher' not found!");
+	}
+	try {
+	    if (rec.publisher == null || rec.publisher.isEmpty()) {
+		rec.publisher = ((List<String>) ld.get("P60489")).get(0);
+	    }
+	} catch (NullPointerException e) {
+
+	    play.Logger
+		    .debug("DataciteMapper: Metadatafield 'thesisInformation' not found!");
 	}
     }
 

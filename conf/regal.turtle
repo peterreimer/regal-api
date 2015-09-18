@@ -503,4 +503,16 @@ rdf:type
 <http://purl.org/lobid/lv#subjectChain>
     <http://hbz-nrw.de/regal#jsonName> "subjectChain";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Schlagwortkette" .
+    
+<http://hbz-nrw.de/regal#parallelEdition>
+    <http://hbz-nrw.de/regal#jsonName> "parallelEdition";
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Titel kopiert von" .
+    
+<http://rdaregistry.info/Elements/u/P60489>
+    <http://hbz-nrw.de/regal#jsonName> "thesisInformation";
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Hochschulschriftenvermerk" .
+    
+<http://fr.dbpedia.org/ontology/institution>
+  	<http://hbz-nrw.de/regal#jsonName> "institution";
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Institut" .
 
