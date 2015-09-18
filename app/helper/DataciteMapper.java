@@ -166,8 +166,7 @@ public class DataciteMapper {
 	}
 	try {
 	    if (rec.publisher == null || rec.publisher.isEmpty()) {
-		rec.publisher = ((List<String>) ld.get("thesisInformation"))
-			.get(0);
+		rec.publisher = ((List<String>) ld.get("P60489")).get(0);
 	    }
 	} catch (NullPointerException e) {
 
