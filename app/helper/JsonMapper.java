@@ -219,7 +219,7 @@ public class JsonMapper {
 	for (Link l : node.getPartsSorted()) {
 	    if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
 		l.setObjectLabel(l.getObject());
-	    l.setPredicate(Globals.profile.nMap.get("hasPart").uri);
+	    // l.setPredicate(Globals.profile.nMap.get("hasPart").uri);
 	    addLinkToJsonMap(rdf, l);
 	}
     }
@@ -229,17 +229,17 @@ public class JsonMapper {
      *         used in getLd
      */
     public Map<String, Object> getContext() {
-	List<Link> ls = node.getLinks();
 	Map<String, Object> pmap;
 	Map<String, Object> cmap = new HashMap<String, Object>();
-	for (Link l : ls) {
+	for (String key : Globals.profile.pMap.keySet()) {
+	    MapEntry e = Globals.profile.pMap.get(key);
 	    pmap = new HashMap<String, Object>();
-	    pmap.put("@id", l.getPredicate());
-	    pmap.put("label", l.getPredicateLabel());
-	    if (!l.isLiteral()) {
-		pmap.put("@type", "@id");
+	    pmap.put("@id", e.uri);
+	    pmap.put("label", e.label);
+	    pmap.put("@type", "@id");
+	    if (e.name != null) {
+		cmap.put(e.name, pmap);
 	    }
-	    cmap.put(getShortName(l), pmap);
 	}
 	return cmap;
     }
