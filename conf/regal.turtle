@@ -125,11 +125,11 @@
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Download" .
 
 <http://purl.org/dc/elements/1.1/contributor>
-    <http://hbz-nrw.de/regal#jsonName> "contributor";
+    <http://hbz-nrw.de/regal#jsonName> "contributorName";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Mitwirkende" .
 
 <http://purl.org/dc/elements/1.1/creator>
-    <http://hbz-nrw.de/regal#jsonName> "creator";
+    <http://hbz-nrw.de/regal#jsonName> "creatorName";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Autor" .
 
 <http://purl.org/dc/elements/1.1/isPartOf>

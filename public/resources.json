@@ -382,7 +382,7 @@
 		"size": "http://downlode.org/Code/RDF/File_Properties/schema#size",
 		"checksumValue": "http://downlode.org/Code/RDF/File_Properties/schema#checksumValue",
 		"generator": "http://downlode.org/Code/RDF/File_Properties/schema#generator",
-		"type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+		"rdftype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 		"P1004": "http://iflastandards.info/ns/isbd/elements/P1004",
 		"P1006": "http://iflastandards.info/ns/isbd/elements/P1006",
 		"P1016": "http://iflastandards.info/ns/isbd/elements/P1016",
@@ -399,6 +399,6 @@
 			"@type": "@id"
 		},
 		"P60489" : "http://rdaregistry.info/Elements/u/P60489",
-		"parallelEdition" : "http://hbz-nrw.de/regal#parallelEdition",
+		"parallelEdition" : "http://hbz-nrw.de/regal#parallelEdition"
 	}
 }

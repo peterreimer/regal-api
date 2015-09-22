@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,8 @@ import models.Link;
 import models.Node;
 import archive.fedora.ApplicationProfile;
 import archive.fedora.MapEntry;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author jan schnasse
@@ -145,7 +148,7 @@ public class JsonMapper {
 	    rdf.put("hasData", hasDataMap);
 	}
 
-	rdf.put("@context", getContext());
+	rdf.put("@context", getContext().get("@context"));
 	return rdf;
     }
 
@@ -229,19 +232,13 @@ public class JsonMapper {
      *         used in getLd
      */
     public Map<String, Object> getContext() {
-	Map<String, Object> pmap;
-	Map<String, Object> cmap = new HashMap<String, Object>();
-	for (String key : Globals.profile.pMap.keySet()) {
-	    MapEntry e = Globals.profile.pMap.get(key);
-	    pmap = new HashMap<String, Object>();
-	    pmap.put("@id", e.uri);
-	    pmap.put("label", e.label);
-	    pmap.put("@type", "@id");
-	    if (e.name != null) {
-		cmap.put(e.name, pmap);
-	    }
+	try {
+	    HashMap<String, Object> result = new ObjectMapper().readValue(
+		    new URL(Globals.contextUrl), HashMap.class);
+	    return result;
+	} catch (Exception e) {
+	    return new HashMap<String, Object>();
 	}
-	return cmap;
     }
 
     /**

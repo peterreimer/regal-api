@@ -223,6 +223,8 @@ public class Globals {
     public static String alephSetName = Play.application().configuration()
 	    .getString("regal-api.alephSetName");
 
+    public static String contextUrl = Play.application().configuration()
+	    .getString("regal-api.contextUrl");
     /**
      * The setName for providing oai records to aleph
      */
