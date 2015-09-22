@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -625,11 +626,9 @@ public class Modify extends RegalAction {
 				"38\\ M:\\ ellinet;\\ GND: \\([^)]*\\)", "");
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
-		Statement link = v
-			.createStatement(
-				v.createURI(node.getPid()),
-				v.createURI("http://fr.dbpedia.org/ontology/institution"),
-				v.createURI(gndId));
+		Statement link = v.createStatement(v.createURI(node.getPid()),
+			v.createURI("http://dbpedia.org/ontology/institution"),
+			v.createURI(gndId));
 		result.add(link);
 		result.addAll(getStatements(gndId));
 	    }
@@ -647,7 +646,12 @@ public class Modify extends RegalAction {
 		boolean isLiteral = s.getObject() instanceof Literal;
 		if (!(s.getSubject() instanceof BNode)) {
 		    if (isLiteral) {
-			filteredStatements.add(s);
+			ValueFactory v = new ValueFactoryImpl();
+			Statement newS = v.createStatement(s.getSubject(), s
+				.getPredicate(), v.createLiteral(Normalizer
+				.normalize(s.getObject().stringValue(),
+					Normalizer.Form.NFKC)));
+			filteredStatements.add(newS);
 		    }
 		}
 	    }
