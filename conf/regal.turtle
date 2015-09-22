@@ -440,7 +440,8 @@
     <http://hbz-nrw.de/regal#jsonName> "isLike";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "ähnlich zu" .
 
-rdf:type
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+	<http://hbz-nrw.de/regal#jsonName> "type";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Typ" .
 
 <http://www.w3.org/2000/01/rdf-schema#inDataset>
@@ -455,10 +456,6 @@ rdf:type
 <http://www.w3.org/2000/01/rdf-schema#seeAlso>
     <http://hbz-nrw.de/regal#jsonName> "seeAlso";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Weitere Informationen" .
-
-<http://www.w3.org/2000/01/rdf-schema#type>
-    <http://hbz-nrw.de/regal#jsonName> "type";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Typ" .
 
 <http://www.w3.org/2002/07/owl#sameAs>
     <http://hbz-nrw.de/regal#jsonName> "sameAs";
@@ -509,10 +506,10 @@ rdf:type
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Titel kopiert von" .
     
 <http://rdaregistry.info/Elements/u/P60489>
-    <http://hbz-nrw.de/regal#jsonName> "thesisInformation";
+    <http://hbz-nrw.de/regal#jsonName> "P60489";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Hochschulschriftenvermerk" .
     
-<http://fr.dbpedia.org/ontology/institution>
+<http://dbpedia.org/ontology/institution>
   	<http://hbz-nrw.de/regal#jsonName> "institution";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Institut" .
 
