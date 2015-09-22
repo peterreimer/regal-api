@@ -175,7 +175,7 @@
 
 <http://purl.org/dc/terms/hasPart>
     <http://hbz-nrw.de/regal#jsonName> "hasPart";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Bestandteile" .
+    <http://www.w3.org/2004/02/skos/core#prefLabel> "Kindobjekt" .
 
 <http://purl.org/dc/terms/hasVersion>
     <http://hbz-nrw.de/regal#jsonName> "hasVersion";
@@ -468,10 +468,6 @@
 <http://xmlns.com/foaf/0.1/isPrimaryTopicOf>
     <http://hbz-nrw.de/regal#jsonName> "isPrimaryTopicOf";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Gegenstand von" .
-
-<info:fedora/fedora-system:def/relations-external#hasPart>
-    <http://hbz-nrw.de/regal#jsonName> "hasPart";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Kindobjekte" .
 
 <info:fedora/fedora-system:def/relations-external#isMemberOf>
     <http://hbz-nrw.de/regal#jsonName> "isMemberOf";

@@ -219,6 +219,7 @@ public class JsonMapper {
 	for (Link l : node.getPartsSorted()) {
 	    if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
 		l.setObjectLabel(l.getObject());
+	    l.setPredicate(Globals.profile.nMap.get("hasPart").uri);
 	    addLinkToJsonMap(rdf, l);
 	}
     }
