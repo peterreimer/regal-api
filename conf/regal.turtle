@@ -468,30 +468,6 @@
 <http://xmlns.com/foaf/0.1/isPrimaryTopicOf>
     <http://hbz-nrw.de/regal#jsonName> "isPrimaryTopicOf";
     <http://www.w3.org/2004/02/skos/core#prefLabel> "Gegenstand von" .
-
-<info:fedora/fedora-system:def/relations-external#isMemberOf>
-    <http://hbz-nrw.de/regal#jsonName> "isMemberOf";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Oai Set" .
-
-<info:fedora/fedora-system:def/relations-external#isPartOf>
-    <http://hbz-nrw.de/regal#jsonName> "isPartOf";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Elternobjekt" .
-
-<info:hbz/hbz-ingest:def/model#accessScheme>
-    <http://hbz-nrw.de/regal#jsonName> "accessScheme";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Daten" .
-
-<info:hbz/hbz-ingest:def/model#contentType>
-    <http://hbz-nrw.de/regal#jsonName> "contentType";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Regal Typ" .
-
-<info:hbz/hbz-ingest:def/model#isNodeType>
-    <http://hbz-nrw.de/regal#jsonName> "isNodeType";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Fedora Typ" .
-
-<info:hbz/hbz-ingest:def/model#publishScheme>
-    <http://hbz-nrw.de/regal#jsonName> "publishScheme";
-    <http://www.w3.org/2004/02/skos/core#prefLabel> "Sichtbarkeit Metadaten" .
     
 <http://purl.org/lobid/lv#subjectChain>
     <http://hbz-nrw.de/regal#jsonName> "subjectChain";
