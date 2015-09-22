@@ -395,10 +395,10 @@
 		"isAggregatedBy": "http://www.openarchives.org/ore/terms/isAggregatedBy",
 		"lastModifiedBy": "http://hbz-nrw.de/regal#lastModifiedBy",
 		"institution" : {
-			"@id" : "http://fr.dbpedia.org/ontology/institution",
+			"@id" : "http://dbpedia.org/ontology/institution",
 			"@type": "@id"
 		},
-		"thesisInformation" : "http://rdaregistry.info/Elements/u/P60489",
-		"parallelEdition" : "http://hbz-nrw.de/regal#parallelEdition"
+		"P60489" : "http://rdaregistry.info/Elements/u/P60489",
+		"parallelEdition" : "http://hbz-nrw.de/regal#parallelEdition",
 	}
 }
