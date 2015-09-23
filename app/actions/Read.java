@@ -454,7 +454,7 @@ public class Read extends RegalAction {
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
-		String pred = Globals.profile.nMap.get(field).uri;
+		String pred = Globals.profile.getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(node.getPid(),
 			pred, metadata, RDFFormat.NTRIPLES);
 
@@ -485,7 +485,7 @@ public class Read extends RegalAction {
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
-		String pred = Globals.profile.nMap.get(field).uri;
+		String pred = Globals.profile.getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(pid, pred,
 			metadata, RDFFormat.NTRIPLES);
 

@@ -327,7 +327,6 @@ public class SearchTest extends BaseModelTest {
 		"edoweb:549b92ee-d0a0-4471-83dc-799b08f3c0f6", drupalSix);
 	System.out.println("Succeeds with: "
 		+ printJsonFormatted(search.getSettings("test", "monograph")));
-
     }
 
     @Test(expected = SearchException.class)

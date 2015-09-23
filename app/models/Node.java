@@ -830,7 +830,7 @@ public class Node {
 		    RDFFormat.NTRIPLES, pid);
 	    rdf = rdf.resolve();
 	    rdf.addLinks(getRelsExt());
-	    return Globals.profile.addLabels(rdf).getLinks();
+	    return rdf.getLinks();
 	} catch (NullPointerException e) {
 	    return new ArrayList<Link>();
 	}

@@ -170,7 +170,7 @@ public class Create extends RegalAction {
 	String parentTitle = new Read().readMetadata(from, "title");
 	if (title == null && parentTitle != null) {
 	    new Modify().addMetadataField(to,
-		    Globals.profile.nMap.get("title").uri, parentTitle);
+		    Globals.profile.getUriFromJsonName("title"), parentTitle);
 	}
     }
 

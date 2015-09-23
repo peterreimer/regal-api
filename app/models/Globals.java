@@ -16,6 +16,7 @@
  */
 package models;
 
+import helper.EtikettMaker;
 import helper.TaskManager;
 
 import java.text.SimpleDateFormat;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.Play;
-import archive.fedora.ApplicationProfile;
 import archive.fedora.FedoraFactory;
 import archive.fedora.FedoraInterface;
 import archive.search.SearchFacade;
@@ -61,11 +61,6 @@ public class Globals {
      */
     public static String fedoraIntern = Play.application().configuration()
 	    .getString("regal-api.fedoraIntern");
-
-    /**
-     * A document to configure elasticsearch indexes used by this application
-     */
-    public static String contextDocument = "public-index-config.json";
 
     /**
      * a list of namespaces to create indexes for
@@ -114,7 +109,7 @@ public class Globals {
     /**
      * labels etc.
      */
-    public static ApplicationProfile profile = new ApplicationProfile();
+    public static EtikettMaker profile = new EtikettMaker();
 
     /**
      * defines a protocol used by this app
@@ -223,8 +218,6 @@ public class Globals {
     public static String alephSetName = Play.application().configuration()
 	    .getString("regal-api.alephSetName");
 
-    public static String contextUrl = Play.application().configuration()
-	    .getString("regal-api.contextUrl");
     /**
      * The setName for providing oai records to aleph
      */
@@ -264,5 +257,16 @@ public class Globals {
 		ips.put(address + "." + i, address + "." + i);
 	}
 	return ips;
+    }
+
+    /**
+     * @return the port of the play application
+     */
+    public static int getPort() {
+	try {
+	    return play.Play.application().configuration().getInt("http.port");
+	} catch (Exception e) {
+	    return 9000;
+	}
     }
 }

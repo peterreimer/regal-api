@@ -20,7 +20,6 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +30,6 @@ import java.util.stream.Collectors;
 import models.Globals;
 import models.Link;
 import models.Node;
-import archive.fedora.ApplicationProfile;
-import archive.fedora.MapEntry;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author jan schnasse
@@ -42,7 +37,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JsonMapper {
 
-    ApplicationProfile profile = Globals.profile;
+    /**
+     * Here are some short names that must be defined in the context document
+     * that is loaded at Globals.context.
+     */
+    final static String primaryTopic = "primaryTopic";
+    final static String contentType = "contentType";
+    final static String accessScheme = "accessScheme";
+    final static String publishScheme = "publishScheme";
+    final static String transformer = "transformer";
+    final static String catalogId = "catalogId";
+    final static String createdBy = "createdBy";
+    final static String legacyId = "legacyId";
+    final static String importedFrom = "importedFrom";
+    final static String name = "name";
+    final static String urn = "urn";
+    final static String lastModifiedBy = "lastModifiedBy";
+    final static String modified = "modified";
+    final static String objectTimestamp = "objectTimestamp";
+    final static String created = "created";
+    final static String describes = "describes";
+    final static String isDescribedBy = "isDescribedBy";
+    final static String doi = "doi";
+    final static String parentPid = "parentPid";
+    final static String format = "format";
+    final static String size = "size";
+    final static String checksumValue = "checksumValue";
+    final static String generator = "generator";
+    final static String type = "type";
+    final static String checksum = "checksum";
+    final static String hasData = "hasData";
+    final static String fulltext_ocr = "fulltext-ocr";
+    final static String title = "title";
+
+    EtikettMaker profile = Globals.profile;
+
     Node node = null;
 
     /**
@@ -80,7 +109,7 @@ public class JsonMapper {
 	List<Link> ls = node.getLinks();
 	Map<String, Object> rdf = new TreeMap<String, Object>();
 	rdf.put("@id", node.getPid());
-	rdf.put("primaryTopic", node.getPid());
+	rdf.put(primaryTopic, node.getPid());
 	for (Link l : ls) {
 	    if (HAS_PART.equals(l.getPredicate()))
 		continue;
@@ -93,62 +122,61 @@ public class JsonMapper {
 	addPartsToJsonMap(rdf);
 	rdf.remove("isNodeType");
 
-	rdf.put("contentType", node.getContentType());
-	rdf.put("accessScheme", node.getAccessScheme());
-	rdf.put("publishScheme", node.getPublishScheme());
-	rdf.put("transformer",
-		node.getTransformer().stream().map(t -> t.getId())
-			.collect(Collectors.toList()));
-	rdf.put("catalogId", node.getCatalogId());
+	rdf.put(contentType, node.getContentType());
+	rdf.put(accessScheme, node.getAccessScheme());
+	rdf.put(publishScheme, node.getPublishScheme());
+	rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
+		.collect(Collectors.toList()));
+	rdf.put(catalogId, node.getCatalogId());
 
 	if (node.getFulltext() != null)
-	    rdf.put("fulltext-ocr", node.getFulltext());
+	    rdf.put(fulltext_ocr, node.getFulltext());
 
 	Map<String, Object> aboutMap = new TreeMap<String, Object>();
 	aboutMap.put("@id", node.getAggregationUri() + ".rdf");
 	if (node.getCreatedBy() != null)
-	    aboutMap.put("createdBy", node.getCreatedBy());
+	    aboutMap.put(createdBy, node.getCreatedBy());
 	if (node.getLegacyId() != null)
-	    aboutMap.put("legacyId", node.getLegacyId());
+	    aboutMap.put(legacyId, node.getLegacyId());
 	if (node.getImportedFrom() != null)
-	    aboutMap.put("importedFrom", node.getImportedFrom());
+	    aboutMap.put(importedFrom, node.getImportedFrom());
 	if (node.getName() != null)
-	    aboutMap.put("name", node.getName());
+	    aboutMap.put(name, node.getName());
 	if (node.getUrn() != null)
-	    aboutMap.put("urn", node.getUrn());
+	    aboutMap.put(urn, node.getUrn());
 	if (node.getLastModifiedBy() != null)
-	    aboutMap.put("lastModifiedBy", node.getLastModifiedBy());
-	aboutMap.put("modified", node.getLastModified());
+	    aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
+	aboutMap.put(modified, node.getLastModified());
 	if (node.getObjectTimestamp() != null) {
-	    aboutMap.put("objectTimestamp", node.getObjectTimestamp());
+	    aboutMap.put(objectTimestamp, node.getObjectTimestamp());
 	} else {
-	    aboutMap.put("objectTimestamp", node.getLastModified());
+	    aboutMap.put(objectTimestamp, node.getLastModified());
 	}
-	aboutMap.put("created", node.getCreationDate());
-	aboutMap.put("describes", node.getAggregationUri());
-	rdf.put("isDescribedBy", aboutMap);
+	aboutMap.put(created, node.getCreationDate());
+	aboutMap.put(describes, node.getAggregationUri());
+	rdf.put(isDescribedBy, aboutMap);
 	if (node.getDoi() != null)
-	    rdf.put("doi", node.getDoi());
+	    rdf.put(doi, node.getDoi());
 	if (node.getParentPid() != null)
-	    rdf.put("parentPid", node.getParentPid());
+	    rdf.put(parentPid, node.getParentPid());
 
 	if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
 	    Map<String, Object> hasDataMap = new TreeMap<String, Object>();
 	    hasDataMap.put("@id", node.getDataUri());
-	    hasDataMap.put("format", node.getMimeType());
-	    hasDataMap.put("size", node.getFileSize());
+	    hasDataMap.put(format, node.getMimeType());
+	    hasDataMap.put(size, node.getFileSize());
 	    if (node.getChecksum() != null) {
-		Map<String, Object> checksum = new TreeMap<String, Object>();
-		checksum.put("checksumValue", node.getChecksum());
-		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
-		checksum.put("type",
-			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
-		hasDataMap.put("checksum", checksum);
+		Map<String, Object> checksumMap = new TreeMap<String, Object>();
+		checksumMap.put(checksumValue, node.getChecksum());
+		checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
+		checksumMap
+			.put(type,
+				"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		hasDataMap.put(checksum, checksumMap);
 	    }
-	    rdf.put("hasData", hasDataMap);
+	    rdf.put(hasData, hasDataMap);
 	}
-
-	rdf.put("@context", getContext().get("@context"));
+	rdf.put("@context", Globals.profile.getContext().get("@context"));
 	return rdf;
     }
 
@@ -161,28 +189,29 @@ public class JsonMapper {
 	Map<String, Object> rdf = new HashMap<String, Object>();
 	rdf.put("@id", node.getPid());
 	for (Link l : ls) {
-	    if (profile.nMap.get("title").uri.equals(l.getPredicate())) {
+	    if (profile.getUriFromJsonName(title).equals(l.getPredicate())) {
 		addLinkToJsonMap(rdf, l);
 		break;
 	    }
 	}
 	addPartsToJsonMap(rdf);
 	rdf.remove("isNodeType");
-	rdf.put("contentType", node.getContentType());
+	rdf.put(contentType, node.getContentType());
 	if (node.getParentPid() != null)
-	    rdf.put("parentPid", node.getParentPid());
+	    rdf.put(parentPid, node.getParentPid());
 	if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
 	    Map<String, Object> hasDataMap = new HashMap<String, Object>();
 	    hasDataMap.put("@id", node.getDataUri());
-	    hasDataMap.put("format", node.getMimeType());
-	    hasDataMap.put("size", node.getFileSize());
+	    hasDataMap.put(format, node.getMimeType());
+	    hasDataMap.put(size, node.getFileSize());
 	    if (node.getChecksum() != null) {
-		Map<String, Object> checksum = new HashMap<String, Object>();
-		checksum.put("checksumValue", node.getChecksum());
-		checksum.put("generator", "http://en.wikipedia.org/wiki/MD5");
-		checksum.put("type",
-			"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
-		hasDataMap.put("checksum", checksum);
+		Map<String, Object> checksumMap = new HashMap<String, Object>();
+		checksumMap.put(checksumValue, node.getChecksum());
+		checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
+		checksumMap
+			.put(type,
+				"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		hasDataMap.put(checksum, checksumMap);
 	    }
 	    rdf.put("hasData", hasDataMap);
 	}
@@ -199,9 +228,10 @@ public class JsonMapper {
 	    resolvedObject.put("@id", id);
 	    resolvedObject.put("prefLabel", value);
 	}
-	if (rdf.containsKey(getShortName(l))) {
+	if (rdf.containsKey(profile.getJsonName(l.getPredicate()))) {
 	    @SuppressWarnings("unchecked")
-	    List<Object> list = (List<Object>) rdf.get(getShortName(l));
+	    List<Object> list = (List<Object>) rdf.get(profile.getJsonName(l
+		    .getPredicate()));
 	    if (resolvedObject == null) {
 		list.add(l.getObject());
 	    } else {
@@ -214,7 +244,7 @@ public class JsonMapper {
 	    } else {
 		list.add(resolvedObject);
 	    }
-	    rdf.put(getShortName(l), list);
+	    rdf.put(profile.getJsonName(l.getPredicate()), list);
 	}
     }
 
@@ -222,49 +252,8 @@ public class JsonMapper {
 	for (Link l : node.getPartsSorted()) {
 	    if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
 		l.setObjectLabel(l.getObject());
-	    // l.setPredicate(Globals.profile.nMap.get("hasPart").uri);
 	    addLinkToJsonMap(rdf, l);
 	}
-    }
-
-    /**
-     * @return a Map representing additional information about the shortnames
-     *         used in getLd
-     */
-    public Map<String, Object> getContext() {
-	try {
-	    HashMap<String, Object> result = new ObjectMapper().readValue(
-		    new URL(Globals.contextUrl), HashMap.class);
-	    return result;
-	} catch (Exception e) {
-	    return new HashMap<String, Object>();
-	}
-    }
-
-    /**
-     * @return The short name of the predicate uses String.split on first index
-     *         of '#' or last index of '/'
-     */
-    private String getShortName(Link l) {
-	String result = null;
-	String predicate = l.getPredicate();
-	MapEntry e = profile.pMap.get(predicate);
-	if (e != null) {
-	    result = e.name;
-	}
-	if (result == null || result.isEmpty()) {
-	    String prefix = "";
-	    if (predicate.startsWith("http://purl.org/dc/elements"))
-		prefix = "dc:";
-	    if (predicate.contains("#"))
-		return prefix + predicate.split("#")[1];
-	    else if (predicate.startsWith("http")) {
-		int i = predicate.lastIndexOf("/");
-		return prefix + predicate.substring(i + 1);
-	    }
-	    result = prefix + predicate;
-	}
-	return result;
     }
 
 }

@@ -24,6 +24,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import models.Globals;
 import models.Message;
 import models.Transformer;
 
@@ -166,7 +167,7 @@ public class MyUtils extends MyController {
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
 	return new BulkActionAccessor().call((userId) -> {
 
-	    int port = getPort();
+	    int port = Globals.getPort();
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
 		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
@@ -194,11 +195,4 @@ public class MyUtils extends MyController {
 	});
     }
 
-    private static int getPort() {
-	try {
-	    return play.Play.application().configuration().getInt("http.port");
-	} catch (Exception e) {
-	    return 9000;
-	}
-    }
 }
