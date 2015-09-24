@@ -221,9 +221,10 @@ public class JsonMapper {
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
 
 	Map<String, Object> resolvedObject = null;
+
+	String id = l.getObject();
+	String value = l.getObjectLabel();
 	if (l.getObjectLabel() != null) {
-	    String id = l.getObject();
-	    String value = l.getObjectLabel();
 	    resolvedObject = new HashMap<String, Object>();
 	    resolvedObject.put("@id", id);
 	    resolvedObject.put("prefLabel", value);
@@ -233,14 +234,28 @@ public class JsonMapper {
 	    List<Object> list = (List<Object>) rdf.get(profile.getJsonName(l
 		    .getPredicate()));
 	    if (resolvedObject == null) {
-		list.add(l.getObject());
+		if (l.isLiteral()) {
+		    list.add(l.getObject());
+		} else {
+		    resolvedObject = new HashMap<String, Object>();
+		    resolvedObject.put("@id", id);
+		    resolvedObject.put("prefLabel", id);
+		    list.add(resolvedObject);
+		}
 	    } else {
 		list.add(resolvedObject);
 	    }
 	} else {
 	    List<Object> list = new ArrayList<Object>();
 	    if (resolvedObject == null) {
-		list.add(l.getObject());
+		if (l.isLiteral()) {
+		    list.add(l.getObject());
+		} else {
+		    resolvedObject = new HashMap<String, Object>();
+		    resolvedObject.put("@id", id);
+		    resolvedObject.put("prefLabel", id);
+		    list.add(resolvedObject);
+		}
 	    } else {
 		list.add(resolvedObject);
 	    }
