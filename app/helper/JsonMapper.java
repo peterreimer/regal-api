@@ -117,6 +117,10 @@ public class JsonMapper {
 		continue;
 	    if (IS_PART_OF.equals(l.getPredicate()))
 		continue;
+	    if ("parentPid"
+		    .equals(Globals.profile.getJsonName(l.getPredicate()))) {
+		l.setPredicate("http://hbz-nrw.de/regal#externalParent");
+	    }
 	    addLinkToJsonMap(rdf, l);
 	}
 	addPartsToJsonMap(rdf);
@@ -224,12 +228,13 @@ public class JsonMapper {
 
 	String id = l.getObject();
 	String value = l.getObjectLabel();
+	String jsonName = profile.getJsonName(l.getPredicate());
 	if (l.getObjectLabel() != null) {
 	    resolvedObject = new HashMap<String, Object>();
 	    resolvedObject.put("@id", id);
 	    resolvedObject.put("prefLabel", value);
 	}
-	if (rdf.containsKey(profile.getJsonName(l.getPredicate()))) {
+	if (rdf.containsKey(jsonName)) {
 	    @SuppressWarnings("unchecked")
 	    List<Object> list = (List<Object>) rdf.get(profile.getJsonName(l
 		    .getPredicate()));
