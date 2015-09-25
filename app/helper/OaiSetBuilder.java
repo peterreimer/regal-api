@@ -16,26 +16,7 @@
  */
 package helper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import models.Globals;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
-import archive.fedora.MapEntry;
 
 /**
  * The OAISetBuilder creates OAISets from rdf statements
@@ -60,24 +41,12 @@ public class OaiSetBuilder {
 	String pid = null;
 
 	if (predicate.compareTo("http://purl.org/dc/terms/subject") == 0) {
-
 	    if (object.startsWith("http://dewey.info/class/")) {
 		String ddc = object.subSequence(object.length() - 4,
 			object.length() - 1).toString();
-
-		if (Globals.profile.pMap.containsKey(object)) {
-		    MapEntry e = Globals.profile.pMap.get(object);
-		    name = e.label;
-		    play.Logger.info("looked up ddc local name: " + name);
-		} else {
-		    name = ddcmap(ddc);
-		    MapEntry e = new MapEntry();
-		    e.label = name;
-		    Globals.profile.pMap.put(object, e);
-		}
+		name = Globals.profile.getLabel(object);
 		spec = "ddc:" + ddc;
 		pid = "oai:" + ddc;
-
 	    } else {
 		return null;
 	    }
@@ -94,49 +63,6 @@ public class OaiSetBuilder {
 	}
 
 	return new OaiSet(name, spec, pid);
-    }
-
-    private String ddcmap(String number) {
-	if (number == null || number.length() != 3)
-	    play.Logger.info("Didn't found ddc name for ddc:" + number);
-	String name = number;
-	try {
-	    URL url = new URL("http://dewey.info/class/" + number
-		    + "/2009-08/about.en");
-	    HttpClient httpClient = new HttpClient();
-	    HttpMethod method = new GetMethod(url.toString());
-	    httpClient.executeMethod(method);
-	    try (InputStream stream = method.getResponseBodyAsStream()) {
-		DocumentBuilderFactory factory = DocumentBuilderFactory
-			.newInstance();
-		DocumentBuilder docBuilder;
-		factory.setNamespaceAware(true);
-		factory.setExpandEntityReferences(false);
-		docBuilder = factory.newDocumentBuilder();
-		Document doc = docBuilder.parse(stream);
-		Element root = doc.getDocumentElement();
-		root.normalize();
-		try {
-		    name = root.getElementsByTagName("skos:prefLabel").item(0)
-			    .getTextContent();
-		    play.Logger.info("looked up ddc online name: " + name);
-		} catch (Exception e) {
-		    play.Logger.info("Didn't found ddc name for ddc:" + number);
-		}
-	    }
-	} catch (MalformedURLException e) {
-	    play.Logger.error(e.getMessage());
-	} catch (HttpException e) {
-	    play.Logger.error(e.getMessage());
-	} catch (IOException e) {
-	    play.Logger.error(e.getMessage());
-	} catch (ParserConfigurationException e) {
-	    play.Logger.error(e.getMessage());
-	} catch (SAXException e) {
-	    play.Logger.error(e.getMessage());
-	}
-
-	return name;
     }
 
     private String docmap(String type) {

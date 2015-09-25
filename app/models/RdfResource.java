@@ -142,7 +142,7 @@ public class RdfResource {
 		return findLabel(r.getLinks());
 	    }
 	}
-	return null;
+	return Globals.profile.getLabel(l.getObject());
     }
 
     private String findLabel(List<Link> list) {

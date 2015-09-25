@@ -22,6 +22,7 @@ import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
+import helper.JsonMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -216,9 +217,9 @@ public class Read extends RegalAction {
     public Map<String, Object> getPartsAsTree(Node node, String style) {
 	Map<String, Object> nm = null;
 	if ("short".equals(style)) {
-	    nm = node.getLdWithoutContextShortStyle();
+	    nm = new JsonMapper(node).getLdWithoutContextShortStyle();
 	} else {
-	    nm = node.getLdWithoutContext();
+	    nm = new JsonMapper(node).getLdWithoutContext();
 	}
 	@SuppressWarnings("unchecked")
 	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
@@ -453,7 +454,7 @@ public class Read extends RegalAction {
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
-		String pred = Globals.profile.nMap.get(field).uri;
+		String pred = Globals.profile.getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(node.getPid(),
 			pred, metadata, RDFFormat.NTRIPLES);
 
@@ -484,7 +485,7 @@ public class Read extends RegalAction {
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
-		String pred = Globals.profile.nMap.get(field).uri;
+		String pred = Globals.profile.getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(pid, pred,
 			metadata, RDFFormat.NTRIPLES);
 
