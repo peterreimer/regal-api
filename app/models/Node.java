@@ -995,13 +995,13 @@ public class Node {
 			metadata)
 		|| RdfUtils.hasTriple(pid,
 			"http: // purl.org/ontology/bibo/doi", metadata)
-		|| hasDoi();
+		|| hasDoi() || hasUrn();
     }
 
     /**
      * @return true if the metadata contains urn
      */
-    public boolean hasUrn() {
+    public boolean hasUrnInMetadata() {
 	return RdfUtils
 		.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata);
     }
@@ -1134,6 +1134,14 @@ public class Node {
     public boolean hasDoi() {
 	String doi = this.getDoi();
 	return doi != null && !doi.isEmpty();
+    }
+
+    /**
+     * @return returns true if urn is not null and not empty
+     */
+    public boolean hasUrn() {
+	String urn = this.getUrn();
+	return urn != null && !urn.isEmpty();
     }
 
     /**

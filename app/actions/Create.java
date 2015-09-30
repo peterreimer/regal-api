@@ -243,7 +243,7 @@ public class Create extends RegalAction {
     }
 
     private void addEpicurTransformer(Node node) {
-	if (node.hasUrn()) {
+	if (node.hasUrnInMetadata() || node.hasUrn()) {
 	    node.addTransformer(new Transformer("epicur"));
 	}
     }

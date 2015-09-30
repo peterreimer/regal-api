@@ -45,7 +45,6 @@ import models.Link;
 import models.Node;
 import models.Pair;
 import models.RegalObject;
-import models.Transformer;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
@@ -207,6 +206,7 @@ public class Modify extends RegalAction {
 		    node.setDoi(dois.get(0));
 		}
 	    }
+
 	    Globals.fedora.updateNode(node);
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
@@ -268,13 +268,12 @@ public class Modify extends RegalAction {
      */
     String addUrn(Node node, String snid) {
 	String subject = node.getPid();
-	if (node.hasUrn())
+	if (node.hasUrnInMetadata() || node.hasUrn())
 	    throw new HttpArchiveException(409, subject
 		    + " already has a urn. Leave unmodified!");
-	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String urn = generateUrn(subject, snid);
-	node.addTransformer(new Transformer("epicur"));
-	return addMetadataField(node, hasUrn, urn);
+	node.setUrn(urn);
+	return makeOAISet(node);
     }
 
     /**
@@ -288,15 +287,10 @@ public class Modify extends RegalAction {
      * @return the urn
      */
     public String replaceUrn(Node node, String snid, String userId) {
-	String subject = node.getPid();
-	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = node.getMetadata();
-	String urn = generateUrn(subject, snid);
-	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
-	node.addTransformer(new Transformer("epicur"));
+	String urn = generateUrn(node.getPid(), snid);
 	node.setLastModifiedBy(userId);
-	updateMetadata(node, metadata);
-	return "Update " + subject + " metadata " + metadata;
+	node.setUrn(urn);
+	return makeOAISet(node);
     }
 
     /**
@@ -387,7 +381,7 @@ public class Modify extends RegalAction {
 	    if ("public".equals(node.getAccessScheme())) {
 		addSet(node, "open_access");
 	    }
-	    if (node.hasUrn()) {
+	    if (node.hasUrnInMetadata()) {
 		addSet(node, "epicur");
 		String urn = node.getUrnFromMetadata();
 		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
@@ -396,6 +390,16 @@ public class Modify extends RegalAction {
 		    addSet(node, "urn-set-2");
 		}
 	    }
+	    if (node.hasUrn()) {
+		addSet(node, "epicur");
+		String urn = node.getUrn();
+		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
+		    addSet(node, "urn-set-1");
+		} else if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
+		    addSet(node, "urn-set-2");
+		}
+	    }
+
 	    if (node.hasLinkToCatalogId()) {
 		play.Logger.info(node.getPid() + " add aleph set!");
 		addSet(node, "aleph");
