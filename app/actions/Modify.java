@@ -511,9 +511,11 @@ public class Modify extends RegalAction {
 		String marker = el.getTextContent();
 		if (!marker.contains("ellinet"))
 		    continue;
+		if (!marker.contains("GND"))
+		    continue;
 		String gndId = gndEndpoint
-			+ marker.replaceFirst(
-				"38\\ M:\\ ellinet;\\ GND: \\([^)]*\\)", "");
+			+ marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)",
+				"");
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
 		Statement link = v.createStatement(v.createURI(node.getPid()),
