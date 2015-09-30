@@ -207,7 +207,8 @@ public class Modify extends RegalAction {
 		}
 	    }
 
-	    Globals.fedora.updateNode(node);
+	    node.setMetadata(content);
+	    makeOAISet(node);
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
