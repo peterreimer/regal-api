@@ -18,13 +18,13 @@ package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
+import helper.oai.OaiDispatcher;
 
 import java.util.List;
 
 import models.Globals;
 import models.Node;
 import models.RegalObject;
-import models.Transformer;
 
 /**
  * @author Jan Schnasse
@@ -126,7 +126,7 @@ public class Create extends RegalAction {
 	if (object.getIsDescribedBy().getName() != null)
 	    node.setName(object.getIsDescribedBy().getName());
 	if (object.getTransformer() != null)
-	    updateTransformer(object.getTransformer(), node);
+	    OaiDispatcher.updateTransformer(object.getTransformer(), node);
 	if (object.getIsDescribedBy().getDoi() != null)
 	    node.setDoi(object.getIsDescribedBy().getDoi());
 	if (object.getIsDescribedBy().getUrn() != null)
@@ -144,7 +144,7 @@ public class Create extends RegalAction {
 	node.setName(object.getIsDescribedBy().getName());
 	node.setDoi(object.getIsDescribedBy().getDoi());
 	node.setUrn(object.getIsDescribedBy().getUrn());
-	updateTransformer(object.getTransformer(), node);
+	OaiDispatcher.makeOAISet(node);
     }
 
     private void setNodeType(String type, Node node) {
@@ -194,76 +194,6 @@ public class Create extends RegalAction {
     private void inheritRights(Node from, Node to) {
 	to.setAccessScheme(from.getAccessScheme());
 	to.setPublishScheme(from.getPublishScheme());
-    }
-
-    protected void updateTransformer(List<String> transformers, Node node) {
-	node.removeAllContentModels();
-	addUnknownTransformer(transformers, node);
-	addOaiDcTransformer(node);
-	addEpicurTransformer(node);
-	addAlephTransformer(node);
-	addMetsTransformer(node);
-    }
-
-    private void addUnknownTransformer(List<String> transformers, Node node) {
-	if (transformers != null) {
-	    for (String t : transformers) {
-		if ("oaidc".equals(t))
-		    continue; // implicitly added - or not allowed to set
-		if ("epicur".equals(t))
-		    continue; // implicitly added - or not allowed to set
-		if ("aleph".equals(t))
-		    continue; // implicitly added - or not allowed to set
-		if ("mets".equals(t))
-		    continue; // implicitly added - or not allowed to set
-		node.addTransformer(new Transformer(t));
-	    }
-	}
-    }
-
-    private void addMetsTransformer(Node node) {
-	String type = node.getContentType();
-	if ("public".equals(node.getPublishScheme())) {
-	    if ("monograph".equals(type) || "journal".equals(type)
-		    || "webpage".equals(type)) {
-		node.addTransformer(new Transformer("mets"));
-	    }
-	}
-    }
-
-    private void addAlephTransformer(Node node) {
-	String type = node.getContentType();
-	if (node.hasPersistentIdentifier()) {
-	    if ("monograph".equals(type) || "journal".equals(type)
-		    || "webpage".equals(type))
-		if (node.hasLinkToCatalogId()) {
-		    node.addTransformer(new Transformer("aleph"));
-		}
-	}
-    }
-
-    private void addEpicurTransformer(Node node) {
-	if (node.hasUrnInMetadata() || node.hasUrn()) {
-	    node.addTransformer(new Transformer("epicur"));
-	}
-    }
-
-    private void addOaiDcTransformer(Node node) {
-	if ("public".equals(node.getPublishScheme())) {
-	    node.addTransformer(new Transformer("oaidc"));
-	}
-    }
-
-    /**
-     * 
-     * @param cms
-     *            a List of Transformers
-     * @param userId
-     * @return a message
-     */
-    public String contentModelsInit(List<Transformer> cms) {
-	Globals.fedora.updateContentModels(cms);
-	return "Success!";
     }
 
     /**
