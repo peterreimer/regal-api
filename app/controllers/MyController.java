@@ -155,6 +155,7 @@ public class MyController extends Controller {
 	try {
 	    return ok(json(obj));
 	} catch (Exception e) {
+	    play.Logger.error("", e);
 	    return internalServerError("Not able to create response!");
 	}
     }

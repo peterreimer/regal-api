@@ -74,8 +74,10 @@ public class EtikettMaker {
 		    + fileName);
 	    result = loadFile(fileName, List.class);
 	} else {
-	    play.Logger.info("...succeed!");
+	    play.Logger.info("...succeeded!");
 	}
+	if (result == null)
+	    play.Logger.info("...not succeeded!");
 	return result;
     }
 
@@ -87,12 +89,14 @@ public class EtikettMaker {
 	Map<String, Object> result = new HashMap<String, Object>();
 	result = loadUrl(fileName, Map.class);
 	if (result == null) {
-	    play.Logger.info("...not succeed! Load from local resource: "
+	    play.Logger.info("...not succeeded! Load from local resource: "
 		    + fileName);
 	    result = loadFile(fileName, Map.class);
 	} else {
 	    play.Logger.info("...succeed!");
 	}
+	if (result == null)
+	    play.Logger.info("...not succeeded!");
 	return result;
     }
 
@@ -102,7 +106,7 @@ public class EtikettMaker {
 		"public/" + fileName)) {
 	    return new ObjectMapper().readValue(in, type);
 	} catch (Exception e) {
-	    return null;
+	    throw new RuntimeException("Error during initialization!", e);
 	}
     }
 

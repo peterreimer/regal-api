@@ -208,6 +208,7 @@ public class Modify extends RegalAction {
 		}
 	    }
 	    Globals.fedora.updateNode(node);
+
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
@@ -362,6 +363,7 @@ public class Modify extends RegalAction {
      */
     public String makeOAISet(Node node) {
 	try {
+	    play.Logger.info("Create OAI-Sets for " + node.getPid());
 	    String pid = node.getPid();
 	    OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
 	    RepositoryResult<Statement> statements = RdfUtils.getStatements(
@@ -409,6 +411,7 @@ public class Modify extends RegalAction {
     }
 
     private void addSet(Node node, String name) {
+	play.Logger.info("Add OAI-Set " + name + " to " + node.getPid());
 	String spec = name;
 	String namespace = "oai";
 	String oaipid = namespace + ":" + name;
