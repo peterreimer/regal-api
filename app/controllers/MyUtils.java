@@ -16,6 +16,8 @@
  */
 package controllers;
 
+import helper.oai.OaiDispatcher;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -187,7 +189,7 @@ public class MyUtils extends MyController {
 	    transformers.add(new Transformer(namespace + "mets", "mets",
 		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
 			    + "/resource/(pid)." + namespace + "mets"));
-	    create.contentModelsInit(transformers);
+	    OaiDispatcher.contentModelsInit(transformers);
 	    String result = "Reinit contentModels " + namespace + "epicur, "
 		    + namespace + "oaidc, " + namespace + "pdfa, " + namespace
 		    + "pdfbox, " + namespace + "aleph, " + namespace + "mets";

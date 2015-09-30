@@ -146,8 +146,6 @@ public class JsonMapper {
 	    aboutMap.put(importedFrom, node.getImportedFrom());
 	if (node.getName() != null)
 	    aboutMap.put(name, node.getName());
-	if (node.getUrn() != null)
-	    aboutMap.put(urn, node.getUrn());
 	if (node.getLastModifiedBy() != null)
 	    aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
 	aboutMap.put(modified, node.getLastModified());
@@ -161,6 +159,8 @@ public class JsonMapper {
 	rdf.put(isDescribedBy, aboutMap);
 	if (node.getDoi() != null)
 	    rdf.put(doi, node.getDoi());
+	if (node.getUrn() != null)
+	    rdf.put(urn, node.getUrn());
 	if (node.getParentPid() != null)
 	    rdf.put(parentPid, node.getParentPid());
 

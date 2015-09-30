@@ -18,9 +18,9 @@ package actions;
 
 import java.util.List;
 
-import play.cache.Cache;
 import models.Globals;
 import models.Node;
+import play.cache.Cache;
 
 /**
  * @author Jan Schnasse
@@ -28,7 +28,7 @@ import models.Node;
  */
 public class RegalAction {
 
-    Node updateIndex(String pid) {
+    public Node updateIndex(String pid) {
 	removeNodeFromCache(pid);
 	Node node = new Read().readNode(pid);
 	new Index().index(node);

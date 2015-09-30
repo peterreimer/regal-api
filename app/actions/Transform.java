@@ -19,8 +19,8 @@ package actions;
 import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
-import helper.OaiDcMapper;
 import helper.PdfText;
+import helper.oai.OaiDcMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

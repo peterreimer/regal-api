@@ -150,6 +150,12 @@ public class RdfResource {
 	    if ("http://d-nb.info/standards/elementset/gnd#preferredName"
 		    .equals(l.getPredicate()))
 		return l.getObject();
+	    if ("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"
+		    .equals(l.getPredicate()))
+		return l.getObject();
+	    if ("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName"
+		    .equals(l.getPredicate()))
+		return l.getObject();
 	    if ("http://www.w3.org/2004/02/skos/core#prefLabel".equals(l
 		    .getPredicate()))
 		return l.getObject();

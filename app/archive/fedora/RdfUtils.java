@@ -590,7 +590,7 @@ public class RdfUtils {
 		}
 	    }
 	} catch (Exception e) {
-	    throw new RdfException(e);
+	    return false;
 	}
 	return false;
     }

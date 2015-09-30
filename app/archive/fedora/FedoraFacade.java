@@ -265,7 +265,6 @@ class FedoraFacade implements FedoraInterface {
 		    response.getEntityInputStream(), "utf-8");
 	    node.setObjectTimestamp(Globals.dateFormat.parse(objectTimestamp));
 	} catch (Exception e) {
-	    play.Logger.debug(node.getPid() + ": No objectTimestamp found");
 	}
     }
 

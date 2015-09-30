@@ -16,13 +16,10 @@
  */
 package actions;
 
-import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
-import static archive.fedora.FedoraVocabulary.ITEM_ID;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
-import helper.OaiSet;
-import helper.OaiSetBuilder;
 import helper.URN;
+import helper.oai.OaiDispatcher;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,18 +38,15 @@ import java.util.regex.Pattern;
 
 import models.DublinCoreData;
 import models.Globals;
-import models.Link;
 import models.Node;
 import models.Pair;
 import models.RegalObject;
-import models.Transformer;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
 
@@ -207,7 +201,9 @@ public class Modify extends RegalAction {
 		    node.setDoi(dois.get(0));
 		}
 	    }
-	    Globals.fedora.updateNode(node);
+
+	    node.setMetadata(content);
+	    OaiDispatcher.makeOAISet(node);
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
@@ -268,13 +264,12 @@ public class Modify extends RegalAction {
      */
     String addUrn(Node node, String snid) {
 	String subject = node.getPid();
-	if (node.hasUrn())
+	if (node.hasUrnInMetadata() || node.hasUrn())
 	    throw new HttpArchiveException(409, subject
 		    + " already has a urn. Leave unmodified!");
-	String hasUrn = "http://purl.org/lobid/lv#urn";
 	String urn = generateUrn(subject, snid);
-	node.addTransformer(new Transformer("epicur"));
-	return addMetadataField(node, hasUrn, urn);
+	node.setUrn(urn);
+	return OaiDispatcher.makeOAISet(node);
     }
 
     /**
@@ -288,15 +283,10 @@ public class Modify extends RegalAction {
      * @return the urn
      */
     public String replaceUrn(Node node, String snid, String userId) {
-	String subject = node.getPid();
-	String hasUrn = "http://purl.org/lobid/lv#urn";
-	String metadata = node.getMetadata();
-	String urn = generateUrn(subject, snid);
-	metadata = RdfUtils.replaceTriple(subject, hasUrn, urn, true, metadata);
-	node.addTransformer(new Transformer("epicur"));
+	String urn = generateUrn(node.getPid(), snid);
 	node.setLastModifiedBy(userId);
-	updateMetadata(node, metadata);
-	return "Update " + subject + " metadata " + metadata;
+	node.setUrn(urn);
+	return OaiDispatcher.makeOAISet(node);
     }
 
     /**
@@ -352,106 +342,6 @@ public class Modify extends RegalAction {
 		    + contentType + " is not allowed to carry urn.";
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
-	}
-    }
-
-    /**
-     * @param node
-     *            the node to be published on the oai interface
-     * @return A short message.
-     */
-    public String makeOAISet(Node node) {
-	try {
-	    String pid = node.getPid();
-	    OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-	    RepositoryResult<Statement> statements = RdfUtils.getStatements(
-		    node.getMetadata(), "fedora:info/");
-	    while (statements.hasNext()) {
-		Statement st = statements.next();
-		String subject = st.getSubject().stringValue();
-		String predicate = st.getPredicate().stringValue();
-		String object = st.getObject().stringValue();
-
-		OaiSet set = oaiSetBuilder.getSet(subject, predicate, object);
-		if (set == null) {
-		    continue;
-		}
-		if (!Globals.fedora.nodeExists(set.getPid())) {
-		    createOAISet(set.getName(), set.getSpec(), set.getPid());
-		}
-		linkObjectToOaiSet(node, set.getSpec(), set.getPid());
-	    }
-
-	    if ("public".equals(node.getAccessScheme())) {
-		addSet(node, "open_access");
-	    }
-	    if (node.hasUrn()) {
-		addSet(node, "epicur");
-		String urn = node.getUrnFromMetadata();
-		if (urn.startsWith("urn:nbn:de:hbz:929:01")) {
-		    addSet(node, "urn-set-1");
-		} else if (urn.startsWith("urn:nbn:de:hbz:929:02")) {
-		    addSet(node, "urn-set-2");
-		}
-	    }
-	    if (node.hasLinkToCatalogId()) {
-		play.Logger.info(node.getPid() + " add aleph set!");
-		addSet(node, "aleph");
-		addSet(node, Globals.alephSetName);
-	    }
-	    addSet(node, node.getContentType());
-	    updateIndex(node.getPid());
-	    return pid + " successfully created oai sets!";
-	} catch (Exception e) {
-	    throw new MetadataNotFoundException(e);
-	}
-
-    }
-
-    private void addSet(Node node, String name) {
-	String spec = name;
-	String namespace = "oai";
-	String oaipid = namespace + ":" + name;
-	if (!Globals.fedora.nodeExists(oaipid)) {
-	    createOAISet(name, spec, oaipid);
-	}
-	linkObjectToOaiSet(node, spec, oaipid);
-    }
-
-    private void linkObjectToOaiSet(Node node, String spec, String pid) {
-	node.removeRelations(ITEM_ID);
-	node.removeRelation(IS_MEMBER_OF, "info:fedora/" + pid);
-	Link link = new Link();
-	link.setPredicate(IS_MEMBER_OF);
-	link.setObject("info:fedora/" + pid, false);
-	node.addRelation(link);
-	link = new Link();
-	link.setPredicate(ITEM_ID);
-	link.setObject("info:fedora/" + node.getPid(), false);
-	node.addRelation(link);
-	Globals.fedora.updateNode(node);
-    }
-
-    private void createOAISet(String name, String spec, String pid) {
-	String setSpecPred = "http://www.openarchives.org/OAI/2.0/setSpec";
-	String setNamePred = "http://www.openarchives.org/OAI/2.0/setName";
-	Link setSpecLink = new Link();
-	setSpecLink.setPredicate(setSpecPred);
-	Link setNameLink = new Link();
-	setNameLink.setPredicate(setNamePred);
-	String namespace = "oai";
-	{
-	    Node oaiset = new Node();
-	    oaiset.setNamespace(namespace);
-	    oaiset.setPID(pid);
-	    setSpecLink.setObject(spec, true);
-	    oaiset.addRelation(setSpecLink);
-	    setNameLink.setObject(name, true);
-	    oaiset.addRelation(setNameLink);
-	    DublinCoreData dc = oaiset.getDublinCoreData();
-	    dc.addTitle(name);
-	    oaiset.setDublinCoreData(dc);
-	    Globals.fedora.createNode(oaiset);
 	}
     }
 
@@ -516,7 +406,7 @@ public class Modify extends RegalAction {
      * @return a message
      */
     public String reinitOaiSets(List<Node> nodes) {
-	return apply(nodes, n -> makeOAISet(n));
+	return apply(nodes, n -> OaiDispatcher.makeOAISet(n));
     }
 
     /**
@@ -621,9 +511,11 @@ public class Modify extends RegalAction {
 		String marker = el.getTextContent();
 		if (!marker.contains("ellinet"))
 		    continue;
+		if (!marker.contains("GND"))
+		    continue;
 		String gndId = gndEndpoint
-			+ marker.replaceFirst(
-				"38\\ M:\\ ellinet;\\ GND: \\([^)]*\\)", "");
+			+ marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)",
+				"");
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
 		Statement link = v.createStatement(v.createURI(node.getPid()),
@@ -740,7 +632,7 @@ public class Modify extends RegalAction {
 	    String registerMetadataResponse = client
 		    .registerMetadataAtDatacite(node, xml);
 	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
-	    String makeOaiSetResponse = makeOAISet(node);
+	    String makeOaiSetResponse = OaiDispatcher.makeOAISet(node);
 
 	    result.put("Metadata", xml);
 	    result.put("registerMetadataResponse", registerMetadataResponse);
@@ -777,7 +669,7 @@ public class Modify extends RegalAction {
 	    String registerMetadataResponse = client
 		    .registerMetadataAtDatacite(node, xml);
 	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
-	    String makeOaiSetResponse = makeOAISet(node);
+	    String makeOaiSetResponse = OaiDispatcher.makeOAISet(node);
 	    result.put("Metadata", xml);
 	    result.put("registerMetadataResponse", registerMetadataResponse);
 	    result.put("mintDoiResponse", mintDoiResponse);
@@ -808,7 +700,7 @@ public class Modify extends RegalAction {
 		RDFFormat.NTRIPLES);
 	updateMetadata(node, metadata);
 	node = new Read().readNode(node.getPid());
-	makeOAISet(node);
+	OaiDispatcher.makeOAISet(node);
 	return "Update " + node.getPid() + "! " + pred + " has been added.";
 
     }

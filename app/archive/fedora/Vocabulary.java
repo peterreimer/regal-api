@@ -104,7 +104,7 @@ public abstract class Vocabulary {
      * predicate to link to an urn
      * 
      */
-    public final static String REL_HAS_URN = HBZ_MODEL_NAMESPACE + "urn";
+    public final static String REL_HAS_URN = "http://purl.org/lobid/lv#urn";
 
     /**
      * predicate to link to a doi
