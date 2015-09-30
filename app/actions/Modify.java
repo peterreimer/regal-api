@@ -208,7 +208,6 @@ public class Modify extends RegalAction {
 		}
 	    }
 	    Globals.fedora.updateNode(node);
-
 	    reindexNodeAndParent(node);
 	    return pid + " metadata successfully updated!";
 	} catch (RdfException e) {
@@ -363,6 +362,7 @@ public class Modify extends RegalAction {
      */
     public String makeOAISet(Node node) {
 	try {
+	    new Create().updateTransformer(null, node);
 	    play.Logger.info("Create OAI-Sets for " + node.getPid());
 	    String pid = node.getPid();
 	    OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();

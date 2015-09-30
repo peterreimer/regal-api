@@ -981,15 +981,29 @@ public class Node {
     }
 
     /**
+     * @return true if the metadata contains one of the following predicates or
+     *         if a doi is present at RELS-EXT -http://purl.org/lobid/lv#urn
+     *         -http://geni-orca.renci.org/owl/topology.owl#hasURN -http: //
+     *         purl.org/ontology/bibo/doi
+     * 
+     */
+    public boolean hasPersistentIdentifier() {
+	return RdfUtils
+		.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata)
+		|| RdfUtils.hasTriple(pid,
+			"http://geni-orca.renci.org/owl/topology.owl#hasURN",
+			metadata)
+		|| RdfUtils.hasTriple(pid,
+			"http: // purl.org/ontology/bibo/doi", metadata)
+		|| hasDoi();
+    }
+
+    /**
      * @return true if the metadata contains urn
      */
     public boolean hasUrn() {
-	String hasUrn = "http://purl.org/lobid/lv#urn";
-	try {
-	    return RdfUtils.hasTriple(pid, hasUrn, metadata);
-	} catch (Exception e) {
-	    return false;
-	}
+	return RdfUtils
+		.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata);
     }
 
     /**

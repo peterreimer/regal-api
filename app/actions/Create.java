@@ -196,24 +196,16 @@ public class Create extends RegalAction {
 	to.setPublishScheme(from.getPublishScheme());
     }
 
-    private void updateTransformer(List<String> transformers, Node node) {
+    protected void updateTransformer(List<String> transformers, Node node) {
 	node.removeAllContentModels();
-	String type = node.getContentType();
-	if ("public".equals(node.getPublishScheme())) {
-	    node.addTransformer(new Transformer("oaidc"));
-	    if ("monograph".equals(type) || "journal".equals(type)
-		    || "webpage".equals(type)) {
-		node.addTransformer(new Transformer("mets"));
-	    }
-	}
-	if (node.hasUrn()) {
-	    node.addTransformer(new Transformer("epicur"));
-	    if ("monograph".equals(type) || "journal".equals(type)
-		    || "webpage".equals(type))
-		if (node.hasLinkToCatalogId()) {
-		    node.addTransformer(new Transformer("aleph"));
-		}
-	}
+	addUnknownTransformer(transformers, node);
+	addOaiDcTransformer(node);
+	addEpicurTransformer(node);
+	addAlephTransformer(node);
+	addMetsTransformer(node);
+    }
+
+    private void addUnknownTransformer(List<String> transformers, Node node) {
 	if (transformers != null) {
 	    for (String t : transformers) {
 		if ("oaidc".equals(t))
@@ -226,6 +218,39 @@ public class Create extends RegalAction {
 		    continue; // implicitly added - or not allowed to set
 		node.addTransformer(new Transformer(t));
 	    }
+	}
+    }
+
+    private void addMetsTransformer(Node node) {
+	String type = node.getContentType();
+	if ("public".equals(node.getPublishScheme())) {
+	    if ("monograph".equals(type) || "journal".equals(type)
+		    || "webpage".equals(type)) {
+		node.addTransformer(new Transformer("mets"));
+	    }
+	}
+    }
+
+    private void addAlephTransformer(Node node) {
+	String type = node.getContentType();
+	if (node.hasPersistentIdentifier()) {
+	    if ("monograph".equals(type) || "journal".equals(type)
+		    || "webpage".equals(type))
+		if (node.hasLinkToCatalogId()) {
+		    node.addTransformer(new Transformer("aleph"));
+		}
+	}
+    }
+
+    private void addEpicurTransformer(Node node) {
+	if (node.hasUrn()) {
+	    node.addTransformer(new Transformer("epicur"));
+	}
+    }
+
+    private void addOaiDcTransformer(Node node) {
+	if ("public".equals(node.getPublishScheme())) {
+	    node.addTransformer(new Transformer("oaidc"));
 	}
     }
 
