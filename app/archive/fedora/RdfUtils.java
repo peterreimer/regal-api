@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -152,10 +152,10 @@ public class RdfUtils {
     }
 
     private static InputStream urlToInputStream(URL url, String accept) {
-	URLConnection con = null;
+	HttpURLConnection con = null;
 	InputStream inputStream = null;
 	try {
-	    con = url.openConnection();
+	    con = (HttpURLConnection) url.openConnection();
 	    con.setRequestProperty("Accept", accept);
 	    con.connect();
 	    inputStream = con.getInputStream();
@@ -163,6 +163,35 @@ public class RdfUtils {
 	    throw new UrlConnectionException(e);
 	}
 	return inputStream;
+    }
+
+    private static InputStream urlToInputStreamWithRedirects(URL url,
+	    String accept) throws IOException {
+	HttpURLConnection con = null;
+	InputStream inputStream = null;
+	try {
+	    con = (HttpURLConnection) url.openConnection();
+	    con.setRequestProperty("Accept", accept);
+	    con.connect();
+	    int responseCode = con.getResponseCode();
+	    play.Logger.debug("Request for " + accept + " from "
+		    + url.toExternalForm());
+	    play.Logger.debug("Get a " + responseCode + " from "
+		    + url.toExternalForm());
+	    if (responseCode == HttpURLConnection.HTTP_MOVED_PERM
+		    || responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+		    || responseCode == 307 || responseCode == 303) {
+		String redirectUrl = con.getHeaderField("Location");
+		play.Logger.debug("Redirect to Location: " + redirectUrl);
+		return urlToInputStreamWithRedirects(new URL(redirectUrl),
+			accept);
+	    }
+	    inputStream = con.getInputStream();
+	    return inputStream;
+	} catch (IOException e) {
+	    throw new UrlConnectionException(e);
+	}
+
     }
 
     /**

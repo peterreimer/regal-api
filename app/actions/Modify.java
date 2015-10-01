@@ -539,7 +539,7 @@ public class Modify extends RegalAction {
 		if (!(s.getSubject() instanceof BNode)) {
 		    if (isLiteral) {
 			ValueFactory v = new ValueFactoryImpl();
-			Statement newS = v.createStatement(s.getSubject(), s
+			Statement newS = v.createStatement(v.createURI(uri), s
 				.getPredicate(), v.createLiteral(Normalizer
 				.normalize(s.getObject().stringValue(),
 					Normalizer.Form.NFKC)));
