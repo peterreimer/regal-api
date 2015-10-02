@@ -516,6 +516,9 @@ public class Modify extends RegalAction {
 		String gndId = gndEndpoint
 			+ marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)",
 				"");
+		if (gndId.endsWith("16269969-4")) {
+		    gndId = gndEndpoint + "2006655-7";
+		}
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
 		Statement link = v.createStatement(v.createURI(node.getPid()),
@@ -539,7 +542,7 @@ public class Modify extends RegalAction {
 		if (!(s.getSubject() instanceof BNode)) {
 		    if (isLiteral) {
 			ValueFactory v = new ValueFactoryImpl();
-			Statement newS = v.createStatement(s.getSubject(), s
+			Statement newS = v.createStatement(v.createURI(uri), s
 				.getPredicate(), v.createLiteral(Normalizer
 				.normalize(s.getObject().stringValue(),
 					Normalizer.Form.NFKC)));
