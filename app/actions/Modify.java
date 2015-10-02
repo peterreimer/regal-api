@@ -516,6 +516,9 @@ public class Modify extends RegalAction {
 		String gndId = gndEndpoint
 			+ marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)",
 				"");
+		if ("16269969-4".equals(gndId)) {
+		    gndId = "2006655-7";
+		}
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
 		Statement link = v.createStatement(v.createURI(node.getPid()),
