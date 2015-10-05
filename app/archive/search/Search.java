@@ -119,6 +119,7 @@ public class Search {
 		play.Logger.info("Create new Index " + index);
 		init(index);
 	    }
+	    play.Logger.debug("Index: " + data);
 	    ActionResponse response = client.prepareIndex(index, type, id)
 		    .setSource(data).execute().actionGet();
 	    refresh();

@@ -198,11 +198,8 @@ public class Transform {
 	String pid = node.getPid();
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
-	    throw new HttpArchiveException(
-		    404,
-		    "The node "
-			    + pid
-			    + " does not provide a mime type. It may not even contain data at all!");
+	    throw new HttpArchiveException(404, "The node " + pid
+		    + " does not provide a mime type. No data found!");
 	if (mimeType.compareTo("application/pdf") != 0)
 	    throw new HttpArchiveException(406,
 		    "Wrong mime type. Cannot extract text from " + mimeType);

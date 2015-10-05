@@ -145,7 +145,7 @@ public class Index {
 	    Node data) {
 	try {
 	    Globals.search.index(Globals.PDFBOX_OCR_INDEX_PREF + index, type,
-		    pid, data.toString());
+		    pid, new Transform().pdfbox(data).toString());
 	    return pid + " indexed in " + Globals.PDFBOX_OCR_INDEX_PREF + index
 		    + "\n";
 	} catch (Exception e) {
