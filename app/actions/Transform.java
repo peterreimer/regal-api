@@ -130,7 +130,8 @@ public class Transform {
     }
 
     private String getInternalDataUri(Node node) {
-	return "http://localhost:9000/resource/" + node.getDataUri();
+	return "http://localhost:" + Globals.getPort() + "/resource/"
+		+ node.getDataUri();
     }
 
     /**
