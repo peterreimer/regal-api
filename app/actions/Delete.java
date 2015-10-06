@@ -114,7 +114,7 @@ public class Delete extends RegalAction {
      */
     public boolean nodesArePersistent(List<Node> nodes) {
 	for (Node n : nodes) {
-	    if (n.hasUrn())
+	    if (n.hasPersistentIdentifier())
 		return true;
 	    if (n.hasDoi())
 		return true;

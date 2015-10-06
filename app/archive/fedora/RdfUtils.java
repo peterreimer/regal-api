@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -152,10 +152,10 @@ public class RdfUtils {
     }
 
     private static InputStream urlToInputStream(URL url, String accept) {
-	URLConnection con = null;
+	HttpURLConnection con = null;
 	InputStream inputStream = null;
 	try {
-	    con = url.openConnection();
+	    con = (HttpURLConnection) url.openConnection();
 	    con.setRequestProperty("Accept", accept);
 	    con.connect();
 	    inputStream = con.getInputStream();
@@ -163,6 +163,35 @@ public class RdfUtils {
 	    throw new UrlConnectionException(e);
 	}
 	return inputStream;
+    }
+
+    private static InputStream urlToInputStreamWithRedirects(URL url,
+	    String accept) throws IOException {
+	HttpURLConnection con = null;
+	InputStream inputStream = null;
+	try {
+	    con = (HttpURLConnection) url.openConnection();
+	    con.setRequestProperty("Accept", accept);
+	    con.connect();
+	    int responseCode = con.getResponseCode();
+	    play.Logger.debug("Request for " + accept + " from "
+		    + url.toExternalForm());
+	    play.Logger.debug("Get a " + responseCode + " from "
+		    + url.toExternalForm());
+	    if (responseCode == HttpURLConnection.HTTP_MOVED_PERM
+		    || responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+		    || responseCode == 307 || responseCode == 303) {
+		String redirectUrl = con.getHeaderField("Location");
+		play.Logger.debug("Redirect to Location: " + redirectUrl);
+		return urlToInputStreamWithRedirects(new URL(redirectUrl),
+			accept);
+	    }
+	    inputStream = con.getInputStream();
+	    return inputStream;
+	} catch (IOException e) {
+	    throw new UrlConnectionException(e);
+	}
+
     }
 
     /**
@@ -178,7 +207,6 @@ public class RdfUtils {
 	    String baseUrl) {
 	try {
 	    RDFParser rdfParser = Rio.createParser(inf);
-	    // play.Logger.debug(rdfParser.getSupportedSettings().toString());
 	    org.openrdf.model.Graph myGraph = new TreeModel();
 	    StatementCollector collector = new StatementCollector(myGraph);
 	    rdfParser.setRDFHandler(collector);
@@ -538,6 +566,34 @@ public class RdfUtils {
 
     }
 
+    public static String replaceTriples(List<Statement> graph,
+	    final String metadata) {
+	try {
+	    InputStream is = new ByteArrayInputStream(
+		    metadata.getBytes("UTF-8"));
+	    RepositoryConnection con = readRdfInputStreamToRepository(is,
+		    RDFFormat.NTRIPLES);
+	    for (Statement st : graph) {
+		RepositoryResult<Statement> statements = con.getStatements(
+			null, null, null, true);
+		while (statements.hasNext()) {
+		    Statement statement = statements.next();
+		    if (statement.getSubject().equals(st.getSubject())
+			    && statement.getPredicate().equals(
+				    st.getPredicate())) {
+			con.remove(statement);
+		    }
+		}
+		con.add(st);
+	    }
+	    return writeStatements(con, RDFFormat.NTRIPLES);
+	} catch (RepositoryException e) {
+	    throw new RdfException(e);
+	} catch (UnsupportedEncodingException e) {
+	    throw new RdfException(e);
+	}
+    }
+
     /**
      * @param subject
      *            the triples subject
@@ -563,7 +619,7 @@ public class RdfUtils {
 		}
 	    }
 	} catch (Exception e) {
-	    throw new RdfException(e);
+	    return false;
 	}
 	return false;
     }

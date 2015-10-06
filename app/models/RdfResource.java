@@ -142,12 +142,18 @@ public class RdfResource {
 		return findLabel(r.getLinks());
 	    }
 	}
-	return null;
+	return Globals.profile.getLabel(l.getObject());
     }
 
     private String findLabel(List<Link> list) {
 	for (Link l : list) {
 	    if ("http://d-nb.info/standards/elementset/gnd#preferredName"
+		    .equals(l.getPredicate()))
+		return l.getObject();
+	    if ("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"
+		    .equals(l.getPredicate()))
+		return l.getObject();
+	    if ("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName"
 		    .equals(l.getPredicate()))
 		return l.getObject();
 	    if ("http://www.w3.org/2004/02/skos/core#prefLabel".equals(l

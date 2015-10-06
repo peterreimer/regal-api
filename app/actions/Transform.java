@@ -18,8 +18,9 @@ package actions;
 
 import helper.DataciteMapper;
 import helper.HttpArchiveException;
-import helper.OaiDcMapper;
+import helper.JsonMapper;
 import helper.PdfText;
+import helper.oai.OaiDcMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -29,9 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import org.apache.commons.codec.binary.Base64;
-
 import java.util.List;
 
 import models.DataciteRecord;
@@ -40,6 +38,7 @@ import models.Globals;
 import models.MabRecord;
 import models.Node;
 
+import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import archive.fedora.CopyUtils;
@@ -131,7 +130,8 @@ public class Transform {
     }
 
     private String getInternalDataUri(Node node) {
-	return "http://localhost:9000/resource/" + node.getDataUri();
+	return "http://localhost:" + Globals.getPort() + "/resource/"
+		+ node.getDataUri();
     }
 
     /**
@@ -198,11 +198,8 @@ public class Transform {
 	String pid = node.getPid();
 	String mimeType = node.getMimeType();
 	if (mimeType == null)
-	    throw new HttpArchiveException(
-		    404,
-		    "The node "
-			    + pid
-			    + " does not provide a mime type. It may not even contain data at all!");
+	    throw new HttpArchiveException(404, "The node " + pid
+		    + " does not provide a mime type. No data found!");
 	if (mimeType.compareTo("application/pdf") != 0)
 	    throw new HttpArchiveException(406,
 		    "Wrong mime type. Cannot extract text from " + mimeType);
@@ -270,7 +267,7 @@ public class Transform {
      */
     public String datacite(Node node) {
 	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
-		node.getLd());
+		new JsonMapper(node).getLd());
 	return dc.toString();
     }
 

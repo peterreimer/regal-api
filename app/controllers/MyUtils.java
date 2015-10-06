@@ -18,6 +18,7 @@ package controllers;
 
 import helper.GatherconfImporter;
 import helper.Webgatherer;
+import helper.oai.OaiDispatcher;
 
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import models.Gatherconf;
+import models.Globals;
 import models.Message;
 import models.Node;
 import models.RegalObject;
@@ -131,10 +133,16 @@ public class MyUtils extends MyController {
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
-    public static Promise<Result> lobidify(@PathParam("pid") String pid) {
+    public static Promise<Result> lobidify(@PathParam("pid") String pid,
+	    @QueryParam("alephid") String alephid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = modify.lobidify(node);
-	    return JsonMessage(new Message(result));
+	    if (alephid != null && !alephid.isEmpty()) {
+		String result = modify.lobidify(node, alephid);
+		return JsonMessage(new Message(result));
+	    } else {
+		String result = modify.lobidify(node);
+		return JsonMessage(new Message(result));
+	    }
 	});
     }
 
@@ -164,7 +172,7 @@ public class MyUtils extends MyController {
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
 	return new BulkActionAccessor().call((userId) -> {
 
-	    int port = getPort();
+	    int port = Globals.getPort();
 	    List<Transformer> transformers = new Vector<Transformer>();
 	    transformers.add(new Transformer(namespace + "epicur", "epicur",
 		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
@@ -184,7 +192,7 @@ public class MyUtils extends MyController {
 	    transformers.add(new Transformer(namespace + "mets", "mets",
 		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
 			    + "/resource/(pid)." + namespace + "mets"));
-	    create.contentModelsInit(transformers);
+	    OaiDispatcher.contentModelsInit(transformers);
 	    String result = "Reinit contentModels " + namespace + "epicur, "
 		    + namespace + "oaidc, " + namespace + "pdfa, " + namespace
 		    + "pdfbox, " + namespace + "aleph, " + namespace + "mets";

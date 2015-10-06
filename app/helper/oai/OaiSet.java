@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package helper;
+package helper.oai;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
