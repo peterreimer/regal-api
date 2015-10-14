@@ -65,6 +65,10 @@ public class Transform {
 		    .getBytes("utf-8")), node.getPid());
 	    record.httpAdresse = Globals.urnbase + node.getPid();
 	    record.doi = node.getDoi();
+	    if (node.hasUrn())
+		record.urn = node.getUrn();
+	    else if (node.hasUrnInMetadata())
+		record.urn = node.getUrnFromMetadata();
 	    return record;
 	} catch (UnsupportedEncodingException e) {
 	    throw new HttpArchiveException(500, e);
@@ -135,14 +139,17 @@ public class Transform {
     }
 
     /**
-     * @param pid
-     *            the pid of the object
+     * @param node
      * @return a epicur display for the pid
      */
-    public String epicur(String pid) {
-	String url = Globals.urnbase + pid;
-	Read ra = new Read();
-	String urn = ra.getUrn(ra.readNode(pid));
+    public String epicur(Node node) {
+	String url = Globals.urnbase + node.getPid();
+
+	String urn = null;
+	if (node.hasUrn())
+	    urn = node.getUrn();
+	else if (node.hasUrnInMetadata())
+	    urn = node.getUrnFromMetadata();
 	String status = "urn_new";
 	String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<epicur xmlns=\"urn:nbn:de:1111-2004033116\" xsi:schemaLocation=\"urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd\">\n"
 		+ "\t<administrative_data>\n"

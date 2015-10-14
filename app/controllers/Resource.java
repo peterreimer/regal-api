@@ -692,7 +692,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/xml", nickname = "asEpicur", value = "asEpicur", notes = "Returns a epicur display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asEpicur(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.epicur(pid);
+	    String result = transform.epicur(node);
 	    response().setContentType("application/xml");
 	    return ok(result);
 	});
