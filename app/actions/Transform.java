@@ -65,6 +65,10 @@ public class Transform {
 		    .getBytes("utf-8")), node.getPid());
 	    record.httpAdresse = Globals.urnbase + node.getPid();
 	    record.doi = node.getDoi();
+	    if (node.hasUrn())
+		record.urn = node.getUrn();
+	    else if (node.hasUrnInMetadata())
+		record.urn = node.getUrnFromMetadata();
 	    return record;
 	} catch (UnsupportedEncodingException e) {
 	    throw new HttpArchiveException(500, e);
