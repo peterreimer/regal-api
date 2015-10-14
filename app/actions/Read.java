@@ -529,24 +529,10 @@ public class Read extends RegalAction {
      * @return a urn object that describes the status of the urn
      */
     public Urn getUrnStatus(Node node) {
-	String urn = getUrn(node);
+	String urn = node.getUrn();
 	Urn result = new Urn(urn);
 	result.init(Globals.urnbase + node.getPid());
 	return result;
-    }
-
-    String getUrn(Node node) {
-	List<String> urns = getNodeLdProperty(node,
-		"http://purl.org/lobid/lv#urn");
-	if (urns == null || urns.isEmpty()) {
-	    throw new HttpArchiveException(500, "No urn fount at: "
-		    + node.getPid());
-	}
-	if (urns.size() > 1) {
-	    throw new HttpArchiveException(500, "Found multiple urns at: "
-		    + node.getPid());
-	}
-	return urns.get(0);
     }
 
     /**
