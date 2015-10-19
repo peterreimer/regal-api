@@ -71,6 +71,7 @@ POST /resource/:pid/flatten	        controllers.Resource.flatten(pid)
 POST /resource/:namespace			controllers.Resource.createResource(namespace)
 POST /resource/:pid/doi             controllers.Resource.addDoi(pid)
 POST /resource/:pid/doi/update      controllers.Resource.updateDoi(pid)
+POST /resource/:pid/doi/replace    controllers.Resource.replaceDoi(pid)
 
 DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)

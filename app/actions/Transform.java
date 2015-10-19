@@ -41,6 +41,7 @@ import models.Node;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
+import play.Play;
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
 import converter.mab.RegalToMabMapper;
@@ -275,7 +276,16 @@ public class Transform {
     public String datacite(Node node) {
 	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
 		new JsonMapper(node).getLd());
-	return dc.toString();
+	String xml = dc.toString();
+	try {
+
+	    XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
+		    Play.application().resourceAsStream("datacite.xsd"));
+	    return xml;
+
+	} catch (Exception e) {
+	    throw new HttpArchiveException(406, e.getMessage());
+	}
     }
 
 }
