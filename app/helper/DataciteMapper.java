@@ -225,12 +225,10 @@ public class DataciteMapper {
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
-	    List<Map<String, Object>> creatorNames = (List<Map<String, Object>>) ld
-		    .get("creatorName");
+	    List<String> creatorNames = (List<String>) ld.get("creatorName");
 	    if (creatorNames != null) {
-		for (Map<String, Object> item : creatorNames) {
-		    String subject = (String) item.get("prefLabel");
-		    rec.creators.add(new Pair<String, String>(subject, null));
+		for (String item : creatorNames) {
+		    rec.creators.add(new Pair<String, String>(item, null));
 		}
 	    }
 
@@ -242,12 +240,11 @@ public class DataciteMapper {
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
-	    List<Map<String, Object>> contributorNames = (List<Map<String, Object>>) ld
+	    List<String> contributorNames = (List<String>) ld
 		    .get("contributorName");
 	    if (contributorNames != null) {
-		for (Map<String, Object> item : contributorNames) {
-		    String subject = (String) item.get("prefLabel");
-		    rec.creators.add(new Pair<String, String>(subject, null));
+		for (String item : contributorNames) {
+		    rec.creators.add(new Pair<String, String>(item, null));
 		}
 	    }
 
