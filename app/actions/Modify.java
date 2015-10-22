@@ -643,8 +643,6 @@ public class Modify extends RegalAction {
 		result.put("mintDoiResponse", mintDoiResponse);
 		if (client.getStatus() != 200)
 		    throw new RuntimeException("Minting Doi failed!");
-		String makeOaiSetResponse = OaiDispatcher.makeOAISet(node);
-		result.put("makeOaiSetResponse", makeOaiSetResponse);
 
 	    } catch (Exception e) {
 		throw new HttpArchiveException(502, node.getPid()
