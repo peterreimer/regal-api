@@ -625,9 +625,9 @@ public class Modify extends RegalAction {
 	if (doi == null || doi.isEmpty()) {
 	    doi = createDoiIdentifier(node);
 	    result.put("Doi", doi);
-	    node.setDoi(doi);
+	    // node.setDoi(doi);
 	    String objectUrl = Globals.urnbase + node.getPid();
-	    String xml = new Transform().datacite(node);
+	    String xml = new Transform().datacite(node, doi);
 	    play.Logger.debug(xml);
 
 	    try {
@@ -652,7 +652,7 @@ public class Modify extends RegalAction {
 			+ "\n Datacite replies: " + e.getMessage());
 	    }
 	    RegalObject o = new RegalObject();
-	    o.getIsDescribedBy().setDoi(node.getDoi());
+	    o.getIsDescribedBy().setDoi(doi);
 	    new Create().patchResource(node, o);
 	    return result;
 	} else {
@@ -690,7 +690,7 @@ public class Modify extends RegalAction {
 			    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
 	} else {
 	    String objectUrl = Globals.urnbase + node.getPid();
-	    String xml = new Transform().datacite(node);
+	    String xml = new Transform().datacite(node, doi);
 	    play.Logger.debug(xml);
 	    DataciteClient client = new DataciteClient();
 	    String registerMetadataResponse = client

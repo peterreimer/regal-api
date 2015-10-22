@@ -273,19 +273,16 @@ public class Transform {
      * @param node
      * @return an xml string for datacite
      */
-    public String datacite(Node node) {
-	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
+    public String datacite(Node node, String doi) {
+	DataciteRecord dc = DataciteMapper.getDataciteRecord(doi,
 		new JsonMapper(node).getLd());
 	String xml = dc.toString();
-	play.Logger.debug(xml);
 	try {
-
 	    XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
 		    Play.application().resourceAsStream("datacite.xsd"));
 	    return xml;
-
 	} catch (Exception e) {
-	    throw new HttpArchiveException(406, e.getMessage());
+	    throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
 	}
     }
 

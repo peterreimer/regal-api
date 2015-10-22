@@ -710,7 +710,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/xml", nickname = "asDatacite", value = "asDatacite", notes = "Returns a Datacite display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asDatacite(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.datacite(node);
+	    String result = transform.datacite(node, node.getDoi());
 	    response().setContentType("application/xml");
 	    return ok(result);
 	});
