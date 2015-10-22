@@ -277,6 +277,7 @@ public class Transform {
 	DataciteRecord dc = DataciteMapper.getDataciteRecord(node.getDoi(),
 		new JsonMapper(node).getLd());
 	String xml = dc.toString();
+	play.Logger.debug(xml);
 	try {
 
 	    XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),

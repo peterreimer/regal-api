@@ -103,10 +103,13 @@ public class DataciteMapper {
 			"LOD-Catalog"));
 	    }
 	    // URN
-	    String urn = (String) ld.get("urn");
-	    if (urn != null)
-		rec.alternateIdentifiers.add(new Pair<String, String>(urn,
-			"URN"));
+	    List<String> urns = (List<String>) ld.get("urn");
+	    if (urns != null) {
+		for (String urn : urns) {
+		    rec.alternateIdentifiers.add(new Pair<String, String>(urn,
+			    "URN"));
+		}
+	    }
 	    // URL
 	    String pid = (String) ld.get("@id");
 	    String url = Globals.urnbase + pid;
