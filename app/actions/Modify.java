@@ -621,32 +621,54 @@ public class Modify extends RegalAction {
 	}
 	Map<String, Object> result = new HashMap<String, Object>();
 	String doi = node.getDoi();
-	result.put("Doi", doi);
+
 	if (doi == null || doi.isEmpty()) {
 	    doi = createDoiIdentifier(node);
-	    node.setDoi(doi);
-	    RegalObject o = new RegalObject();
-	    o.getIsDescribedBy().setDoi(node.getDoi());
-	    new Create().patchResource(node, o);
+	    result.put("Doi", doi);
+	    // node.setDoi(doi);
 	    String objectUrl = Globals.urnbase + node.getPid();
-	    String xml = new Transform().datacite(node);
+	    String xml = new Transform().datacite(node, doi);
 	    play.Logger.debug(xml);
-	    DataciteClient client = new DataciteClient();
-	    String registerMetadataResponse = client
-		    .registerMetadataAtDatacite(node, xml);
-	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
-	    String makeOaiSetResponse = OaiDispatcher.makeOAISet(node);
 
-	    result.put("Metadata", xml);
-	    result.put("registerMetadataResponse", registerMetadataResponse);
-	    result.put("mintDoiResponse", mintDoiResponse);
-	    result.put("makeOaiSetResponse", makeOaiSetResponse);
+	    try {
+		DataciteClient client = new DataciteClient();
+		result.put("Metadata", xml);
+		String registerMetadataResponse = client
+			.registerMetadataAtDatacite(node, xml);
+		result.put("registerMetadataResponse", registerMetadataResponse);
+		if (client.getStatus() != 200)
+		    throw new RuntimeException("Registering Doi failed!");
+		String mintDoiResponse = client.mintDoiAtDatacite(doi,
+			objectUrl);
+		result.put("mintDoiResponse", mintDoiResponse);
+		if (client.getStatus() != 200)
+		    throw new RuntimeException("Minting Doi failed!");
+
+	    } catch (Exception e) {
+		throw new HttpArchiveException(502, node.getPid()
+			+ " Add Doi failed!\n" + result
+			+ "\n Datacite replies: " + e.getMessage());
+	    }
+	    RegalObject o = new RegalObject();
+	    o.getIsDescribedBy().setDoi(doi);
+	    new Create().patchResource(node, o);
 	    return result;
 	} else {
 	    throw new HttpArchiveException(409, node.getPid()
-		    + " already has a doi. Leave unmodified!");
+		    + " already has a doi. Leave unmodified! ");
 	}
 
+    }
+
+    /**
+     * Creates a new doi identifier and registers to datacite
+     * 
+     * @param node
+     * @return a key value structure as feedback to the client
+     */
+    public Map<String, Object> replaceDoi(Node node) {
+	node.setDoi(null);
+	return addDoi(node);
     }
 
     /**
@@ -666,7 +688,7 @@ public class Modify extends RegalAction {
 			    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
 	} else {
 	    String objectUrl = Globals.urnbase + node.getPid();
-	    String xml = new Transform().datacite(node);
+	    String xml = new Transform().datacite(node, doi);
 	    play.Logger.debug(xml);
 	    DataciteClient client = new DataciteClient();
 	    String registerMetadataResponse = client

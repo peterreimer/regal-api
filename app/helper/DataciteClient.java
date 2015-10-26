@@ -27,6 +27,7 @@ import models.Globals;
 import models.Node;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -43,11 +44,13 @@ public class DataciteClient {
 
     Client webclient = null;
     boolean testMode = false;
+    int status = 200;
 
     /**
      * The DataciteClient can mint and register dois via the datacite api
      */
     public DataciteClient() {
+	status = 200;
 	String user = Globals.dataCiteUser;
 	String password = Globals.dataCitePasswd;
 	ClientConfig cc = new DefaultClientConfig();
@@ -95,14 +98,20 @@ public class DataciteClient {
      * @return the http response as string
      */
     public String mintDoiAtDatacite(String doi, String objectUrl) {
-	String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
-		: "https://mds.datacite.org/doi";
-	WebResource resource = webclient.resource(url);
-	String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
-	play.Logger.debug("PostBody:\n" + postBody);
-	String response = resource.type("application/xml").post(String.class,
-		postBody);
-	return response;
+	try {
+	    status = 200;
+	    String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
+		    : "https://mds.datacite.org/doi";
+	    WebResource resource = webclient.resource(url);
+	    String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
+	    play.Logger.debug("PostBody:\n" + postBody);
+	    String response = resource.type("application/xml").post(
+		    String.class, postBody);
+	    return response;
+	} catch (UniformInterfaceException e) {
+	    setStatus(e.getResponse().getStatus());
+	    return e.getMessage();
+	}
     }
 
     /**
@@ -113,11 +122,26 @@ public class DataciteClient {
      * @return the http response as string
      */
     public String registerMetadataAtDatacite(Node node, String xml) {
-	String url = testMode ? "https://mds.datacite.org/metadata?testMode=true"
-		: "https://mds.datacite.org/metadata";
-	WebResource resource = webclient.resource(url);
-	String response = resource.type("application/xml;charset=UTF-8").post(
-		String.class, xml);
-	return response;
+	try {
+	    status = 200;
+	    String url = testMode ? "https://mds.datacite.org/metadata?testMode=true"
+		    : "https://mds.datacite.org/metadata";
+	    WebResource resource = webclient.resource(url);
+	    String response = resource.type("application/xml;charset=UTF-8")
+		    .post(String.class, xml);
+	    return response;
+	} catch (UniformInterfaceException e) {
+	    setStatus(e.getResponse().getStatus());
+	    throw new RuntimeException(e);
+	}
     }
+
+    public int getStatus() {
+	return status;
+    }
+
+    public void setStatus(int status) {
+	this.status = status;
+    }
+
 }

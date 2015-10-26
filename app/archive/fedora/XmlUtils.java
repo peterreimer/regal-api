@@ -270,8 +270,9 @@ public class XmlUtils {
 
 	    SchemaFactory schemaFactory = SchemaFactory
 		    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-	    Schema s = schemaFactory.newSchema(new StreamSource(schema));
 
+	    schemaFactory.setResourceResolver(new ResourceResolver());
+	    Schema s = schemaFactory.newSchema(new StreamSource(schema));
 	    factory.setSchema(s);
 	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
 	    docBuilder.setErrorHandler(new ErrorHandler() {
@@ -290,15 +291,11 @@ public class XmlUtils {
 		    throw new XmlException(exception);
 		}
 	    });
+
+	    // Try to parse with schema validation on
 	    docBuilder.parse(oaidc);
 
-	} catch (FileNotFoundException e) {
-	    throw new XmlException(e);
-	} catch (SAXException e) {
-	    throw new XmlException(e);
-	} catch (IOException e) {
-	    throw new XmlException(e);
-	} catch (ParserConfigurationException e) {
+	} catch (Exception e) {
 	    throw new XmlException(e);
 	}
 

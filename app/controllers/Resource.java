@@ -710,7 +710,7 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/xml", nickname = "asDatacite", value = "asDatacite", notes = "Returns a Datacite display of the resource", response = Message.class, httpMethod = "GET")
     public static Promise<Result> asDatacite(@PathParam("pid") String pid) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.datacite(node);
+	    String result = transform.datacite(node, node.getDoi());
 	    response().setContentType("application/xml");
 	    return ok(result);
 	});
@@ -955,6 +955,20 @@ public class Resource extends MyController {
 	return new ModifyAction().call(pid, node -> {
 	    try {
 		Map<String, Object> result = modify.updateDoi(node);
+		return JsonMessage(new Message(json(result)));
+	    } catch (HttpArchiveException e) {
+		return HtmlMessage(new Message(e, e.getCode()));
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
+
+    @ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
+    public static Promise<Result> replaceDoi(@PathParam("pid") String pid) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Map<String, Object> result = modify.replaceDoi(node);
 		return JsonMessage(new Message(json(result)));
 	    } catch (HttpArchiveException e) {
 		return HtmlMessage(new Message(e, e.getCode()));
