@@ -266,7 +266,8 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json", nickname = "patchResource", value = "patchResource", notes = "Patches a Resource", response = Message.class, httpMethod = "PUT")
     @ApiImplicitParams({ @ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
     public static Promise<Result> patchResource(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
 	    RegalObject object = getRegalObject(request().body().asJson());
 	    Node newNode = create.patchResource(node, object);
 	    String result = newNode.getPid() + " created/updated!";
@@ -294,7 +295,8 @@ public class Resource extends MyController {
     public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 	return new ModifyAction().call(
 		pid,
-		node -> {
+		userId -> {
+		    Node node = readNodeOrNull(pid);
 		    RegalObject object = getRegalObject(request().body()
 			    .asJson());
 		    Node newNode = null;
@@ -760,7 +762,8 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "text/plain", nickname = "updateOaiSets", value = "updateOaiSets", notes = "Links resource to oai sets and creates new sets if needed", response = String.class, httpMethod = "POST")
     public static Promise<Result> updateOaiSets(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
 	    String result = OaiDispatcher.makeOAISet(node);
 	    response().setContentType("text/plain");
 	    return JsonMessage(new Message(result));
@@ -769,7 +772,8 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "moveUp", value = "moveUp", notes = "Moves the resource to the parents parent. If parent has no parent, a HTTP 406 will be replied.", response = String.class, httpMethod = "POST")
     public static Promise<Result> moveUp(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
 	    Node result = modify.moveUp(node);
 	    return JsonMessage(new Message(json(result)));
 	});
@@ -779,37 +783,28 @@ public class Resource extends MyController {
     public static Promise<Result> copyMetadata(@PathParam("pid") String pid,
 	    @QueryParam("field") String field,
 	    @QueryParam("copySource") String copySource) {
-	return new ModifyAction().call(pid, node -> {
-	    try {
-		Node result = modify.copyMetadata(node, field, copySource);
-		return JsonMessage(new Message(json(result)));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
+	    Node result = modify.copyMetadata(node, field, copySource);
+	    return JsonMessage(new Message(json(result)));
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "enrichMetadata", value = "enrichMetadata", notes = "Includes linked resources into metadata", response = String.class, httpMethod = "POST")
     public static Promise<Result> enrichMetadata(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
-	    try {
-		Node result = modify.enrichMetadata(node);
-		return getJsonResult(result);
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
+	    Node result = modify.enrichMetadata(node);
+	    return getJsonResult(result);
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "flatten", value = "flatten", notes = "Copy the title of your parent and move up one level.", response = String.class, httpMethod = "POST")
     public static Promise<Result> flatten(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
-	    try {
-		Node result = modify.flatten(node);
-		return JsonMessage(new Message(json(result)));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
+	    Node result = modify.flatten(node);
+	    return JsonMessage(new Message(json(result)));
 	});
     }
 
@@ -938,43 +933,28 @@ public class Resource extends MyController {
 
     @ApiOperation(produces = "application/json", nickname = "addDoi", value = "addDoi", notes = "Adds a Doi and performes a registration at Datacite", response = String.class, httpMethod = "POST")
     public static Promise<Result> addDoi(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
-	    try {
-		Map<String, Object> result = modify.addDoi(node);
-		return JsonMessage(new Message(json(result)));
-	    } catch (HttpArchiveException e) {
-		return HtmlMessage(new Message(e, e.getCode()));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
+	    Map<String, Object> result = modify.addDoi(node);
+	    return JsonMessage(new Message(json(result)));
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
     public static Promise<Result> updateDoi(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
-	    try {
-		Map<String, Object> result = modify.updateDoi(node);
-		return JsonMessage(new Message(json(result)));
-	    } catch (HttpArchiveException e) {
-		return HtmlMessage(new Message(e, e.getCode()));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
+	    Map<String, Object> result = modify.updateDoi(node);
+	    return JsonMessage(new Message(json(result)));
 	});
     }
 
     @ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
     public static Promise<Result> replaceDoi(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
-	    try {
-		Map<String, Object> result = modify.replaceDoi(node);
-		return JsonMessage(new Message(json(result)));
-	    } catch (HttpArchiveException e) {
-		return HtmlMessage(new Message(e, e.getCode()));
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
+	    Map<String, Object> result = modify.replaceDoi(node);
+	    return JsonMessage(new Message(json(result)));
 	});
     }
 }

@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 
 import models.Globals;
 import models.Message;
+import models.Node;
 import models.Transformer;
 
 import org.slf4j.Logger;
@@ -123,7 +124,8 @@ public class MyUtils extends MyController {
 
     @ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
     public static Promise<Result> removeFromIndex(@PathParam("pid") String pid) {
-	return new ModifyAction().call(pid, node -> {
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
 	    String result = index.remove(node);
 	    return JsonMessage(new Message(result));
 	});
@@ -132,7 +134,8 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
     public static Promise<Result> lobidify(@PathParam("pid") String pid,
 	    @QueryParam("alephid") String alephid) {
-	return new ModifyAction().call(pid, node -> {
+	return new ModifyAction().call(pid, userId -> {
+	    Node node = readNodeOrNull(pid);
 	    if (alephid != null && !alephid.isEmpty()) {
 		String result = modify.lobidify(node, alephid);
 		return JsonMessage(new Message(result));
@@ -141,6 +144,26 @@ public class MyUtils extends MyController {
 		return JsonMessage(new Message(result));
 	    }
 	});
+    }
+
+    @ApiOperation(produces = "application/json,application/html", nickname = "addObjectTimestamp", value = "addObjectTimestamp", notes = "Add a objectTimestamp", httpMethod = "POST")
+    public static Promise<Result> addObjectTimestamp(
+	    @PathParam("pid") String pid) {
+	return new ModifyAction().call(pid,
+		userId -> {
+		    Node node = readNodeOrNull(pid);
+		    Date t = node.getObjectTimestamp();
+		    if (t == null) {
+			t = node.getCreationDate();
+			modify.setObjectTimestamp(node, t, userId);
+			return JsonMessage(new Message(pid
+				+ " set objectTimestamp to "
+				+ Globals.dateFormat.format(t)));
+		    }
+		    return JsonMessage(new Message(pid
+			    + " already has objectTimestamp "
+			    + Globals.dateFormat.format(t)));
+		});
     }
 
     @ApiOperation(produces = "application/json,application/html", nickname = "addUrn", value = "addUrn", notes = "Adds a urn to the /metadata of the resource.", httpMethod = "POST")
