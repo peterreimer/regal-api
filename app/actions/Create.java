@@ -147,6 +147,7 @@ public class Create extends RegalAction {
 	    node.setDoi(object.getIsDescribedBy().getDoi());
 	if (object.getIsDescribedBy().getUrn() != null)
 	    node.setUrn(object.getIsDescribedBy().getUrn());
+	OaiDispatcher.makeOAISet(node);
     }
 
     private void overrideNodeMembers(Node node, RegalObject object) {

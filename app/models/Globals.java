@@ -249,6 +249,12 @@ public class Globals {
 	    "yyyy-MM-dd'T'HH:mm:ssZ");
 
     /**
+     * the string for the mab field
+     */
+    public static String mab655x = Play.application().configuration()
+	    .getString("regal-api.mab655x");
+
+    /**
      * @param ipWhiteList
      * @return a Map with ips
      */

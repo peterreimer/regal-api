@@ -74,6 +74,7 @@ POST /resource/:pid/createVersion  controllers.Resource.createVersion(pid)
 POST /resource/:namespace			controllers.Resource.createResource(namespace)
 POST /resource/:pid/doi             controllers.Resource.addDoi(pid)
 POST /resource/:pid/doi/update      controllers.Resource.updateDoi(pid)
+POST /resource/:pid/doi/replace    controllers.Resource.replaceDoi(pid)
 
 DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)
@@ -108,3 +109,10 @@ POST /utils/initContentModels  		controllers.MyUtils.initContentModels(namespace
 POST /utils/addUrnToAll 			controllers.MyUtils.addUrnToAll(namespace,snid,dateBefore)
 POST /utils/gatherconf				controllers.MyUtils.importGatherConf(namespace)
 POST /utils/runGatherer 			controllers.MyUtils.runGatherer()
+POST /utils/addObjectTimestamp/:pid		controllers.MyUtils.addObjectTimestamp(pid)
+
+POST /resource/:pid/index			controllers.MyUtils.index(pid,index?="")
+DELETE /resource/:pid/removeFromIndex controllers.MyUtils.removeFromIndex(pid)
+POST /resource/:pid/metadata/lobidify	controllers.MyUtils.lobidify(pid,alephid?="")
+POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pid)
+

@@ -103,10 +103,13 @@ public class DataciteMapper {
 			"LOD-Catalog"));
 	    }
 	    // URN
-	    String urn = (String) ((List<String>) ld.get("urn")).get(0);
-	    if (urn != null)
-		rec.alternateIdentifiers.add(new Pair<String, String>(urn,
-			"URN"));
+	    List<String> urns = (List<String>) ld.get("urn");
+	    if (urns != null) {
+		for (String urn : urns) {
+		    rec.alternateIdentifiers.add(new Pair<String, String>(urn,
+			    "URN"));
+		}
+	    }
 	    // URL
 	    String pid = (String) ld.get("@id");
 	    String url = Globals.urnbase + pid;
@@ -158,7 +161,7 @@ public class DataciteMapper {
 
     private static void addPublisher(Map<String, Object> ld, DataciteRecord rec) {
 	try {
-	    rec.publisher = ((List<String>) ld.get("dc:publisher")).get(0);
+	    rec.publisher = ((List<String>) ld.get("publisher")).get(0);
 
 	} catch (NullPointerException e) {
 	    play.Logger
@@ -225,6 +228,13 @@ public class DataciteMapper {
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
+	    List<String> creatorNames = (List<String>) ld.get("creatorName");
+	    if (creatorNames != null) {
+		for (String item : creatorNames) {
+		    rec.creators.add(new Pair<String, String>(item, null));
+		}
+	    }
+
 	    List<Map<String, Object>> contributors = (List<Map<String, Object>>) ld
 		    .get("contributor");
 	    if (contributors != null) {
@@ -233,6 +243,14 @@ public class DataciteMapper {
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
+	    List<String> contributorNames = (List<String>) ld
+		    .get("contributorName");
+	    if (contributorNames != null) {
+		for (String item : contributorNames) {
+		    rec.creators.add(new Pair<String, String>(item, null));
+		}
+	    }
+
 	} catch (NullPointerException e) {
 	    play.Logger.debug("", e);
 	}
