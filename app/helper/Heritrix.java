@@ -31,15 +31,16 @@ import java.util.Arrays;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import models.Gatherconf;
+import models.Globals;
+import play.Play;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPDigestAuthFilter;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
-
-import play.Play;
-import models.Gatherconf;
 
 /**
  * @author Jan Schnasse
@@ -51,10 +52,14 @@ public class Heritrix {
 
     class HeritrixWebclient {
 	public Client createWebclient() {
-	    String keystoreLoc = Play.application().configuration()
-		    .getString("regal-api.keystoreLocation");
-	    String keystorePass = Play.application().configuration()
-		    .getString("regal-api.keystorePassword");
+	    String keystoreLoc = Globals.keystoreLocation;
+	    String keystorePass = Globals.keystorePassword;
+	    if (keystoreLoc == null || keystorePass == null
+		    || keystoreLoc.isEmpty() || keystorePass.isEmpty()) {
+		play.Logger
+			.error("Keystore is not configured. Set regal-api.keystoreLocation and regal-api.keystorePassword in application.conf");
+		return null;
+	    }
 	    String heritrixUser = Play.application().configuration()
 		    .getString("regal-api.heritrix.user");
 	    String heritrixPwd = Play.application().configuration()

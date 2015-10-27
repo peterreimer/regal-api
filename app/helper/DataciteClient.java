@@ -69,6 +69,15 @@ public class DataciteClient {
 	    SSLContext ctx = SSLContext.getInstance("SSL");
 	    KeyStore trustStore;
 	    trustStore = KeyStore.getInstance("JKS");
+
+	    if (Globals.keystoreLocation == null
+		    || Globals.keystorePassword == null
+		    || Globals.keystoreLocation.isEmpty()
+		    || Globals.keystorePassword.isEmpty()) {
+		throw new RuntimeException(
+			"Keystore is not configured. Set regal-api.keystoreLocation and regal-api.keystorePassword in application.conf");
+	    }
+
 	    try (InputStream in = new FileInputStream(Globals.keystoreLocation)) {
 		trustStore.load(in, Globals.keystorePassword.toCharArray());
 	    }
