@@ -54,7 +54,7 @@ public class BaseModelTest {
 			    Http.Context.current.get().args.put("role",
 				    "edoweb-admin");
 			    return function.get();
-			}).get(5000);
+			}).get(10000);
 	String str = Helpers.contentAsString(result);
 	play.Logger.debug(str);
 	return result;
