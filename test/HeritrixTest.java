@@ -10,7 +10,6 @@ import models.Node;
 import models.RegalObject;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import actions.Create;
 import actions.Modify;
@@ -25,7 +24,7 @@ public class HeritrixTest {
 	modify = new Modify();
     }
 
-    @Test
+    // @Test
     public void testHeritrix() {
 	running(testServer(3333), new Runnable() {
 	    @SuppressWarnings("deprecation")

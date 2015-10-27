@@ -80,7 +80,7 @@ public class RepositoryTest extends BaseModelTest {
 		.getResource("test.pdf");
 	play.Logger.info("Upload data from: " + url.getPath());
 	object.setUploadFile(url.getPath());
-	object.setMimeType("text/xml");
+	object.setMimeType("application/pdf");
 	cleanUp();
     }
 
@@ -131,10 +131,10 @@ public class RepositoryTest extends BaseModelTest {
 	newTitle.add("Neuer Titel");
 	object.dublinCoreData.setTitle(newTitle);
 	URL url = Thread.currentThread().getContextClassLoader()
-		.getResource("resources/HT017297166.xml");
+		.getResource("HT017297166.xml");
 	object.setUploadFile(url.getPath());
 	object.setMimeType("text/xml");
-	object.setFileLabel("resources/HT017297166.xml");
+	object.setFileLabel("HT017297166.xml");
 
 	facade.updateNode(object);
 
