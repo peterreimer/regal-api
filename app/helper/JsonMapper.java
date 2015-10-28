@@ -159,8 +159,14 @@ public class JsonMapper {
 	rdf.put(isDescribedBy, aboutMap);
 	if (node.getDoi() != null)
 	    rdf.put(doi, node.getDoi());
-	if (node.getUrn() != null)
-	    rdf.put(urn, node.getUrn());
+	if (node.getUrn() != null) {
+	    Link l = new Link();
+	    l.setPredicate(Globals.profile.getUriFromJsonName("urn"));
+	    l.setObject(node.getUrn());
+	    l.setLiteral(true);
+	    addLinkToJsonMap(rdf, l);
+	}
+
 	if (node.getParentPid() != null)
 	    rdf.put(parentPid, node.getParentPid());
 
