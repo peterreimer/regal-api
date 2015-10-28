@@ -15,3 +15,12 @@ before_script:
   - ./opt/regal/fedora/tomcat/bin/startup.sh
 script:
   - ./activator-${ACTIVATOR_VERSION}-minimal/activator test
+after_script:
+- echo
+- echo "//////fedora.log//////////////
+- echo
+- cat ./opt/regal/fedora/server/logs/fedora.log
+- echo
+- echo "//////catalina.out//////////////
+- echo
+- cat ./opt/regal/fedora/tomcat/logs/catalina.out
