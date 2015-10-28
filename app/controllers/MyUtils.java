@@ -33,7 +33,6 @@ import models.Globals;
 import models.Message;
 import models.Node;
 import models.RegalObject;
-import models.Transformer;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import actions.BasicAuth;
@@ -193,31 +192,7 @@ public class MyUtils extends MyController {
     public static Promise<Result> initContentModels(
 	    @DefaultValue("") @QueryParam("namespace") String namespace) {
 	return new BulkActionAccessor().call((userId) -> {
-
-	    int port = Globals.getPort();
-	    List<Transformer> transformers = new Vector<Transformer>();
-	    transformers.add(new Transformer(namespace + "epicur", "epicur",
-		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
-			    + "/resource/(pid)." + namespace + "epicur"));
-	    transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
-			    + "/resource/(pid)." + namespace + "oaidc"));
-	    transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
-			    + "/resource/(pid)." + namespace + "pdfa"));
-	    transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
-		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
-			    + "/resource/(pid)." + namespace + "pdfbox"));
-	    transformers.add(new Transformer(namespace + "aleph", "aleph",
-		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
-			    + "/resource/(pid)." + namespace + "aleph"));
-	    transformers.add(new Transformer(namespace + "mets", "mets",
-		    "http://edoweb-anonymous:nopwd@" + "localhost:" + port
-			    + "/resource/(pid)." + namespace + "mets"));
-	    OaiDispatcher.contentModelsInit(transformers);
-	    String result = "Reinit contentModels " + namespace + "epicur, "
-		    + namespace + "oaidc, " + namespace + "pdfa, " + namespace
-		    + "pdfbox, " + namespace + "aleph, " + namespace + "mets";
+	    String result = OaiDispatcher.initContentModels(namespace);
 	    return JsonMessage(new Message(result));
 	});
     }

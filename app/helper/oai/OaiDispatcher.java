@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
 import static archive.fedora.FedoraVocabulary.ITEM_ID;
 
 import java.util.List;
+import java.util.Vector;
 
 import models.DublinCoreData;
 import models.Globals;
@@ -70,6 +71,37 @@ public class OaiDispatcher {
 	addEpicurTransformer(node);
 	addAlephTransformer(node);
 	addMetsTransformer(node);
+    }
+
+    public static String initContentModels(String namespace) {
+	int port = Globals.getPort();
+	play.Logger.info("Reinit fedora content models to listen on port: "
+		+ port);
+	List<Transformer> transformers = new Vector<Transformer>();
+	transformers.add(new Transformer(namespace + "epicur", "epicur",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "epicur"));
+	transformers.add(new Transformer(namespace + "oaidc", "oaidc",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "oaidc"));
+	transformers.add(new Transformer(namespace + "pdfa", "pdfa",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "pdfa"));
+	transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "pdfbox"));
+	transformers.add(new Transformer(namespace + "aleph", "aleph",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "aleph"));
+	transformers.add(new Transformer(namespace + "mets", "mets",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "mets"));
+	OaiDispatcher.contentModelsInit(transformers);
+	String result = "Reinit contentModels " + namespace + "epicur, "
+		+ namespace + "oaidc, " + namespace + "pdfa, " + namespace
+		+ "pdfbox, " + namespace + "aleph, " + namespace + "mets";
+	play.Logger.info(result);
+	return result;
     }
 
     /**
