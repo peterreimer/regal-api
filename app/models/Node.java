@@ -62,6 +62,7 @@ public class Node {
 
     private String metadataFile = null;
     private String seqFile = null;
+    private String confFile = null;
     private String uploadFile = null;
     private String objectTimestampFile = null;
     private List<Link> links = new Vector<Link>();
@@ -69,6 +70,9 @@ public class Node {
 
     private String metadata = null;
     private String seq = null;
+
+    private String conf = null;
+
     private Date objectTimestamp = null;
 
     private String pid = null;
@@ -105,6 +109,8 @@ public class Node {
     private String urn = null;
 
     private String fulltext;
+
+    private boolean isManaged = true;
 
     /**
      * Creates a new Node.
@@ -269,16 +275,16 @@ public class Node {
 
     /**
      * A Node can be associated to a file and it's containing data.
-     * 
+     *
      * @param localLocation
      *            file location
      * @param mimeType
      *            mime type of the data
      * @return this
      */
-    public Node setUploadData(String localLocation, String mimeType) {
+    public Node setLocalData(String localLocation) {
 	uploadFile = localLocation;
-	setMimeType(mimeType);
+	isManaged = false;
 	return this;
     }
 
@@ -325,6 +331,22 @@ public class Node {
      */
     public void setSeqFile(String seqFile) {
 	this.seqFile = seqFile;
+    }
+
+    /**
+     * @param absolutePath
+     *            to a webharvest config file
+     */
+    public void setConfFile(String absolutePath) {
+	this.confFile = absolutePath;
+
+    }
+
+    /**
+     * @return absolute path to a webharvest config file
+     */
+    public String getConfFile() {
+	return confFile;
     }
 
     /**
@@ -606,6 +628,24 @@ public class Node {
     public Node setSeq(String seq) {
 	this.seq = seq;
 	return this;
+    }
+
+    /**
+     * @param conf
+     *            datastream as string
+     * @return this
+     */
+    public Node setConf(String conf) {
+	this.conf = conf;
+	return this;
+    }
+
+    /**
+     * @return the content of conf datastream in a string
+     */
+    @JsonIgnore()
+    public String getConf() {
+	return conf;
     }
 
     /**
@@ -1078,6 +1118,14 @@ public class Node {
      */
     public String getFulltext() {
 	return fulltext;
+    }
+
+    /**
+     * 
+     * @return true, if the node has a managed data stream
+     */
+    public boolean isManaged() {
+	return isManaged;
     }
 
     /**

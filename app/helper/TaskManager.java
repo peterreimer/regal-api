@@ -17,8 +17,8 @@
 package helper;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 import models.Globals;
 
@@ -35,13 +35,19 @@ public class TaskManager {
      * register all jobs
      */
     public void init() {
-
+	play.Logger.info("Taskmanager initialized!");
 	if (Globals.heartbeatTask != null && !Globals.heartbeatTask.isEmpty()) {
 	    play.Logger.info("Register Job: heartbeat. Will run every "
 		    + Globals.heartbeatTask);
 	    addTask("heartbeat",
 		    () -> play.Logger.debug("Boom: " + new Date().toString()),
 		    Globals.heartbeatTask);
+	}
+
+	if (Globals.webgatherTask != null && !Globals.webgatherTask.isEmpty()) {
+	    play.Logger.info("Register Job: wabgatherer. Will run every "
+		    + Globals.webgatherTask);
+	    addTask("web gatherer", new Webgatherer(), Globals.webgatherTask);
 	}
 
 	if (Globals.urnTask != null && !Globals.urnTask.isEmpty()) {
@@ -55,7 +61,6 @@ public class TaskManager {
 		    + Globals.doiTask);
 	    addTask("doi allocator", new DoiAllocator(), Globals.doiTask);
 	}
-
     }
 
     private void addTask(String name, Runnable r, String cronExpression) {

@@ -22,7 +22,11 @@ import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
+
+import helper.Webgatherer;
+
 import helper.JsonMapper;
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +43,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import models.DublinCoreData;
+import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -54,6 +59,10 @@ import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
 import archive.fedora.XmlUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * 
@@ -131,7 +140,8 @@ public class Read extends RegalAction {
 
     /**
      * @param node
-     * @return child recently modified
+     * @return returns the recently modified node of list containing the passed
+     *         node itself and all of it's children nodes.
      */
     public Node getLastModifiedChild(Node node) {
 	Node oldestNode = node;
@@ -468,6 +478,29 @@ public class Read extends RegalAction {
     }
 
     /**
+     * @param node
+     * @return a webgather configuration
+     */
+    public String readConf(Node node) {
+	try {
+	    String confstring = node.getConf();
+	    if (confstring == null)
+		return "";
+	    ObjectMapper mapper = JsonUtil.mapper();
+	    Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
+	    String owDatestamp = new SimpleDateFormat("yyyyMMdd")
+		    .format(new Date());
+	    conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink
+		    + owDatestamp + "/" + conf.getUrl());
+	    return conf.toString();
+	} catch (UrlConnectionException e) {
+	    throw new HttpArchiveException(404, e);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    /**
      * @param pid
      *            the pid of the object
      * @param field
@@ -608,15 +641,50 @@ public class Read extends RegalAction {
 	result.put("doiStatus", doiStatus(node));
 	result.put("oaiStatus", getOaiStatus(node));
 	result.put("links", getLinks(node));
-	result.put("title", readMetadata(node, "title"));
+	result.put("title", getTitle(node));
 	result.put("metadataAccess", node.getPublishScheme());
 	result.put("dataAccess", node.getAccessScheme());
 	result.put("type", node.getContentType());
 	result.put("pid",
 		node.getPid().substring(node.getNamespace().length() + 1));
 	result.put("catalogId", node.getLegacyId());
+	result.put("webgatherer", getGatherStatus(node));
+	/*
+	 * unsure merge result.put("urn", node.getUrn());
+	 */
 	result.put("urn", node.getUrnFromMetadata());
+
 	return result;
+    }
+
+    private String getTitle(Node node) {
+	try {
+	    return readMetadata(node, "title");
+	} catch (Exception e) {
+	    return "No Title";
+	}
+    }
+
+    private Map<String, Object> getGatherStatus(Node node) {
+	Map<String, Object> entries = null;
+	try {
+	    // if ("version".equals(node.getContentType())) {
+	    //
+	    // new java.io.File(Gatherconf.create(node.getConf())
+	    // .getLocalDir() + "/reports/crawl-report.txt"))
+	    // .as("text/plain");
+	    // } else
+	    if ("webpage".equals(node.getContentType())) {
+		String hertrixXmlResponse = Globals.heritrix.getJobStatus(node
+			.getPid());
+		XmlMapper xmlMapper = new XmlMapper();
+		entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+		entries.put("nextLaunch", Webgatherer.nextLaunch(node));
+	    }
+	} catch (Exception e) {
+	    play.Logger.warn("", e);
+	}
+	return entries == null ? new HashMap<String, Object>() : entries;
     }
 
     private int urnStatus(Node node) {
@@ -681,6 +749,7 @@ public class Read extends RegalAction {
 	HttpURLConnection con = (HttpURLConnection) new URL(url)
 		.openConnection();
 	con.setInstanceFollowRedirects(false);
+	con.setReadTimeout(1000 * 2);
 	con.connect();
 	con.getInputStream();
 	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM

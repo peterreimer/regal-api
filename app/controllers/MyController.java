@@ -145,6 +145,14 @@ public class MyController extends Controller {
 	response().setContentType("application/json");
     }
 
+    protected static Node readNodeOrNull(String pid) {
+	try {
+	    return read.readNode(pid);
+	} catch (Exception e) {
+	    return null;
+	}
+    }
+
     /**
      * @param obj
      *            an arbitrary object
@@ -223,7 +231,7 @@ public class MyController extends Controller {
 		    if (isWhitelisted(request().getHeader("UserIp"))) {
 			play.Logger
 				.info("IP "
-					+ request().remoteAddress()
+					+ request().getHeader("UserIp")
 					+ " is white listed. Access to restricted data granted.");
 			return true;
 		    }
@@ -403,36 +411,26 @@ public class MyController extends Controller {
      *
      */
     public static class ModifyAction {
-	Promise<Result> call(String pid, NodeAction ca) {
+	Promise<Result> call(String pid, Action ca) {
 	    return Promise.promise(() -> {
-		String userId = "0";
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
-		    userId = request().getHeader("UserId");
+		    String userId = request().getHeader("UserId");
 		    play.Logger.debug("Try to access with role: " + role
-			    + "and user id " + userId);
+			    + " and userId " + userId);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
+		    } else {
+			Result result = ca.exec(userId);
+			if (userId != null && !userId.equals("0")
+				&& !userId.equals("1")
+				&& !userId.equals("UrnAllocator")) {
+			    play.Logger.info(json(modify.setObjectTimestamp(
+				    read.readNode(pid), new Date(), userId)));
+			}
+			return result;
 		    }
-		    Node node = null;
-		    try {
-			node = read.internalReadNode(pid);
-			node.setLastModifiedBy(userId);
-		    } catch (Exception e) {
-			play.Logger.debug(
-				"Try to modify resource that can not be read!",
-				e);
-		    }
-
-		    Result result = ca.exec(node);
-		    if (userId != null && !userId.equals("0")
-			    && !userId.equals("1")
-			    && !userId.equals("UrnAllocator")) {
-			play.Logger.info(json(modify.setObjectTimestamp(node,
-				new Date(), userId)));
-		    }
-		    return result;
 		} catch (HttpArchiveException e) {
 		    return JsonMessage(new Message(e, e.getCode()));
 		} catch (Exception e) {

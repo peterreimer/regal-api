@@ -71,7 +71,7 @@ import com.yourmediashelf.fedora.generated.management.PidList;
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  */
-class FedoraFacade implements FedoraInterface {
+public class FedoraFacade {
     @SuppressWarnings("serial")
     private class DeleteException extends HttpArchiveException {
 
@@ -203,6 +203,9 @@ class FedoraFacade implements FedoraInterface {
 	    return me;
     }
 
+    /**
+     * @param node
+     */
     public void createNode(Node node) {
 	try {
 	    new Ingest(node.getPid()).label(node.getLabel()).execute();
@@ -211,11 +214,19 @@ class FedoraFacade implements FedoraInterface {
 	    // utils.createContentModels(cms);
 	    utils.linkContentModels(cms, node);
 	    if (node.getUploadFile() != null) {
-		utils.createManagedStream(node);
+		if (node.isManaged()) {
+		    utils.createManagedStream(node);
+		    getChecksumFromFedora(node);
+		} else {
+		    utils.createUnManagedStream(node);
+		}
 	    }
 
 	    if (node.getSeqFile() != null) {
 		utils.createSeqStream(node);
+	    }
+	    if (node.getConfFile() != null) {
+		utils.createConfStream(node);
 	    }
 	    if (node.getObjectTimestampFile() != null) {
 		utils.createObjectTimestampStream(node);
@@ -229,6 +240,10 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param namespace
+     * @return
+     */
     public Node createRootObject(String namespace) {
 	Node rootObject = null;
 	String pid = getPid(namespace);
@@ -240,6 +255,10 @@ class FedoraFacade implements FedoraInterface {
 	return rootObject;
     }
 
+    /**
+     * @param pid
+     * @return
+     */
     public Node readNode(String pid) {
 	if (!nodeExists(pid))
 	    throw new NodeNotFoundException(404, pid);
@@ -253,6 +272,7 @@ class FedoraFacade implements FedoraInterface {
 	getChecksumFromFedora(node);
 	getMetadataFromFedora(node);
 	getDataFromFedora(pid, node);
+	getConfFromFedora(pid, node);
 	getObjectTimestampFromFedora(node);
 	return node;
     }
@@ -274,6 +294,17 @@ class FedoraFacade implements FedoraInterface {
 		    .execute();
 	    node.setSeq(CopyUtils.copyToString(response.getEntityInputStream(),
 		    "utf-8"));
+	} catch (Exception e) {
+	    // datastream with name metadata is optional
+	}
+    }
+
+    private void getConfFromFedora(String pid, Node node) {
+	try {
+	    FedoraResponse response = new GetDatastreamDissemination(pid,
+		    "conf").execute();
+	    node.setConf(CopyUtils.copyToString(
+		    response.getEntityInputStream(), "utf-8"));
 	} catch (Exception e) {
 	    // datastream with name metadata is optional
 	}
@@ -320,20 +351,33 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param node
+     */
     public void updateNode(Node node) {
+	play.Logger.info("Update node in fedora");
 	DublinCoreHandler.updateDc(node);
 	List<Transformer> models = node.getTransformer();
 	// utils.updateContentModels(models);
 	node.removeRelations(REL_HAS_MODEL);
 	if (node.getUploadFile() != null) {
-	    utils.updateManagedStream(node);
-	    getChecksumFromFedora(node);
+	    if (node.isManaged()) {
+		utils.updateManagedStream(node);
+		getChecksumFromFedora(node);
+	    } else {
+		utils.updateUnManagedStream(node);
+	    }
+
 	}
 	if (node.getMetadataFile() != null) {
 	    utils.updateMetadataStream(node);
 	}
 	if (node.getSeqFile() != null) {
 	    utils.updateSeqStream(node);
+	}
+	if (node.getConfFile() != null) {
+	    play.Logger.info("Write conf file to fedora");
+	    utils.updateConfStream(node);
 	}
 	if (node.getObjectTimestampFile() != null) {
 	    utils.updateObjectTimestampStream(node);
@@ -370,6 +414,11 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param rdfQuery
+     * @param queryFormat
+     * @return
+     */
     public List<String> findPids(String rdfQuery, String queryFormat) {
 	if (queryFormat.compareTo(FedoraVocabulary.SIMPLE) == 0) {
 	    return utils.findPidsSimple(rdfQuery);
@@ -378,6 +427,10 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param namespace
+     * @return
+     */
     public String getPid(String namespace) {
 	try {
 	    GetNextPIDResponse response = new GetNextPID().namespace(namespace)
@@ -388,6 +441,11 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param namespace
+     * @param number
+     * @return
+     */
     public String[] getPids(String namespace, int number) {
 	try {
 	    GetNextPIDResponse response = new GetNextPID().namespace(namespace)
@@ -401,6 +459,9 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param rootPID
+     */
     public void deleteNode(String rootPID) {
 	try {
 	    new ModifyObject(rootPID).state("D").execute();
@@ -418,6 +479,10 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param pid
+     * @param datastream
+     */
     public void deleteDatastream(String pid, String datastream) {
 	try {
 	    new ModifyDatastream(pid, datastream).dsState("D").execute();
@@ -426,14 +491,27 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param pid
+     * @return
+     */
     public boolean nodeExists(String pid) {
 	return utils.nodeExists(pid);
     }
 
+    /**
+     * @param cms
+     */
     public void updateContentModels(List<Transformer> cms) {
 	utils.updateContentModels(cms);
     }
 
+    /**
+     * @param query
+     * @param queryFormat
+     * @param outputformat
+     * @return
+     */
     public InputStream findTriples(String query, String queryFormat,
 	    String outputformat) {
 	try {
@@ -445,18 +523,35 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param pred
+     * @return
+     */
     public String removeUriPrefix(String pred) {
 	return utils.removeUriPrefix(pred);
     }
 
+    /**
+     * @param pid
+     * @return
+     */
     public String addUriPrefix(String pid) {
 	return utils.addUriPrefix(pid);
     }
 
+    /**
+     * @param searchTerm
+     * @return
+     */
     public List<String> findNodes(String searchTerm) {
 	return findPids(searchTerm, SIMPLE);
     }
 
+    /**
+     * @param node
+     * @param in
+     * @param dcNamespace
+     */
     public void readDcToNode(Node node, InputStream in, String dcNamespace) {
 	DublinCoreHandler.readDcToNode(node, in, dcNamespace);
     }
@@ -475,7 +570,6 @@ class FedoraFacade implements FedoraInterface {
 	result.add(root);
 	result.addAll(listChildren(root));
 	return result;
-
     }
 
     private List<Node> listChildren(Node root) {
@@ -493,6 +587,10 @@ class FedoraFacade implements FedoraInterface {
 	return result;
     }
 
+    /**
+     * @param node
+     * @return
+     */
     public String getNodeParent(Node node) {
 	List<Link> links = node.getRelsExt();
 	for (Link link : links) {
@@ -518,12 +616,19 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param node
+     */
     public void unlinkParent(Node node) {
 	Node parent = readNode(node.getParentPid());
 	parent.removeRelation(HAS_PART, node.getPid());
 	updateNode(parent);
     }
 
+    /**
+     * @param node
+     * @param parentPid
+     */
     public void linkToParent(Node node, String parentPid) {
 	node.removeRelations(IS_PART_OF);
 	Link link = new Link();
@@ -534,6 +639,10 @@ class FedoraFacade implements FedoraInterface {
 	updateNode(node);
     }
 
+    /**
+     * @param parentPid
+     * @param pid
+     */
     public void linkParentToNode(String parentPid, String pid) {
 	try {
 	    Node parent = readNode(parentPid);
@@ -549,6 +658,11 @@ class FedoraFacade implements FedoraInterface {
 	}
     }
 
+    /**
+     * @param pid
+     * @param datastreamId
+     * @return
+     */
     public boolean dataStreamExists(String pid, String datastreamId) {
 	try {
 	    ListDatastreamsResponse response = new ListDatastreams(pid)

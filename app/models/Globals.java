@@ -17,6 +17,7 @@
 package models;
 
 import helper.EtikettMaker;
+import helper.Heritrix;
 import helper.TaskManager;
 
 import java.text.SimpleDateFormat;
@@ -24,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.Play;
+import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
-import archive.fedora.FedoraInterface;
 import archive.search.SearchFacade;
 
 import com.google.common.net.InetAddresses;
@@ -98,7 +99,7 @@ public class Globals {
     /**
      * a globally available entry to Fedora
      */
-    public static FedoraInterface fedora = FedoraFactory.getFedoraImpl(
+    public static FedoraFacade fedora = FedoraFactory.getFedoraImpl(
 	    Globals.fedoraIntern, Globals.fedoraUser, Globals.fedoraPassword);
 
     /**
@@ -174,7 +175,6 @@ public class Globals {
     public static final String PDFBOX_OCR_TYPE = "pdfbox-ocr";
 
     /**
-     * 
      * prefix for fulltext index
      */
     public static final String PDFBOX_OCR_INDEX_PREF = "fulltext_";
@@ -183,6 +183,17 @@ public class Globals {
      * prefix used for public es index
      */
     public static final String PUBLIC_INDEX_PREF = "public_";
+
+    /**
+     * Global heritrix instance
+     */
+    public static Heritrix heritrix = new Heritrix();
+
+    /**
+     * Url to heritrix data directory
+     */
+    public static String heritrixData = Play.application().configuration()
+	    .getString("regal-api.heritrix.dataUrl");
 
     /**
      * Datacite provides a service for minting Dois. Configure your user here.
@@ -219,6 +230,12 @@ public class Globals {
 	    .getString("regal-api.alephSetName");
 
     /**
+     * Read cron expression for the webgatherer
+     */
+    public static String webgatherTask = Play.application().configuration()
+	    .getString("regal-api.webgatherTask");
+
+    /*
      * The setName for providing oai records to aleph
      */
     public static Map<String, String> ipWhiteList = buildIpList(Play
@@ -230,6 +247,12 @@ public class Globals {
      */
     public static SimpleDateFormat dateFormat = new SimpleDateFormat(
 	    "yyyy-MM-dd'T'HH:mm:ssZ");
+
+    /**
+     * the string for the mab field
+     */
+    public static String mab655x = Play.application().configuration()
+	    .getString("regal-api.mab655x");
 
     /**
      * @param ipWhiteList

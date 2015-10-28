@@ -15,6 +15,7 @@
  *
  */
 import static play.mvc.Results.notFound;
+import helper.oai.OaiDispatcher;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -30,7 +31,6 @@ import play.mvc.Action;
 import play.mvc.Http.Request;
 import play.mvc.Http.RequestHeader;
 import play.mvc.Result;
-import controllers.MyUtils;
 
 /**
  * @author Jan Schnasse
@@ -39,14 +39,23 @@ import controllers.MyUtils;
 public class Global extends GlobalSettings {
     @Override
     public void onStart(Application app) {
-	play.Logger.info("Application has started");
-	for (int i = 0; i < Globals.namespaces.length; i++) {
-	    MyUtils.initContentModels(Globals.namespaces[i]);
+	try {
+	    play.Logger.info("Regal-API started!");
+	    for (int i = 0; i < Globals.namespaces.length; i++) {
+
+		play.Logger.info("Init fedora content models for "
+			+ Globals.namespaces[i]);
+		OaiDispatcher.initContentModels(Globals.namespaces[i]);
+	    }
+	    play.Logger
+		    .info("Init fedora content models for default namespace");
+	    OaiDispatcher.initContentModels("");
+	    Globals.search.init(Globals.namespaces);
+	    Globals.taskManager.init();
+	    Globals.taskManager.execute();
+	} catch (Throwable t) {
+	    t.printStackTrace();
 	}
-	MyUtils.initContentModels("");
-	Globals.search.init(Globals.namespaces);
-	Globals.taskManager.init();
-	Globals.taskManager.execute();
     }
 
     @Override

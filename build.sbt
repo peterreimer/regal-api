@@ -22,11 +22,13 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "org.codehaus.jackson" % "jackson-core-lgpl" % "1.9.13",
   "org.codehaus.jackson" % "jackson-mapper-lgpl" % "1.9.13" ,
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % "2.4.0" ,
   "com.github.jsonld-java" % "jsonld-java" % "0.3",
   "com.sun.jersey" % "jersey-core" % "1.18.1" ,
   "com.sun.jersey" % "jersey-server" % "1.18.1",
   "com.sun.jersey" % "jersey-client" % "1.18.1",
   "com.sun.jersey.contribs" % "jersey-multipart" % "1.18.1",
+  "com.sun.jersey.contribs" % "jersey-apache-client" % "1.18.1",
   "com.sun.jersey" % "jersey-json" % "1.18.1",
   "com.sun.jersey" % "jersey-bundle" % "1.18.1",
   "org.openrdf.sesame" % "sesame-repository-api" % "2.7.10" ,
@@ -59,7 +61,8 @@ libraryDependencies ++= Seq(
   "xmlunit" % "xmlunit" % "1.5",
   "com.sun.xml.bind" % "jaxb-impl" % "2.2.6",
   "javax.xml.bind" % "jaxb-api" % "2.2.6",
-  "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2"
+  "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2",
+  "net.sf.supercsv" %"super-csv" %"2.3.1"
 )
 
 val root = (project in file(".")).enablePlugins(PlayJava)
