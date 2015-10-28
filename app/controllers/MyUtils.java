@@ -254,12 +254,4 @@ public class MyUtils extends MyController {
 	    return ok();
 	});
     }
-
-    private static int getPort() {
-	try {
-	    return play.Play.application().configuration().getInt("http.port");
-	} catch (Exception e) {
-	    return 9000;
-	}
-    }
 }
