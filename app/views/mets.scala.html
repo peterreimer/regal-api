@@ -30,13 +30,13 @@
 		case map: Map[String,Object]=> {
 		@map.get("hasPart") match {
 				case isGrp: List[Map[String,Object]] => { 
-				<mets:fileGrp ID="@map.get("@id")" USE="@map.get("contentType")">
+				<mets:fileGrp ID="@map.get("@id")" USE="@map.get("contentType")" >
 					@addFile(isGrp)
 				</mets:fileGrp>
 				}
 				case _ => {
-				<mets:file SIZE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("size")" CHECKSUM="@map.get("hasData").asInstanceOf[Map[String,Object]].get("checksum").asInstanceOf[Map[String,Object]].get("checksumValue")" CHECKSUMTYPE="MD5" ID="@map.get("@id")" MIMETYPE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("format")">
-				<mets:metsFLocat xlink:href="@models.Globals.urnbase@map.get("@id")/data" LOCTYPE="URL"/>
+				<mets:file LABEL="@map.get("hasData").asInstanceOf[Map[String,Object]].get("fileLabel")" SIZE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("size")" CHECKSUM="@map.get("hasData").asInstanceOf[Map[String,Object]].get("checksum").asInstanceOf[Map[String,Object]].get("checksumValue")" CHECKSUMTYPE="MD5" ID="@map.get("@id")" MIMETYPE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("format")">
+				<mets:FLocat xlink:href="@models.Globals.urnbase@map.get("@id")/data" LOCTYPE="URL"/>
 				</mets:file>
 				}
 		}
