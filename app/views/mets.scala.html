@@ -35,8 +35,8 @@
 				</mets:fileGrp>
 				}
 				case _ => {
-				<mets:file ID="@map.get("@id")" MIMETYPE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("format")">
-				<metsFLocat xlink:href="@models.Globals.urnbase@map.get("@id")/data" LOCTYPE="URL"/>
+				<mets:file SIZE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("size")" CHECKSUM="@map.get("hasData").asInstanceOf[Map[String,Object]].get("checksum").asInstanceOf[Map[String,Object]].get("checksumValue")" CHECKSUMTYPE="MD5" ID="@map.get("@id")" MIMETYPE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("format")">
+				<mets:metsFLocat xlink:href="@models.Globals.urnbase@map.get("@id")/data" LOCTYPE="URL"/>
 				</mets:file>
 				}
 		}
