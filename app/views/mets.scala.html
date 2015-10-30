@@ -15,7 +15,7 @@
  http://www.openarchives.org/OAI/2.0/oai_dc/ 
  http://www.openarchives.org/OAI/2.0/oai_dc.xsd"
  OBJID="@data.get("@id")"
- LABEL="@data.get("title")">
+ LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
 
 
 @addFile(objects:Any)={
@@ -78,7 +78,7 @@
 	<mets:mdRef xlink:href="@models.Globals.urnbase@data.get("@id")" LOCTYPE="URL" MDTYPE="RDF" LABEL="Publisso Entity"/>
 </mets:dmdSec>
 <mets:dmdSec ID="DM1">
-	<mets:mdWrap MDTYPE="DC" LABEL="@data.get("title")">
+	<mets:mdWrap MDTYPE="DC" LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
 		<mets:xmlData>
 		@tags.oaidcView(dcData)
 		</mets:xmlData>
