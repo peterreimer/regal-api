@@ -20,6 +20,7 @@
 
 @addFile(objects:Any)={
 @objects match {
+		case null => {}
 		case objects: List[Map[String,Object]]=> {
 				@for( i <- objects){
 					@for( j <- i.keySet()){
@@ -29,6 +30,7 @@
 		}
 		case map: Map[String,Object]=> {
 		@map.get("hasPart") match {
+				case null => {}
 				case isGrp: List[Map[String,Object]] => { 
 				<mets:fileGrp ID="@map.get("@id").asInstanceOf[String].replace(":","-")" USE="@map.get("contentType")" >
 					@addFile(isGrp)
@@ -47,6 +49,7 @@
 
 @addFileToStructMap(objects:Any)={
 @objects match {
+		case null => {}
 		case objects: List[Map[String,Object]]=> {
 				@for( i <- objects){
 					@for( j <- i.keySet()){
@@ -56,6 +59,7 @@
 		}
 		case map: Map[String,Object]=> {
 		@map.get("hasPart") match {
+				case null => {}
 				case isGrp: List[Map[String,Object]] => { 
 				<mets:div LABEL="@map.get("contentType")">
 					@addFileToStructMap(isGrp)
