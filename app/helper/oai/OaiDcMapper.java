@@ -122,13 +122,13 @@ public class OaiDcMapper {
 	    // data.addPublisher(l.getObject());
 	    // }
 	    else if ("http://purl.org/lobid/lv#urn".equals(l.getPredicate())) {
-		data.addIdentifier(l.getObject(), "hbz:urn");
+		data.addIdentifier(l.getObject(), "hbz-urn");
 	    } else if ("http://purl.org/lobid/lv#hbzID"
 		    .equals(l.getPredicate())) {
-		data.addIdentifier(l.getObject(), "hbz:alephId");
+		data.addIdentifier(l.getObject(), "hbz-alephId");
 	    } else if ("http://purl.org/ontology/bibo/isbn".equals(l
 		    .getPredicate())) {
-		data.addIdentifier(l.getObject(), "hbz:isbn");
+		data.addIdentifier(l.getObject(), "hbz-isbn");
 	    }
 	    // else if ("http://purl.org/dc/elements/1.1/subject".equals(l
 	    // .getPredicate())) {
@@ -155,7 +155,7 @@ public class OaiDcMapper {
 		}
 	    }
 	}
-	data.addIdentifier(node.getAggregationUri(), "hbz:edowebId");
+	data.addIdentifier(node.getAggregationUri(), "hbz-edowebId");
 	data.addType("regal:" + node.getContentType());
 	return data;
     }
