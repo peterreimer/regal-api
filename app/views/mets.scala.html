@@ -1,9 +1,9 @@
 @(data:Map[String,Object],dcData:DublinCoreData)<?xml version="1.0" encoding="UTF-8"?>
 <mets:mets xmlns:mets="http://www.loc.gov/METS/"
- xmlns:dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
  xmlns:rts="http://cosimo.stanford.edu/sdr/metsrights/"
  xmlns:mix="http://www.loc.gov/mix/v10"
  xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:hbz="http://hbz-nrw.de/regal/schema/"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation=
 "http://www.loc.gov/METS/
@@ -12,8 +12,8 @@
  http://cosimo.stanford.edu/sdr/metsrights.xsd
  http://www.loc.gov/mix/v10
  http://www.loc.gov/standards/mix/mix10/mix10.xsd
- http://www.openarchives.org/OAI/2.0/oai_dc/ 
- http://www.openarchives.org/OAI/2.0/oai_dc.xsd"
+ http://hbz-nrw.de/regal/schema/ 
+ http://@models.Globals.server/public/schemas/regal.xsd"
  OBJID="@data.get("@id")"
  LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
 
@@ -30,12 +30,12 @@
 		case map: Map[String,Object]=> {
 		@map.get("hasPart") match {
 				case isGrp: List[Map[String,Object]] => { 
-				<mets:fileGrp ID="@map.get("@id")" USE="@map.get("contentType")" >
+				<mets:fileGrp ID="@map.get("@id").asInstanceOf[String].replace(":","-")" USE="@map.get("contentType")" >
 					@addFile(isGrp)
 				</mets:fileGrp>
 				}
 				case _ => {
-				<mets:file LABEL="@map.get("hasData").asInstanceOf[Map[String,Object]].get("fileLabel")" SIZE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("size")" CHECKSUM="@map.get("hasData").asInstanceOf[Map[String,Object]].get("checksum").asInstanceOf[Map[String,Object]].get("checksumValue")" CHECKSUMTYPE="MD5" ID="@map.get("@id")" MIMETYPE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("format")">
+				<mets:file  SIZE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("size")" CHECKSUM="@map.get("hasData").asInstanceOf[Map[String,Object]].get("checksum").asInstanceOf[Map[String,Object]].get("checksumValue")" CHECKSUMTYPE="MD5" ID="@map.get("@id").asInstanceOf[String].replace(":","-")" MIMETYPE="@map.get("hasData").asInstanceOf[Map[String,Object]].get("format")">
 				<mets:FLocat xlink:href="@models.Globals.urnbase@map.get("@id")/data" LOCTYPE="URL"/>
 				</mets:file>
 				}
@@ -57,12 +57,14 @@
 		case map: Map[String,Object]=> {
 		@map.get("hasPart") match {
 				case isGrp: List[Map[String,Object]] => { 
-				
+				<mets:div LABEL="@map.get("contentType")">
 					@addFileToStructMap(isGrp)
-			
+				</mets:div>
 				}
 				case _ => {
-				<mets:fptr FILEID="@map.get("@id")"/>
+				<mets:div LABEL="@map.get("hasData").asInstanceOf[Map[String,Object]].get("fileLabel")">
+				<mets:fptr FILEID="@map.get("@id").asInstanceOf[String].replace(":","-")"/>
+				</mets:div>
 				}
 		}
 		}
@@ -75,7 +77,7 @@
  
 </mets:metsHdr>
 <mets:dmdSec ID="DMR1">
-	<mets:mdRef xlink:href="@models.Globals.urnbase@data.get("@id")" LOCTYPE="URL" MDTYPE="RDF" LABEL="Publisso Entity"/>
+	<mets:mdRef xlink:href="@models.Globals.urnbase@data.get("@id")" LOCTYPE="URL" MDTYPE="OTHER" LABEL="Publisso Entity"/>
 </mets:dmdSec>
 <mets:dmdSec ID="DM1">
 	<mets:mdWrap MDTYPE="DC" LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
@@ -91,8 +93,10 @@
 <mets:fileSec>
 @addFile(data)
 </mets:fileSec>
-<mets:structMap TYPE="text" LABEL="" DDMDID="DMR1 DM1">
+<mets:structMap TYPE="text" LABEL="">
+<mets:div>
 @addFileToStructMap(data)
+</mets:div>
 </mets:structMap>
 
 </mets:mets>
