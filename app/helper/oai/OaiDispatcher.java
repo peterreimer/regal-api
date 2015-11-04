@@ -203,7 +203,7 @@ public class OaiDispatcher {
 	node.addRelation(link);
 	link = new Link();
 	link.setPredicate(ITEM_ID);
-	link.setObject("info:fedora/" + node.getPid(), false);
+	link.setObject("oai:" + Globals.server + ":" + node.getPid(), false);
 	node.addRelation(link);
 	Globals.fedora.updateNode(node);
     }
