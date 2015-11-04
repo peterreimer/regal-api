@@ -207,7 +207,6 @@ public class XmlUtils {
 	    for (int i = 0; i < elements.getLength(); i++) {
 		try {
 		    Element element = (Element) elements.item(i);
-
 		    result.add(element);
 		} catch (ClassCastException e) {
 		    logger.warn(e.getMessage());
@@ -272,8 +271,10 @@ public class XmlUtils {
 		    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
 	    schemaFactory.setResourceResolver(new ResourceResolver());
-	    Schema s = schemaFactory.newSchema(new StreamSource(schema));
-	    factory.setSchema(s);
+	    if (schema != null) {
+		Schema s = schemaFactory.newSchema(new StreamSource(schema));
+		factory.setSchema(s);
+	    }
 	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
 	    docBuilder.setErrorHandler(new ErrorHandler() {
 		public void fatalError(SAXParseException exception)

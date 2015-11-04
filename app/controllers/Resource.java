@@ -56,6 +56,7 @@ import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
+import play.twirl.api.Html;
 import views.html.mab;
 import views.html.mets;
 import views.html.oaidc;
@@ -683,11 +684,16 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asOaiDc", value = "asOaiDc", notes = "Returns a oai dc display of the resource", response = Message.class, httpMethod = "GET")
-    public static Promise<Result> asOaiDc(@PathParam("pid") String pid) {
+    public static Promise<Result> asOaiDc(@PathParam("pid") String pid,
+	    @QueryParam("validate") boolean validate) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    DublinCoreData result = transform.oaidc(pid);
 	    response().setContentType("application/xml");
-	    return ok(oaidc.render(result));
+	    Html result = oaidc.render(transform.oaidc(pid));
+	    String xml = result.toString();
+	    if (validate) {
+		validate(xml, "public/schemas/oai_dc.xsd");
+	    }
+	    return ok(result);
 	});
     }
 
@@ -710,21 +716,34 @@ public class Resource extends MyController {
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asDatacite", value = "asDatacite", notes = "Returns a Datacite display of the resource", response = Message.class, httpMethod = "GET")
-    public static Promise<Result> asDatacite(@PathParam("pid") String pid) {
+    public static Promise<Result> asDatacite(@PathParam("pid") String pid,
+	    @QueryParam("validate") boolean validate) {
 	return new ReadMetadataAction().call(pid, node -> {
-	    String result = transform.datacite(node, node.getDoi());
 	    response().setContentType("application/xml");
+	    String result = transform.datacite(node, node.getDoi());
+	    if (validate) {
+		validate(result, "public/schemas/datacite.xsd");
+	    }
 	    return ok(result);
 	});
     }
 
     @ApiOperation(produces = "application/xml", nickname = "asMets", value = "asMets", notes = "Returns a Mets display of the resource", response = Message.class, httpMethod = "GET")
-    public static Promise<Result> asMets(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    response().setContentType("application/xml");
-	    return ok(mets.render(read.getPartsAsTree(node, "long"),
-		    transform.oaidc(pid)));
-	});
+    public static Promise<Result> asMets(@PathParam("pid") String pid,
+	    @QueryParam("validate") boolean validate) {
+	return new ReadMetadataAction().call(
+		pid,
+		node -> {
+		    response().setContentType("application/xml");
+		    Html result = mets.render(
+			    read.getPartsAsTree(node, "long"),
+			    transform.oaidc(pid));
+		    String xml = result.toString();
+		    if (validate) {
+			validate(xml, "public/schemas/mets.xsd");
+		    }
+		    return ok(result);
+		});
     }
 
     @ApiOperation(produces = "application/pdf", nickname = "asPdfa", value = "asPdfa", notes = "Returns a pdfa conversion of a pdf datastream.", httpMethod = "GET")

@@ -628,8 +628,7 @@ public class Modify extends RegalAction {
 	    // node.setDoi(doi);
 	    String objectUrl = Globals.urnbase + node.getPid();
 	    String xml = new Transform().datacite(node, doi);
-	    play.Logger.debug(xml);
-
+	    MyController.validate(xml, "public/schemas/datacite.xsd");
 	    try {
 		DataciteClient client = new DataciteClient();
 		result.put("Metadata", xml);
@@ -689,7 +688,7 @@ public class Modify extends RegalAction {
 	} else {
 	    String objectUrl = Globals.urnbase + node.getPid();
 	    String xml = new Transform().datacite(node, doi);
-	    play.Logger.debug(xml);
+	    MyController.validate(xml, "public/schemas/datacite.xsd");
 	    DataciteClient client = new DataciteClient();
 	    String registerMetadataResponse = client
 		    .registerMetadataAtDatacite(node, xml);

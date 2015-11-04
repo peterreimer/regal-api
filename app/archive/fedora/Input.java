@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 
 import org.w3c.dom.ls.LSInput;
 
@@ -30,7 +31,7 @@ import com.google.common.io.CharStreams;
 
 /**
  * @author Jan Schnasse
- *
+ * 
  */
 public class Input implements LSInput {
 
@@ -72,11 +73,22 @@ public class Input implements LSInput {
     }
 
     public synchronized String getStringData() {
+	play.Logger.info("Load XML Resource with id " + systemId + " , "
+		+ publicId);
 	try {
-	    return CharStreams.toString(new InputStreamReader(Play
-		    .application().resourceAsStream(systemId), Charsets.UTF_8));
-	} catch (IOException e) {
-	    throw new RuntimeException(e);
+	    URL url = new URL(systemId);
+	    return CharStreams
+		    .toString(new InputStreamReader(url.openStream()));
+	} catch (Exception e1) {
+
+	    try {
+
+		return CharStreams.toString(new InputStreamReader(Play
+			.application().resourceAsStream(
+				"public/schemas/" + systemId), Charsets.UTF_8));
+	    } catch (IOException e) {
+		throw new RuntimeException(e);
+	    }
 	}
     }
 

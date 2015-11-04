@@ -19,6 +19,7 @@ package controllers;
 import helper.HttpArchiveError;
 import helper.HttpArchiveException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -32,6 +33,7 @@ import java.util.Map.Entry;
 import models.Globals;
 import models.Message;
 import models.Node;
+import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -43,6 +45,7 @@ import actions.Index;
 import actions.Modify;
 import actions.Read;
 import actions.Transform;
+import archive.fedora.XmlUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -186,6 +189,7 @@ public class MyController extends Controller {
      */
     public static Result HtmlMessage(Message msg) {
 	play.Logger.debug("\nResponse: " + msg.toString());
+	response().setContentType("text/html");
 	return status(msg.getCode(), message.render(msg.toString()));
     }
 
@@ -564,5 +568,20 @@ public class MyController extends Controller {
 	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 	Date date = new Date();
 	return dateFormat.format(date);
+    }
+
+    public static void validate(String xml, String schema) {
+	try {
+	    if (schema != null) {
+		XmlUtils.validate(
+			new ByteArrayInputStream(xml.getBytes("utf-8")), Play
+				.application().resourceAsStream(schema));
+	    } else {
+		XmlUtils.validate(
+			new ByteArrayInputStream(xml.getBytes("utf-8")), null);
+	    }
+	} catch (Exception e) {
+	    throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
+	}
     }
 }

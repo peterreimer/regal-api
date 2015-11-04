@@ -41,7 +41,6 @@ import models.Node;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
-import play.Play;
 import archive.fedora.CopyUtils;
 import archive.fedora.XmlUtils;
 import converter.mab.RegalToMabMapper;
@@ -183,7 +182,7 @@ public class Transform {
 	Node node = new Read().readNode(pid);
 	String uri = Globals.urnbase + node.getPid();
 	DublinCoreData data = new OaiDcMapper(node).getData().addIdentifier(
-		uri, "dcterms:Uri");
+		uri, "dcterms-Uri");
 	return data;
     }
 
@@ -276,14 +275,7 @@ public class Transform {
     public String datacite(Node node, String doi) {
 	DataciteRecord dc = DataciteMapper.getDataciteRecord(doi,
 		new JsonMapper(node).getLd());
-	String xml = dc.toString();
-	try {
-	    XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
-		    Play.application().resourceAsStream("datacite.xsd"));
-	    return xml;
-	} catch (Exception e) {
-	    throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
-	}
+	return dc.toString();
     }
 
 }
