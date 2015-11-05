@@ -22,11 +22,8 @@ import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
-
-import helper.Webgatherer;
-
 import helper.JsonMapper;
-
+import helper.Webgatherer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -461,6 +458,8 @@ public class Read extends RegalAction {
     public String readMetadata(Node node, String field) {
 	try {
 	    String metadata = node.getMetadata();
+	    if (metadata == null)
+		return null;
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
