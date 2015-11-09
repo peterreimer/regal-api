@@ -71,6 +71,7 @@ public class OaiDispatcher {
 	addEpicurTransformer(node);
 	addAlephTransformer(node);
 	addMetsTransformer(node);
+	addRdfTransformer(node);
     }
 
     public static String initContentModels(String namespace) {
@@ -96,10 +97,14 @@ public class OaiDispatcher {
 	transformers.add(new Transformer(namespace + "mets", "mets",
 		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
 			+ "/resource/(pid)." + namespace + "mets"));
+	transformers.add(new Transformer(namespace + "rdf", "rdf",
+		"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+			+ "/resource/(pid)." + namespace + "rdf"));
 	OaiDispatcher.contentModelsInit(transformers);
 	String result = "Reinit contentModels " + namespace + "epicur, "
 		+ namespace + "oaidc, " + namespace + "pdfa, " + namespace
-		+ "pdfbox, " + namespace + "aleph, " + namespace + "mets";
+		+ "pdfbox, " + namespace + "aleph, " + namespace + "mets"
+		+ namespace + "rdf";
 	play.Logger.info(result);
 	return result;
     }
@@ -198,7 +203,7 @@ public class OaiDispatcher {
 	node.addRelation(link);
 	link = new Link();
 	link.setPredicate(ITEM_ID);
-	link.setObject("info:fedora/" + node.getPid(), false);
+	link.setObject("oai:" + Globals.server + ":" + node.getPid(), false);
 	node.addRelation(link);
 	Globals.fedora.updateNode(node);
     }
@@ -238,6 +243,8 @@ public class OaiDispatcher {
 		    continue; // implicitly added - or not allowed to set
 		if ("mets".equals(t))
 		    continue; // implicitly added - or not allowed to set
+		if ("rdf".equals(t))
+		    continue; // implicitly added - or not allowed to set
 		node.addTransformer(new Transformer(t));
 	    }
 	}
@@ -271,8 +278,22 @@ public class OaiDispatcher {
     }
 
     private static void addOaiDcTransformer(Node node) {
+	String type = node.getContentType();
 	if ("public".equals(node.getPublishScheme())) {
-	    node.addTransformer(new Transformer("oaidc"));
+	    if ("monograph".equals(type) || "journal".equals(type)
+		    || "webpage".equals(type)) {
+		node.addTransformer(new Transformer("oaidc"));
+	    }
+	}
+    }
+
+    private static void addRdfTransformer(Node node) {
+	String type = node.getContentType();
+	if ("public".equals(node.getPublishScheme())) {
+	    if ("monograph".equals(type) || "journal".equals(type)
+		    || "webpage".equals(type)) {
+		node.addTransformer(new Transformer("rdf"));
+	    }
 	}
     }
 }

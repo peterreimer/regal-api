@@ -69,6 +69,7 @@ public class JsonMapper {
     final static String hasData = "hasData";
     final static String fulltext_ocr = "fulltext-ocr";
     final static String title = "title";
+    final static String fileLabel = "fileLabel";
 
     EtikettMaker profile = Globals.profile;
 
@@ -148,6 +149,7 @@ public class JsonMapper {
 	    aboutMap.put(name, node.getName());
 	if (node.getLastModifiedBy() != null)
 	    aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
+
 	aboutMap.put(modified, node.getLastModified());
 	if (node.getObjectTimestamp() != null) {
 	    aboutMap.put(objectTimestamp, node.getObjectTimestamp());
@@ -175,6 +177,8 @@ public class JsonMapper {
 	    hasDataMap.put("@id", node.getDataUri());
 	    hasDataMap.put(format, node.getMimeType());
 	    hasDataMap.put(size, node.getFileSize());
+	    if (node.getFileLabel() != null)
+		hasDataMap.put(fileLabel, node.getFileLabel());
 	    if (node.getChecksum() != null) {
 		Map<String, Object> checksumMap = new TreeMap<String, Object>();
 		checksumMap.put(checksumValue, node.getChecksum());

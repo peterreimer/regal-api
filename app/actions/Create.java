@@ -178,7 +178,8 @@ public class Create extends RegalAction {
 	    inheritRights(parent, node);
 	    updateIndex(parentPid);
 	} catch (Exception e) {
-	    // play.Logger.debug("", e);
+	    play.Logger.debug("Fail link " + node.getPid() + " to " + parentPid
+		    + "", e);
 	}
     }
 

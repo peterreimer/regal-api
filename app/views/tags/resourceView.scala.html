@@ -54,7 +54,7 @@
 		case a if v.startsWith("http") => {
 			<a href=@v>@v</a>
 		}
-		case a if v.startsWith("edoweb") => {
+		case a if v.startsWith(namespace) => {
 			<a href=/resource/@v>@v</a>
 		}
 		case _ => {
