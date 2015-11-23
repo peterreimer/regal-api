@@ -1,19 +1,9 @@
 @(data:Map[String,Object],dcData:DublinCoreData)<?xml version="1.0" encoding="UTF-8"?>
 <mets:mets xmlns:mets="http://www.loc.gov/METS/"
- xmlns:rts="http://cosimo.stanford.edu/sdr/metsrights/"
- xmlns:mix="http://www.loc.gov/mix/v10"
  xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:hbz="http://hbz-nrw.de/regal/schema/"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation=
-"http://www.loc.gov/METS/
- http://www.loc.gov/standards/mets/mets.xsd
- http://cosimo.stanford.edu/sdr/metsrights/
- http://cosimo.stanford.edu/sdr/metsrights.xsd
- http://www.loc.gov/mix/v10
- http://www.loc.gov/standards/mix/mix10/mix10.xsd
- http://hbz-nrw.de/regal/schema/ 
- http://@models.Globals.server/public/schemas/regal.xsd"
+ xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/metss.xsd"
+ 
  OBJID="@data.get("@id")"
  LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
 
