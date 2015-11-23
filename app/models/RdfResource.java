@@ -19,6 +19,8 @@ package models;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -146,20 +148,21 @@ public class RdfResource {
     }
 
     private String findLabel(List<Link> list) {
-	for (Link l : list) {
-	    if ("http://d-nb.info/standards/elementset/gnd#preferredName"
-		    .equals(l.getPredicate()))
-		return l.getObject();
-	    if ("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"
-		    .equals(l.getPredicate()))
-		return l.getObject();
-	    if ("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName"
-		    .equals(l.getPredicate()))
-		return l.getObject();
-	    if ("http://www.w3.org/2004/02/skos/core#prefLabel".equals(l
-		    .getPredicate()))
-		return l.getObject();
-	}
+	Map<String, Link> map = list.stream().collect(Collectors.toMap(Link::getPredicate, (p) -> p));
+
+	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"))
+	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody").getObject();
+
+	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName"))
+	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName")
+		    .getObject();
+	
+	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredName"))
+	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredName").getObject();
+
+	if (map.containsKey("http://www.w3.org/2004/02/skos/core#prefLabel"))
+	    return map.get("http://www.w3.org/2004/02/skos/core#prefLabel").getObject();
+
 	return null;
     }
 
