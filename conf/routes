@@ -41,15 +41,6 @@ GET /resource/:pid/all.rdf			controllers.Resource.listAllPartsAsRdf(pid)
 GET /resource/:pid/all.json			controllers.Resource.listAllPartsAsJson(pid,style?="short")
 GET /resource/:pid/about			controllers.Resource.asRdf(pid)
 GET /resource/:pid/status			controllers.Resource.getStatus(pid)
-
-# list from elasticsearch index
-GET /listIndex 						controllers.ResourceIndex.listNodes(ids: String)
-# list resource from elasticsearch index
-GET /resourceIndex/:pid.json		controllers.ResourceIndex.listResource(pid)	
-GET /resourceIndex/:pid				controllers.ResourceIndex.listResource(pid)
-GET /resourceIndex 					controllers.ResourceIndex.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
-GET /resourceIndex/:pid/parts		controllers.ResourceIndex.listParts(pid,style?="")
-GET /resourceIndex/:pid/parents		controllers.ResourceIndex.listParents(pid,style?="")
 GET /resource/:pid/conf			    controllers.Resource.listConf(pid)
 
 PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
@@ -88,14 +79,13 @@ DELETE /resource 					controllers.Resource.deleteResources(namespace?="",purge?=
 POST /resource/:pid/oaisets			controllers.Resource.updateOaiSets(pid)
 	
 # Swagger - Root Resources Listing
-#GET /api-docs 						@controllers.ApiHelpController.getResources
+GET  /api-docs   @pl.matisoft.swagger.ApiHelpController.getResources
+GET /api-docs/utils 				@pl.matisoft.swagger.ApiHelpController.getResource(path = "/utils")
+GET /api-docs/resource 		@pl.matisoft.swagger.ApiHelpController.getResource(path = "/resource")
 
 #OPTIONS to support hosting UI off domain
 #OPTIONS /*wholepath controllers.Resource.getOptions(wholepath)
 
-#GET /api-docs/utils 				@controllers.ApiHelpController.getResource(path = "/utils")
-#GET /api-docs/resource 			@controllers.ApiHelpController.getResource(path = "/resource")
-#GET /api-docs/resourceIndex 		@controllers.ApiHelpController.getResource(path = "/resourceIndex")
 
 POST /utils/index/:pid 				controllers.MyUtils.index(pid,index?="")
 POST /utils/indexAll 				controllers.MyUtils.indexAll(index?="")
