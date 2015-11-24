@@ -18,6 +18,7 @@ package models;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -148,8 +149,10 @@ public class RdfResource {
     }
 
     private String findLabel(List<Link> list) {
-	Map<String, Link> map = list.stream().collect(Collectors.toMap(Link::getPredicate, (p) -> p));
-
+	Map<String, Link> map = new HashMap<String,Link>();
+	for(Link l:list){
+	    map.put(l.getPredicate(), l);
+	}
 	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"))
 	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody").getObject();
 
