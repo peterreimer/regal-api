@@ -21,12 +21,14 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import akka.util.Collections;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -70,6 +72,24 @@ public class JsonMapper {
     final static String fulltext_ocr = "fulltext-ocr";
     final static String title = "title";
     final static String fileLabel = "fileLabel";
+
+    final static String[] typePrios = new String[] { "http://purl.org/lobid/lv#Biography",
+	    "http://purl.org/library/Game", "http://purl.org/lobid/lv#Schoolbook",
+	    "http://purl.org/ontology/mo/PublishedScore", "http://purl.org/lobid/lv#Legislation",
+	    "http://purl.org/ontology/bibo/ReferenceSource", "http://purl.org/lobid/lv#OfficialPublication",
+	    "http://purl.org/lobid/lv#Bibliography", "http://purl.org/lobid/lv#Festschrift",
+	    "http://purl.org/ontology/bibo/Proceedings", "http://purl.org/lobid/lv#EditedVolume",
+	    "http://purl.org/ontology/bibo/Thesis", "http://purl.org/lobid/lv#Miscellaneous",
+	    "http://purl.org/ontology/mo/Record", "http://purl.org/ontology/bibo/Map",
+	    "http://purl.org/ontology/bibo/AudioVisualDocument", "http://purl.org/ontology/bibo/AudioDocument",
+	    "http://purl.org/ontology/bibo/Image", "http://purl.org/ontology/bibo/Article",
+	    "http://rdvocab.info/termList/RDACarrierType/1018", "http://rdvocab.info/termList/RDACarrierType/1010",
+	    "http://iflastandards.info/ns/isbd/terms/mediatype/T1002", "http://purl.org/ontology/bibo/MultiVolumeBook",
+	    "http://purl.org/ontology/bibo/Journal", "http://purl.org/ontology/bibo/Newspaper",
+	    "http://purl.org/ontology/bibo/Series", "http://purl.org/ontology/bibo/Periodical",
+	    "http://purl.org/ontology/bibo/Collection", "http://purl.org/ontology/bibo/Book",
+	    "http://data.archiveshub.ac.uk/def/ArchivalResource", "http://purl.org/ontology/bibo/Document",
+	    "http://purl.org/vocab/frbr/core#Manifestation", "http://purl.org/dc/terms/BibliographicResource" };
 
     EtikettMaker profile = Globals.profile;
 
@@ -118,8 +138,7 @@ public class JsonMapper {
 		continue;
 	    if (IS_PART_OF.equals(l.getPredicate()))
 		continue;
-	    if ("parentPid"
-		    .equals(Globals.profile.getJsonName(l.getPredicate()))) {
+	    if ("parentPid".equals(Globals.profile.getJsonName(l.getPredicate()))) {
 		l.setPredicate("http://hbz-nrw.de/regal#externalParent");
 	    }
 	    addLinkToJsonMap(rdf, l);
@@ -130,8 +149,7 @@ public class JsonMapper {
 	rdf.put(contentType, node.getContentType());
 	rdf.put(accessScheme, node.getAccessScheme());
 	rdf.put(publishScheme, node.getPublishScheme());
-	rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
-		.collect(Collectors.toList()));
+	rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId()).collect(Collectors.toList()));
 	rdf.put(catalogId, node.getCatalogId());
 
 	if (node.getFulltext() != null)
@@ -183,14 +201,13 @@ public class JsonMapper {
 		Map<String, Object> checksumMap = new TreeMap<String, Object>();
 		checksumMap.put(checksumValue, node.getChecksum());
 		checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-		checksumMap
-			.put(type,
-				"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		checksumMap.put(type, "http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 		hasDataMap.put(checksum, checksumMap);
 	    }
 	    rdf.put(hasData, hasDataMap);
 	}
 	rdf.put("@context", Globals.profile.getContext().get("@context"));
+	rdf.put(type, getType(rdf));
 	return rdf;
     }
 
@@ -222,20 +239,17 @@ public class JsonMapper {
 		Map<String, Object> checksumMap = new HashMap<String, Object>();
 		checksumMap.put(checksumValue, node.getChecksum());
 		checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-		checksumMap
-			.put(type,
-				"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+		checksumMap.put(type, "http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 		hasDataMap.put(checksum, checksumMap);
 	    }
 	    rdf.put("hasData", hasDataMap);
 	}
+	rdf.put(type, getType(rdf));
 	return rdf;
     }
 
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
-
 	Map<String, Object> resolvedObject = null;
-
 	String id = l.getObject();
 	String value = l.getObjectLabel();
 	String jsonName = profile.getJsonName(l.getPredicate());
@@ -246,8 +260,7 @@ public class JsonMapper {
 	}
 	if (rdf.containsKey(jsonName)) {
 	    @SuppressWarnings("unchecked")
-	    List<Object> list = (List<Object>) rdf.get(profile.getJsonName(l
-		    .getPredicate()));
+	    List<Object> list = (List<Object>) rdf.get(profile.getJsonName(l.getPredicate()));
 	    if (resolvedObject == null) {
 		if (l.isLiteral()) {
 		    list.add(l.getObject());
@@ -276,6 +289,32 @@ public class JsonMapper {
 	    }
 	    rdf.put(profile.getJsonName(l.getPredicate()), list);
 	}
+	
+    }
+
+    private List<Object> getType(Map<String, Object> rdf) {
+	@SuppressWarnings("unchecked")
+	List<Object> result = new ArrayList<Object>();
+	List<Map<String, Object>> types = (List<Map<String, Object>>) rdf.get(type);
+	if (types != null) {
+	    for (String s : typePrios) {
+		for (Map<String, Object> m : types) {
+		    if (s.equals(m.get("@id"))) {
+			result.add(m);
+			return result;
+		    }
+		}
+	    }
+	}
+	result.add(noTypeMap());
+	return result;
+    }
+
+    private Map<String, Object> noTypeMap() {
+	Map<String, Object> noTypeMap = new HashMap<String, Object>();
+	noTypeMap.put("@id", typePrios[typePrios.length - 1]);
+	noTypeMap.put("pref", typePrios[typePrios.length - 1]);
+	return noTypeMap;
     }
 
     private void addPartsToJsonMap(Map<String, Object> rdf) {
