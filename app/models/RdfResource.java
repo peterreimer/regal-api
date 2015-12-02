@@ -155,6 +155,9 @@ public class RdfResource {
 	}
 	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"))
 	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody").getObject();
+	
+	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson"))
+	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson").getObject();
 
 	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName"))
 	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName")
@@ -162,7 +165,7 @@ public class RdfResource {
 	
 	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredName"))
 	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredName").getObject();
-
+	
 	if (map.containsKey("http://www.w3.org/2004/02/skos/core#prefLabel"))
 	    return map.get("http://www.w3.org/2004/02/skos/core#prefLabel").getObject();
 
