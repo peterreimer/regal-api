@@ -22,7 +22,7 @@ import java.util.Vector;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wordnik.swagger.core.util.JsonUtil;
+
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -305,7 +305,7 @@ public class RegalObject {
 
     @Override
     public String toString() {
-	ObjectMapper mapper = JsonUtil.mapper();
+	ObjectMapper mapper = new ObjectMapper();
 	StringWriter w = new StringWriter();
 	try {
 	    mapper.writeValue(w, this);
