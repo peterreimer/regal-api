@@ -153,11 +153,12 @@ public class RdfResource {
 	for(Link l:list){
 	    map.put(l.getPredicate(), l);
 	}
-	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"))
-	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody").getObject();
-	
+
 	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson"))
 	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson").getObject();
+	
+	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody"))
+	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody").getObject();
 
 	if (map.containsKey("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName"))
 	    return map.get("http://d-nb.info/standards/elementset/gnd#preferredNameForThePlaceOrGeographicName")
