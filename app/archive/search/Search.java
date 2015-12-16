@@ -34,6 +34,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
@@ -185,10 +186,15 @@ public class Search {
 	refresh();
 	play.Logger.debug("Search for " + queryString);
 	QueryBuilder query = QueryBuilders.queryString(queryString);
-	SearchResponse response = client.prepareSearch(index).setQuery(query)
-		.setFrom(from).setSize(until - from).execute().actionGet();
-	return response.getHits();
+	return query(index,query,from,until);
     }
+    
+    SearchHits query(String[] index, QueryBuilder query, int from, int until) {
+   	refresh();
+   	SearchResponse response = client.prepareSearch(index).setQuery(query)
+   		.setFrom(from).setSize(until - from).execute().actionGet();
+   	return response.getHits();
+       }
 
     Map<String, Object> getSettings(String index, String type) {
 	try {

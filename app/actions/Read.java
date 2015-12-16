@@ -561,9 +561,13 @@ public class Read extends RegalAction {
      * @return a urn object that describes the status of the urn
      */
     public Urn getUrnStatus(Node node) {
-	String urn = node.getUrn();
+	return getUrnStatus(node.getUrn(),node.getPid());
+    }
+    
+    public Urn getUrnStatus(String urn,String pid) {
+	if(urn==null)return null;
 	Urn result = new Urn(urn);
-	result.init(Globals.urnbase + node.getPid());
+	result.init(Globals.urnbase + pid);
 	return result;
     }
 
@@ -698,14 +702,17 @@ public class Read extends RegalAction {
     }
 
     private int doiStatus(Node node) {
+	return doiStatus(node.getDoi());
+    }
+    
+    private int doiStatus(String doi){
 	try {
-	    return getFinalResponseCode("https://dx.doi.org/" + node.getDoi());
+	    return getFinalResponseCode(Globals.doiResolverAddress + doi);
 	} catch (Exception e) {
 	    play.Logger.warn("", e);
 	    return 500;
 	}
     }
-
     /**
      * @param nodes
      * @return status information for many nodes
@@ -760,4 +767,21 @@ public class Read extends RegalAction {
 	}
 	return con.getResponseCode();
     }
+    
+    public String getFinalURL(String url) throws IOException {
+   	HttpURLConnection con = (HttpURLConnection) new URL(url)
+   		.openConnection();
+   	con.setReadTimeout(1000 * 2);
+   	con.setInstanceFollowRedirects(false);
+   	con.connect();
+   	con.getInputStream();
+   	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+   		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
+   		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
+   	    String redirectUrl = con.getHeaderField("Location");
+
+   	    return getFinalURL(redirectUrl);
+   	}
+   	return url;
+       }
 }

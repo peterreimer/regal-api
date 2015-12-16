@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.QueryParam;
+
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -30,7 +32,6 @@ import org.elasticsearch.search.SearchHits;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 import actions.BasicAuth;
 import actions.Read;
@@ -38,8 +39,6 @@ import models.Globals;
 import models.Message;
 import play.libs.F.Promise;
 import play.mvc.Result;
-
-import views.html.checks;
 
 /**
  * 
@@ -54,25 +53,12 @@ import views.html.checks;
 @SuppressWarnings("javadoc")
 public class Checks extends MyController {
 
-    @ApiOperation(produces = "application/html", nickname = "checks", value = "checks", notes = "Html page to perform checks", response = Message.class, httpMethod = "GET")
-    public static Promise<Result> checks() {
-	return new BulkActionAccessor().call((userId) -> {
-	    try {
-
-		response().setHeader("Content-Type", "text/html; charset=utf-8");
-		return ok(checks.render());
-	    } catch (Exception e) {
-		return JsonMessage(new Message(e, 500));
-	    }
-	});
-    }
-
-    public static Promise<Result> missingUrn() {
+    public static Promise<Result> missingUrn( @QueryParam("from") int from, @QueryParam("until") int until) {
 	return new BulkActionAccessor().call((userId) -> {
 	    try {
 		QueryBuilder query = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 			FilterBuilders.missingFilter("urn"));
-		SearchHits sh = Globals.search.query(Globals.namespaces, query, 0, 50000);
+		SearchHits sh = Globals.search.query(Globals.namespaces, query,from, until);
 		SearchHit[] hits = sh.getHits();
 		List<Map<String, Object>> objects = new ArrayList<>();
 		for (SearchHit hit : hits) {
@@ -87,12 +73,12 @@ public class Checks extends MyController {
 	});
     }
 
-    public static Promise<Result> missingDoi() {
+    public static Promise<Result> missingDoi( @QueryParam("from") int from, @QueryParam("until") int until) {
 	return new BulkActionAccessor().call((userId) -> {
 	    try {
 		QueryBuilder query = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 			FilterBuilders.missingFilter("doi"));
-		SearchHits sh = Globals.search.query(Globals.namespaces, query, 0, 50000);
+		SearchHits sh = Globals.search.query(Globals.namespaces, query, from, until);
 		SearchHit[] hits = sh.getHits();
 		List<Map<String, Object>> objects = new ArrayList<>();
 		for (SearchHit hit : hits) {
@@ -107,12 +93,12 @@ public class Checks extends MyController {
 	});
     }
 
-    public static Promise<Result> doiStatus() {
+    public static Promise<Result> doiStatus( @QueryParam("from") int from, @QueryParam("until") int until) {
 	return new BulkActionAccessor().call((userId) -> {
 	    try {
 		ObjectMapper mapper = new ObjectMapper();
 		QueryBuilder query = QueryBuilders.matchAllQuery();
-		SearchHits sh = Globals.search.query(Globals.namespaces, query, 0, 50000);
+		SearchHits sh = Globals.search.query(Globals.namespaces, query, from, until);
 		SearchHit[] hits = sh.getHits();
 		List<Map<String, Object>> objects = new ArrayList<>();
 		for (SearchHit hit : hits) {
@@ -120,7 +106,6 @@ public class Checks extends MyController {
 		    Map<String, Object> object = getObject(hit, node);
 		    objects.add(object);
 		}
-
 		return getJsonResult(objects);
 	    } catch (Exception e) {
 		return JsonMessage(new Message(e, 500));
@@ -134,7 +119,6 @@ public class Checks extends MyController {
 	object.put("ht", node.at("/parallelEdition/0/@id").asText());
 	object.put("doi", node.at("/doi").asText());
 	object.put("urn", node.at("/urn/0").asText());
-
 	object.put("doiTarget", getDoiStatus((String) object.get("doi")));
 	object.put("urnTarget", getUrnStatus((String) object.get("urn")));
 	return object;

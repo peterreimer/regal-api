@@ -13,6 +13,10 @@ GET     /public/*file               controllers.Assets.at(path="/public", file)
 
 # list
 GET /list 							controllers.Resource.listNodes(ids: String)
+GET /checks/missingUrn				controllers.Checks.missingUrn(from: Int?=0,until: Int?=10)
+GET /checks/missingDoi				controllers.Checks.missingDoi(from: Int?=0,until: Int?=10)
+GET /checks/doiStatus				controllers.Checks.doiStatus(from: Int?=0,until: Int?=10)
+
 # Resource
 GET /resource/status				controllers.Resource.listResourcesStatus(namespace?="",contentType?="",from: Int ?=0, until: Int?=100)
 GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
