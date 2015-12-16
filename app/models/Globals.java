@@ -254,6 +254,8 @@ public class Globals {
     public static String mab655x = Play.application().configuration()
 	    .getString("regal-api.mab655x");
 
+    public static String doiResolverAddress = "https://dx.doi.org/";
+
     /**
      * @param ipWhiteList
      * @return a Map with ips

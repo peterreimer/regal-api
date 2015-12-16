@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
  *
@@ -40,17 +41,18 @@ public class Global extends GlobalSettings {
     @Override
     public void onStart(Application app) {
 	try {
-	    play.Logger.info("Regal-API started!");
-	    for (int i = 0; i < Globals.namespaces.length; i++) {
+	    if (play.api.Play.isProd(play.api.Play.current())) {
+		play.Logger.info("Regal-API started!");
+		for (int i = 0; i < Globals.namespaces.length; i++) {
 
-		play.Logger.info("Init fedora content models for "
-			+ Globals.namespaces[i]);
-		OaiDispatcher.initContentModels(Globals.namespaces[i]);
+		    play.Logger.info("Init fedora content models for " + Globals.namespaces[i]);
+		    OaiDispatcher.initContentModels(Globals.namespaces[i]);
+		}
+		play.Logger.info("Init fedora content models for default namespace");
+		OaiDispatcher.initContentModels("");
+
+		Globals.search.init(Globals.namespaces);
 	    }
-	    play.Logger
-		    .info("Init fedora content models for default namespace");
-	    OaiDispatcher.initContentModels("");
-	    Globals.search.init(Globals.namespaces);
 	    Globals.taskManager.init();
 	    Globals.taskManager.execute();
 	} catch (Throwable t) {
@@ -66,14 +68,12 @@ public class Global extends GlobalSettings {
     }
 
     public Promise<Result> onHandlerNotFound(RequestHeader request) {
-	return Promise.<Result> pure(notFound("Action not found "
-		+ request.uri()));
+	return Promise.<Result> pure(notFound("Action not found " + request.uri()));
     }
 
     @SuppressWarnings("rawtypes")
     public Action onRequest(Request request, Method actionMethod) {
-	play.Logger.debug("\n" + request.toString() + "\n\t"
-		+ mapToString(request.headers()) + "\n\t"
+	play.Logger.debug("\n" + request.toString() + "\n\t" + mapToString(request.headers()) + "\n\t"
 		+ request.body().toString());
 	return super.onRequest(request, actionMethod);
     }

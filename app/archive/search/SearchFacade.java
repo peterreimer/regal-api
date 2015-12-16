@@ -26,6 +26,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
 
 /**
@@ -142,7 +143,7 @@ public class SearchFacade {
      *            the value to search for
      * @return all hits
      */
-    public SearchHits query(String index, String fieldName, String fieldValue) {
+    public SearchHits querys(String index, String fieldName, String fieldValue) {
 	return search.query(index, fieldName, fieldValue);
     }
 
@@ -160,6 +161,11 @@ public class SearchFacade {
     public SearchHits query(String[] index, String queryString, int from,
 	    int until) {
 	return search.query(index, queryString, from, until);
+    }
+    
+    public SearchHits query(String[] index, QueryBuilder query, int from,
+	    int until) {
+	return search.query(index, query, from, until);
     }
 
     /**
