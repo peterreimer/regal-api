@@ -612,7 +612,12 @@ public class Read extends RegalAction {
 	String aleph = Globals.alephAddress + node.getLegacyId();
 	String lobid = Globals.lobidAddress + node.getLegacyId();
 	String api = this.getHttpUriOfResource(node);
-	String urn = Globals.urnResolverAddress + node.getUrnFromMetadata();
+	String urn = null;
+	if(node.getUrn()!=null){
+	    urn = Globals.urnResolverAddress + node.getUrn();
+	}else{
+	    urn = Globals.urnResolverAddress + node.getUrnFromMetadata();
+	}
 	String doi = "https://dx.doi.org/" + node.getDoi();
 	String frontend = Globals.urnbase + node.getPid();
 	String digitool = Globals.digitoolAddress
@@ -652,11 +657,11 @@ public class Read extends RegalAction {
 		node.getPid().substring(node.getNamespace().length() + 1));
 	result.put("catalogId", node.getLegacyId());
 	result.put("webgatherer", getGatherStatus(node));
-	/*
-	 * unsure merge result.put("urn", node.getUrn());
-	 */
-	result.put("urn", node.getUrnFromMetadata());
-
+	if(node.getUrn() != null){
+	    result.put("urn", node.getUrn());
+	}else{
+	    result.put("urn", node.getUrnFromMetadata());
+	}
 	return result;
     }
 
