@@ -1,0 +1,23 @@
+.title {
+	display: block;
+	padding: 0;
+	marging: 0;
+	border:red;
+}
+
+.titlePre {
+	font-style: italic;
+	padding: 0;
+	marging: 0;
+}
+
+.titleMain {
+	padding: 0;
+	marging: 0;
+}
+
+.titlePost {
+	font-style: italic;
+	padding: 0;
+	marging: 0;
+}

@@ -41,6 +41,7 @@ import models.Globals;
 import models.Node;
 import models.Pair;
 import models.RegalObject;
+import play.Logger;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
@@ -365,37 +366,8 @@ public class Modify extends RegalAction {
      * @return a short message
      */
     public String lobidify(Node node) {
-	String alephid = findAlephid(node);
+	String alephid = new Read().findAlephid(node);
 	return lobidify(node, alephid);
-    }
-
-    private String findAlephid(Node node) {
-	String pid = node.getPid();
-	List<Pair<String, String>> identifier = node.getDublinCoreData()
-		.getIdentifier();
-	String alephid = "";
-	for (Pair<String, String> id : identifier) {
-	    if (id.getLeft().startsWith("TT") || id.getLeft().startsWith("HT")) {
-		alephid = id.getLeft();
-		break;
-	    }
-	}
-	if (alephid.isEmpty()) {
-	    alephid = getIdOfParallelEdition(node);
-	    if (alephid == null || alephid.isEmpty()) {
-		throw new HttpArchiveException(500, pid
-			+ " no Catalog-Id found");
-	    }
-	}
-	return alephid;
-    }
-
-    private String getIdOfParallelEdition(Node node) {
-	String alephid;
-	alephid = new Read().readMetadata(node, "parallelEdition");
-	alephid = alephid.substring(alephid.lastIndexOf('/') + 1,
-		alephid.length());
-	return alephid;
     }
 
     /**
@@ -498,7 +470,7 @@ public class Modify extends RegalAction {
     }
 
     private List<Statement> findInstitution(Node node) {
-	String alephid = getIdOfParallelEdition(node);
+	String alephid = new Read().getIdOfParallelEdition(node);
 	try (InputStream in = new URL(Globals.lobidAddress + alephid
 		+ "/about?format=source").openStream()) {
 	    String gndEndpoint = "http://d-nb.info/gnd/";
@@ -792,33 +764,71 @@ public class Modify extends RegalAction {
 	}
     }
 
+//    public String lobidify(Node node, String alephid) {
+//	String pid = node.getPid();
+//	String lobidUri = "http://lobid.org/resource/" + alephid;
+//	try {
+//	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid
+//		    + "/about");
+//	    RDFFormat inFormat = RDFFormat.TURTLE;
+//	    String accept = "text/turtle";
+//	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
+//		    RDFFormat.NTRIPLES, accept);
+//	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
+//		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat,
+//			accept);
+//	    }
+//	    str = Pattern.compile(lobidUri).matcher(str)
+//		    .replaceAll(Matcher.quoteReplacement(pid))
+//		    + "<"
+//		    + pid
+//		    + "> <"
+//		    + archive.fedora.Vocabulary.REL_MAB_527
+//		    + "> <" + lobidUri + "> .";
+//	    return updateMetadata(node, str);
+//	} catch (MalformedURLException e) {
+//	    throw new HttpArchiveException(500, e);
+//	} catch (Exception e) {
+//	    throw new HttpArchiveException(500, e);
+//	}
+//
+//    }
+    
     public String lobidify(Node node, String alephid) {
-	String pid = node.getPid();
-	String lobidUri = "http://lobid.org/resource/" + alephid;
-	try {
-	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid
-		    + "/about");
-	    RDFFormat inFormat = RDFFormat.TURTLE;
-	    String accept = "text/turtle";
-	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
-		    RDFFormat.NTRIPLES, accept);
-	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
-		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat,
-			accept);
-	    }
-	    str = Pattern.compile(lobidUri).matcher(str)
-		    .replaceAll(Matcher.quoteReplacement(pid))
-		    + "<"
-		    + pid
-		    + "> <"
-		    + archive.fedora.Vocabulary.REL_MAB_527
-		    + "> <" + lobidUri + "> .";
-	    return updateMetadata(node, str);
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	}
+   	String pid = node.getPid();
+   	String lobidUri = "http://lobid.org/resource/" + alephid;
+   	String newFashionlobidUri = "http://lobid.org/resources/" + alephid;
+   	 Logger.info(lobidUri);
+   	
+   	try {
+   	    URL lobidUrl = new URL("http://gaia.hbz-nrw.de:9200/resources/_all/" + alephid+"/_source");
+   	    RDFFormat inFormat = RDFFormat.JSONLD;
+   	    String accept = "application/json";
+   	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
+   		    RDFFormat.NTRIPLES, accept);
+   	    
+   	   
+   	    
+//   	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
+//   		str = RdfUtils.followSameAsAndInclude(new URL(lobidUri+"/about"), pid, RDFFormat.TURTLE,
+//   			"text/turtle");
+//   	    }
+   	    str = Pattern.compile(newFashionlobidUri).matcher(str)
+   		    .replaceAll(Matcher.quoteReplacement(pid))
+   		    + "<"
+   		    + pid
+   		    + "> <"
+   		    + archive.fedora.Vocabulary.REL_MAB_527
+   		    + "> <" + lobidUri + "> .";
+   	    
+   	 Logger.info(str);
+   	 
+   	    return updateMetadata(node, str);
+   	} catch (MalformedURLException e) {
+   	    throw new HttpArchiveException(500, e);
+   	} catch (Exception e) {
+   	    throw new HttpArchiveException(500, e);
+   	}
 
-    }
+       }
 }

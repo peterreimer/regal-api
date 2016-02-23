@@ -208,6 +208,7 @@ public class JsonMapper {
 	}
 	rdf.put("@context", Globals.profile.getContext().get("@context"));
 	rdf.put(type, getType(rdf));
+	rdf.put("authors", getSortedListOfAuthors(rdf));
 	return rdf;
     }
 
@@ -245,6 +246,7 @@ public class JsonMapper {
 	    rdf.put("hasData", hasDataMap);
 	}
 	rdf.put(type, getType(rdf));
+	rdf.put("authors", getSortedListOfAuthors(rdf));
 	return rdf;
     }
 
@@ -324,5 +326,44 @@ public class JsonMapper {
 	    addLinkToJsonMap(rdf, l);
 	}
     }
+    
+    public List<Map<String, Object>> getSortedListOfAuthors(Map<String, Object> nodeAsMap) {
+
+   	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+   	List<String> carray = (List<String>) nodeAsMap.get("contributorOrder");
+   	if (carray == null || carray.isEmpty())
+   	    return result;
+   	for (String cstr : carray) {
+   	    String[] contributorOrdered = cstr.contains("|") ? cstr.split("\\|") : new String[] { cstr };
+   	    for (String s : contributorOrdered) {
+   		Map<String, Object> map = findContributorOrCreator(nodeAsMap, s.trim());
+   		if (!map.isEmpty())
+   		    result.add(map);
+   	    }
+   	}
+   	return result;
+       }
+    
+    private Map<String, Object> findContributorOrCreator(Map<String, Object> m, String authorsId) {
+   	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
+   	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");
+   	if (contributors != null) {
+   	    for (Map<String, Object> contributor : contributors) {
+   		String currentId =(String)contributor.get("@id");
+   		if (authorsId.compareTo(currentId) == 0){
+   		    return contributor;
+   		}
+   	    }
+   	}
+   	if (creators != null) {
+   	    for (Map<String, Object> creator : creators) {
+   		String currentId =(String)creator.get("@id");
+   		if (authorsId.compareTo(currentId) == 0){
+   		    return creator;
+   		}
+   	    }
+   	}
+   	return new HashMap<String, Object>();
+       }
 
 }

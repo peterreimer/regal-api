@@ -88,6 +88,7 @@ public class RdfUtils {
 	    myGraph = readRdfToGraph(url, inf, accept);
 	    return graphToString(myGraph, outf);
 	} catch (Exception e) {
+	    play.Logger.warn("",e);
 	    return "";
 	}
     }
@@ -207,6 +208,7 @@ public class RdfUtils {
 	    String baseUrl) {
 	try {
 	    RDFParser rdfParser = Rio.createParser(inf);
+	    
 	    org.openrdf.model.Graph myGraph = new TreeModel();
 	    StatementCollector collector = new StatementCollector(myGraph);
 	    rdfParser.setRDFHandler(collector);
