@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -208,7 +209,7 @@ public class JsonMapper {
 	}
 	rdf.put("@context", Globals.profile.getContext().get("@context"));
 	rdf.put(type, getType(rdf));
-	rdf.put("authors", getSortedListOfAuthors(rdf));
+	sortCreatorAndContributors(rdf);
 	return rdf;
     }
 
@@ -246,8 +247,21 @@ public class JsonMapper {
 	    rdf.put("hasData", hasDataMap);
 	}
 	rdf.put(type, getType(rdf));
-	rdf.put("authors", getSortedListOfAuthors(rdf));
+
+	sortCreatorAndContributors(rdf);
 	return rdf;
+    }
+
+    private void sortCreatorAndContributors(Map<String, Object> rdf) {
+	List<Map<String, Object>> cr = getSortedListOfCreators(rdf);
+	if (!cr.isEmpty()){
+	    rdf.put("creator", cr);
+	 rdf.remove("creatorName");
+	 rdf.remove("contributorName");
+	}
+	List<Map<String, Object>> co = getSortedListOfContributors(rdf);
+	if (!co.isEmpty())
+	    rdf.put("contributor", co);
     }
 
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
@@ -291,7 +305,7 @@ public class JsonMapper {
 	    }
 	    rdf.put(profile.getJsonName(l.getPredicate()), list);
 	}
-	
+
     }
 
     private List<Object> getType(Map<String, Object> rdf) {
@@ -326,44 +340,78 @@ public class JsonMapper {
 	    addLinkToJsonMap(rdf, l);
 	}
     }
-    
-    public List<Map<String, Object>> getSortedListOfAuthors(Map<String, Object> nodeAsMap) {
 
-   	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-   	List<String> carray = (List<String>) nodeAsMap.get("contributorOrder");
-   	if (carray == null || carray.isEmpty())
-   	    return result;
-   	for (String cstr : carray) {
-   	    String[] contributorOrdered = cstr.contains("|") ? cstr.split("\\|") : new String[] { cstr };
-   	    for (String s : contributorOrdered) {
-   		Map<String, Object> map = findContributorOrCreator(nodeAsMap, s.trim());
-   		if (!map.isEmpty())
-   		    result.add(map);
-   	    }
-   	}
-   	return result;
-       }
-    
-    private Map<String, Object> findContributorOrCreator(Map<String, Object> m, String authorsId) {
- //  	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
-   	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");
-//   	if (contributors != null) {
-//   	    for (Map<String, Object> contributor : contributors) {
-//   		String currentId =(String)contributor.get("@id");
-//   		if (authorsId.compareTo(currentId) == 0){
-//   		    return contributor;
-//   		}
-//   	    }
-//   	}
-   	if (creators != null) {
-   	    for (Map<String, Object> creator : creators) {
-   		String currentId =(String)creator.get("@id");
-   		if (authorsId.compareTo(currentId) == 0){
-   		    return creator;
-   		}
-   	    }
-   	}
-   	return new HashMap<String, Object>();
-       }
+    public List<Map<String, Object>> getSortedListOfCreators(Map<String, Object> nodeAsMap) {
+	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+	List<String> carray = (List<String>) nodeAsMap.get("contributorOrder");
+	if (carray == null || carray.isEmpty())
+	    return result;
+	for (String cstr : carray) {
+	    String[] contributorOrdered = cstr.contains("|") ? cstr.split("\\|") : new String[] { cstr };
+	    for (String s : contributorOrdered) {
+		Map<String, Object> map = findCreator(nodeAsMap, s.trim());
+		if (!map.isEmpty())
+		    result.add(map);
+	    }
+	}
+	return result;
+    }
+
+    public List<Map<String, Object>> getSortedListOfContributors(Map<String, Object> nodeAsMap) {
+	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+	List<String> carray = (List<String>) nodeAsMap.get("contributorOrder");
+	if (carray == null || carray.isEmpty())
+	    return result;
+	for (String cstr : carray) {
+	    String[] contributorOrdered = cstr.contains("|") ? cstr.split("\\|") : new String[] { cstr };
+	    for (String s : contributorOrdered) {
+		Map<String, Object> map = findContributor(nodeAsMap, s.trim());
+		if (!map.isEmpty())
+		    result.add(map);
+	    }
+	}
+	return result;
+    }
+
+    private Map<String, Object> findCreator(Map<String, Object> m, String authorsId) {
+	if (!authorsId.startsWith("http")) {
+	    Map<String, Object> creatorWithoutId = new HashMap<String, Object>();
+	    creatorWithoutId.put("prefLabel", authorsId);
+	    creatorWithoutId.put("@id", "https://de.wikipedia.org/w/index.php?search=" + urlEncode(authorsId)
+		    + "&title=Spezial%3ASuche&go=Artikel");
+	    return creatorWithoutId;
+	}
+	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");
+	if (creators != null) {
+	    for (Map<String, Object> creator : creators) {
+		String currentId = (String) creator.get("@id");
+		if (authorsId.compareTo(currentId) == 0) {
+		    return creator;
+		}
+	    }
+	}
+	return new HashMap<String, Object>();
+    }
+
+    private String urlEncode(String str) {
+	try {
+	    return URLEncoder.encode(str, "UTF-8");
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+    }
+
+    private Map<String, Object> findContributor(Map<String, Object> m, String authorsId) {
+	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
+	if (contributors != null) {
+	    for (Map<String, Object> contributor : contributors) {
+		String currentId = (String) contributor.get("@id");
+		if (authorsId.compareTo(currentId) == 0) {
+		    return contributor;
+		}
+	    }
+	}
+	return new HashMap<String, Object>();
+    }
 
 }

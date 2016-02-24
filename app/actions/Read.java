@@ -762,13 +762,7 @@ public class Read extends RegalAction {
 	    return getFinalURL(redirectUrl);
 	}
 	return url;
-    }
-
-    public List<Map<String, Object>> getSortedListOfAuthors(Node node) {
-	return (List<Map<String, Object>>)node.getLd().get("authors");
-    }
-
-   
+    }   
 
     String findAlephid(Node node) {
 	String pid = node.getPid();

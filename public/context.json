@@ -136,12 +136,6 @@
 			"@id":"http://purl.org/dc/terms/bibliographicCitation",
 			"label":"Veröffentlichungs Details"
 		},
-		"authors":{
-			"icon":"",
-			"@id":"http://hbz-nrw.de/regal#authors",
-			"label":"Autoren (sort.)",
-			"@container":"@list"
-		},
 		"doi":{
 			"@id":"http://purl.org/ontology/bibo/doi",
 			"label":"Doi"
@@ -154,12 +148,6 @@
 			"@type":"@id",
 			"@id":"http://id.loc.gov/vocabulary/relators/sng",
 			"label":"Gesang",
-			"@container":"@set"
-		},
-		"contributorOrder":{
-			"icon":"",
-			"@id":"http://purl.org/lobid/lv#contributorOrder",
-			"label":"Autorenliste",
 			"@container":"@set"
 		},
 		"isLike":{
@@ -259,8 +247,8 @@
 			"@type":"@id",
 			"icon":"",
 			"@id":"http://purl.org/dc/terms/creator",
-			"label":"Autor (unsort.)",
-			"@container":"@set"
+			"label":"Autor (sort.)",
+			"@container":"@list"
 		},
 		"performer":{
 			"@type":"@id",
@@ -427,11 +415,6 @@
 			"@type":"@id",
 			"@id":"http://xmlns.com/foaf/0.1/isPrimaryTopicOf",
 			"label":"Gegenstand von"
-		},
-		"contributorLabel":{
-			"@id":"http://purl.org/lobid/lv#contributorLabel",
-			"label":"Mitwirkende",
-			"@container":"@set"
 		},
 		"contentType":{
 			"@id":"http://hbz-nrw.de/regal#contentType",
@@ -609,7 +592,8 @@
 		"contributor":{
 			"@type":"@id",
 			"@id":"http://purl.org/dc/terms/contributor",
-			"label":"Mitwirkende"
+			"label":"Mitwirkende (sort.)",
+			"@container":"@list"
 		},
 		"festschrift":{
 			"@type":"@id",

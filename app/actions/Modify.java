@@ -732,14 +732,13 @@ public class Modify extends RegalAction {
 	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
 	    RDFFormat inFormat = RDFFormat.TURTLE;
 	    String accept = "text/turtle";
-	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat, RDFFormat.NTRIPLES, accept);
-	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
-		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat, accept);
-	    }
-	    str = Pattern.compile(lobidUri).matcher(str).replaceAll(Matcher.quoteReplacement(pid)) + "<" + pid + "> <"
-		    + archive.fedora.Vocabulary.REL_MAB_527 + "> <" + lobidUri + "> ." + "\n<" + pid
-		    + "> <http://purl.org/lobid/lv#contributorOrder> \"" + getAuthorOrdering(alephid) + "\" .\n";
-	    return updateMetadata(node, str);
+	    Graph graph = RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+	    ValueFactory f=RdfUtils.valueFactory;
+	    Statement parallelEditionStatement=f.createStatement(f.createURI(pid), f.createURI(archive.fedora.Vocabulary.REL_MAB_527), f.createURI(lobidUri));
+	    graph.add(parallelEditionStatement);
+	    Statement contributorOrderStatement=f.createStatement(f.createURI(pid), f.createURI("http://purl.org/lobid/lv#contributorOrder"), f.createLiteral(getAuthorOrdering(alephid)));
+	    graph.add(contributorOrderStatement);	 
+	    return updateMetadata(node, RdfUtils.graphToString(RdfUtils.rewriteSubject(lobidUri,pid,graph), RDFFormat.NTRIPLES));
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}

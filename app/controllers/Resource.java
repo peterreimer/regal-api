@@ -909,11 +909,4 @@ public class Resource extends MyController {
 	    return JsonMessage(new Message(json(result)));
 	});
     }
-
-    @ApiOperation(produces = "application/json", nickname = "getSortedListOfAuthors", value = "getSortedListOfAuthors", notes = "Returns a sorted list of authors", response = String.class, httpMethod = "GET")
-    public static Promise<Result> getSortedListOfAuthors(@PathParam("pid") String pid) {
-	return new ReadMetadataAction().call(pid, node -> {
-	    return getJsonResult(read.getSortedListOfAuthors(node));
-	});
-    }
 }

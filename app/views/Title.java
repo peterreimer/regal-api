@@ -33,7 +33,7 @@ public class Title {
     }
 
     public static String getAuthorNames(Map<String, Object> hit) {
-	List<Map<String, Object>> authorList = (List<Map<String, Object>>) hit.get("authors");
+	List<Map<String, Object>> authorList = (List<Map<String, Object>>) hit.get("creator");
 	if (authorList == null || authorList.isEmpty())
 	    return "";
 	List<String> authorNames = new ArrayList<String>();
