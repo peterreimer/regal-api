@@ -345,16 +345,16 @@ public class JsonMapper {
        }
     
     private Map<String, Object> findContributorOrCreator(Map<String, Object> m, String authorsId) {
-   	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
+ //  	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
    	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");
-   	if (contributors != null) {
-   	    for (Map<String, Object> contributor : contributors) {
-   		String currentId =(String)contributor.get("@id");
-   		if (authorsId.compareTo(currentId) == 0){
-   		    return contributor;
-   		}
-   	    }
-   	}
+//   	if (contributors != null) {
+//   	    for (Map<String, Object> contributor : contributors) {
+//   		String currentId =(String)contributor.get("@id");
+//   		if (authorsId.compareTo(currentId) == 0){
+//   		    return contributor;
+//   		}
+//   	    }
+//   	}
    	if (creators != null) {
    	    for (Map<String, Object> creator : creators) {
    		String currentId =(String)creator.get("@id");
