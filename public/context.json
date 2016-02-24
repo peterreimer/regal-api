@@ -139,7 +139,7 @@
 		"authors":{
 			"icon":"",
 			"@id":"http://hbz-nrw.de/regal#authors",
-			"label":"Authoren",
+			"label":"Autoren (sort.)",
 			"@container":"@set"
 		},
 		"doi":{
@@ -181,7 +181,7 @@
 		},
 		"creatorName":{
 			"@id":"http://purl.org/dc/elements/1.1/creator",
-			"label":"Autor"
+			"label":"AutorenNamen"
 		},
 		"fulltextOnline":{
 			"@type":"@id",
@@ -259,7 +259,7 @@
 			"@type":"@id",
 			"icon":"",
 			"@id":"http://purl.org/dc/terms/creator",
-			"label":"Autor",
+			"label":"Autor (unsort.)",
 			"@container":""
 		},
 		"performer":{
