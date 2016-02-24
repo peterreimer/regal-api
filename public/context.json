@@ -140,7 +140,7 @@
 			"icon":"",
 			"@id":"http://hbz-nrw.de/regal#authors",
 			"label":"Autoren (sort.)",
-			"@container":"@set"
+			"@container":"@list"
 		},
 		"doi":{
 			"@id":"http://purl.org/ontology/bibo/doi",
@@ -260,7 +260,7 @@
 			"icon":"",
 			"@id":"http://purl.org/dc/terms/creator",
 			"label":"Autor (unsort.)",
-			"@container":""
+			"@container":"@set"
 		},
 		"performer":{
 			"@type":"@id",
