@@ -30,6 +30,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -44,6 +45,7 @@ import models.RegalObject;
 import play.Logger;
 
 import org.openrdf.model.BNode;
+import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
@@ -78,11 +80,10 @@ public class Modify extends RegalAction {
      * @throws IOException
      *             if data can not be written to a tmp file
      */
-    public String updateData(String pid, InputStream content, String mimeType,
-	    String name, String md5Hash) throws IOException {
+    public String updateData(String pid, InputStream content, String mimeType, String name, String md5Hash)
+	    throws IOException {
 	if (content == null) {
-	    throw new HttpArchiveException(406, pid
-		    + " you've tried to upload an empty stream."
+	    throw new HttpArchiveException(406, pid + " you've tried to upload an empty stream."
 		    + " This action is not supported. Use HTTP DELETE instead.");
 	}
 	File tmp = File.createTempFile(name, "tmp");
@@ -102,9 +103,8 @@ public class Modify extends RegalAction {
 
 	    String fedoraHash = node.getChecksum();
 	    if (!md5Hash.equals(fedoraHash)) {
-		throw new HttpArchiveException(417, pid + " expected a MD5 of "
-			+ fedoraHash + " but you provided a MD5 value of "
-			+ md5Hash);
+		throw new HttpArchiveException(417,
+			pid + " expected a MD5 of " + fedoraHash + " but you provided a MD5 value of " + md5Hash);
 	    }
 	}
 	return pid + " data successfully updated!";
@@ -136,10 +136,8 @@ public class Modify extends RegalAction {
     public String updateSeq(String pid, String content) {
 	try {
 	    if (content == null) {
-		throw new HttpArchiveException(406, pid
-			+ " You've tried to upload an empty string."
-			+ " This action is not supported."
-			+ " Use HTTP DELETE instead.\n");
+		throw new HttpArchiveException(406, pid + " You've tried to upload an empty string."
+			+ " This action is not supported." + " Use HTTP DELETE instead.\n");
 	    }
 	    play.Logger.info(content);
 	    File file = CopyUtils.copyStringToFile(content);
@@ -184,10 +182,8 @@ public class Modify extends RegalAction {
 	try {
 	    String pid = node.getPid();
 	    if (content == null) {
-		throw new HttpArchiveException(406, pid
-			+ " You've tried to upload an empty string."
-			+ " This action is not supported."
-			+ " Use HTTP DELETE instead.\n");
+		throw new HttpArchiveException(406, pid + " You've tried to upload an empty string."
+			+ " This action is not supported." + " Use HTTP DELETE instead.\n");
 	    }
 	    RdfUtils.validate(content);
 
@@ -195,9 +191,8 @@ public class Modify extends RegalAction {
 	    node.setMetadataFile(file.getAbsolutePath());
 
 	    if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
-		List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
-			archive.fedora.Vocabulary.REL_LOBID_DOI, content,
-			RDFFormat.NTRIPLES);
+		List<String> dois = RdfUtils.findRdfObjects(node.getPid(), archive.fedora.Vocabulary.REL_LOBID_DOI,
+			content, RDFFormat.NTRIPLES);
 		if (!dois.isEmpty()) {
 		    node.setDoi(dois.get(0));
 		}
@@ -266,8 +261,7 @@ public class Modify extends RegalAction {
     String addUrn(Node node, String snid) {
 	String subject = node.getPid();
 	if (node.hasUrnInMetadata() || node.hasUrn())
-	    throw new HttpArchiveException(409, subject
-		    + " already has a urn. Leave unmodified!");
+	    throw new HttpArchiveException(409, subject + " already has a urn. Leave unmodified!");
 	String urn = generateUrn(subject, snid);
 	node.setUrn(urn);
 	return OaiDispatcher.makeOAISet(node);
@@ -314,9 +308,8 @@ public class Modify extends RegalAction {
 		return addUrn(n, snid);
 	    }
 	}
-	return "Not Updated " + n.getPid() + " " + n.getCreationDate()
-		+ " is not before " + fromBefore + " or contentType "
-		+ contentType + " is not allowed to carry urn.";
+	return "Not Updated " + n.getPid() + " " + n.getCreationDate() + " is not before " + fromBefore
+		+ " or contentType " + contentType + " is not allowed to carry urn.";
     }
 
     /**
@@ -338,9 +331,8 @@ public class Modify extends RegalAction {
 		    return MyController.mapper.writeValueAsString(addDoi(n));
 		}
 	    }
-	    return "Not Updated " + n.getPid() + " " + n.getCreationDate()
-		    + " is not before " + fromBefore + " or contentType "
-		    + contentType + " is not allowed to carry urn.";
+	    return "Not Updated " + n.getPid() + " " + n.getCreationDate() + " is not before " + fromBefore
+		    + " or contentType " + contentType + " is not allowed to carry urn.";
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
@@ -402,17 +394,14 @@ public class Modify extends RegalAction {
 	Node parent = new Read().readNode(recentParent);
 	String destinyPid = parent.getParentPid();
 	if (destinyPid == null || destinyPid.isEmpty())
-	    throw new HttpArchiveException(406,
-		    "Can't find valid destiny for move operation. "
-			    + node.getParentPid() + " parent of "
-			    + node.getPid() + " has no further parent.");
+	    throw new HttpArchiveException(406, "Can't find valid destiny for move operation. " + node.getParentPid()
+		    + " parent of " + node.getPid() + " has no further parent.");
 	RegalObject object = new RegalObject();
 	object.setParentPid(destinyPid);
 	node = new Create().patchResource(node, object);
 
-	play.Logger.info("Move " + node.getPid() + " to new parent "
-		+ node.getParentPid() + ". Recent Parent was " + recentParent
-		+ ". Calculated destiny was " + destinyPid);
+	play.Logger.info("Move " + node.getPid() + " to new parent " + node.getParentPid() + ". Recent Parent was "
+		+ recentParent + ". Calculated destiny was " + destinyPid);
 	return node;
     }
 
@@ -431,20 +420,17 @@ public class Modify extends RegalAction {
 	}
 	Node parent = new Read().readNode(copySource);
 	String subject = node.getPid();
-	play.Logger.debug("Try to enrich " + node.getPid() + " with "
-		+ parent.getPid() + " . Looking for field " + field);
+	play.Logger
+		.debug("Try to enrich " + node.getPid() + " with " + parent.getPid() + " . Looking for field " + field);
 	String pred = Globals.profile.getUriFromJsonName(field);
-	List<String> value = RdfUtils.findRdfObjects(subject, pred,
-		parent.getMetadata(), RDFFormat.NTRIPLES);
+	List<String> value = RdfUtils.findRdfObjects(subject, pred, parent.getMetadata(), RDFFormat.NTRIPLES);
 	String metadata = node.getMetadata();
 	if (metadata == null)
 	    metadata = "";
 	if (value != null && !value.isEmpty()) {
-	    metadata = RdfUtils.replaceTriple(subject, pred, value.get(0),
-		    true, metadata);
+	    metadata = RdfUtils.replaceTriple(subject, pred, value.get(0), true, metadata);
 	} else {
-	    throw new HttpArchiveException(406, "Source object " + copySource
-		    + " has no field: " + field);
+	    throw new HttpArchiveException(406, "Source object " + copySource + " has no field: " + field);
 	}
 	updateMetadata(node, metadata);
 	return node;
@@ -471,13 +457,10 @@ public class Modify extends RegalAction {
 
     private List<Statement> findInstitution(Node node) {
 	String alephid = new Read().getIdOfParallelEdition(node);
-	try (InputStream in = new URL(Globals.lobidAddress + alephid
-		+ "/about?format=source").openStream()) {
+	try (InputStream in = new URL(Globals.lobidAddress + alephid + "/about?format=source").openStream()) {
 	    String gndEndpoint = "http://d-nb.info/gnd/";
 	    List<Element> institutionHack = XmlUtils
-		    .getElements(
-			    "//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield",
-			    in, null);
+		    .getElements("//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield", in, null);
 	    List<Statement> result = new ArrayList<Statement>();
 	    for (Element el : institutionHack) {
 		String marker = el.getTextContent();
@@ -485,17 +468,14 @@ public class Modify extends RegalAction {
 		    continue;
 		if (!marker.contains("GND"))
 		    continue;
-		String gndId = gndEndpoint
-			+ marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)",
-				"");
+		String gndId = gndEndpoint + marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)", "");
 		if (gndId.endsWith("16269969-4")) {
 		    gndId = gndEndpoint + "2006655-7";
 		}
 		play.Logger.debug("Add data from " + gndId);
 		ValueFactory v = new ValueFactoryImpl();
 		Statement link = v.createStatement(v.createURI(node.getPid()),
-			v.createURI("http://dbpedia.org/ontology/institution"),
-			v.createURI(gndId));
+			v.createURI("http://dbpedia.org/ontology/institution"), v.createURI(gndId));
 		result.add(link);
 		result.addAll(getStatements(gndId));
 	    }
@@ -508,16 +488,14 @@ public class Modify extends RegalAction {
     private List<Statement> getStatements(String uri) {
 	List<Statement> filteredStatements = new ArrayList<Statement>();
 	try {
-	    for (Statement s : RdfUtils.readRdfToGraph(new URL(uri
-		    + "/about/lds"), RDFFormat.RDFXML, "application/rdf+xml")) {
+	    for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about/lds"), RDFFormat.RDFXML,
+		    "application/rdf+xml")) {
 		boolean isLiteral = s.getObject() instanceof Literal;
 		if (!(s.getSubject() instanceof BNode)) {
 		    if (isLiteral) {
 			ValueFactory v = new ValueFactoryImpl();
-			Statement newS = v.createStatement(v.createURI(uri), s
-				.getPredicate(), v.createLiteral(Normalizer
-				.normalize(s.getObject().stringValue(),
-					Normalizer.Form.NFKC)));
+			Statement newS = v.createStatement(v.createURI(uri), s.getPredicate(), v.createLiteral(
+				Normalizer.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC)));
 			filteredStatements.add(newS);
 		    }
 		}
@@ -530,8 +508,7 @@ public class Modify extends RegalAction {
 
     private List<String> findAllGndIds(String metadata) {
 	HashMap<String, String> result = new HashMap<String, String>();
-	Matcher m = Pattern.compile("http://d-nb.info/gnd/[^>]*").matcher(
-		metadata);
+	Matcher m = Pattern.compile("http://d-nb.info/gnd/[^>]*").matcher(metadata);
 	while (m.find()) {
 	    String id = m.group();
 	    result.put(id, id);
@@ -582,14 +559,9 @@ public class Modify extends RegalAction {
      */
     public Map<String, Object> addDoi(Node node) {
 	String contentType = node.getContentType();
-	if ("file".equals(contentType) || "issue".equals(contentType)
-		|| "volume".equals(contentType)) {
-	    throw new HttpArchiveException(
-		    412,
-		    node.getPid()
-			    + " resource is of type "
-			    + contentType
-			    + ". It is not allowed to mint Dois for this type. Leave unmodified!");
+	if ("file".equals(contentType) || "issue".equals(contentType) || "volume".equals(contentType)) {
+	    throw new HttpArchiveException(412, node.getPid() + " resource is of type " + contentType
+		    + ". It is not allowed to mint Dois for this type. Leave unmodified!");
 	}
 	Map<String, Object> result = new HashMap<String, Object>();
 	String doi = node.getDoi();
@@ -604,29 +576,25 @@ public class Modify extends RegalAction {
 	    try {
 		DataciteClient client = new DataciteClient();
 		result.put("Metadata", xml);
-		String registerMetadataResponse = client
-			.registerMetadataAtDatacite(node, xml);
+		String registerMetadataResponse = client.registerMetadataAtDatacite(node, xml);
 		result.put("registerMetadataResponse", registerMetadataResponse);
 		if (client.getStatus() != 200)
 		    throw new RuntimeException("Registering Doi failed!");
-		String mintDoiResponse = client.mintDoiAtDatacite(doi,
-			objectUrl);
+		String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
 		result.put("mintDoiResponse", mintDoiResponse);
 		if (client.getStatus() != 200)
 		    throw new RuntimeException("Minting Doi failed!");
 
 	    } catch (Exception e) {
-		throw new HttpArchiveException(502, node.getPid()
-			+ " Add Doi failed!\n" + result
-			+ "\n Datacite replies: " + e.getMessage());
+		throw new HttpArchiveException(502,
+			node.getPid() + " Add Doi failed!\n" + result + "\n Datacite replies: " + e.getMessage());
 	    }
 	    RegalObject o = new RegalObject();
 	    o.getIsDescribedBy().setDoi(doi);
 	    new Create().patchResource(node, o);
 	    return result;
 	} else {
-	    throw new HttpArchiveException(409, node.getPid()
-		    + " already has a doi. Leave unmodified! ");
+	    throw new HttpArchiveException(409, node.getPid() + " already has a doi. Leave unmodified! ");
 	}
 
     }
@@ -653,17 +621,14 @@ public class Modify extends RegalAction {
 	String doi = node.getDoi();
 	result.put("Doi", doi);
 	if (doi == null || doi.isEmpty()) {
-	    throw new HttpArchiveException(
-		    412,
-		    node.getPid()
-			    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
+	    throw new HttpArchiveException(412, node.getPid()
+		    + " resource is not associated to doi. Please create a doi first (POST /doi).  Leave unmodified!");
 	} else {
 	    String objectUrl = Globals.urnbase + node.getPid();
 	    String xml = new Transform().datacite(node, doi);
 	    MyController.validate(xml, "public/schemas/datacite.xsd");
 	    DataciteClient client = new DataciteClient();
-	    String registerMetadataResponse = client
-		    .registerMetadataAtDatacite(node, xml);
+	    String registerMetadataResponse = client.registerMetadataAtDatacite(node, xml);
 	    String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
 	    String makeOaiSetResponse = OaiDispatcher.makeOAISet(node);
 	    result.put("Metadata", xml);
@@ -691,10 +656,8 @@ public class Modify extends RegalAction {
     public String updateConf(Node node, String content) {
 	try {
 	    if (content == null) {
-		throw new HttpArchiveException(406, node.getPid()
-			+ " You've tried to upload an empty string."
-			+ " This action is not supported."
-			+ " Use HTTP DELETE instead.\n");
+		throw new HttpArchiveException(406, node.getPid() + " You've tried to upload an empty string."
+			+ " This action is not supported." + " Use HTTP DELETE instead.\n");
 	    }
 	    play.Logger.info("Write to conf: " + content);
 	    File file = CopyUtils.copyStringToFile(content);
@@ -723,8 +686,7 @@ public class Modify extends RegalAction {
      */
     public String addMetadataField(Node node, String pred, String obj) {
 	String metadata = node.getMetadata();
-	metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata,
-		RDFFormat.NTRIPLES);
+	metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata, RDFFormat.NTRIPLES);
 	updateMetadata(node, metadata);
 	node = new Read().readNode(node.getPid());
 	OaiDispatcher.makeOAISet(node);
@@ -741,8 +703,7 @@ public class Modify extends RegalAction {
      *            who has modified?
      * @return a user message in form of a map
      */
-    public Map<String, Object> setObjectTimestamp(Node node, Date date,
-	    String userId) {
+    public Map<String, Object> setObjectTimestamp(Node node, Date date, String userId) {
 	Map<String, Object> result = new HashMap<String, Object>();
 	try {
 	    String content = Globals.dateFormat.format(date);
@@ -764,71 +725,46 @@ public class Modify extends RegalAction {
 	}
     }
 
-//    public String lobidify(Node node, String alephid) {
-//	String pid = node.getPid();
-//	String lobidUri = "http://lobid.org/resource/" + alephid;
-//	try {
-//	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid
-//		    + "/about");
-//	    RDFFormat inFormat = RDFFormat.TURTLE;
-//	    String accept = "text/turtle";
-//	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
-//		    RDFFormat.NTRIPLES, accept);
-//	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
-//		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat,
-//			accept);
-//	    }
-//	    str = Pattern.compile(lobidUri).matcher(str)
-//		    .replaceAll(Matcher.quoteReplacement(pid))
-//		    + "<"
-//		    + pid
-//		    + "> <"
-//		    + archive.fedora.Vocabulary.REL_MAB_527
-//		    + "> <" + lobidUri + "> .";
-//	    return updateMetadata(node, str);
-//	} catch (MalformedURLException e) {
-//	    throw new HttpArchiveException(500, e);
-//	} catch (Exception e) {
-//	    throw new HttpArchiveException(500, e);
-//	}
-//
-//    }
-    
     public String lobidify(Node node, String alephid) {
-   	String pid = node.getPid();
-   	String lobidUri = "http://lobid.org/resource/" + alephid;
-   	String newFashionlobidUri = "http://lobid.org/resources/" + alephid;
-   	 Logger.info(lobidUri);
-   	
-   	try {
-   	    URL lobidUrl = new URL("http://gaia.hbz-nrw.de:9200/resources/_all/" + alephid+"/_source");
-   	    RDFFormat inFormat = RDFFormat.JSONLD;
-   	    String accept = "application/json";
-   	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat,
-   		    RDFFormat.NTRIPLES, accept);
-   	    
-   	   
-   	    
-//   	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
-//   		str = RdfUtils.followSameAsAndInclude(new URL(lobidUri+"/about"), pid, RDFFormat.TURTLE,
-//   			"text/turtle");
-//   	    }
-   	    str = Pattern.compile(newFashionlobidUri).matcher(str)
-   		    .replaceAll(Matcher.quoteReplacement(pid))
-   		    + "<"
-   		    + pid
-   		    + "> <"
-   		    + archive.fedora.Vocabulary.REL_MAB_527
-   		    + "> <" + lobidUri + "> .";
-   	    
-   	 Logger.info(str);
-   	 
-   	    return updateMetadata(node, str);
-   	} catch (MalformedURLException e) {
-   	    throw new HttpArchiveException(500, e);
-   	} catch (Exception e) {
-   	    throw new HttpArchiveException(500, e);
-   	}
+	String pid = node.getPid();
+	String lobidUri = "http://lobid.org/resource/" + alephid;
+	try {
+	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
+	    RDFFormat inFormat = RDFFormat.TURTLE;
+	    String accept = "text/turtle";
+	    String str = RdfUtils.readRdfToString(lobidUrl, inFormat, RDFFormat.NTRIPLES, accept);
+	    if (str.contains("http://www.w3.org/2002/07/owl#sameAs")) {
+		str = RdfUtils.followSameAsAndInclude(lobidUrl, pid, inFormat, accept);
+	    }
+	    str = Pattern.compile(lobidUri).matcher(str).replaceAll(Matcher.quoteReplacement(pid)) + "<" + pid + "> <"
+		    + archive.fedora.Vocabulary.REL_MAB_527 + "> <" + lobidUri + "> ." + "\n<" + pid
+		    + "> <http://purl.org/lobid/lv#contributorOrder> \"" + getAuthorOrdering(alephid) + "\" .\n";
+	    return updateMetadata(node, str);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
 
-       }
+    }
+
+    public String getAuthorOrdering(String alephid) {
+	try {
+	    URL lobidUrl = new URL("http://gaia.hbz-nrw.de:9200/resources/_all/" + alephid + "/_source");
+	    RDFFormat inFormat = RDFFormat.JSONLD;
+	    String accept = "application/json";
+	    Graph myGraph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+	    Iterator<Statement> statements = myGraph.iterator();
+	    while (statements.hasNext()) {
+		Statement curStatement = statements.next();
+		String pred = curStatement.getPredicate().stringValue();
+		String obj = curStatement.getObject().stringValue();
+		if ("http://purl.org/lobid/lv#contributorOrder".equals(pred)) {
+		    return obj;
+		}
+	    }
+	    return "";
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+
+    }
 }
