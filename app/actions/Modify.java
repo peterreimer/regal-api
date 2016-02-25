@@ -179,6 +179,20 @@ public class Modify extends RegalAction {
      * @return a short message
      */
     public String updateMetadata(Node node, String content) {
+	    String pid = node.getPid();
+	    if (content == null) {
+		throw new HttpArchiveException(406, pid + " You've tried to upload an empty string."
+			+ " This action is not supported." + " Use HTTP DELETE instead.\n");
+	    }
+	    if(content.contains(archive.fedora.Vocabulary.REL_MAB_527)){
+		String lobidUri=	RdfUtils.findRdfObjects(node.getPid(), archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES).get(0);
+		String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+		content=getLobidDataAsNtripleString(node,alephid);
+	    }
+	    return forceUpdateMetadata(node,content);
+    }
+    
+    private String forceUpdateMetadata(Node node, String content) {
 	try {
 	    String pid = node.getPid();
 	    if (content == null) {
@@ -186,10 +200,8 @@ public class Modify extends RegalAction {
 			+ " This action is not supported." + " Use HTTP DELETE instead.\n");
 	    }
 	    RdfUtils.validate(content);
-
 	    File file = CopyUtils.copyStringToFile(content);
 	    node.setMetadataFile(file.getAbsolutePath());
-
 	    if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
 		List<String> dois = RdfUtils.findRdfObjects(node.getPid(), archive.fedora.Vocabulary.REL_LOBID_DOI,
 			content, RDFFormat.NTRIPLES);
@@ -197,7 +209,6 @@ public class Modify extends RegalAction {
 		    node.setDoi(dois.get(0));
 		}
 	    }
-
 	    node.setMetadata(content);
 	    OaiDispatcher.makeOAISet(node);
 	    reindexNodeAndParent(node);
@@ -207,6 +218,29 @@ public class Modify extends RegalAction {
 	} catch (IOException e) {
 	    throw new UpdateNodeException(e);
 	}
+    }
+
+  
+
+    private String getLobidDataAsNtripleString(Node node, String alephid) {
+	String pid = node.getPid();
+	String lobidUri = "http://lobid.org/resource/" + alephid;
+	play.Logger.info("Get lobid data for "+pid+" from "+lobidUri);
+	try {
+	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
+	    RDFFormat inFormat = RDFFormat.TURTLE;
+	    String accept = "text/turtle";
+	    Graph graph = RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+	    ValueFactory f=RdfUtils.valueFactory;
+	    Statement parallelEditionStatement=f.createStatement(f.createURI(pid), f.createURI(archive.fedora.Vocabulary.REL_MAB_527), f.createURI(lobidUri));
+	    graph.add(parallelEditionStatement);
+	    Statement contributorOrderStatement=f.createStatement(f.createURI(pid), f.createURI("http://purl.org/lobid/lv#contributorOrder"), f.createLiteral(getAuthorOrdering(alephid)));
+	    graph.add(contributorOrderStatement);	
+	    return RdfUtils.graphToString(RdfUtils.rewriteSubject(lobidUri,pid,graph), RDFFormat.NTRIPLES);
+	} catch (Exception e) {
+	    throw new HttpArchiveException(500, e);
+	}
+
     }
 
     private void reindexNodeAndParent(Node node) {
@@ -726,23 +760,7 @@ public class Modify extends RegalAction {
     }
 
     public String lobidify(Node node, String alephid) {
-	String pid = node.getPid();
-	String lobidUri = "http://lobid.org/resource/" + alephid;
-	try {
-	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
-	    RDFFormat inFormat = RDFFormat.TURTLE;
-	    String accept = "text/turtle";
-	    Graph graph = RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
-	    ValueFactory f=RdfUtils.valueFactory;
-	    Statement parallelEditionStatement=f.createStatement(f.createURI(pid), f.createURI(archive.fedora.Vocabulary.REL_MAB_527), f.createURI(lobidUri));
-	    graph.add(parallelEditionStatement);
-	    Statement contributorOrderStatement=f.createStatement(f.createURI(pid), f.createURI("http://purl.org/lobid/lv#contributorOrder"), f.createLiteral(getAuthorOrdering(alephid)));
-	    graph.add(contributorOrderStatement);	 
-	    return updateMetadata(node, RdfUtils.graphToString(RdfUtils.rewriteSubject(lobidUri,pid,graph), RDFFormat.NTRIPLES));
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	}
-
+	return forceUpdateMetadata(node,getLobidDataAsNtripleString(node, alephid)); 
     }
 
     public String getAuthorOrdering(String alephid) {

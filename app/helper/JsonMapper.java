@@ -377,8 +377,7 @@ public class JsonMapper {
 	if (!authorsId.startsWith("http")) {
 	    Map<String, Object> creatorWithoutId = new HashMap<String, Object>();
 	    creatorWithoutId.put("prefLabel", authorsId);
-	    creatorWithoutId.put("@id", "https://de.wikipedia.org/w/index.php?search=" + urlEncode(authorsId)
-		    + "&title=Spezial%3ASuche&go=Artikel");
+	    creatorWithoutId.put("@id",Globals.protocol+":"+ Globals.server+"/author/"+urlEncode(authorsId));
 	    return creatorWithoutId;
 	}
 	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");

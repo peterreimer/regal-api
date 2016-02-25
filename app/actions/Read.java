@@ -782,7 +782,7 @@ public class Read extends RegalAction {
 	}
 	return alephid;
     }
-
+  
     String getIdOfParallelEdition(Node node) {
 	String alephid;
 	alephid = new Read().readMetadata(node, "parallelEdition");
