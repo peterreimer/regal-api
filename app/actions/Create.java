@@ -280,7 +280,7 @@ public class Create extends RegalAction {
 	    Node webpageVersion = createResource(n.getNamespace(), regalObject);
 	    String label = new SimpleDateFormat("yyyy-MM-dd")
 		    .format(new Date());
-	    new Modify().updateMetadata(webpageVersion,
+	    new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 		    "<" + webpageVersion.getPid()
 			    + "> <http://purl.org/dc/terms/title> \"" + label
 			    + "\" .");

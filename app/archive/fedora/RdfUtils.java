@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -161,8 +162,9 @@ public class RdfUtils {
 	try (InputStream in = urlToInputStream(url, accept)) {
 	    graph = readRdfToGraph(in, inf, url.toString());
 	    String sameAsTarget =getSameAsTarget(graph);
-	    play.Logger.info("Include data from "+sameAsTarget);
+	    play.Logger.info("GET "+sameAsTarget);
 	    if (sameAsTarget!=null && sameAsTarget.contains("lobid")) {
+		play.Logger.info("GET "+sameAsTarget);
 		graph.addAll(readRdfToGraph(new URL(sameAsTarget),inf,accept));
 	    }
 	}
@@ -182,11 +184,13 @@ public class RdfUtils {
 	return null;
     }
 
-    private static InputStream urlToInputStream(URL url, String accept) {
+    public static InputStream urlToInputStream(URL url, String accept) {
 	HttpURLConnection con = null;
 	InputStream inputStream = null;
 	try {
 	    con = (HttpURLConnection) url.openConnection();
+	    con.setConnectTimeout(15000);
+	    con.setReadTimeout(15000);
 	    con.setRequestProperty("Accept", accept);
 	    con.connect();
 	    inputStream = con.getInputStream();
@@ -201,6 +205,8 @@ public class RdfUtils {
 	InputStream inputStream = null;
 	try {
 	    con = (HttpURLConnection) url.openConnection();
+	    con.setConnectTimeout(15000);
+	    con.setReadTimeout(15000);
 	    con.setRequestProperty("Accept", accept);
 	    con.connect();
 	    int responseCode = con.getResponseCode();
@@ -214,7 +220,10 @@ public class RdfUtils {
 	    }
 	    inputStream = con.getInputStream();
 	    return inputStream;
-	} catch (IOException e) {
+	}catch(SocketTimeoutException e){
+	    play.Logger.warn("Timeout on "+url);
+	    throw new UrlConnectionException(e);
+	}catch (IOException e) {
 	    throw new UrlConnectionException(e);
 	}
 
@@ -394,14 +403,12 @@ public class RdfUtils {
     }
 
     private static List<String> findRdfObjects(String subject, String predicate, RepositoryConnection con) {
-
 	List<String> list = new Vector<String>();
 	TupleQueryResult result = null;
 	try {
 	    String queryString = "SELECT  x, y FROM {x} <" + predicate + "> {y}";
 	    TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SERQL, queryString);
 	    result = tupleQuery.evaluate();
-
 	    while (result.hasNext()) {
 		BindingSet bindingSet = result.next();
 		Value valueOfY = bindingSet.getValue("y");

@@ -336,8 +336,12 @@ public class Resource extends MyController {
 	    @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
     public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
-	    String result = modify.updateMetadata(pid, request().body().asText());
+	    try {
+	    String result = modify.updateLobidifyAndEnrichMetadata(pid, request().body().asText());
 	    return JsonMessage(new Message(result));
+	    } catch (Exception e) {
+		throw new HttpArchiveException(500, e);
+	    }
 	});
     }
 

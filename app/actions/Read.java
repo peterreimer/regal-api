@@ -452,7 +452,7 @@ public class Read extends RegalAction {
 	    } else {
 		String pred = Globals.profile.getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(node.getPid(), pred, metadata, RDFFormat.NTRIPLES);
-		return value.isEmpty() ? null : value.get(0);
+		return value == null || value.isEmpty() ? null : value.get(0);
 	    }
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
@@ -762,7 +762,7 @@ public class Read extends RegalAction {
 	    return getFinalURL(redirectUrl);
 	}
 	return url;
-    }   
+    }
 
     String findAlephid(Node node) {
 	String pid = node.getPid();
@@ -782,11 +782,11 @@ public class Read extends RegalAction {
 	}
 	return alephid;
     }
-  
+
     String getIdOfParallelEdition(Node node) {
-	String alephid;
-	alephid = new Read().readMetadata(node, "parallelEdition");
-	alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
-	return alephid;
+	    String alephid;
+	    alephid = new Read().readMetadata(node, "parallelEdition");
+	    alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
+	    return alephid;
     }
 }

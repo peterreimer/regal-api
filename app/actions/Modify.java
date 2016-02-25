@@ -162,10 +162,10 @@ public class Modify extends RegalAction {
      *            The metadata as rdf string
      * @return a short message
      */
-    public String updateMetadata(String pid, String content) {
+    public String updateLobidifyAndEnrichMetadata(String pid, String content) {
 	try {
 	    Node node = new Read().readNode(pid);
-	    return updateMetadata(node, content);
+	    return updateLobidifyAndEnrichMetadata(node, content);
 	} catch (Exception e) {
 	    throw new UpdateNodeException(e);
 	}
@@ -178,21 +178,29 @@ public class Modify extends RegalAction {
      *            The metadata as rdf string
      * @return a short message
      */
-    public String updateMetadata(Node node, String content) {
-	    String pid = node.getPid();
-	    if (content == null) {
-		throw new HttpArchiveException(406, pid + " You've tried to upload an empty string."
-			+ " This action is not supported." + " Use HTTP DELETE instead.\n");
-	    }
-	    if(content.contains(archive.fedora.Vocabulary.REL_MAB_527)){
-		String lobidUri=	RdfUtils.findRdfObjects(node.getPid(), archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES).get(0);
-		String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
-		content=getLobidDataAsNtripleString(node,alephid);
-	    }
-	    return forceUpdateMetadata(node,content);
+    public String updateLobidifyAndEnrichMetadata(Node node, String content) {
+
+	String pid = node.getPid();
+	if (content == null) {
+	    throw new HttpArchiveException(406, pid + " You've tried to upload an empty string."
+		    + " This action is not supported." + " Use HTTP DELETE instead.\n");
+	}
+	if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+	    String lobidUri = RdfUtils
+		    .findRdfObjects(node.getPid(), archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
+		    .get(0);
+	    String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+	    content = getLobidDataAsNtripleString(node, alephid);
+	    updateMetadata(node, content);
+	    enrichMetadata(node);
+	    return pid + " metadata successfully updated, lobidified and enriched!";
+	} else {
+	    updateMetadata(node, content);
+	    return pid + " metadata successfully updated!";
+	}
     }
-    
-    private String forceUpdateMetadata(Node node, String content) {
+
+    private String updateMetadata(Node node, String content) {
 	try {
 	    String pid = node.getPid();
 	    if (content == null) {
@@ -220,23 +228,24 @@ public class Modify extends RegalAction {
 	}
     }
 
-  
-
     private String getLobidDataAsNtripleString(Node node, String alephid) {
 	String pid = node.getPid();
 	String lobidUri = "http://lobid.org/resource/" + alephid;
-	play.Logger.info("Get lobid data for "+pid+" from "+lobidUri);
+	play.Logger.info("GET " + lobidUri);
 	try {
 	    URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
 	    RDFFormat inFormat = RDFFormat.TURTLE;
 	    String accept = "text/turtle";
 	    Graph graph = RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
-	    ValueFactory f=RdfUtils.valueFactory;
-	    Statement parallelEditionStatement=f.createStatement(f.createURI(pid), f.createURI(archive.fedora.Vocabulary.REL_MAB_527), f.createURI(lobidUri));
+	    ValueFactory f = RdfUtils.valueFactory;
+	    Statement parallelEditionStatement = f.createStatement(f.createURI(pid),
+		    f.createURI(archive.fedora.Vocabulary.REL_MAB_527), f.createURI(lobidUri));
 	    graph.add(parallelEditionStatement);
-	    Statement contributorOrderStatement=f.createStatement(f.createURI(pid), f.createURI("http://purl.org/lobid/lv#contributorOrder"), f.createLiteral(getAuthorOrdering(alephid)));
-	    graph.add(contributorOrderStatement);	
-	    return RdfUtils.graphToString(RdfUtils.rewriteSubject(lobidUri,pid,graph), RDFFormat.NTRIPLES);
+	    Statement contributorOrderStatement = f.createStatement(f.createURI(pid),
+		    f.createURI("http://purl.org/lobid/lv#contributorOrder"),
+		    f.createLiteral(getAuthorOrdering(alephid)));
+	    graph.add(contributorOrderStatement);
+	    return RdfUtils.graphToString(RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
@@ -433,7 +442,6 @@ public class Modify extends RegalAction {
 	RegalObject object = new RegalObject();
 	object.setParentPid(destinyPid);
 	node = new Create().patchResource(node, object);
-
 	play.Logger.info("Move " + node.getPid() + " to new parent " + node.getParentPid() + ". Recent Parent was "
 		+ recentParent + ". Calculated destiny was " + destinyPid);
 	return node;
@@ -466,22 +474,26 @@ public class Modify extends RegalAction {
 	} else {
 	    throw new HttpArchiveException(406, "Source object " + copySource + " has no field: " + field);
 	}
-	updateMetadata(node, metadata);
+	updateLobidifyAndEnrichMetadata(node, metadata);
 	return node;
     }
 
     public Node enrichMetadata(Node node) {
+
+	play.Logger.info("Enrich " + node.getPid());
 	String metadata = node.getMetadata();
 	if (metadata == null || metadata.isEmpty()) {
+	    play.Logger.info("Not metadata to enrich " + node.getPid());
 	    return node;
 	}
+	play.Logger.info("Enrich " + node.getPid() + " with gnd.");
 	List<String> gndIds = findAllGndIds(metadata);
-
 	List<Statement> enrichStatements = new ArrayList<Statement>();
 	for (String uri : gndIds) {
-	    play.Logger.debug("Add data from " + uri);
 	    enrichStatements.addAll(getStatements(uri));
 	}
+
+	play.Logger.info("Enrich " + node.getPid() + " with institution.");
 	List<Statement> institutions = findInstitution(node);
 	enrichStatements.addAll(institutions);
 	metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
@@ -490,36 +502,42 @@ public class Modify extends RegalAction {
     }
 
     private List<Statement> findInstitution(Node node) {
-	String alephid = new Read().getIdOfParallelEdition(node);
-	try (InputStream in = new URL(Globals.lobidAddress + alephid + "/about?format=source").openStream()) {
-	    String gndEndpoint = "http://d-nb.info/gnd/";
-	    List<Element> institutionHack = XmlUtils
-		    .getElements("//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield", in, null);
-	    List<Statement> result = new ArrayList<Statement>();
-	    for (Element el : institutionHack) {
-		String marker = el.getTextContent();
-		if (!marker.contains("ellinet"))
-		    continue;
-		if (!marker.contains("GND"))
-		    continue;
-		String gndId = gndEndpoint + marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)", "");
-		if (gndId.endsWith("16269969-4")) {
-		    gndId = gndEndpoint + "2006655-7";
+	try {
+	    String alephid = new Read().getIdOfParallelEdition(node);
+	    String uri = Globals.lobidAddress + alephid + "/about?format=source";
+	    play.Logger.info("GET " + uri);
+	    try (InputStream in = RdfUtils.urlToInputStream(new URL(uri), "application/xml")) {
+		String gndEndpoint = "http://d-nb.info/gnd/";
+		List<Element> institutionHack = XmlUtils
+			.getElements("//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield", in, null);
+		List<Statement> result = new ArrayList<Statement>();
+		for (Element el : institutionHack) {
+		    String marker = el.getTextContent();
+		    if (!marker.contains("ellinet"))
+			continue;
+		    if (!marker.contains("GND"))
+			continue;
+		    String gndId = gndEndpoint + marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)", "");
+		    if (gndId.endsWith("16269969-4")) {
+			gndId = gndEndpoint + "2006655-7";
+		    }
+		    play.Logger.debug("Add data from " + gndId);
+		    ValueFactory v = new ValueFactoryImpl();
+		    Statement link = v.createStatement(v.createURI(node.getPid()),
+			    v.createURI("http://dbpedia.org/ontology/institution"), v.createURI(gndId));
+		    result.add(link);
+		    result.addAll(getStatements(gndId));
 		}
-		play.Logger.debug("Add data from " + gndId);
-		ValueFactory v = new ValueFactoryImpl();
-		Statement link = v.createStatement(v.createURI(node.getPid()),
-			v.createURI("http://dbpedia.org/ontology/institution"), v.createURI(gndId));
-		result.add(link);
-		result.addAll(getStatements(gndId));
+		return result;
 	    }
-	    return result;
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    throw new HttpArchiveException(500, e);
 	}
     }
 
     private List<Statement> getStatements(String uri) {
+	play.Logger.info("GET " + uri);
 	List<Statement> filteredStatements = new ArrayList<Statement>();
 	try {
 	    for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about/lds"), RDFFormat.RDFXML,
@@ -535,14 +553,14 @@ public class Modify extends RegalAction {
 		}
 	    }
 	} catch (Exception e) {
-	    play.Logger.warn("Not able to include data from" + uri);
+	    play.Logger.warn("Not able to get data from" + uri);
 	}
 	return filteredStatements;
     }
 
     private List<String> findAllGndIds(String metadata) {
 	HashMap<String, String> result = new HashMap<String, String>();
-	Matcher m = Pattern.compile("http://d-nb.info/gnd/[^>]*").matcher(metadata);
+	Matcher m = Pattern.compile("http://d-nb.info/gnd/[1234567890-]*").matcher(metadata);
 	while (m.find()) {
 	    String id = m.group();
 	    result.put(id, id);
@@ -721,7 +739,7 @@ public class Modify extends RegalAction {
     public String addMetadataField(Node node, String pred, String obj) {
 	String metadata = node.getMetadata();
 	metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata, RDFFormat.NTRIPLES);
-	updateMetadata(node, metadata);
+	updateLobidifyAndEnrichMetadata(node, metadata);
 	node = new Read().readNode(node.getPid());
 	OaiDispatcher.makeOAISet(node);
 	return "Update " + node.getPid() + "! " + pred + " has been added.";
@@ -760,7 +778,7 @@ public class Modify extends RegalAction {
     }
 
     public String lobidify(Node node, String alephid) {
-	return forceUpdateMetadata(node,getLobidDataAsNtripleString(node, alephid)); 
+	return updateMetadata(node, getLobidDataAsNtripleString(node, alephid));
     }
 
     public String getAuthorOrdering(String alephid) {
