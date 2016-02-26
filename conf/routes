@@ -86,6 +86,7 @@ POST /resource/:pid/oaisets			controllers.Resource.updateOaiSets(pid)
 GET  /api-docs   @pl.matisoft.swagger.ApiHelpController.getResources
 GET /api-docs/utils 				@pl.matisoft.swagger.ApiHelpController.getResource(path = "/utils")
 GET /api-docs/resource 		@pl.matisoft.swagger.ApiHelpController.getResource(path = "/resource")
+GET /api-docs/authors 		@pl.matisoft.swagger.ApiHelpController.getResource(path = "/authors")
 
 #OPTIONS to support hosting UI off domain
 #OPTIONS /*wholepath controllers.Resource.getOptions(wholepath)
@@ -109,4 +110,6 @@ POST /resource/:pid/index			controllers.MyUtils.index(pid,index?="")
 DELETE /resource/:pid/removeFromIndex controllers.MyUtils.removeFromIndex(pid)
 POST /resource/:pid/metadata/lobidify	controllers.MyUtils.lobidify(pid,alephid?="")
 POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pid)
+
+GET /authors/:authorname controllers.AuthorsController.getAuthorsRdf(authorname)
 

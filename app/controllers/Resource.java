@@ -49,6 +49,11 @@ import models.RegalObject;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.openrdf.model.Graph;
+import org.openrdf.model.Literal;
+import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.TreeModel;
 import org.openrdf.rio.RDFFormat;
 
 import play.libs.F.Function0;
@@ -170,13 +175,13 @@ public class Resource extends MyController {
     @ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
     public static Promise<Result> listResource(@PathParam("pid") String pid) {
 	response().setHeader("Access-Control-Allow-Origin", "*");
-	
-	    if (request().accepts("text/html"))
-		return asHtml(pid);
-	    if (request().accepts("application/rdf+xml"))
-		return asRdf(pid);
-	    if (request().accepts("text/plain"))
-		return asRdf(pid);
+
+	if (request().accepts("text/html"))
+	    return asHtml(pid);
+	if (request().accepts("application/rdf+xml"))
+	    return asRdf(pid);
+	if (request().accepts("text/plain"))
+	    return asRdf(pid);
 	return asJson(pid);
     }
 
@@ -337,8 +342,8 @@ public class Resource extends MyController {
     public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, node -> {
 	    try {
-	    String result = modify.updateLobidifyAndEnrichMetadata(pid, request().body().asText());
-	    return JsonMessage(new Message(result));
+		String result = modify.updateLobidifyAndEnrichMetadata(pid, request().body().asText());
+		return JsonMessage(new Message(result));
 	    } catch (Exception e) {
 		throw new HttpArchiveException(500, e);
 	    }
@@ -913,4 +918,7 @@ public class Resource extends MyController {
 	    return JsonMessage(new Message(json(result)));
 	});
     }
+
+    
+
 }

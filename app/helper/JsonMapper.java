@@ -254,10 +254,10 @@ public class JsonMapper {
 
     private void sortCreatorAndContributors(Map<String, Object> rdf) {
 	List<Map<String, Object>> cr = getSortedListOfCreators(rdf);
-	if (!cr.isEmpty()){
+	if (!cr.isEmpty()) {
 	    rdf.put("creator", cr);
-	 rdf.remove("creatorName");
-	 rdf.remove("contributorName");
+	    rdf.remove("creatorName");
+	    rdf.remove("contributorName");
 	}
 	List<Map<String, Object>> co = getSortedListOfContributors(rdf);
 	if (!co.isEmpty())
@@ -377,7 +377,7 @@ public class JsonMapper {
 	if (!authorsId.startsWith("http")) {
 	    Map<String, Object> creatorWithoutId = new HashMap<String, Object>();
 	    creatorWithoutId.put("prefLabel", authorsId);
-	    creatorWithoutId.put("@id",Globals.protocol+":"+ Globals.server+"/author/"+urlEncode(authorsId));
+	    creatorWithoutId.put("@id", Globals.protocol + Globals.server + "/authors/" + urlEncode(authorsId));
 	    return creatorWithoutId;
 	}
 	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");

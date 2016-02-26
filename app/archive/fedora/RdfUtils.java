@@ -24,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,6 +70,8 @@ import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import helper.HttpArchiveException;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -697,6 +701,21 @@ public class RdfUtils {
 	    }
 	}
 	return result;
+    }
+
+    public String urlEncode(String str) {
+   	try {
+   	    return URLEncoder.encode(str, "UTF-8");
+   	} catch (Exception e) {
+   	    throw new HttpArchiveException(500, e);
+   	}
+       }
+    public static String urlDecode(String str) {
+	try {
+   	    return URLDecoder.decode(str, "UTF-8");
+   	} catch (Exception e) {
+   	    throw new HttpArchiveException(500, e);
+   	}
     }
 
 }
