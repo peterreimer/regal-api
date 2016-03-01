@@ -30,6 +30,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import akka.util.Collections;
+import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -377,7 +378,7 @@ public class JsonMapper {
 	if (!authorsId.startsWith("http")) {
 	    Map<String, Object> creatorWithoutId = new HashMap<String, Object>();
 	    creatorWithoutId.put("prefLabel", authorsId);
-	    creatorWithoutId.put("@id", Globals.protocol + Globals.server + "/authors/" + urlEncode(authorsId));
+	    creatorWithoutId.put("@id", Globals.protocol + Globals.server + "/authors/" + RdfUtils.urlEncode(authorsId).replace("+", "%20"));
 	    return creatorWithoutId;
 	}
 	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");
@@ -391,15 +392,6 @@ public class JsonMapper {
 	}
 	return new HashMap<String, Object>();
     }
-
-    private String urlEncode(String str) {
-	try {
-	    return URLEncoder.encode(str, "UTF-8");
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	}
-    }
-
     private Map<String, Object> findContributor(Map<String, Object> m, String authorsId) {
 	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
 	if (contributors != null) {

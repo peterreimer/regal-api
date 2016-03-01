@@ -34,14 +34,22 @@ public class Title {
 
     public static String getAuthorNames(Map<String, Object> hit) {
 	List<Map<String, Object>> authorList = (List<Map<String, Object>>) hit.get("creator");
-	if (authorList == null || authorList.isEmpty())
-	    return "";
+	if (authorList == null || authorList.isEmpty()){
+	     authorList = getContributorList(hit);
+	    if(authorList == null || authorList.isEmpty()){
+		return "";
+	    }
+	}
 	List<String> authorNames = new ArrayList<String>();
 	for (Map<String, Object> author : authorList) {
 	    String authorName = (String) author.get("prefLabel");
 	    authorNames.add(authorName);
 	}
 	return authorNames != null && !authorNames.isEmpty() ? String.join(" | ", authorNames) + " . " : "";
+    }
+
+    private static List<Map<String, Object>> getContributorList(Map<String, Object> hit) {
+	return (List<Map<String, Object>>) hit.get("contributor");
     }
 
     public static String getIssued(Map<String, Object> hit) {

@@ -703,9 +703,9 @@ public class RdfUtils {
 	return result;
     }
 
-    public String urlEncode(String str) {
+    public static String urlEncode(String str) {
    	try {
-   	    return URLEncoder.encode(str, "UTF-8");
+   	    return URLEncoder.encode(str, "UTF-8").replace("+", "%20");
    	} catch (Exception e) {
    	    throw new HttpArchiveException(500, e);
    	}

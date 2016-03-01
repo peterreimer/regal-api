@@ -401,8 +401,7 @@ public class Modify extends RegalAction {
      * @return a short message
      */
     public String lobidify(Node node) {
-	String alephid = new Read().findAlephid(node);
-	return lobidify(node, alephid);
+	return updateLobidifyAndEnrichMetadata(node, node.getMetadata());
     }
 
     /**

@@ -25,7 +25,7 @@ public class AuthorsController extends MyController {
 	response().setHeader("Access-Control-Allow-Origin", "*");
 	Graph g = new TreeModel();
 	ValueFactory f = RdfUtils.valueFactory;
-	URI subj = f.createURI(Globals.protocol + Globals.server + "/authors/" + authorname);
+	URI subj = f.createURI(Globals.protocol + Globals.server + "/authors/" + RdfUtils.urlEncode(authorname));
 	URI pred = f.createURI("http://www.w3.org/2004/02/skos/core#prefLabel");
 	Literal obj = f.createLiteral(RdfUtils.urlDecode(authorname));
 	g.add(f.createStatement(subj, pred, obj));
