@@ -17,30 +17,19 @@
 package helper;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStore;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
 import models.Gatherconf;
-import models.Globals;
 import play.Play;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.HTTPDigestAuthFilter;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 /**
  * @author Jan Schnasse
@@ -50,67 +39,13 @@ public class Heritrix {
     public static String openwaybackLink = Play.application().configuration()
 	    .getString("regal-api.heritrix.openwaybackLink");
 
-    class HeritrixWebclient {
-	public Client createWebclient() {
-	    String keystoreLoc = Globals.keystoreLocation;
-	    String keystorePass = Globals.keystorePassword;
-	    if (keystoreLoc == null || keystorePass == null
-		    || keystoreLoc.isEmpty() || keystorePass.isEmpty()) {
-		play.Logger
-			.error("Keystore is not configured. Set regal-api.keystoreLocation and regal-api.keystorePassword in application.conf");
-		return null;
-	    }
-	    String heritrixUser = Play.application().configuration()
-		    .getString("regal-api.heritrix.user");
-	    String heritrixPwd = Play.application().configuration()
-		    .getString("regal-api.heritrix.pwd");
-
-	    Client webclient = null;
-	    ClientConfig cc = new DefaultClientConfig();
-	    // cc.getProperties()
-	    // .put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, true);
-	    cc.getFeatures().put(ClientConfig.FEATURE_DISABLE_XML_SECURITY,
-		    true);
-	    cc.getProperties().put(
-		    HTTPSProperties.PROPERTY_HTTPS_PROPERTIES,
-		    new HTTPSProperties(null, initSsl(cc, keystoreLoc,
-			    keystorePass)));
-	    webclient = Client.create(cc);
-	    webclient.addFilter(new HTTPDigestAuthFilter(heritrixUser,
-		    heritrixPwd));
-	    // 10min
-	    webclient.setConnectTimeout(1000 * 60 * 10);
-	    // 10sec
-	    webclient.setReadTimeout(1000 * 10);
-	    return webclient;
-	}
-
-	private SSLContext initSsl(ClientConfig cc, String keystorelocation,
-		String keystorepasswd) {
-	    try (InputStream keystoreInput = new FileInputStream(
-		    keystorelocation)) {
-		SSLContext ctx = SSLContext.getInstance("SSL");
-		KeyStore trustStore;
-		trustStore = KeyStore.getInstance("JKS");
-		trustStore.load(keystoreInput, keystorepasswd.toCharArray());
-		TrustManagerFactory tmf = TrustManagerFactory
-			.getInstance("SunX509");
-		tmf.init(trustStore);
-		ctx.init(null, tmf.getTrustManagers(), null);
-		return ctx;
-	    } catch (Exception e) {
-		throw new RuntimeException("Can not initiate SSL connection", e);
-	    }
-	}
-    }
-
     final String restUrl = Play.application().configuration()
 	    .getString("regal-api.heritrix.rest");
 
     final String jobDir = Play.application().configuration()
 	    .getString("regal-api.heritrix.jobDir");
 
-    final Client client = new HeritrixWebclient().createWebclient();
+    final static Client client =  HeritrixWebclient.createWebclient();
 
     /**
      * @param name
@@ -367,10 +302,12 @@ public class Heritrix {
 
     public boolean isBusy() {
 	try {
+	    
 	    WebResource resource = client.resource(restUrl + "/engine/");
 	    resource.get(String.class);
 	    return false;
 	} catch (Exception e) {
+	    play.Logger.debug("",e);
 	    return true;
 	}
     }
