@@ -227,7 +227,7 @@ public class MyUtils extends MyController {
 				conf.toString());
 			String ht = conf.getName();
 			if ("null".equals(ht) || ht == null || ht.isEmpty()) {
-			    new actions.Modify().updateMetadata(
+			    new actions.Modify().updateLobidifyAndEnrichMetadata(
 				    webpage,
 				    "<"
 					    + webpage.getPid()

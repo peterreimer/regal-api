@@ -44,6 +44,7 @@ import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.Node;
+import models.Pair;
 import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
@@ -76,8 +77,7 @@ public class Read extends RegalAction {
     public Node readNode(String pid) {
 	Node n = internalReadNode(pid);
 	if ("D".equals(n.getState())) {
-	    throw new HttpArchiveException(410, "The requested resource " + pid
-		    + " has been marked as deleted.");
+	    throw new HttpArchiveException(410, "The requested resource " + pid + " has been marked as deleted.");
 	}
 	addLabelsForParts(n);
 	writeNodeToCache(n);
@@ -162,8 +162,7 @@ public class Read extends RegalAction {
 	n.setAggregationUri(createAggregationUri(n.getPid()));
 	n.setRemUri(n.getAggregationUri() + ".rdf");
 	n.setDataUri(n.getAggregationUri() + "/data");
-	n.setContextDocumentUri("http://" + Globals.server
-		+ "/public/edoweb-resources.json");
+	n.setContextDocumentUri("http://" + Globals.server + "/public/edoweb-resources.json");
 	writeNodeToCache(n);
 	return n;
     }
@@ -171,8 +170,7 @@ public class Read extends RegalAction {
     void addLabelsForParts(Node n) {
 	List<Link> rels = n.getRelsExt();
 	for (Link l : rels) {
-	    if (HAS_PART.equals(l.getPredicate())
-		    || IS_PART_OF.equals(l.getPredicate())) {
+	    if (HAS_PART.equals(l.getPredicate()) || IS_PART_OF.equals(l.getPredicate())) {
 		addLabel(n, l);
 	    }
 	}
@@ -205,8 +203,8 @@ public class Read extends RegalAction {
     public List<Node> getParts(Node node) {
 	List<Node> result = new ArrayList<Node>();
 	result.add(node);
-	List<Node> parts = getNodes(node.getPartsSorted().stream()
-		.map((Link l) -> l.getObject()).collect(Collectors.toList()));
+	List<Node> parts = getNodes(
+		node.getPartsSorted().stream().map((Link l) -> l.getObject()).collect(Collectors.toList()));
 	for (Node p : parts) {
 	    result.addAll(getParts(p));
 	}
@@ -229,8 +227,7 @@ public class Read extends RegalAction {
 	    nm = new JsonMapper(node).getLdWithoutContext();
 	}
 	@SuppressWarnings("unchecked")
-	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm
-		.get("hasPart");
+	List<Map<String, Object>> parts = (List<Map<String, Object>>) nm.get("hasPart");
 	List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
 	if (parts != null) {
 	    for (Map<String, Object> part : parts) {
@@ -270,10 +267,8 @@ public class Read extends RegalAction {
      *            show only hits ending at this index
      * @return A list of pids with type {@type}
      */
-    public List<SearchHit> listSearch(String type, String namespace, int from,
-	    int until) {
-	return Arrays.asList(Globals.search.list(namespace, type, from, until)
-		.getHits());
+    public List<SearchHit> listSearch(String type, String namespace, int from, int until) {
+	return Arrays.asList(Globals.search.list(namespace, type, from, until).getHits());
     }
 
     /**
@@ -287,20 +282,15 @@ public class Read extends RegalAction {
      *            show only hits ending at this index
      * @return a list of nodes
      */
-    public List<Node> listRepo(String type, String namespace, int from,
-	    int until) {
+    public List<Node> listRepo(String type, String namespace, int from, int until) {
 	List<String> list = null;
 	if (from < 0 || until <= from) {
-	    throw new HttpArchiveException(316,
-		    "until and from not sensible. choose a valid range, please.");
-	} else if (type == null || type.isEmpty() && namespace != null
-		&& !namespace.isEmpty()) {
+	    throw new HttpArchiveException(316, "until and from not sensible. choose a valid range, please.");
+	} else if (type == null || type.isEmpty() && namespace != null && !namespace.isEmpty()) {
 	    return getNodes(listRepoNamespace(namespace, from, until));
-	} else if (namespace == null || namespace.isEmpty() && type != null
-		&& !type.isEmpty()) {
+	} else if (namespace == null || namespace.isEmpty() && type != null && !type.isEmpty()) {
 	    return getNodes(listRepoType(type, from, until));
-	} else if ((namespace == null || namespace.isEmpty())
-		&& (type == null || type.isEmpty())) {
+	} else if ((namespace == null || namespace.isEmpty()) && (type == null || type.isEmpty())) {
 	    list = listRepoAll();
 	} else {
 	    list = listRepo(type, namespace);
@@ -330,8 +320,7 @@ public class Read extends RegalAction {
      * @return a list of Maps each represents a node
      */
     public List<Map<String, Object>> getNodesFromIndex(List<String> ids) {
-	return ids.stream().map((String id) -> readNodeFromIndex(id))
-		.collect(Collectors.toList());
+	return ids.stream().map((String id) -> readNodeFromIndex(id)).collect(Collectors.toList());
     }
 
     private List<String> listRepo(String type, String namespace) {
@@ -352,8 +341,7 @@ public class Read extends RegalAction {
     private List<String> listRepoType(String type) {
 	List<String> typedList;
 	String query = "* <" + REL_CONTENT_TYPE + "> \"" + type + "\"";
-	try (InputStream in = Globals.fedora.findTriples(query,
-		FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
+	try (InputStream in = Globals.fedora.findTriples(query, FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
 	    typedList = RdfUtils.getFedoraSubject(in);
 	    return typedList;
 	} catch (IOException e) {
@@ -365,8 +353,7 @@ public class Read extends RegalAction {
     private List<String> listRepoAll() {
 	List<String> typedList;
 	String query = "* <" + REL_IS_NODE_TYPE + "> <" + TYPE_OBJECT + ">";
-	try (InputStream in = Globals.fedora.findTriples(query,
-		FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
+	try (InputStream in = Globals.fedora.findTriples(query, FedoraVocabulary.SPO, FedoraVocabulary.N3)) {
 	    typedList = RdfUtils.getFedoraSubject(in);
 	    return typedList;
 	} catch (IOException e) {
@@ -464,10 +451,8 @@ public class Read extends RegalAction {
 		return metadata;
 	    } else {
 		String pred = Globals.profile.getUriFromJsonName(field);
-		List<String> value = RdfUtils.findRdfObjects(node.getPid(),
-			pred, metadata, RDFFormat.NTRIPLES);
-
-		return value.isEmpty() ? null : value.get(0);
+		List<String> value = RdfUtils.findRdfObjects(node.getPid(), pred, metadata, RDFFormat.NTRIPLES);
+		return value == null || value.isEmpty() ? null : value.get(0);
 	    }
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
@@ -487,10 +472,8 @@ public class Read extends RegalAction {
 		return "";
 	    ObjectMapper mapper = JsonUtil.mapper();
 	    Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
-	    String owDatestamp = new SimpleDateFormat("yyyyMMdd")
-		    .format(new Date());
-	    conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink
-		    + owDatestamp + "/" + conf.getUrl());
+	    String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+	    conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
 	    return conf.toString();
 	} catch (UrlConnectionException e) {
 	    throw new HttpArchiveException(404, e);
@@ -512,14 +495,12 @@ public class Read extends RegalAction {
 	    Node node = readNode(pid);
 	    String metadata = node.getMetadata();
 	    if (metadata == null || metadata.isEmpty())
-		throw new HttpArchiveException(404, "No Metadata on " + pid
-			+ " available!");
+		throw new HttpArchiveException(404, "No Metadata on " + pid + " available!");
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
 		String pred = Globals.profile.getUriFromJsonName(field);
-		List<String> value = RdfUtils.findRdfObjects(pid, pred,
-			metadata, RDFFormat.NTRIPLES);
+		List<String> value = RdfUtils.findRdfObjects(pid, pred, metadata, RDFFormat.NTRIPLES);
 
 		return value.isEmpty() ? "No " + field : value.get(0);
 	    }
@@ -561,11 +542,12 @@ public class Read extends RegalAction {
      * @return a urn object that describes the status of the urn
      */
     public Urn getUrnStatus(Node node) {
-	return getUrnStatus(node.getUrn(),node.getPid());
+	return getUrnStatus(node.getUrn(), node.getPid());
     }
-    
-    public Urn getUrnStatus(String urn,String pid) {
-	if(urn==null)return null;
+
+    public Urn getUrnStatus(String urn, String pid) {
+	if (urn == null)
+	    return null;
 	Urn result = new Urn(urn);
 	result.init(Globals.urnbase + pid);
 	return result;
@@ -579,8 +561,8 @@ public class Read extends RegalAction {
      * @return all objects that are referenced using the predicate
      */
     public List<String> getNodeLdProperty(Node node, String predicate) {
-	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
-		predicate, node.getMetadata(), RDFFormat.NTRIPLES);
+	List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(), predicate, node.getMetadata(),
+		RDFFormat.NTRIPLES);
 	return linkedObjects;
     }
 
@@ -596,8 +578,7 @@ public class Read extends RegalAction {
 	    HttpURLConnection.setFollowRedirects(true);
 	    con.connect();
 	    Element root = XmlUtils.getDocument(con.getInputStream());
-	    List<Element> elements = XmlUtils.getElements("//setSpec", root,
-		    null);
+	    List<Element> elements = XmlUtils.getElements("//setSpec", root, null);
 	    if (elements.isEmpty())
 		return 404;
 	    return con.getResponseCode();
@@ -613,15 +594,14 @@ public class Read extends RegalAction {
 	String lobid = Globals.lobidAddress + node.getLegacyId();
 	String api = this.getHttpUriOfResource(node);
 	String urn = null;
-	if(node.getUrn()!=null){
+	if (node.getUrn() != null) {
 	    urn = Globals.urnResolverAddress + node.getUrn();
-	}else{
+	} else {
 	    urn = Globals.urnResolverAddress + node.getUrnFromMetadata();
 	}
 	String doi = "https://dx.doi.org/" + node.getDoi();
 	String frontend = Globals.urnbase + node.getPid();
-	String digitool = Globals.digitoolAddress
-		+ node.getPid().substring(node.getNamespace().length() + 1);
+	String digitool = Globals.digitoolAddress + node.getPid().substring(node.getNamespace().length() + 1);
 
 	Map<String, String> result = new HashMap<String, String>();
 	result.put("oai", oai);
@@ -653,13 +633,12 @@ public class Read extends RegalAction {
 	result.put("metadataAccess", node.getPublishScheme());
 	result.put("dataAccess", node.getAccessScheme());
 	result.put("type", node.getContentType());
-	result.put("pid",
-		node.getPid().substring(node.getNamespace().length() + 1));
+	result.put("pid", node.getPid().substring(node.getNamespace().length() + 1));
 	result.put("catalogId", node.getLegacyId());
 	result.put("webgatherer", getGatherStatus(node));
-	if(node.getUrn() != null){
+	if (node.getUrn() != null) {
 	    result.put("urn", node.getUrn());
-	}else{
+	} else {
 	    result.put("urn", node.getUrnFromMetadata());
 	}
 	return result;
@@ -683,8 +662,7 @@ public class Read extends RegalAction {
 	    // .as("text/plain");
 	    // } else
 	    if ("webpage".equals(node.getContentType())) {
-		String hertrixXmlResponse = Globals.heritrix.getJobStatus(node
-			.getPid());
+		String hertrixXmlResponse = Globals.heritrix.getJobStatus(node.getPid());
 		XmlMapper xmlMapper = new XmlMapper();
 		entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
 		entries.put("nextLaunch", Webgatherer.nextLaunch(node));
@@ -709,8 +687,8 @@ public class Read extends RegalAction {
     private int doiStatus(Node node) {
 	return doiStatus(node.getDoi());
     }
-    
-    private int doiStatus(String doi){
+
+    private int doiStatus(String doi) {
 	try {
 	    return getFinalResponseCode(Globals.doiResolverAddress + doi);
 	} catch (Exception e) {
@@ -718,13 +696,13 @@ public class Read extends RegalAction {
 	    return 500;
 	}
     }
+
     /**
      * @param nodes
      * @return status information for many nodes
      */
     public List<Map<String, Object>> getStatus(List<Node> nodes) {
-	return nodes.stream().map((Node n) -> getStatus(n))
-		.collect(Collectors.toList());
+	return nodes.stream().map((Node n) -> getStatus(n)).collect(Collectors.toList());
     }
 
     /**
@@ -742,14 +720,12 @@ public class Read extends RegalAction {
 	List<SearchHit> result = new ArrayList<SearchHit>();
 	int step = 100;
 	int start = 0;
-	SearchHits hits = Globals.search.query(new String[] { namespace },
-		query, start, step);
+	SearchHits hits = Globals.search.query(new String[] { namespace }, query, start, step);
 	long size = hits.getTotalHits();
 
 	result.addAll(Arrays.asList((hits.getHits())));
 	for (int i = 0; i < (size - (size % step)); i += step) {
-	    hits = Globals.search.query(new String[] { namespace }, query, i,
-		    step);
+	    hits = Globals.search.query(new String[] { namespace }, query, i, step);
 	    result.addAll(Arrays.asList((hits.getHits())));
 	}
 	return result;
@@ -757,36 +733,60 @@ public class Read extends RegalAction {
     }
 
     private int getFinalResponseCode(String url) throws IOException {
-	HttpURLConnection con = (HttpURLConnection) new URL(url)
-		.openConnection();
+	HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 	con.setInstanceFollowRedirects(false);
 	con.setReadTimeout(1000 * 2);
 	con.connect();
 	con.getInputStream();
 	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
-		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
-		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
+		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP || con.getResponseCode() == 307
+		|| con.getResponseCode() == 303) {
 	    String redirectUrl = con.getHeaderField("Location");
 
 	    return getFinalResponseCode(redirectUrl);
 	}
 	return con.getResponseCode();
     }
-    
-    public String getFinalURL(String url) throws IOException {
-   	HttpURLConnection con = (HttpURLConnection) new URL(url)
-   		.openConnection();
-   	con.setReadTimeout(1000 * 2);
-   	con.setInstanceFollowRedirects(false);
-   	con.connect();
-   	con.getInputStream();
-   	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
-   		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
-   		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
-   	    String redirectUrl = con.getHeaderField("Location");
 
-   	    return getFinalURL(redirectUrl);
-   	}
-   	return url;
-       }
+    public String getFinalURL(String url) throws IOException {
+	HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+	con.setReadTimeout(1000 * 2);
+	con.setInstanceFollowRedirects(false);
+	con.connect();
+	con.getInputStream();
+	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP || con.getResponseCode() == 307
+		|| con.getResponseCode() == 303) {
+	    String redirectUrl = con.getHeaderField("Location");
+
+	    return getFinalURL(redirectUrl);
+	}
+	return url;
+    }
+
+    String findAlephid(Node node) {
+	String pid = node.getPid();
+	List<Pair<String, String>> identifier = node.getDublinCoreData().getIdentifier();
+	String alephid = "";
+	for (Pair<String, String> id : identifier) {
+	    if (id.getLeft().startsWith("TT") || id.getLeft().startsWith("HT")) {
+		alephid = id.getLeft();
+		break;
+	    }
+	}
+	if (alephid.isEmpty()) {
+	    alephid = getIdOfParallelEdition(node);
+	    if (alephid == null || alephid.isEmpty()) {
+		throw new HttpArchiveException(500, pid + " no Catalog-Id found");
+	    }
+	}
+	return alephid;
+    }
+
+    String getIdOfParallelEdition(Node node) {
+	    String alephid;
+	    alephid = new Read().readMetadata(node, "parallelEdition");
+	    alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
+	    return alephid;
+    }
 }

@@ -1,17 +1,13 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 @(hits: List[Map[String,Object]],namespace: String)
 
+
 @main("") {
 
 		@for( hit <- hits){
 <div class="container">
 
-	<div class="row">
-		<div class="col-md-12">
-			<h1><a href=/resource/@hit.get("@id")>@hit.get("title")</a></h1>
-		</div>
-		
-	</div>
+@tags.getTitle(hit)
 <div class="row">
 		<div class="col-md-7"></div>
 	<div class="col-md-5">@tags.selectSourceRadios(hit.get("@id").asInstanceOf[String],"repo")</div>

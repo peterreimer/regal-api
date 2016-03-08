@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_HBZ_ID;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import akka.util.Collections;
+import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -208,6 +210,7 @@ public class JsonMapper {
 	}
 	rdf.put("@context", Globals.profile.getContext().get("@context"));
 	rdf.put(type, getType(rdf));
+	sortCreatorAndContributors(rdf);
 	return rdf;
     }
 
@@ -245,7 +248,21 @@ public class JsonMapper {
 	    rdf.put("hasData", hasDataMap);
 	}
 	rdf.put(type, getType(rdf));
+
+	sortCreatorAndContributors(rdf);
 	return rdf;
+    }
+
+    private void sortCreatorAndContributors(Map<String, Object> rdf) {
+	List<Map<String, Object>> cr = getSortedListOfCreators(rdf);
+	if (!cr.isEmpty()) {
+	    rdf.put("creator", cr);
+	    rdf.remove("creatorName");
+	    rdf.remove("contributorName");
+	}
+	List<Map<String, Object>> co = getSortedListOfContributors(rdf);
+	if (!co.isEmpty())
+	    rdf.put("contributor", co);
     }
 
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
@@ -289,7 +306,7 @@ public class JsonMapper {
 	    }
 	    rdf.put(profile.getJsonName(l.getPredicate()), list);
 	}
-	
+
     }
 
     private List<Object> getType(Map<String, Object> rdf) {
@@ -323,6 +340,69 @@ public class JsonMapper {
 		l.setObjectLabel(l.getObject());
 	    addLinkToJsonMap(rdf, l);
 	}
+    }
+
+    public List<Map<String, Object>> getSortedListOfCreators(Map<String, Object> nodeAsMap) {
+	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+	List<String> carray = (List<String>) nodeAsMap.get("contributorOrder");
+	if (carray == null || carray.isEmpty())
+	    return result;
+	for (String cstr : carray) {
+	    String[] contributorOrdered = cstr.contains("|") ? cstr.split("\\|") : new String[] { cstr };
+	    for (String s : contributorOrdered) {
+		Map<String, Object> map = findCreator(nodeAsMap, s.trim());
+		if (!map.isEmpty())
+		    result.add(map);
+	    }
+	}
+	return result;
+    }
+
+    public List<Map<String, Object>> getSortedListOfContributors(Map<String, Object> nodeAsMap) {
+	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+	List<String> carray = (List<String>) nodeAsMap.get("contributorOrder");
+	if (carray == null || carray.isEmpty())
+	    return result;
+	for (String cstr : carray) {
+	    String[] contributorOrdered = cstr.contains("|") ? cstr.split("\\|") : new String[] { cstr };
+	    for (String s : contributorOrdered) {
+		Map<String, Object> map = findContributor(nodeAsMap, s.trim());
+		if (!map.isEmpty())
+		    result.add(map);
+	    }
+	}
+	return result;
+    }
+
+    private Map<String, Object> findCreator(Map<String, Object> m, String authorsId) {
+	if (!authorsId.startsWith("http")) {
+	    Map<String, Object> creatorWithoutId = new HashMap<String, Object>();
+	    creatorWithoutId.put("prefLabel", authorsId);
+	    creatorWithoutId.put("@id", Globals.protocol + Globals.server + "/authors/" + RdfUtils.urlEncode(authorsId).replace("+", "%20"));
+	    return creatorWithoutId;
+	}
+	List<Map<String, Object>> creators = (List<Map<String, Object>>) m.get("creator");
+	if (creators != null) {
+	    for (Map<String, Object> creator : creators) {
+		String currentId = (String) creator.get("@id");
+		if (authorsId.compareTo(currentId) == 0) {
+		    return creator;
+		}
+	    }
+	}
+	return new HashMap<String, Object>();
+    }
+    private Map<String, Object> findContributor(Map<String, Object> m, String authorsId) {
+	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
+	if (contributors != null) {
+	    for (Map<String, Object> contributor : contributors) {
+		String currentId = (String) contributor.get("@id");
+		if (authorsId.compareTo(currentId) == 0) {
+		    return contributor;
+		}
+	    }
+	}
+	return new HashMap<String, Object>();
     }
 
 }

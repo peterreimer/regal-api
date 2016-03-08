@@ -115,7 +115,7 @@ public class Globals {
     /**
      * defines a protocol used by this app
      */
-    public static String protocol = "http://";
+    public static String protocol = Play.application().configuration().getString("regal-api.protocol");
 
     /**
      * Urn resolver used for testing urn resolving

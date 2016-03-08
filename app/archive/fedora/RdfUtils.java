@@ -22,18 +22,26 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import models.Link;
 import models.RdfResource;
 
+import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -42,6 +50,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.TreeModel;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
@@ -62,6 +71,8 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import helper.HttpArchiveException;
+
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
@@ -69,6 +80,7 @@ import org.slf4j.LoggerFactory;
 public class RdfUtils {
 
     final static Logger logger = LoggerFactory.getLogger(RdfUtils.class);
+    public final static ValueFactory valueFactory=ValueFactoryImpl.getInstance();
 
     /**
      * @param url
@@ -81,13 +93,13 @@ public class RdfUtils {
      *            the accept header for the url
      * @return a rdf string
      */
-    public static String readRdfToString(URL url, RDFFormat inf,
-	    RDFFormat outf, String accept) {
+    public static String readRdfToString(URL url, RDFFormat inf, RDFFormat outf, String accept) {
 	try {
 	    Graph myGraph = null;
 	    myGraph = readRdfToGraph(url, inf, accept);
 	    return graphToString(myGraph, outf);
 	} catch (Exception e) {
+	    play.Logger.warn("", e);
 	    return "";
 	}
     }
@@ -127,8 +139,7 @@ public class RdfUtils {
      *            usually the url of the resource
      * @return a string representation
      */
-    public static String readRdfToString(InputStream in, RDFFormat inf,
-	    RDFFormat outf, String baseUrl) {
+    public static String readRdfToString(InputStream in, RDFFormat inf, RDFFormat outf, String baseUrl) {
 	Graph myGraph = null;
 	myGraph = readRdfToGraph(in, inf, baseUrl);
 	return graphToString(myGraph, outf);
@@ -144,18 +155,46 @@ public class RdfUtils {
      * @return a Graph with the rdf
      * @throws IOException
      */
-    public static Graph readRdfToGraph(URL url, RDFFormat inf, String accept)
-	    throws IOException {
+    public static Graph readRdfToGraph(URL url, RDFFormat inf, String accept) throws IOException {
 	try (InputStream in = urlToInputStream(url, accept)) {
 	    return readRdfToGraph(in, inf, url.toString());
 	}
     }
 
-    private static InputStream urlToInputStream(URL url, String accept) {
+    public static Graph readRdfToGraphAndFollowSameAs(URL url, RDFFormat inf, String accept) throws IOException {
+	Graph graph = null;
+	try (InputStream in = urlToInputStream(url, accept)) {
+	    graph = readRdfToGraph(in, inf, url.toString());
+	    String sameAsTarget =getSameAsTarget(graph);
+	    play.Logger.info("GET "+sameAsTarget);
+	    if (sameAsTarget!=null && sameAsTarget.contains("lobid")) {
+		play.Logger.info("GET "+sameAsTarget);
+		graph.addAll(readRdfToGraph(new URL(sameAsTarget),inf,accept));
+	    }
+	}
+	return graph;
+    }
+
+    private static String getSameAsTarget(Graph graph) {
+	Iterator<Statement> statements = graph.iterator();
+	while (statements.hasNext()) {
+	    Statement curStatement = statements.next();
+	    String pred = curStatement.getPredicate().stringValue();
+	    String obj = curStatement.getObject().stringValue();
+	    if("http://www.w3.org/2002/07/owl#sameAs".equals(pred)){
+		return obj;
+	    }
+	}
+	return null;
+    }
+
+    public static InputStream urlToInputStream(URL url, String accept) {
 	HttpURLConnection con = null;
 	InputStream inputStream = null;
 	try {
 	    con = (HttpURLConnection) url.openConnection();
+	    con.setConnectTimeout(15000);
+	    con.setReadTimeout(15000);
 	    con.setRequestProperty("Accept", accept);
 	    con.connect();
 	    inputStream = con.getInputStream();
@@ -165,30 +204,30 @@ public class RdfUtils {
 	return inputStream;
     }
 
-    private static InputStream urlToInputStreamWithRedirects(URL url,
-	    String accept) throws IOException {
+    private static InputStream urlToInputStreamWithRedirects(URL url, String accept) throws IOException {
 	HttpURLConnection con = null;
 	InputStream inputStream = null;
 	try {
 	    con = (HttpURLConnection) url.openConnection();
+	    con.setConnectTimeout(15000);
+	    con.setReadTimeout(15000);
 	    con.setRequestProperty("Accept", accept);
 	    con.connect();
 	    int responseCode = con.getResponseCode();
-	    play.Logger.debug("Request for " + accept + " from "
-		    + url.toExternalForm());
-	    play.Logger.debug("Get a " + responseCode + " from "
-		    + url.toExternalForm());
-	    if (responseCode == HttpURLConnection.HTTP_MOVED_PERM
-		    || responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+	    play.Logger.debug("Request for " + accept + " from " + url.toExternalForm());
+	    play.Logger.debug("Get a " + responseCode + " from " + url.toExternalForm());
+	    if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP
 		    || responseCode == 307 || responseCode == 303) {
 		String redirectUrl = con.getHeaderField("Location");
 		play.Logger.debug("Redirect to Location: " + redirectUrl);
-		return urlToInputStreamWithRedirects(new URL(redirectUrl),
-			accept);
+		return urlToInputStreamWithRedirects(new URL(redirectUrl), accept);
 	    }
 	    inputStream = con.getInputStream();
 	    return inputStream;
-	} catch (IOException e) {
+	}catch(SocketTimeoutException e){
+	    play.Logger.warn("Timeout on "+url);
+	    throw new UrlConnectionException(e);
+	}catch (IOException e) {
 	    throw new UrlConnectionException(e);
 	}
 
@@ -203,8 +242,7 @@ public class RdfUtils {
      *            see sesame docu
      * @return a Graph representing the rdf in the input stream
      */
-    public static Graph readRdfToGraph(InputStream inputStream, RDFFormat inf,
-	    String baseUrl) {
+    public static Graph readRdfToGraph(InputStream inputStream, RDFFormat inf, String baseUrl) {
 	try {
 	    RDFParser rdfParser = Rio.createParser(inf);
 	    org.openrdf.model.Graph myGraph = new TreeModel();
@@ -226,85 +264,19 @@ public class RdfUtils {
 	Vector<String> pids = new Vector<String>();
 	String findpid = null;
 	try {
-	    RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
-		    in, RDFFormat.N3);
+	    RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(in, RDFFormat.N3);
 
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, true);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 
 	    while (statements.hasNext()) {
 		Statement st = statements.next();
-		findpid = st.getSubject().stringValue()
-			.replace("info:fedora/", "");
+		findpid = st.getSubject().stringValue().replace("info:fedora/", "");
 		pids.add(findpid);
 	    }
 	} catch (Exception e) {
 	    throw new RdfException(e);
 	}
 	return pids;
-    }
-
-    /**
-     * Follows the first sameAs link
-     * 
-     * @param url
-     *            a url pointing to rdf data
-     * @param pid
-     *            the pid will become a subject
-     * @param format
-     *            the input format
-     * @param accept
-     *            the accept header for url call - must correspond to format
-     *            param.
-     * @return the original string plus the data from the sameAs resource
-     */
-    public static String followSameAsAndInclude(URL url, String pid,
-	    RDFFormat format, String accept) {
-	URL followMe = null;
-	String str = readRdfToString(url, format, RDFFormat.NTRIPLES, accept);
-	followMe = getSameAsLink(url);
-	if (followMe == null) {
-	    return str;
-	}
-	String str1 = readRdfToString(followMe, format, RDFFormat.NTRIPLES,
-		accept);
-	str1 = Pattern.compile(followMe.toString()).matcher(str1)
-		.replaceAll(Matcher.quoteReplacement(pid));
-	return str + "\n" + str1;
-    }
-
-    private static URL getSameAsLink(URL sameAsUrl) {
-	TupleQueryResult result = null;
-	try {
-	    RepositoryConnection con = RdfUtils.readRdfUrlToRepository(
-		    sameAsUrl, RDFFormat.NTRIPLES);
-
-	    String queryString = "SELECT x, y FROM {x} <http://www.w3.org/2002/07/owl#sameAs> {y}";
-
-	    TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
-		    queryString);
-	    result = tupleQuery.evaluate();
-
-	    while (result.hasNext()) {
-		BindingSet bindingSet = result.next();
-		Value valueOfY = bindingSet.getValue("y");
-
-		if (valueOfY.toString().contains("lobid")) {
-		    return new URL(valueOfY.stringValue());
-		}
-	    }
-	} catch (Exception e) {
-	    throw new RdfException(e);
-	} finally {
-	    if (result != null)
-		try {
-		    result.close();
-		} catch (QueryEvaluationException e) {
-		    logger.debug("", e);
-		}
-	}
-
-	return null;
     }
 
     /**
@@ -315,16 +287,13 @@ public class RdfUtils {
     public static List<String> getFedoraObjects(InputStream stream) {
 	Vector<String> findpids = new Vector<String>();
 	try {
-	    RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
-		    stream, RDFFormat.N3);
+	    RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(stream, RDFFormat.N3);
 
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, true);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 
 	    while (statements.hasNext()) {
 		Statement st = statements.next();
-		findpids.add(st.getObject().stringValue()
-			.replace("info:fedora/", ""));
+		findpids.add(st.getObject().stringValue().replace("info:fedora/", ""));
 
 	    }
 	} catch (Exception e) {
@@ -340,13 +309,10 @@ public class RdfUtils {
      *            a base Url for relative uris
      * @return all rdf statements
      */
-    public static RepositoryResult<Statement> getStatements(String metadata,
-	    String baseUrl) {
+    public static RepositoryResult<Statement> getStatements(String metadata, String baseUrl) {
 	try {
-	    RepositoryConnection con = RdfUtils.readRdfStringToRepository(
-		    metadata, RDFFormat.NTRIPLES, baseUrl);
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, true);
+	    RepositoryConnection con = RdfUtils.readRdfStringToRepository(metadata, RDFFormat.NTRIPLES, baseUrl);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 	    return statements;
 	} catch (Exception e) {
 	    throw new RdfException(e);
@@ -375,15 +341,13 @@ public class RdfUtils {
 
     }
 
-    private static String writeStatements(RepositoryConnection con,
-	    RDFFormat outf) {
+    private static String writeStatements(RepositoryConnection con, RDFFormat outf) {
 	StringWriter out = new StringWriter();
 	RDFWriter writer = Rio.createWriter(outf, out);
 	String result = null;
 	try {
 	    writer.startRDF();
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, false);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, false);
 
 	    while (statements.hasNext()) {
 		Statement statement = statements.next();
@@ -400,9 +364,8 @@ public class RdfUtils {
 	return result;
     }
 
-    private static void addStatements(String pid, List<Link> links,
-	    RepositoryConnection con, SailRepository myRepository)
-	    throws RepositoryException {
+    private static void addStatements(String pid, List<Link> links, RepositoryConnection con,
+	    SailRepository myRepository) throws RepositoryException {
 
 	ValueFactory f = myRepository.getValueFactory();
 	URI subject = f.createURI("info:fedora/" + pid);
@@ -437,26 +400,19 @@ public class RdfUtils {
      *            accept header for the url
      * @return a list of rdf objects
      */
-    public static List<String> findRdfObjects(String subject, String predicate,
-	    String metadata, RDFFormat inf) {
+    public static List<String> findRdfObjects(String subject, String predicate, String metadata, RDFFormat inf) {
 	RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
-		new ByteArrayInputStream(metadata
-			.getBytes(StandardCharsets.UTF_8)), inf);
+		new ByteArrayInputStream(metadata.getBytes(StandardCharsets.UTF_8)), inf);
 	return findRdfObjects(subject, predicate, con);
     }
 
-    private static List<String> findRdfObjects(String subject,
-	    String predicate, RepositoryConnection con) {
-
+    private static List<String> findRdfObjects(String subject, String predicate, RepositoryConnection con) {
 	List<String> list = new Vector<String>();
 	TupleQueryResult result = null;
 	try {
-	    String queryString = "SELECT  x, y FROM {x} <" + predicate
-		    + "> {y}";
-	    TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
-		    queryString);
+	    String queryString = "SELECT  x, y FROM {x} <" + predicate + "> {y}";
+	    TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SERQL, queryString);
 	    result = tupleQuery.evaluate();
-
 	    while (result.hasNext()) {
 		BindingSet bindingSet = result.next();
 		Value valueOfY = bindingSet.getValue("y");
@@ -468,8 +424,7 @@ public class RdfUtils {
 	}
     }
 
-    private static RepositoryConnection readRdfUrlToRepository(URL rdfUrl,
-	    RDFFormat inf) {
+    private static RepositoryConnection readRdfUrlToRepository(URL rdfUrl, RDFFormat inf) {
 	RepositoryConnection con = null;
 	try {
 	    Repository myRepository = new SailRepository(new MemoryStore());
@@ -483,23 +438,20 @@ public class RdfUtils {
 	}
     }
 
-    private static RepositoryConnection readRdfStringToRepository(String str,
-	    RDFFormat inf, String baseUrl) {
+    private static RepositoryConnection readRdfStringToRepository(String str, RDFFormat inf, String baseUrl) {
 	RepositoryConnection con = null;
 	try {
 	    Repository myRepository = new SailRepository(new MemoryStore());
 	    myRepository.initialize();
 	    con = myRepository.getConnection();
-	    con.add(new ByteArrayInputStream(str.getBytes("utf-8")), baseUrl,
-		    inf);
+	    con.add(new ByteArrayInputStream(str.getBytes("utf-8")), baseUrl, inf);
 	    return con;
 	} catch (Exception e) {
 	    throw new RdfException(e);
 	}
     }
 
-    private static RepositoryConnection readRdfInputStreamToRepository(
-	    InputStream is, RDFFormat inf) {
+    private static RepositoryConnection readRdfInputStreamToRepository(InputStream is, RDFFormat inf) {
 	RepositoryConnection con = null;
 	try {
 
@@ -530,13 +482,11 @@ public class RdfUtils {
      *            the metadata as String
      * @return modified Metadata
      */
-    public static String replaceTriple(String subject, String predicate,
-	    String object, boolean isLiteral, final String metadata) {
+    public static String replaceTriple(String subject, String predicate, String object, boolean isLiteral,
+	    final String metadata) {
 	try {
-	    InputStream is = new ByteArrayInputStream(
-		    metadata.getBytes("UTF-8"));
-	    RepositoryConnection con = readRdfInputStreamToRepository(is,
-		    RDFFormat.NTRIPLES);
+	    InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
+	    RepositoryConnection con = readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
 	    ValueFactory f = con.getValueFactory();
 	    URI s = f.createURI(subject);
 	    URI p = f.createURI(predicate);
@@ -546,8 +496,7 @@ public class RdfUtils {
 	    } else {
 		o = f.createLiteral(object);
 	    }
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, true);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 	    while (statements.hasNext()) {
 		Statement st = statements.next();
 		if (st.getSubject().stringValue().equals(subject)
@@ -566,21 +515,16 @@ public class RdfUtils {
 
     }
 
-    public static String replaceTriples(List<Statement> graph,
-	    final String metadata) {
+    public static String replaceTriples(List<Statement> graph, final String metadata) {
 	try {
-	    InputStream is = new ByteArrayInputStream(
-		    metadata.getBytes("UTF-8"));
-	    RepositoryConnection con = readRdfInputStreamToRepository(is,
-		    RDFFormat.NTRIPLES);
+	    InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
+	    RepositoryConnection con = readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
 	    for (Statement st : graph) {
-		RepositoryResult<Statement> statements = con.getStatements(
-			null, null, null, true);
+		RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 		while (statements.hasNext()) {
 		    Statement statement = statements.next();
 		    if (statement.getSubject().equals(st.getSubject())
-			    && statement.getPredicate().equals(
-				    st.getPredicate())) {
+			    && statement.getPredicate().equals(st.getPredicate())) {
 			con.remove(statement);
 		    }
 		}
@@ -605,12 +549,10 @@ public class RdfUtils {
      *            ntriple string
      * @return true if the metadata string contains the triple
      */
-    public static boolean hasTriple(String subject, String predicate,
-	    String metadata) {
+    public static boolean hasTriple(String subject, String predicate, String metadata) {
 	try {
 	    RepositoryConnection con = getConnection(metadata);
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, true);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 	    while (statements.hasNext()) {
 		Statement st = statements.next();
 		if (st.getSubject().stringValue().equals(subject)
@@ -626,10 +568,8 @@ public class RdfUtils {
 
     private static RepositoryConnection getConnection(String metadata)
 	    throws UnsupportedEncodingException, IOException {
-	try (InputStream is = new ByteArrayInputStream(
-		metadata.getBytes("UTF-8"))) {
-	    RepositoryConnection con = readRdfInputStreamToRepository(is,
-		    RDFFormat.NTRIPLES);
+	try (InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"))) {
+	    RepositoryConnection con = readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
 	    return con;
 	}
     }
@@ -649,13 +589,12 @@ public class RdfUtils {
      *            format of in and out
      * @return the string together with the new triple
      */
-    public static String addTriple(String subject, String predicate,
-	    String object, boolean isLiteral, String metadata, RDFFormat format) {
+    public static String addTriple(String subject, String predicate, String object, boolean isLiteral, String metadata,
+	    RDFFormat format) {
 	try {
 	    RepositoryConnection con = null;
 	    if (metadata != null) {
-		InputStream is = new ByteArrayInputStream(
-			metadata.getBytes("UTF-8"));
+		InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
 		con = readRdfInputStreamToRepository(is, format);
 	    } else {
 		Repository myRepository = new SailRepository(new MemoryStore());
@@ -686,8 +625,7 @@ public class RdfUtils {
      */
     public static void validate(String metadata) {
 	try {
-	    InputStream is = new ByteArrayInputStream(
-		    metadata.getBytes("UTF-8"));
+	    InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
 	    readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
 	} catch (UnsupportedEncodingException e) {
 	    throw new RdfException(e);
@@ -703,19 +641,15 @@ public class RdfUtils {
      *            uri that is described by data
      * @return a RdfResource
      */
-    public static RdfResource createRdfResource(InputStream stream,
-	    RDFFormat format, String uri) {
+    public static RdfResource createRdfResource(InputStream stream, RDFFormat format, String uri) {
 	try {
 
-	    RepositoryConnection con = readRdfInputStreamToRepository(stream,
-		    format);
-	    RepositoryResult<Statement> statements = con.getStatements(null,
-		    null, null, true);
+	    RepositoryConnection con = readRdfInputStreamToRepository(stream, format);
+	    RepositoryResult<Statement> statements = con.getStatements(null, null, null, true);
 	    Map<String, RdfResource> subjects = fetchSubjects(statements);
 	    RdfResource me = subjects.get(uri);
 	    for (Link l : me.getLinks()) {
-		if (!l.getObject().equals(uri) && !l.isLiteral()
-			&& subjects.containsKey(l.getObject())) {
+		if (!l.getObject().equals(uri) && !l.isLiteral() && subjects.containsKey(l.getObject())) {
 		    RdfResource c = subjects.get(l.getObject());
 		    me.addResolvedLink(c);
 		}
@@ -728,8 +662,8 @@ public class RdfUtils {
 	}
     }
 
-    private static Map<String, RdfResource> fetchSubjects(
-	    RepositoryResult<Statement> statements) throws RepositoryException {
+    private static Map<String, RdfResource> fetchSubjects(RepositoryResult<Statement> statements)
+	    throws RepositoryException {
 
 	Map<String, RdfResource> subjs = new HashMap<String, RdfResource>();
 	while (statements.hasNext()) {
@@ -737,15 +671,12 @@ public class RdfUtils {
 	    Resource subject = st.getSubject();
 	    if (subjs.containsKey(subject.stringValue())) {
 
-		subjs.get(subject.stringValue()).addLink(
-			(new Link(st.getPredicate().stringValue(), st
-				.getObject().stringValue(),
-				(st.getObject() instanceof Literal))));
+		subjs.get(subject.stringValue()).addLink((new Link(st.getPredicate().stringValue(),
+			st.getObject().stringValue(), (st.getObject() instanceof Literal))));
 	    } else {
 		RdfResource r = new RdfResource();
 
-		r.addLink(new Link(st.getPredicate().stringValue(), st
-			.getObject().stringValue(),
+		r.addLink(new Link(st.getPredicate().stringValue(), st.getObject().stringValue(),
 			(st.getObject() instanceof Literal)));
 		r.setUri(subject.stringValue());
 		subjs.put(subject.stringValue(), r);
@@ -753,6 +684,38 @@ public class RdfUtils {
 
 	}
 	return subjs;
+    }
+
+    public static Graph rewriteSubject(String lobidUri, String pid, Graph graph) {
+	org.openrdf.model.Graph result = new TreeModel();
+	Iterator<Statement> statements = graph.iterator();
+	while (statements.hasNext()) {
+	    Statement curStatement = statements.next();
+	    String subj = curStatement.getSubject().stringValue();
+	    Resource pred = curStatement.getPredicate();
+	    Value obj = curStatement.getObject();
+	    if(subj.equals(lobidUri)){
+		result.add(valueFactory.createStatement(valueFactory.createURI(pid), valueFactory.createURI(pred.stringValue()), obj));
+	    }else{
+		result.add(curStatement);
+	    }
+	}
+	return result;
+    }
+
+    public static String urlEncode(String str) {
+   	try {
+   	    return URLEncoder.encode(str, "UTF-8").replace("+", "%20");
+   	} catch (Exception e) {
+   	    throw new HttpArchiveException(500, e);
+   	}
+       }
+    public static String urlDecode(String str) {
+	try {
+   	    return URLDecoder.decode(str, "UTF-8");
+   	} catch (Exception e) {
+   	    throw new HttpArchiveException(500, e);
+   	}
     }
 
 }
