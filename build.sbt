@@ -20,9 +20,6 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "0.9.30", 
   "org.slf4j" % "slf4j-api" % "1.6.2", 
   "commons-io" % "commons-io" % "2.4",
-  "org.codehaus.jackson" % "jackson-core-lgpl" % "1.9.13",
-  "org.codehaus.jackson" % "jackson-mapper-lgpl" % "1.9.13" ,
-  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % "2.4.0" ,
   "com.github.jsonld-java" % "jsonld-java" % "0.5.1",
   "com.sun.jersey" % "jersey-core" % "1.18.1" ,
   "com.sun.jersey" % "jersey-server" % "1.18.1",
@@ -62,7 +59,12 @@ libraryDependencies ++= Seq(
   "com.sun.xml.bind" % "jaxb-impl" % "2.2.6",
   "javax.xml.bind" % "jaxb-api" % "2.2.6",
   "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2",
-  "net.sf.supercsv" %"super-csv" %"2.3.1"
+  "net.sf.supercsv" %"super-csv" %"2.3.1",
+  "com.github.hbz" %"lobid-rdf-to-json" %"19c21aae1e08f1c2f5331fd01296ac124767ffd6",
+  "com.fasterxml.jackson.core" %"jackson-core" %"2.6.3",
+  "com.fasterxml" %"jackson-module-json-org" %"0.9.1",
+  "com.fasterxml.jackson.core" %"jackson-databind" %"2.6.3",
+  "com.fasterxml.jackson.dataformat" %"jackson-dataformat-xml" %"2.6.3"
 )
 
 val root = (project in file(".")).enablePlugins(PlayJava)
@@ -70,7 +72,7 @@ val root = (project in file(".")).enablePlugins(PlayJava)
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "http://repo1.maven.org/maven2","edoweb releases" at "http://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "http://maven.ontotext.com/content/repositories/aduna/" ,
-"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty"
+"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty", "jitpack" at "https://jitpack.io"
 )
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")

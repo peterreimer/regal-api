@@ -118,8 +118,7 @@ public class Create extends RegalAction {
 	node.setAggregationUri(createAggregationUri(node.getPid()));
 	node.setRemUri(node.getAggregationUri() + ".rdf");
 	node.setDataUri(node.getAggregationUri() + "/data");
-	node.setContextDocumentUri("http://" + Globals.server
-		+ "/public/edoweb-resources.json");
+	node.setContextDocumentUri("http://" + Globals.server + "/public/edoweb-resources.json");
 	Globals.fedora.createNode(node);
 	return node;
     }
@@ -178,8 +177,7 @@ public class Create extends RegalAction {
 	    inheritRights(parent, node);
 	    updateIndex(parentPid);
 	} catch (Exception e) {
-	    play.Logger.debug("Fail link " + node.getPid() + " to " + parentPid
-		    + "", e);
+	    play.Logger.debug("Fail link " + node.getPid() + " to " + parentPid + "", e);
 	}
     }
 
@@ -187,8 +185,7 @@ public class Create extends RegalAction {
 	String title = new Read().readMetadata(to, "title");
 	String parentTitle = new Read().readMetadata(from, "title");
 	if (title == null && parentTitle != null) {
-	    new Modify().addMetadataField(to,
-		    Globals.profile.getUriFromJsonName("title"), parentTitle);
+	    new Modify().addMetadataField(to, getUriFromJsonName("title"), parentTitle);
 	}
     }
 
@@ -232,14 +229,11 @@ public class Create extends RegalAction {
     public Node createWebpageVersion(Node n) {
 	try {
 	    if (Globals.heritrix.isBusy()) {
-		throw new WebgathererTooBusyException(403,
-			"Webgatherer is too busy! Please try again later.");
+		throw new WebgathererTooBusyException(403, "Webgatherer is too busy! Please try again later.");
 	    }
 	    if (!"webpage".equals(n.getContentType())) {
-		throw new HttpArchiveException(
-			400,
-			n.getContentType()
-				+ " is not supported. Operation works only on regalType:\"webpage\"");
+		throw new HttpArchiveException(400,
+			n.getContentType() + " is not supported. Operation works only on regalType:\"webpage\"");
 	    }
 	    play.Logger.debug("Create webpageVersion " + n.getPid());
 	    Gatherconf conf = Gatherconf.create(n.getConf());
@@ -263,8 +257,7 @@ public class Create extends RegalAction {
 	    String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
 	    String uriPath = Globals.heritrix.getUriPath(warcPath);
 
-	    String localpath = Globals.heritrixData + "/heritrix-data" + "/"
-		    + uriPath;
+	    String localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
 	    play.Logger.debug("Path to WARC " + localpath);
 
 	    // create fedora object with unmanaged content pointing to
@@ -278,12 +271,9 @@ public class Create extends RegalAction {
 	    regalObject.setIsDescribedBy(prov);
 	    regalObject.setParentPid(n.getPid());
 	    Node webpageVersion = createResource(n.getNamespace(), regalObject);
-	    String label = new SimpleDateFormat("yyyy-MM-dd")
-		    .format(new Date());
+	    String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 	    new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
-		    "<" + webpageVersion.getPid()
-			    + "> <http://purl.org/dc/terms/title> \"" + label
-			    + "\" .");
+		    "<" + webpageVersion.getPid() + "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
 	    webpageVersion.setLocalData(localpath);
 	    webpageVersion.setMimeType("application/warc");
 	    webpageVersion.setFileLabel(label);
@@ -292,8 +282,7 @@ public class Create extends RegalAction {
 	    webpageVersion = updateResource(webpageVersion);
 
 	    conf.setLocalDir(crawlDir.getAbsolutePath());
-	    String msg = new Modify().updateConf(webpageVersion,
-		    conf.toString());
+	    String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
 	    play.Logger.info(msg);
 

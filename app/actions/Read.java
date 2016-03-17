@@ -450,7 +450,7 @@ public class Read extends RegalAction {
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
-		String pred = Globals.profile.getUriFromJsonName(field);
+		String pred = getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(node.getPid(), pred, metadata, RDFFormat.NTRIPLES);
 		return value == null || value.isEmpty() ? null : value.get(0);
 	    }
@@ -499,7 +499,7 @@ public class Read extends RegalAction {
 	    if (field == null || field.isEmpty()) {
 		return metadata;
 	    } else {
-		String pred = Globals.profile.getUriFromJsonName(field);
+		String pred = getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(pid, pred, metadata, RDFFormat.NTRIPLES);
 
 		return value.isEmpty() ? "No " + field : value.get(0);

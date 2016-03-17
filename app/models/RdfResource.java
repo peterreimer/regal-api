@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -145,7 +144,7 @@ public class RdfResource {
 		return findLabel(r.getLinks());
 	    }
 	}
-	return Globals.profile.getLabel(l.getObject());
+	return Globals.profile.getEtikett(l.getObject()).getLabel();
     }
 
     private String findLabel(List<Link> list) {

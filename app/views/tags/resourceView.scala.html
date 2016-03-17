@@ -24,7 +24,7 @@
 				</td>
 			</tr>
   		}
-		case b: List[Any] => {
+		case b: Set[Any] => {
 			<tr>
 				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
 				<td>
@@ -46,8 +46,7 @@
 				</td>
 			</tr>
 		}
-		
-		case _ => {}
+		case _ => { }
 	}
 }
 @analyseString(v: String)={
@@ -84,15 +83,15 @@
 			@analyseString(value.asInstanceOf[String])
 		}
 		case b: Map[String,Object] => {
-			<span class="@models.Globals.profile.getIcon(b.get("@id").asInstanceOf[String])"></span>
-			<a href=@analyseValue(b.get("@id").asInstanceOf[String])>
-			@(b.get("prefLabel"))
+			<span class="@models.Globals.profile.getEtikett(b.get("id").asInstanceOf[String]).getIcon()"></span>
+			<a href=@analyseValue(b.get("id").asInstanceOf[String])>
+			@(b.get("label"))
 			</a> |
-			<a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(b.get("@id").asInstanceOf[String])">
+			<a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(b.get("id").asInstanceOf[String])">
 				<span class="glyphicon glyphicon-link"></span>
 			</a>
 		}
-		case _ => {hu}
+		case _ => {}
 	}
 	<br/>
 }
@@ -121,7 +120,7 @@
 			case map : Map[String,Object] => {
 				@map.get(key) match { 
 					case keyMap : Map[String,Object]=> {
-						@keyMap.get("@id")
+						@keyMap.get("id")
 					}
 					case _ => {@key}
 					

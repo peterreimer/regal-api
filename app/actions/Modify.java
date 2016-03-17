@@ -463,7 +463,7 @@ public class Modify extends RegalAction {
 	String subject = node.getPid();
 	play.Logger
 		.debug("Try to enrich " + node.getPid() + " with " + parent.getPid() + " . Looking for field " + field);
-	String pred = Globals.profile.getUriFromJsonName(field);
+	String pred = getUriFromJsonName(field);
 	List<String> value = RdfUtils.findRdfObjects(subject, pred, parent.getMetadata(), RDFFormat.NTRIPLES);
 	String metadata = node.getMetadata();
 	if (metadata == null)
