@@ -96,8 +96,14 @@ public class MyEtikettMaker implements EtikettMakerInterface {
             cmap.put(l.getName(), pmap);
         }
         Map<String, Object> contextObject = new HashMap<String, Object>();
+        addAliases(cmap);
         contextObject.put("@context", cmap);
         return contextObject;
+    }
+    
+    private void addAliases(Map<String, Object> cmap) {
+            cmap.put("id", "@id");
+            cmap.put("type", "@type");
     }
 
     @Override

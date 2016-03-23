@@ -455,7 +455,7 @@ public class JsonMapper {
 
     private Map<String, Object> findContributor(Map<String, Object> m, String authorsId) {
 	@SuppressWarnings("unchecked")
-	List<Map<String, Object>> contributors = (List<Map<String, Object>>) m.get("contributor");
+	Set<Map<String, Object>> contributors = (Set<Map<String, Object>>) m.get("contributor");
 	if (contributors != null) {
 	    for (Map<String, Object> contributor : contributors) {
 		String currentId = (String) contributor.get(ID2);

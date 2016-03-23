@@ -5832,7 +5832,7 @@
 		"label":"Autor",
 		"icon":"",
 		"name":"creator",
-		"referenceType":"String",
+		"referenceType":"@id",
 		"container":"@list",
 		"weight":"5"
 	},

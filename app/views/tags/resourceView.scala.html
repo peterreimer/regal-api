@@ -20,7 +20,7 @@
 			<tr>
 				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
 				<td>
-					@value(a)
+					@value(a,key)
 				</td>
 			</tr>
   		}
@@ -29,7 +29,17 @@
 				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
 				<td>
 					@for(field <- b){
-						@value(field)
+						@value(field,key)
+					}
+				</td>
+			</tr>
+		}
+		case d: List[Any] => {
+			<tr>
+				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
+				<td>
+					@for(field <- d){
+						@value(field,key)
 					}
 				</td>
 			</tr>
@@ -49,6 +59,8 @@
 		case _ => { }
 	}
 }
+
+
 @analyseString(v: String)={
 	@v match {
 		case a if v.startsWith("http") => {
@@ -77,23 +89,39 @@
 	}
 }
 
-@value(value: Any)= {
+@value(value: Any,key:String)= {
 	@value match {
 		case a: String => {
 			@analyseString(value.asInstanceOf[String])
 		}
-		case b: Map[String,Object] => {
-			<span class="@models.Globals.profile.getEtikett(b.get("id").asInstanceOf[String]).getIcon()"></span>
-			<a href=@analyseValue(b.get("id").asInstanceOf[String])>
-			@(b.get("label"))
-			</a> |
-			<a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(b.get("id").asInstanceOf[String])">
-				<span class="glyphicon glyphicon-link"></span>
-			</a>
+		case c : Map[String,Object] => {
+					@displayMap(c.get("id"),c)
 		}
-		case _ => {}
+		case _ => {
+		
+		}
 	}
 	<br/>
+}
+
+@displayMap(value:Any,map:Map[String,Object])={
+	@value match {
+		case a: String => {
+		 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
+                       <a href=@analyseValue(a)>
+                       @(map.get("label"))
+                       </a> |
+                       <a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(a)">
+                               <span class="glyphicon glyphicon-link"></span>
+                       </a>
+		
+		}
+		case _ => {		
+			<table class="table table-striped table-condensed">
+			@htmlRow(map,"")
+			</table>
+		}
+		}
 }
 
 @getLabel(key: String)={
@@ -120,7 +148,7 @@
 			case map : Map[String,Object] => {
 				@map.get(key) match { 
 					case keyMap : Map[String,Object]=> {
-						@keyMap.get("id")
+						@keyMap.get("@id")
 					}
 					case _ => {@key}
 					
