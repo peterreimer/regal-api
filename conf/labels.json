@@ -11035,7 +11035,7 @@
 		"comment":"",
 		"label":"Typ",
 		"icon":"",
-		"name":"type",
+		"name":"rdftype",
 		"referenceType":"@id",
 		"container":"",
 		"weight":"1000"
@@ -11051,7 +11051,7 @@
 		"uri":"http://www.w3.org/2000/01/rdf-schema#label",
 		"label":"Etikett",
 		"icon":"fa fa-tag",
-		"name":"label",
+		"name":"etikett",
 		"referenceType":"String",
 		"weight":"1000"
 	},

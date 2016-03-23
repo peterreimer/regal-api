@@ -75,7 +75,7 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	return result;
     }
     
-    public Map<String, Object> getAnnotatedContext() {
+    private Map<String, Object> getAnnotatedContext() {
         Map<String, Object> pmap;
         Map<String, Object> cmap = new HashMap<String, Object>();
         for (Etikett l : getValues()) {
@@ -83,16 +83,14 @@ public class MyEtikettMaker implements EtikettMakerInterface {
                 continue;
             pmap = new HashMap<String, Object>();
             pmap.put("@id", l.getUri());
-            pmap.put("label", l.getLabel());
-            pmap.put("icon", l.getIcon());
-            pmap.put("weight", l.weight);
-            pmap.put("comment", l.comment);
+            addFieldToMap(pmap,"label",l.getLabel());
+            addFieldToMap(pmap,"icon",l.getIcon());
+            addFieldToMap(pmap,"weight",l.weight);
+            addFieldToMap(pmap,"comment",l.comment);
             if (!"String".equals(l.getReferenceType())) {
-                pmap.put("@type", l.getReferenceType());
+                addFieldToMap(pmap,"@type",l.getReferenceType());
             }
-            if (l.container != null && !l.container.isEmpty()) {
-                pmap.put("@container", l.container);
-            }
+            addFieldToMap(pmap,"@container",l.container);
             cmap.put(l.getName(), pmap);
         }
         Map<String, Object> contextObject = new HashMap<String, Object>();
@@ -100,7 +98,11 @@ public class MyEtikettMaker implements EtikettMakerInterface {
         contextObject.put("@context", cmap);
         return contextObject;
     }
-    
+    private void addFieldToMap(Map<String,Object> map,String key, String value){
+	 if ( value != null && !value.isEmpty()) {
+	 map.put(key, value);
+	 }
+    }
     private void addAliases(Map<String, Object> cmap) {
             cmap.put("id", "@id");
             cmap.put("type", "@type");

@@ -78,7 +78,7 @@ public class JsonMapper {
     final static String size = "size";
     final static String checksumValue = "checksumValue";
     final static String generator = "generator";
-    final static String type = "type";
+    final static String type = "rdftype";
     final static String checksum = "checksum";
     final static String hasData = "hasData";
     final static String fulltext_ocr = "fulltext-ocr";
@@ -223,6 +223,9 @@ public class JsonMapper {
 	    }
 	    rdf.put(hasData, hasDataMap);
 	}
+	
+	play.Logger.debug("CONF: "+node.getConf());
+	
 	rdf.put("@context", profile.getContext().get("@context"));
 	postprocessing(rdf);
 	return rdf;
@@ -361,22 +364,24 @@ public class JsonMapper {
 	    }
 	    rdf.put(getJsonName(l.getPredicate()), list);
 	}
-
     }
 
-    private List<String> getType(Map<String, Object> rdf) {
-	List<String> result = new ArrayList<String>();
-	HashSet<String> types = (HashSet<String>) rdf.get(type);
+    private List<Map<String,Object>> getType(Map<String, Object> rdf) {
+	List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
+	Set<String> types = (Set<String>) rdf.get(type);
 	if (types != null) {
 	    for (String s : typePrios) {
 		if (types.contains(s)) {
-		    result.add(s);
+		    Map<String,Object>tmap=new HashMap();
+		    tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
+		    tmap.put(ID2, s);
+		    result.add(tmap);
 		    return result;
 		}
 
 	    }
 	}
-	result.add("undefined");
+	result.add(new HashMap<String,Object>());
 	return result;
     }
 
