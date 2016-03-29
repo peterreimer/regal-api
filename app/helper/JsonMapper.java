@@ -333,7 +333,7 @@ public class JsonMapper {
 	    resolvedObject.put(ID2, id);
 	    resolvedObject.put(PREF_LABEL, value);
 	}
-	if (rdf.containsKey(jsonName)) {
+	if (jsonName!=null && rdf.containsKey(jsonName)) {
 	    @SuppressWarnings("unchecked")
 	    List<Object> list = (List<Object>) rdf.get(getJsonName(l.getPredicate()));
 	    if (resolvedObject == null) {
@@ -498,7 +498,14 @@ public class JsonMapper {
     }
 
     private String getJsonName(String uri) {
-	return profile.getEtikett(uri).getName();
+	String result =  profile.getEtikett(uri).getName();
+	
+	if(result == null){
+	    play.Logger.warn("No json name for "+uri+". Please fix your labels.json");
+	    result = uri;
+	}
+	
+	return result;
     }
 
 }
