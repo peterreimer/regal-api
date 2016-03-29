@@ -193,7 +193,7 @@ public class JsonMapper {
 	}
 	aboutMap.put(created, node.getCreationDate());
 	aboutMap.put(describes, node.getAggregationUri());
-	
+
 	rdf.put(isDescribedBy, aboutMap);
 	if (node.getDoi() != null)
 	    rdf.put(doi, node.getDoi());
@@ -224,9 +224,9 @@ public class JsonMapper {
 	    }
 	    rdf.put(hasData, hasDataMap);
 	}
-	
-	play.Logger.debug("CONF: "+node.getConf());
-	
+
+	play.Logger.debug("CONF: " + node.getConf());
+
 	rdf.put("@context", profile.getContext().get("@context"));
 	postprocessing(rdf);
 	return rdf;
@@ -234,7 +234,7 @@ public class JsonMapper {
 
     private Map<String, Object> getDescriptiveMetadata() {
 	InputStream stream = new ByteArrayInputStream(node.getMetadata().getBytes(StandardCharsets.UTF_8));
-	Map<String, Object> rdf = jsonConverter.convert(node.getPid(),stream, RDFFormat.NTRIPLES, 
+	Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream, RDFFormat.NTRIPLES,
 		profile.getContext().get("@context"));
 	return rdf;
     }
@@ -281,9 +281,21 @@ public class JsonMapper {
 	    rdf.put(type, getType(rdf));
 	    postProcessInstitution(rdf);
 	    sortCreatorAndContributors(rdf);
+	    postProcessSubjects(rdf);
 	    postProcessParallelEdition(rdf);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
+	}
+    }
+
+    private void postProcessSubjects(Map<String, Object> m) {
+	Set<Map<String, Object>> subjects = (Set<Map<String, Object>>) m.get("subject");
+	if (subjects != null) {
+	    for (Map<String, Object> subject : subjects) {
+		String currentId = (String) subject.get(ID2);
+		String prefLabel = findLabel(subject);
+		subject.put(PREF_LABEL, prefLabel);
+	    }
 	}
     }
 
@@ -333,7 +345,7 @@ public class JsonMapper {
 	    resolvedObject.put(ID2, id);
 	    resolvedObject.put(PREF_LABEL, value);
 	}
-	if (jsonName!=null && rdf.containsKey(jsonName)) {
+	if (jsonName != null && rdf.containsKey(jsonName)) {
 	    @SuppressWarnings("unchecked")
 	    List<Object> list = (List<Object>) rdf.get(getJsonName(l.getPredicate()));
 	    if (resolvedObject == null) {
@@ -366,13 +378,13 @@ public class JsonMapper {
 	}
     }
 
-    private List<Map<String,Object>> getType(Map<String, Object> rdf) {
-	List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
+    private List<Map<String, Object>> getType(Map<String, Object> rdf) {
+	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 	Set<String> types = (Set<String>) rdf.get(type);
 	if (types != null) {
 	    for (String s : typePrios) {
 		if (types.contains(s)) {
-		    Map<String,Object>tmap=new HashMap();
+		    Map<String, Object> tmap = new HashMap();
 		    tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
 		    tmap.put(ID2, s);
 		    result.add(tmap);
@@ -381,7 +393,7 @@ public class JsonMapper {
 
 	    }
 	}
-	result.add(new HashMap<String,Object>());
+	result.add(new HashMap<String, Object>());
 	return result;
     }
 
@@ -498,13 +510,13 @@ public class JsonMapper {
     }
 
     private String getJsonName(String uri) {
-	String result =  profile.getEtikett(uri).getName();
-	
-	if(result == null){
-	    play.Logger.warn("No json name for "+uri+". Please fix your labels.json");
+	String result = profile.getEtikett(uri).getName();
+
+	if (result == null) {
+	    play.Logger.warn("No json name for " + uri + ". Please fix your labels.json");
 	    result = uri;
 	}
-	
+
 	return result;
     }
 
