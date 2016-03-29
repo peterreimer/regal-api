@@ -298,13 +298,13 @@ public class JsonMapper {
 	    }
 	}
     }
-
+    
     private void postProcessInstitution(Map<String, Object> rdf) {
 	try {
 	    Set<Object> institution = (Set<Object>) rdf.get("institution");
 	    Map<String, Object> inst = ((Map<String, Object>) institution.iterator().next());
 	    String label = findLabel(inst);
-	    inst.put("label", label);
+	    inst.put(PREF_LABEL, label);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	}
@@ -314,10 +314,10 @@ public class JsonMapper {
 	try {
 	    Set<Object> parallelEditions = (Set<Object>) rdf.get("parallelEdition");
 	    Map<String, Object> parallelEdition = ((Map<String, Object>) parallelEditions.iterator().next());
-	    String link = parallelEdition.get("id").toString();
+	    String link = parallelEdition.get(ID2).toString();
 	    String htnummer = link.substring(link.lastIndexOf("/") + 1);
-	    parallelEdition.put("label", htnummer);
-	    parallelEdition.put("id", "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + htnummer);
+	    parallelEdition.put(PREF_LABEL, htnummer);
+	    parallelEdition.put(ID2, "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + htnummer);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	}
