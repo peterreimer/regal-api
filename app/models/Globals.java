@@ -113,7 +113,7 @@ public class Globals {
      * labels etc.
      */
     public static EtikettMakerInterface 
-	profile = new MyEtikettMaker(Play.application().resourceAsStream("labels.json"));
+	profile = new MyEtikettMaker();
 
     /**
      * defines a protocol used by this app

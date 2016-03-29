@@ -49,8 +49,8 @@ import play.Play;
  */
 public class JsonMapper {
 
-    private static final String PREF_LABEL = "label";
-    private static final String ID2 = "id";
+    private static final String PREF_LABEL = Globals.profile.getLabelKey();
+    private static final String ID2 = Globals.profile.getIdAlias();
     /**
      * Here are some short names that must be defined in the context document
      * that is loaded at Globals.context.
@@ -173,7 +173,7 @@ public class JsonMapper {
 	    rdf.put(fulltext_ocr, node.getFulltext());
 
 	Map<String, Object> aboutMap = new TreeMap<String, Object>();
-	aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
+	aboutMap.put("id", node.getAggregationUri() + ".rdf");
 	if (node.getCreatedBy() != null)
 	    aboutMap.put(createdBy, node.getCreatedBy());
 	if (node.getLegacyId() != null)
@@ -193,6 +193,7 @@ public class JsonMapper {
 	}
 	aboutMap.put(created, node.getCreationDate());
 	aboutMap.put(describes, node.getAggregationUri());
+	
 	rdf.put(isDescribedBy, aboutMap);
 	if (node.getDoi() != null)
 	    rdf.put(doi, node.getDoi());
@@ -233,8 +234,7 @@ public class JsonMapper {
 
     private Map<String, Object> getDescriptiveMetadata() {
 	InputStream stream = new ByteArrayInputStream(node.getMetadata().getBytes(StandardCharsets.UTF_8));
-
-	Map<String, Object> rdf = jsonConverter.convert(stream, RDFFormat.NTRIPLES, Globals.namespaces[0] + ":",
+	Map<String, Object> rdf = jsonConverter.convert(node.getPid(),stream, RDFFormat.NTRIPLES, 
 		profile.getContext().get("@context"));
 	return rdf;
     }

@@ -56,7 +56,15 @@
 				</td>
 			</tr>
 		}
-		case _ => { }
+		case d if d == null =>{}
+		case _ => {
+			<tr>
+				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
+				<td>
+					@values
+				</td>
+			</tr>
+		}
 	}
 }
 
@@ -95,7 +103,7 @@
 			@analyseString(value.asInstanceOf[String])
 		}
 		case c : Map[String,Object] => {
-					@displayMap(c.get("id"),c)
+					@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
 		}
 		case _ => {
 		
@@ -104,23 +112,23 @@
 	<br/>
 }
 
-@displayMap(value:Any,map:Map[String,Object])={
-	@value match {
-		case a: String => {
-		 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
-                       <a href=@analyseValue(a)>
-                       @(map.get("label"))
-                       </a> |
-                       <a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(a)">
-                               <span class="glyphicon glyphicon-link"></span>
-                       </a>
-		
-		}
-		case _ => {		
-			<table class="table table-striped table-condensed">
-			@htmlRow(map,"")
-			</table>
-		}
+@displayMap(value:Any,map:Map[String,Object],key:String)={
+	    @value match {
+			case a: String => {
+			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
+	                       <a href=@analyseValue(a)>
+	                       @(map.get("label"))
+	                       </a> |
+	                       <a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(a)">
+	                               <span class="glyphicon glyphicon-link"></span>
+	                       </a>
+			
+			}
+			case _ => {		
+				<table class="table table-striped table-condensed">
+				@htmlRow(map,"")
+				</table>
+			}
 		}
 }
 
