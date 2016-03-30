@@ -173,7 +173,7 @@ public class JsonMapper {
 	    rdf.put(fulltext_ocr, node.getFulltext());
 
 	Map<String, Object> aboutMap = new TreeMap<String, Object>();
-	aboutMap.put("id", node.getAggregationUri() + ".rdf");
+	aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
 	if (node.getCreatedBy() != null)
 	    aboutMap.put(createdBy, node.getCreatedBy());
 	if (node.getLegacyId() != null)
