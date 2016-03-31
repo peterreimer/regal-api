@@ -738,8 +738,8 @@ public class Resource extends MyController {
     public static Promise<Result> enrichMetadata(@PathParam("pid") String pid) {
 	return new ModifyAction().call(pid, userId -> {
 	    Node node = readNodeOrNull(pid);
-	    Node result = modify.enrichMetadata(node);
-	    return getJsonResult(result);
+	    String result = modify.enrichMetadata(node);
+	    return JsonMessage(new Message(json(result)));
 	});
     }
 

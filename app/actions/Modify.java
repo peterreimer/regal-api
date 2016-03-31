@@ -192,8 +192,8 @@ public class Modify extends RegalAction {
 	    String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
 	    content = getLobidDataAsNtripleString(node, alephid);
 	    updateMetadata(node, content);
-	    enrichMetadata(node);
-	    return pid + " metadata successfully updated, lobidified and enriched!";
+	    String enrichMessage = enrichMetadata(node);
+	    return pid + " metadata successfully updated, lobidified and enriched! " + enrichMessage;
 	} else {
 	    updateMetadata(node, content);
 	    return pid + " metadata successfully updated!";
@@ -477,27 +477,31 @@ public class Modify extends RegalAction {
 	return node;
     }
 
-    public Node enrichMetadata(Node node) {
+    public String enrichMetadata(Node node) {
+	try {
+	    play.Logger.info("Enrich " + node.getPid());
+	    String metadata = node.getMetadata();
+	    if (metadata == null || metadata.isEmpty()) {
+		play.Logger.info("Not metadata to enrich " + node.getPid());
+		return "Not metadata to enrich " + node.getPid();
+	    }
+	    play.Logger.info("Enrich " + node.getPid() + " with gnd.");
+	    List<String> gndIds = findAllGndIds(metadata);
+	    List<Statement> enrichStatements = new ArrayList<Statement>();
+	    for (String uri : gndIds) {
+		enrichStatements.addAll(getStatements(uri));
+	    }
 
-	play.Logger.info("Enrich " + node.getPid());
-	String metadata = node.getMetadata();
-	if (metadata == null || metadata.isEmpty()) {
-	    play.Logger.info("Not metadata to enrich " + node.getPid());
-	    return node;
+	    play.Logger.info("Enrich " + node.getPid() + " with institution.");
+	    List<Statement> institutions = findInstitution(node);
+	    enrichStatements.addAll(institutions);
+	    metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+	    updateMetadata(node, metadata);
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	    return "Enrichment of " + node.getPid() + " partially failed !\n" + e.getMessage();
 	}
-	play.Logger.info("Enrich " + node.getPid() + " with gnd.");
-	List<String> gndIds = findAllGndIds(metadata);
-	List<Statement> enrichStatements = new ArrayList<Statement>();
-	for (String uri : gndIds) {
-	    enrichStatements.addAll(getStatements(uri));
-	}
-
-	play.Logger.info("Enrich " + node.getPid() + " with institution.");
-	List<Statement> institutions = findInstitution(node);
-	enrichStatements.addAll(institutions);
-	metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-	updateMetadata(node, metadata);
-	return node;
+	return "Enrichment of " + node.getPid() + " succeeded!";
     }
 
     private List<Statement> findInstitution(Node node) {
@@ -530,8 +534,8 @@ public class Modify extends RegalAction {
 		return result;
 	    }
 	} catch (Exception e) {
-	    e.printStackTrace();
 	    throw new HttpArchiveException(500, e);
+
 	}
     }
 
