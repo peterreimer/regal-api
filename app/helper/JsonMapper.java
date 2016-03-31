@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 
 import org.openrdf.rio.RDFFormat;
 
-import com.sun.org.apache.xml.internal.resolver.Catalog;
-
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
@@ -276,11 +274,11 @@ public class JsonMapper {
 
     private void postprocessing(Map<String, Object> rdf) {
 	try {
+	    addCatalogLink(rdf);
 	    rdf.put(type, getType(rdf));
 	    postProcessInstitution(rdf);
 	    sortCreatorAndContributors(rdf);
 	    postProcessSubjects(rdf);
-	    addCatalogLink(rdf);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	}
@@ -313,10 +311,12 @@ public class JsonMapper {
 
     private void addCatalogLink(Map<String, Object> rdf) {
 	try {
-	    String hbzId = (String) rdf.get("hbzId");
-	    Map<String, Object> catalogLink = new HashMap<>();
-	    catalogLink.put(ID2, "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
-	    catalogLink.put(PREF_LABEL, hbzId);
+	    String hbzId = ((Set<String>) rdf.get("hbzId")).iterator().next();
+	    List<Map<String, Object>> catalogLink = new ArrayList<>();
+	    Map<String, Object> cl=new HashMap<>();
+	    cl.put(ID2, "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
+	    cl.put(PREF_LABEL, hbzId);
+	    catalogLink.add(cl);
 	    rdf.put("catalogLink", catalogLink);
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
