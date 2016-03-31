@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,18 +34,18 @@ import java.util.stream.Collectors;
 import org.openrdf.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
-import de.hbz.lobid.helper.EtikettMaker;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
-import play.Play;
 
 /**
  * @author jan schnasse
  *
  */
+
+@SuppressWarnings("unchecked")
 public class JsonMapper {
 
     private static final String PREF_LABEL = Globals.profile.getLabelKey();
@@ -106,9 +105,6 @@ public class JsonMapper {
     Node node = null;
     EtikettMakerInterface profile = Globals.profile;
     JsonConverter jsonConverter = null;
-
-    private JsonMapper() {
-    }
 
     /**
      * @param node
@@ -289,16 +285,19 @@ public class JsonMapper {
     }
 
     private void postProcessSubjects(Map<String, Object> m) {
-	Set<Map<String, Object>> subjects = (Set<Map<String, Object>>) m.get("subject");
-	if (subjects != null) {
-	    for (Map<String, Object> subject : subjects) {
-		String currentId = (String) subject.get(ID2);
-		String prefLabel = findLabel(subject);
-		subject.put(PREF_LABEL, prefLabel);
+	try {
+	    Set<Map<String, Object>> subjects = (Set<Map<String, Object>>) m.get("subject");
+	    if (subjects != null) {
+		for (Map<String, Object> subject : subjects) {
+		    String prefLabel = findLabel(subject);
+		    subject.put(PREF_LABEL, prefLabel);
+		}
 	    }
+	} catch (Exception e) {
+	    play.Logger.trace("", e);
 	}
     }
-    
+
     private void postProcessInstitution(Map<String, Object> rdf) {
 	try {
 	    Set<Object> institution = (Set<Object>) rdf.get("institution");
@@ -306,7 +305,7 @@ public class JsonMapper {
 	    String label = findLabel(inst);
 	    inst.put(PREF_LABEL, label);
 	} catch (Exception e) {
-	    play.Logger.debug("", e);
+	    play.Logger.trace("", e);
 	}
     }
 
@@ -324,15 +323,19 @@ public class JsonMapper {
     }
 
     private void sortCreatorAndContributors(Map<String, Object> rdf) {
-	List<Map<String, Object>> cr = getSortedListOfCreators(rdf);
-	if (!cr.isEmpty()) {
-	    rdf.put("creator", cr);
-	    rdf.remove("creatorName");
-	    rdf.remove("contributorName");
+	try {
+	    List<Map<String, Object>> cr = getSortedListOfCreators(rdf);
+	    if (!cr.isEmpty()) {
+		rdf.put("creator", cr);
+		rdf.remove("creatorName");
+		rdf.remove("contributorName");
+	    }
+	    List<Map<String, Object>> co = getSortedListOfContributors(rdf);
+	    if (!co.isEmpty())
+		rdf.put("contributor", co);
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
 	}
-	List<Map<String, Object>> co = getSortedListOfContributors(rdf);
-	if (!co.isEmpty())
-	    rdf.put("contributor", co);
     }
 
     private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
@@ -346,7 +349,6 @@ public class JsonMapper {
 	    resolvedObject.put(PREF_LABEL, value);
 	}
 	if (jsonName != null && rdf.containsKey(jsonName)) {
-	    @SuppressWarnings("unchecked")
 	    List<Object> list = (List<Object>) rdf.get(getJsonName(l.getPredicate()));
 	    if (resolvedObject == null) {
 		if (l.isLiteral()) {
@@ -384,7 +386,7 @@ public class JsonMapper {
 	if (types != null) {
 	    for (String s : typePrios) {
 		if (types.contains(s)) {
-		    Map<String, Object> tmap = new HashMap();
+		    Map<String, Object> tmap = new HashMap<>();
 		    tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
 		    tmap.put(ID2, s);
 		    result.add(tmap);
@@ -397,13 +399,6 @@ public class JsonMapper {
 	return result;
     }
 
-    private Map<String, Object> noTypeMap() {
-	Map<String, Object> noTypeMap = new HashMap<String, Object>();
-	noTypeMap.put(ID2, typePrios[typePrios.length - 1]);
-	noTypeMap.put("pref", typePrios[typePrios.length - 1]);
-	return noTypeMap;
-    }
-
     private void addPartsToJsonMap(Map<String, Object> rdf) {
 	for (Link l : node.getPartsSorted()) {
 	    if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
@@ -414,7 +409,6 @@ public class JsonMapper {
 
     List<Map<String, Object>> getSortedListOfCreators(Map<String, Object> nodeAsMap) {
 	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-	@SuppressWarnings("unchecked")
 	Set<String> carray = (Set<String>) nodeAsMap.get("contributorOrder");
 	if (carray == null || carray.isEmpty())
 	    return result;
@@ -431,7 +425,6 @@ public class JsonMapper {
 
     List<Map<String, Object>> getSortedListOfContributors(Map<String, Object> nodeAsMap) {
 	List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-	@SuppressWarnings("unchecked")
 	Set<String> carray = (Set<String>) nodeAsMap.get("contributorOrder");
 	if (carray == null || carray.isEmpty())
 	    return result;
@@ -454,7 +447,6 @@ public class JsonMapper {
 		    + RdfUtils.urlEncode(authorsId).replace("+", "%20"));
 	    return creatorWithoutId;
 	}
-	@SuppressWarnings("unchecked")
 	Set<Map<String, Object>> creators = (Set<Map<String, Object>>) m.get("creator");
 	if (creators != null) {
 	    for (Map<String, Object> creator : creators) {
@@ -471,7 +463,6 @@ public class JsonMapper {
     }
 
     private Map<String, Object> findContributor(Map<String, Object> m, String authorsId) {
-	@SuppressWarnings("unchecked")
 	Set<Map<String, Object>> contributors = (Set<Map<String, Object>>) m.get("contributor");
 	if (contributors != null) {
 	    for (Map<String, Object> contributor : contributors) {

@@ -21,11 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import models.Globals;
+
 /**
  * 
  * @author Jan Schnasse
  *
  */
+@SuppressWarnings("unchecked")
 public class Title {
 
     public static String getTitle(Map<String, Object> hit) {
@@ -43,7 +46,7 @@ public class Title {
 	}
 	List<String> authorNames = new ArrayList<String>();
 	for (Map<String, Object> author : authorList) {
-	    String authorName = (String) author.get("label");
+	    String authorName = (String) author.get(Globals.profile.getLabelKey());
 	    authorNames.add(authorName);
 	}
 	return authorNames != null && !authorNames.isEmpty() ? String.join(" | ", authorNames) + " . " : "";

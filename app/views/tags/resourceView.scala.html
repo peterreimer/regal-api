@@ -117,7 +117,7 @@
 			case a: String => {
 			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
 	                       <a href=@analyseValue(a)>
-	                       @(map.get("label"))
+	                       @(map.get(Globals.profile.getLabelKey()))
 	                       </a> |
 	                       <a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(a)">
 	                               <span class="glyphicon glyphicon-link"></span>
