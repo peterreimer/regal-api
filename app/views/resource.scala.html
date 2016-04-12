@@ -5,29 +5,10 @@
 @main("") {
 
 		@for( hit <- hits){
-<div class="container">
-
-@tags.getTitle(hit)
-<div class="row">
-		<div class="col-md-7"></div>
-	<div class="col-md-5">@tags.selectSourceRadios(hit.get("@id").asInstanceOf[String],"repo")</div>
-	</div>
-</div>
-<div class="container-fluid">
-<div class="row">
-	<div  class="col-md-11">
-		@tags.resourceView(hit,hit.get("@context").asInstanceOf[Map[String,Object]],namespace)
-	</div>
-<div class="col-md-1">
-<button type="button" class="btn btn-default" disabled ><span class="fa fa-edit"/>
-<button type="button" class="btn btn-default" disabled ><span class="fa fa-remove"/>
-<button type="button" class="btn btn-default" disabled ><span class="fa fa-cut"/>
-<button type="button" class="btn btn-default" disabled ><span class="fa fa-paste"/>
-<button type="button" class="btn btn-default" disabled ><span class="fa fa-save"/>
-<button type="button" class="btn btn-default" disabled ><span class="fa fa-link"/>
-</div>
-<div>
-</div>
+			<div class="container">
+			@tags.getTitle(hit)
+			@tags.resourceView(hit,hit.get("@context").asInstanceOf[Map[String,Object]],namespace)
+			</div>
 
 	}
 }

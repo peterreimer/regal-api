@@ -48,8 +48,7 @@ public class RegalAction {
     }
 
     protected String createAggregationUri(String pid) {
-	return Globals.useHttpUris ? Globals.protocol + Globals.server
-		+ "/resource/" + pid : pid;
+	return Globals.useHttpUris ? Globals.protocol + Globals.server + "/resource/" + pid : pid;
     }
 
     /**
@@ -59,8 +58,7 @@ public class RegalAction {
      */
     public String getHttpUriOfResource(Node node) {
 	return Globals.useHttpUris ? node.getAggregationUri()
-		: Globals.protocol + Globals.server + "/resource/"
-			+ node.getAggregationUri();
+		: Globals.protocol + Globals.server + "/resource/" + node.getAggregationUri();
     }
 
     /**
@@ -77,11 +75,18 @@ public class RegalAction {
 	    try {
 		str.append("\n Updated " + action.process(n));
 	    } catch (Exception e) {
-		str.append("\n Not updated " + n.getPid() + " "
-			+ e.getMessage());
+		str.append("\n Not updated " + n.getPid() + " " + e.getMessage());
 	    }
 	}
 	str.append("\n");
 	return str.toString();
+    }
+
+    protected String getUriFromJsonName(String name) {
+	return Globals.profile.getEtikettByName(name).getUri();
+    }
+
+    protected String getJsonName(String uri) {
+	return Globals.profile.getEtikett(uri).getName();
     }
 }

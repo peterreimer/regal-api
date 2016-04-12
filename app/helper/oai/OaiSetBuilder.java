@@ -44,7 +44,7 @@ public class OaiSetBuilder {
 	    if (object.startsWith("http://dewey.info/class/")) {
 		String ddc = object.subSequence(object.length() - 4,
 			object.length() - 1).toString();
-		name = Globals.profile.getLabel(object);
+		name = Globals.profile.getEtikett(object).getLabel();
 		spec = "ddc:" + ddc;
 		pid = "oai:" + ddc;
 	    } else {

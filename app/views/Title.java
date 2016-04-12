@@ -19,16 +19,20 @@ package views;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import models.Globals;
 
 /**
  * 
  * @author Jan Schnasse
  *
  */
+@SuppressWarnings("unchecked")
 public class Title {
 
     public static String getTitle(Map<String, Object> hit) {
-	List<String> title = (List<String>) hit.get("title");
+	Set<String> title = (Set<String>) hit.get("title");
 	return title != null && !title.isEmpty() ? String.join("<br/> ", title) : "";
     }
 
@@ -42,7 +46,7 @@ public class Title {
 	}
 	List<String> authorNames = new ArrayList<String>();
 	for (Map<String, Object> author : authorList) {
-	    String authorName = (String) author.get("prefLabel");
+	    String authorName = (String) author.get(Globals.profile.getLabelKey());
 	    authorNames.add(authorName);
 	}
 	return authorNames != null && !authorNames.isEmpty() ? String.join(" | ", authorNames) + " . " : "";
@@ -53,7 +57,7 @@ public class Title {
     }
 
     public static String getIssued(Map<String, Object> hit) {
-	List<String> issued = (List<String>) hit.get("issued");
+	Set<String> issued = (Set<String>) hit.get("issued");
 	return issued != null && !issued.isEmpty() ? String.join("<br/> ", issued) : "";
     }
 }

@@ -16,8 +16,8 @@
  */
 package models;
 
-import helper.EtikettMaker;
 import helper.Heritrix;
+import helper.MyEtikettMaker;
 import helper.TaskManager;
 
 import java.text.SimpleDateFormat;
@@ -28,6 +28,8 @@ import play.Play;
 import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
 import archive.search.SearchFacade;
+import de.hbz.lobid.helper.Etikett;
+import de.hbz.lobid.helper.EtikettMakerInterface;
 
 import com.google.common.net.InetAddresses;
 
@@ -110,7 +112,8 @@ public class Globals {
     /**
      * labels etc.
      */
-    public static EtikettMaker profile = new EtikettMaker();
+    public static EtikettMakerInterface 
+	profile = new MyEtikettMaker();
 
     /**
      * defines a protocol used by this app

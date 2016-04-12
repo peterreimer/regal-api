@@ -3,7 +3,7 @@
 @(hit: Map[String,Object],context:Map[String,Object],namespace:String)
 
 <table class="table table-striped table-condensed" id="example" class="display" cellspacing="0" width="100%">
-<thead><tr><th>Name</th><th>Value</th></tr></thead>
+<thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
 	@context match{
 		case map : Map[String,Object] => {
 			@for(k<-map.keys){
@@ -18,24 +18,38 @@
 	@values match {
 		case a: String => {
 			<tr>
+				<td style="display:none;">@getWeight(key)</td>
 				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
 				<td>
-					@value(a)
+					@value(a,key)
 				</td>
 			</tr>
   		}
-		case b: List[Any] => {
+		case b: Set[Any] => {
 			<tr>
+			<td style="display:none;">@getWeight(key)</td>
 				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
 				<td>
 					@for(field <- b){
-						@value(field)
+						@value(field,key)
+					}
+				</td>
+			</tr>
+		}
+		case d: List[Any] => {
+			<tr>
+			<td style="display:none;">@getWeight(key)</td>
+				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
+				<td>
+					@for(field <- d){
+						@value(field,key)
 					}
 				</td>
 			</tr>
 		}
 		case c : Map[String,Object] => {
 			<tr>
+			<td style="display:none;">@getWeight(key)</td>
 				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
 				<td>
 					<table class="table table-striped table-condensed">
@@ -46,10 +60,20 @@
 				</td>
 			</tr>
 		}
-		
-		case _ => {}
+		case d if d == null =>{}
+		case _ => {
+			<tr>
+			<td style="display:none;">@getWeight(key)</td>
+				<td><a href=@getFieldId(key)>@getLabel(key)</a></td>
+				<td>
+					@values
+				</td>
+			</tr>
+		}
 	}
 }
+
+
 @analyseString(v: String)={
 	@v match {
 		case a if v.startsWith("http") => {
@@ -78,23 +102,39 @@
 	}
 }
 
-@value(value: Any)= {
+@value(value: Any,key:String)= {
 	@value match {
 		case a: String => {
 			@analyseString(value.asInstanceOf[String])
 		}
-		case b: Map[String,Object] => {
-			<span class="@models.Globals.profile.getIcon(b.get("@id").asInstanceOf[String])"></span>
-			<a href=@analyseValue(b.get("@id").asInstanceOf[String])>
-			@(b.get("prefLabel"))
-			</a> |
-			<a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(b.get("@id").asInstanceOf[String])">
-				<span class="glyphicon glyphicon-link"></span>
-			</a>
+		case c : Map[String,Object] => {
+					@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
 		}
-		case _ => {hu}
+		case _ => {
+		
+		}
 	}
 	<br/>
+}
+
+@displayMap(value:Any,map:Map[String,Object],key:String)={
+	    @value match {
+			case a: String => {
+			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
+	                       <a href=@analyseValue(a)>
+	                       @(map.get(Globals.profile.getLabelKey()))
+	                       </a> |
+	                       <a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(a)">
+	                               <span class="glyphicon glyphicon-link"></span>
+	                       </a>
+			
+			}
+			case _ => {		
+				<table class="table table-striped table-condensed">
+				@htmlRow(map,"")
+				</table>
+			}
+		}
 }
 
 @getLabel(key: String)={
@@ -113,6 +153,25 @@
 				}
 			}
 			case _ => {@key}
+	}
+}
+
+@getWeight(key: String)={
+		@context match{
+			case map : Map[String,Object] => {
+				@map.get(key) match { 
+					case keyMap : Map[String,Object]=> {
+						@keyMap.get("weight") match {
+						 case weight: String =>{
+						 	@weight
+						 }
+						 case _ => {1000}
+						}
+					}
+					case _ => {1000}
+				}
+			}
+			case _ => {1000}
 	}
 }
 
