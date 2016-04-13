@@ -143,7 +143,8 @@ public class JsonMapper {
 	Map<String, Object> rdf = getDescriptiveMetadata();
 
 	changeDcIsPartOfToRegalIsPartOf(rdf);
-
+	rdf.remove("describedby");
+	
 	rdf.put(ID2, node.getPid());
 	rdf.put(primaryTopic, node.getPid());
 	for (Link l : ls) {
