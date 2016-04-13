@@ -142,6 +142,8 @@ public class JsonMapper {
 	List<Link> ls = node.getRelsExt();
 	Map<String, Object> rdf = getDescriptiveMetadata();
 
+	changeDcIsPartOfToRegalIsPartOf(rdf);
+
 	rdf.put(ID2, node.getPid());
 	rdf.put(primaryTopic, node.getPid());
 	for (Link l : ls) {
@@ -151,9 +153,6 @@ public class JsonMapper {
 		continue;
 	    if (IS_PART_OF.equals(l.getPredicate()))
 		continue;
-	    if ("parentPid".equals(getJsonName(l.getPredicate()))) {
-		l.setPredicate("http://hbz-nrw.de/regal#externalParent");
-	    }
 	    addLinkToJsonMap(rdf, l);
 	}
 	addPartsToJsonMap(rdf);
@@ -226,6 +225,11 @@ public class JsonMapper {
 	rdf.put("@context", profile.getContext().get("@context"));
 	postprocessing(rdf);
 	return rdf;
+    }
+
+    private void changeDcIsPartOfToRegalIsPartOf(Map<String, Object> rdf) {
+	rdf.put("externalParent", rdf.get("parentPid"));
+	rdf.remove("parentPid");
     }
 
     private Map<String, Object> getDescriptiveMetadata() {
@@ -313,7 +317,7 @@ public class JsonMapper {
 	try {
 	    String hbzId = ((Set<String>) rdf.get("hbzId")).iterator().next();
 	    List<Map<String, Object>> catalogLink = new ArrayList<>();
-	    Map<String, Object> cl=new HashMap<>();
+	    Map<String, Object> cl = new HashMap<>();
 	    cl.put(ID2, "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
 	    cl.put(PREF_LABEL, hbzId);
 	    catalogLink.add(cl);

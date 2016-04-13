@@ -24,7 +24,6 @@ import helper.oai.OaiDispatcher;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -40,9 +39,7 @@ import java.util.regex.Pattern;
 import models.DublinCoreData;
 import models.Globals;
 import models.Node;
-import models.Pair;
 import models.RegalObject;
-import play.Logger;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
