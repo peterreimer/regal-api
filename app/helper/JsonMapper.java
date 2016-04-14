@@ -145,7 +145,7 @@ public class JsonMapper {
 	changeDcIsPartOfToRegalIsPartOf(rdf);
 	rdf.remove("describedby");
 	rdf.remove("sameAs");
-	
+
 	rdf.put(ID2, node.getPid());
 	rdf.put(primaryTopic, node.getPid());
 	for (Link l : ls) {
@@ -230,8 +230,11 @@ public class JsonMapper {
     }
 
     private void changeDcIsPartOfToRegalIsPartOf(Map<String, Object> rdf) {
-	rdf.put("externalParent", rdf.get("parentPid"));
-	rdf.remove("parentPid");
+	Object pid = rdf.get("parentPid");
+	if (pid != null) {
+	    rdf.put("externalParent", pid);
+	    rdf.remove("parentPid");
+	}
     }
 
     private Map<String, Object> getDescriptiveMetadata() {
