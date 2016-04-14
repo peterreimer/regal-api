@@ -144,6 +144,7 @@ public class JsonMapper {
 
 	changeDcIsPartOfToRegalIsPartOf(rdf);
 	rdf.remove("describedby");
+	rdf.remove("sameAs");
 	
 	rdf.put(ID2, node.getPid());
 	rdf.put(primaryTopic, node.getPid());
