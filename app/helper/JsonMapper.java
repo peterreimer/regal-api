@@ -484,7 +484,7 @@ public class JsonMapper {
 		}
 	    }
 	}
-	return new HashMap<String, Object>();
+	return new HashMap<String, Object>(); 
     }
 
     private String findLabel(Map<String, Object> map) {

@@ -18,6 +18,7 @@ package actions;
 
 import helper.DataciteClient;
 import helper.HttpArchiveException;
+import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
 
@@ -492,6 +493,10 @@ public class Modify extends RegalAction {
 	    play.Logger.info("Enrich " + node.getPid() + " with institution.");
 	    List<Statement> institutions = findInstitution(node);
 	    enrichStatements.addAll(institutions);
+
+	    play.Logger.info("Enrich " + node.getPid() + " with parent.");
+	    List<Statement> catalogParents = findParents(node, metadata);
+	    enrichStatements.addAll(catalogParents);
 	    metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 	    updateMetadata(node, metadata);
 	} catch (Exception e) {
@@ -499,6 +504,26 @@ public class Modify extends RegalAction {
 	    return "Enrichment of " + node.getPid() + " partially failed !\n" + e.getMessage();
 	}
 	return "Enrichment of " + node.getPid() + " succeeded!";
+    }
+
+    private List<Statement> findParents(Node node, String metadata) {
+	List<Statement> catalogParents = new ArrayList<Statement>();
+	// getIsPartOf
+	List<String> parents = RdfUtils.findRdfObjects(node.getPid(), "http://purl.org/dc/terms/isPartOf", metadata,
+		RDFFormat.NTRIPLES);
+	for (String p : parents) {
+	    ValueFactory v = new ValueFactoryImpl();
+	    String label = getEtikett(p);
+	    Statement st = v.createStatement(v.createURI(p), v.createURI("http://www.w3.org/2004/02/skos/core#prefLabel"),
+		    v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
+	    catalogParents.add(st);
+	}
+	return catalogParents;
+    }
+
+    private String getEtikett(String p) {
+	String prefLabel = MyEtikettMaker.getLabelFromEtikettWs(p);
+	return prefLabel;
     }
 
     private List<Statement> findInstitution(Node node) {

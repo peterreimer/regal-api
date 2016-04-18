@@ -28,7 +28,6 @@ import play.Play;
 import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
 import archive.search.SearchFacade;
-import de.hbz.lobid.helper.Etikett;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 
 import com.google.common.net.InetAddresses;
@@ -258,6 +257,11 @@ public class Globals {
 	    .getString("regal-api.mab655x");
 
     public static String doiResolverAddress = "https://dx.doi.org/";
+
+    public static String etikettUrl=Play.application().configuration().getString("regal-api.etikett.url");
+    
+    public static String etikettUser=Play.application().configuration().getString("regal-api.etikett.user");
+    public static String etikettPwd=Play.application().configuration().getString("regal-api.etikett.pwd");
 
     /**
      * @param ipWhiteList

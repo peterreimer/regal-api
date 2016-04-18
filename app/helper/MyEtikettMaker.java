@@ -16,15 +16,26 @@
  */
 package helper;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
+
 import de.hbz.lobid.helper.Etikett;
 import de.hbz.lobid.helper.EtikettMaker;
 import de.hbz.lobid.helper.EtikettMakerInterface;
+import models.Globals;
 import play.Play;
+import play.libs.ws.WSAuthScheme;
+import play.libs.ws.WSResponse;
 
 /**
  * 
@@ -41,7 +52,7 @@ public class MyEtikettMaker implements EtikettMakerInterface {
     public MyEtikettMaker() {
 	String url = null;
 	try {
-	    url = Play.application().configuration().getString("regal-api.etikettUrl");
+	    url = Globals.etikettUrl + "/labels.json";
 	    play.Logger.info("Reload labels from " + url);
 	    URL u = new URL(url);
 	    maker = new EtikettMaker(u.openStream());
@@ -65,15 +76,18 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	try {
 	    result = maker.getEtikett(uri);
 	} catch (RuntimeException e) {
-	    play.Logger.debug("No label defined for " + uri);
 	}
 	if (result == null) {
 	    result = new Etikett(uri);
 	    result.setName(getJsonName(result));
 	}
 	if (result.getLabel() == null || result.getLabel().isEmpty()) {
+	    // result = getLabelFromEtikettWs(uri);
+	}
+	if (result.getLabel() == null || result.getLabel().isEmpty()) {
 	    result.setLabel(result.getUri());
 	}
+	play.Logger.debug("Label " + result.getUri() + " with " + result.getLabel());
 	return result;
     }
 
@@ -168,4 +182,18 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	return TYPE;
     }
 
+    public static String getLabelFromEtikettWs(String uri) {
+	try {
+	    play.Logger.debug(Globals.etikettUrl + "?url=" + uri + "&column=label");
+	    WSResponse response = play.libs.ws.WS.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
+		    .setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC).setFollowRedirects(true).get()
+		    .get(1000);
+	    InputStream input = response.getBodyAsStream();
+	    String content = CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+	    Closeables.closeQuietly(input);
+	    return content;
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
+    }
 }

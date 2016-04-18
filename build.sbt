@@ -6,7 +6,7 @@ version := "0.8.0-SNAPSHOT"
 scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
-  cache,ws,
+  cache,ws,javaWs,
   "org.marc4j" % "marc4j" % "2.4", 
   "junit" % "junit" % "4.10", 
   "org.lobid" % "lodmill-rd" % "regal-0.1.0", 
