@@ -288,8 +288,37 @@ public class JsonMapper {
 	    postProcessInstitution(rdf);
 	    sortCreatorAndContributors(rdf);
 	    postProcessSubjects(rdf);
+	    postProcess(rdf,"redaktor");
+	    postProcess(rdf,"actor");
+	    postProcess(rdf,"producer");
+	    postProcess(rdf,"interviewer");
+	    postProcess(rdf,"collaborator");
+	    postProcess(rdf,"cartographer");
+	    postProcess(rdf,"director");
+	    postProcess(rdf,"cinematographer");
+	    postProcess(rdf,"photographer");
+	    postProcess(rdf,"engraver");
+	    postProcess(rdf,"contributor_");
+	    postProcess(rdf,"dedicatee");
+	    postProcess(rdf,"honoree");
+	    postProcess(rdf,"singer");
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
+	}
+    }
+
+    private void postProcess(Map<String, Object> m ,String role) {
+	try {
+	    Set<Map<String, Object>> roles = (Set<Map<String, Object>>) m.get(role);
+	    if (roles != null) {
+		for (Map<String, Object> r : roles) {
+		    String prefLabel = findLabel(r);
+		    play.Logger.debug("Found label "+prefLabel+" for role "+r);
+		    r.put(PREF_LABEL, prefLabel);
+		}
+	    }
+	} catch (Exception e) {
+	    play.Logger.trace("", e);
 	}
     }
 
@@ -484,7 +513,7 @@ public class JsonMapper {
 		}
 	    }
 	}
-	return new HashMap<String, Object>(); 
+	return new HashMap<String, Object>();
     }
 
     private String findLabel(Map<String, Object> map) {

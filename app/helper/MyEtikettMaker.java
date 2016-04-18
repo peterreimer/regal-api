@@ -87,7 +87,7 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	if (result.getLabel() == null || result.getLabel().isEmpty()) {
 	    result.setLabel(result.getUri());
 	}
-	play.Logger.debug("Label " + result.getUri() + " with " + result.getLabel());
+	//play.Logger.debug("Label " + result.getUri() + " with " + result.getLabel());
 	return result;
     }
 
