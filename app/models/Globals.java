@@ -108,12 +108,7 @@ public class Globals {
      */
     public static TaskManager taskManager = new TaskManager();
 
-    /**
-     * labels etc.
-     */
-    public static EtikettMakerInterface 
-	profile = new MyEtikettMaker();
-
+   
     /**
      * defines a protocol used by this app
      */
@@ -291,6 +286,14 @@ public class Globals {
 	return ips;
     }
 
+    
+    /**
+     * labels etc.
+     */
+    public static EtikettMakerInterface 
+	profile = new MyEtikettMaker();
+
+    
     /**
      * @return the port of the play application
      */
