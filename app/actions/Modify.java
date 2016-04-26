@@ -239,15 +239,25 @@ public class Modify extends RegalAction {
 	    Statement parallelEditionStatement = f.createStatement(f.createURI(pid),
 		    f.createURI(archive.fedora.Vocabulary.REL_MAB_527), f.createURI(lobidUri));
 	    graph.add(parallelEditionStatement);
-	    Statement contributorOrderStatement = f.createStatement(f.createURI(pid),
-		    f.createURI("http://purl.org/lobid/lv#contributorOrder"),
-		    f.createLiteral(getAuthorOrdering(alephid)));
-	    graph.add(contributorOrderStatement);
+	    tryToImportOrderingFromLobidData2(alephid, pid, graph, f);
 	    return RdfUtils.graphToString(RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
 
+    }
+
+    private void tryToImportOrderingFromLobidData2(String alephid, String pid, Graph graph, ValueFactory f) {
+	try {
+	    String ordering = getAuthorOrdering(alephid);
+	    if (ordering != null) {
+		Statement contributorOrderStatement = f.createStatement(f.createURI(pid),
+			f.createURI("http://purl.org/lobid/lv#contributorOrder"), f.createLiteral(ordering));
+		graph.add(contributorOrderStatement);
+	    }
+	} catch (Exception e) {
+	    play.Logger.error("Ordering info not available!", e);
+	}
     }
 
     private void reindexNodeAndParent(Node node) {
@@ -499,6 +509,7 @@ public class Modify extends RegalAction {
 	    enrichStatements.addAll(catalogParents);
 	    metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 	    updateMetadata(node, metadata);
+	    
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	    return "Enrichment of " + node.getPid() + " partially failed !\n" + e.getMessage();
@@ -514,7 +525,8 @@ public class Modify extends RegalAction {
 	for (String p : parents) {
 	    ValueFactory v = new ValueFactoryImpl();
 	    String label = getEtikett(p);
-	    Statement st = v.createStatement(v.createURI(p), v.createURI("http://www.w3.org/2004/02/skos/core#prefLabel"),
+	    Statement st = v.createStatement(v.createURI(p),
+		    v.createURI("http://www.w3.org/2004/02/skos/core#prefLabel"),
 		    v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
 	    catalogParents.add(st);
 	}
@@ -821,10 +833,9 @@ public class Modify extends RegalAction {
 		    return obj;
 		}
 	    }
-	    return "";
+	    return null;
 	} catch (Exception e) {
 	    throw new HttpArchiveException(500, e);
 	}
-
     }
 }
