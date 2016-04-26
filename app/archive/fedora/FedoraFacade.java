@@ -234,8 +234,7 @@ public class FedoraFacade {
 	    // utils.createRelsExt(node);
 	    utils.updateRelsExt(node);
 	} catch (Exception e) {
-	    e.printStackTrace();
-	    play.Logger.debug(node.toString());
+	    play.Logger.error(node.toString(),e);
 	    throw new CreateNodeException(500, e);
 	}
     }

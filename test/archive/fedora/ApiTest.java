@@ -60,7 +60,7 @@ public class ApiTest extends BaseModelTest {
 
 	String parentPid = "test:1234568";
 	RegalObject parentObject = new RegalObject();
-	object.setContentType("monograph");
+	parentObject.setContentType("monograph");
 
 	createObject(parentPid, parentObject, 200);
 	createObject(pid, object, 200);

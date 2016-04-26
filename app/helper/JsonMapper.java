@@ -140,7 +140,8 @@ public class JsonMapper {
      */
     public Map<String, Object> getLd() {
 	List<Link> ls = node.getRelsExt();
-	Map<String, Object> rdf = getDescriptiveMetadata();
+	Map<String, Object> m=getDescriptiveMetadata() ;
+	Map<String, Object> rdf =  m == null ? new HashMap():m;
 
 	changeDcIsPartOfToRegalIsPartOf(rdf);
 	rdf.remove("describedby");
@@ -222,7 +223,7 @@ public class JsonMapper {
 	    rdf.put(hasData, hasDataMap);
 	}
 
-	play.Logger.debug("CONF: " + node.getConf());
+	//play.Logger.debug("CONF: " + node.getConf());
 
 	rdf.put("@context", profile.getContext().get("@context"));
 	postprocessing(rdf);
@@ -238,10 +239,15 @@ public class JsonMapper {
     }
 
     private Map<String, Object> getDescriptiveMetadata() {
+	try{
 	InputStream stream = new ByteArrayInputStream(node.getMetadata().getBytes(StandardCharsets.UTF_8));
 	Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream, RDFFormat.NTRIPLES,
 		profile.getContext().get("@context"));
 	return rdf;
+	}catch(Exception e){
+	    play.Logger.debug(node.getPid()+" has no descriptive Metadata!");
+	}
+	return null;
     }
 
     /**
@@ -250,7 +256,8 @@ public class JsonMapper {
      */
     public Map<String, Object> getLdShortStyle() {
 	List<Link> ls = node.getRelsExt();
-	Map<String, Object> rdf = getDescriptiveMetadata();
+	Map<String, Object> m=getDescriptiveMetadata() ;
+	Map<String, Object> rdf =  m == null ? new HashMap():m;
 	rdf.put(ID2, node.getPid());
 	for (Link l : ls) {
 	    if (getUriFromJsonName(title).equals(l.getPredicate())) {
@@ -284,7 +291,8 @@ public class JsonMapper {
     private void postprocessing(Map<String, Object> rdf) {
 	try {
 	    addCatalogLink(rdf);
-	    rdf.put(type, getType(rdf));
+	    List<Map<String, Object>> t=getType(rdf);
+	    if(t!=null && t.size()!=0) rdf.put(type, t);
 	    postProcessInstitution(rdf);
 	    sortCreatorAndContributors(rdf);
 	    postProcessSubjects(rdf);
@@ -357,7 +365,7 @@ public class JsonMapper {
 	    catalogLink.add(cl);
 	    rdf.put("catalogLink", catalogLink);
 	} catch (Exception e) {
-	    play.Logger.debug("", e);
+	    play.Logger.debug("No catalog link available!");
 	}
     }
 
