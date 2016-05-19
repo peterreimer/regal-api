@@ -296,6 +296,8 @@ public class JsonMapper {
 	    postProcessInstitution(rdf);
 	    sortCreatorAndContributors(rdf);
 	    postProcessSubjects(rdf);
+	    postProcess(rdf,"creator");
+	    postProcess(rdf,"contributor");
 	    postProcess(rdf,"redaktor");
 	    postProcess(rdf,"actor");
 	    postProcess(rdf,"producer");
@@ -378,8 +380,9 @@ public class JsonMapper {
 		rdf.remove("contributorName");
 	    }
 	    List<Map<String, Object>> co = getSortedListOfContributors(rdf);
-	    if (!co.isEmpty())
+	    if (!co.isEmpty()){
 		rdf.put("contributor", co);
+	    }
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	}
@@ -486,7 +489,7 @@ public class JsonMapper {
 	return result;
     }
 
-    private Map<String, Object> findCreator(Map<String, Object> m, String authorsId) {
+    private Map<String, Object> findCreator(Map<String, Object> m, String authorsId) {	
 	if (!authorsId.startsWith("http")) {
 	    Map<String, Object> creatorWithoutId = new HashMap<String, Object>();
 	    creatorWithoutId.put(PREF_LABEL, authorsId);
@@ -499,9 +502,7 @@ public class JsonMapper {
 	    for (Map<String, Object> creator : creators) {
 		String currentId = (String) creator.get(ID2);
 		play.Logger.debug(creator + " " + currentId + " " + authorsId);
-		if (authorsId.compareTo(currentId) == 0) {
-		    String prefLabel = findLabel(creator);
-		    creator.put(PREF_LABEL, prefLabel);
+		if (authorsId.compareTo(currentId) == 0) {		    
 		    return creator;
 		}
 	    }
@@ -515,8 +516,6 @@ public class JsonMapper {
 	    for (Map<String, Object> contributor : contributors) {
 		String currentId = (String) contributor.get(ID2);
 		if (authorsId.compareTo(currentId) == 0) {
-		    String prefLabel = findLabel(contributor);
-		    contributor.put(PREF_LABEL, prefLabel);
 		    return contributor;
 		}
 	    }
