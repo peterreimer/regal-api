@@ -256,7 +256,7 @@ public class Modify extends RegalAction {
 		graph.add(contributorOrderStatement);
 	    }
 	} catch (Exception e) {
-	    play.Logger.error("Ordering info not available!", e);
+	    play.Logger.error(alephid+": Ordering info not available!");
 	}
     }
 
