@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -295,7 +296,7 @@ public class JsonMapper {
 	    if(t!=null && t.size()!=0) rdf.put(type, t);
 	    postProcessInstitution(rdf);
 	    sortCreatorAndContributors(rdf);
-	    postProcessSubjects(rdf);
+	    postProcess(rdf,"subject");
 	    postProcess(rdf,"creator");
 	    postProcess(rdf,"contributor");
 	    postProcess(rdf,"redaktor");
@@ -319,26 +320,12 @@ public class JsonMapper {
 
     private void postProcess(Map<String, Object> m ,String role) {
 	try {
-	    Set<Map<String, Object>> roles = (Set<Map<String, Object>>) m.get(role);
+	    Collection<Map<String, Object>> roles = (Collection<Map<String, Object>>) m.get(role);
 	    if (roles != null) {
 		for (Map<String, Object> r : roles) {
 		    String prefLabel = findLabel(r);
 		    play.Logger.debug("Found label "+prefLabel+" for role "+r);
 		    r.put(PREF_LABEL, prefLabel);
-		}
-	    }
-	} catch (Exception e) {
-	    play.Logger.trace("", e);
-	}
-    }
-
-    private void postProcessSubjects(Map<String, Object> m) {
-	try {
-	    Set<Map<String, Object>> subjects = (Set<Map<String, Object>>) m.get("subject");
-	    if (subjects != null) {
-		for (Map<String, Object> subject : subjects) {
-		    String prefLabel = findLabel(subject);
-		    subject.put(PREF_LABEL, prefLabel);
 		}
 	    }
 	} catch (Exception e) {
