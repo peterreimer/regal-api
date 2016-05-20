@@ -17,6 +17,7 @@
 package views;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class Title {
     }
 
     public static String getAuthorNames(Map<String, Object> hit) {
-	List<Map<String, Object>> authorList = (List<Map<String, Object>>) hit.get("creator");
+	Collection<Map<String, Object>> authorList = (Collection<Map<String, Object>>) hit.get("creator");
 	if (authorList == null || authorList.isEmpty()){
 	     authorList = getContributorList(hit);
 	    if(authorList == null || authorList.isEmpty()){

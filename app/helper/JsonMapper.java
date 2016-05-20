@@ -90,7 +90,7 @@ public class JsonMapper {
 	    "http://purl.org/ontology/mo/PublishedScore", "http://purl.org/lobid/lv#Legislation",
 	    "http://purl.org/ontology/bibo/ReferenceSource", "http://purl.org/lobid/lv#OfficialPublication",
 	    "http://purl.org/lobid/lv#Bibliography", "http://purl.org/lobid/lv#Festschrift",
-	    "http://purl.org/ontology/bibo/Proceedings", "http://purl.org/lobid/lv#EditedVolume",
+	    "http://purl.org/ontology/bibo/Proceedings","http://hbz-nrw.de/regal#ResearchData", "http://purl.org/lobid/lv#EditedVolume",
 	    "http://purl.org/ontology/bibo/Thesis", "http://purl.org/lobid/lv#Miscellaneous",
 	    "http://purl.org/ontology/mo/Record", "http://purl.org/ontology/bibo/Map",
 	    "http://purl.org/ontology/bibo/AudioVisualDocument", "http://purl.org/ontology/bibo/AudioDocument",
@@ -313,6 +313,7 @@ public class JsonMapper {
 	    postProcess(rdf,"dedicatee");
 	    postProcess(rdf,"honoree");
 	    postProcess(rdf,"singer");
+	    postProcess(rdf,"professionalGroup");
 	} catch (Exception e) {
 	    play.Logger.debug("", e);
 	}
@@ -522,7 +523,10 @@ public class JsonMapper {
 
 	if (map.containsKey("preferredName"))
 	    return (String) map.get("preferredName");
-
+	
+	if (map.containsKey("preferredNameForTheSubjectHeading"))
+	    return (String) map.get("preferredNameForTheSubjectHeading");
+	
 	if (map.containsKey(PREF_LABEL))
 	    return (String) map.get(PREF_LABEL);
 

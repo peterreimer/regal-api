@@ -194,7 +194,8 @@ public class Modify extends RegalAction {
 	    return pid + " metadata successfully updated, lobidified and enriched! " + enrichMessage;
 	} else {
 	    updateMetadata(node, content);
-	    return pid + " metadata successfully updated!";
+	    String enrichMessage = enrichMetadata(node);
+	    return pid + " metadata successfully updated, and enriched! " + enrichMessage;
 	}
     }
 
@@ -539,6 +540,7 @@ public class Modify extends RegalAction {
     }
 
     private List<Statement> findInstitution(Node node) {
+	List<Statement> result = new ArrayList<Statement>();
 	try {
 	    String alephid = new Read().getIdOfParallelEdition(node);
 	    String uri = Globals.lobidAddress + alephid + "/about?format=source";
@@ -547,7 +549,7 @@ public class Modify extends RegalAction {
 		String gndEndpoint = "http://d-nb.info/gnd/";
 		List<Element> institutionHack = XmlUtils
 			.getElements("//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield", in, null);
-		List<Statement> result = new ArrayList<Statement>();
+		
 		for (Element el : institutionHack) {
 		    String marker = el.getTextContent();
 		    if (!marker.contains("ellinet"))
@@ -565,12 +567,13 @@ public class Modify extends RegalAction {
 		    result.add(link);
 		    result.addAll(getStatements(gndId));
 		}
-		return result;
+		
 	    }
 	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
+	    play.Logger.info("No institution found for "+node.getPid());
 
 	}
+	return result;
     }
 
     private List<Statement> getStatements(String uri) {
@@ -583,6 +586,7 @@ public class Modify extends RegalAction {
 		if (!(s.getSubject() instanceof BNode)) {
 		    if (isLiteral) {
 			ValueFactory v = new ValueFactoryImpl();
+			play.Logger.info("Get data from "+uri);
 			Statement newS = v.createStatement(v.createURI(uri), s.getPredicate(), v.createLiteral(
 				Normalizer.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC)));
 			filteredStatements.add(newS);
