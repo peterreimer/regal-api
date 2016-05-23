@@ -15,6 +15,7 @@
  *
  */
 package helper;
+import play.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,35 +36,42 @@ import actions.Read;
  *
  */
 public class Webgatherer implements Runnable {
+	
+    private static final Logger.ALogger WebgatherLogger = Logger.of("webgatherer");
 
     @Override
     public void run() {
 	// get all webpages
 
-	play.Logger.info("List 50000 resources of type webpage from namespace "
+    WebgatherLogger.info("List 50000 resources of type webpage from namespace "
 		+ Globals.namespaces[0] + ".");
 	List<Node> webpages = new Read().listRepo("webpage",
 		Globals.namespaces[0], 0, 50000);
-	play.Logger.info("Found " + webpages.size() + " webpages.");
+	WebgatherLogger.info("Found " + webpages.size() + " webpages.");
 	int count = 0;
+	int precount = 0;
 	int limit = 5;
 	// get all configs
 	for (Node n : webpages) {
 	    try {
+	    precount++;
+	    WebgatherLogger.info("Precount: "+precount);
+	    WebgatherLogger.info("PID: " + n.getPid());
+	    WebgatherLogger.info("Config: " + n.getConf() + " is being created in Gatherconf.");
 		Gatherconf conf = Gatherconf.create(n.getConf());
-		play.Logger.info("Test if " + n.getPid() + " is scheduled.");
+		WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
 		// find open jobs
 		if (isOutstanding(n, conf)) {
 		    count++;
-		    play.Logger.info("Create new version for: " + n.getPid()
+		    WebgatherLogger.info("Create new version for: " + n.getPid()
 			    + ".");
 		    new Create().createWebpageVersion(n);
 		}
 
 	    } catch (WebgathererTooBusyException e) {
-		play.Logger.error("Webgatherer stopped! Heritrix is too busy.");
+		WebgatherLogger.error("Webgatherer stopped! Heritrix is too busy.");
 	    } catch (Exception e) {
-		play.Logger.error("", e);
+		WebgatherLogger.error("", e);
 	    }
 	    if (count >= limit)
 		break;
@@ -100,7 +108,7 @@ public class Webgatherer implements Runnable {
 	Date now = cal.getTime();
 	cal.setTime(lastHarvest);
 	Date nextTimeHarvest = getSchedule(cal, conf);
-	play.Logger.info(n.getPid()
+	WebgatherLogger.info(n.getPid()
 		+ " "
 		+ n.getConf()
 		+ " will be launched next time at "
