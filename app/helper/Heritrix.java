@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import models.Gatherconf;
+import play.Logger;
 import play.Play;
 
 import com.sun.jersey.api.client.Client;
@@ -46,6 +47,7 @@ public class Heritrix {
 	    .getString("regal-api.heritrix.jobDir");
 
     final static Client client =  HeritrixWebclient.createWebclient();
+    private static final Logger.ALogger WebgatherLogger = Logger.of("webgatherer");
 
     /**
      * @param name
@@ -66,7 +68,7 @@ public class Heritrix {
 		    + name);
 	    String response = resource.accept("application/xml").post(
 		    String.class, "action=teardown");
-	    play.Logger.info(response);
+	    WebgatherLogger.info(response);
 	    return response;
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
@@ -82,15 +84,15 @@ public class Heritrix {
      * @param conf
      */
     public void createJob(Gatherconf conf) {
-	play.Logger.debug("Create new job " + conf.getName());
+	WebgatherLogger.debug("Create new job " + conf.getName());
 	File dir = createJobDir(conf);
 	try {
 	    teardown(conf.getName());
 	} catch (RuntimeException e) {
-	    play.Logger.debug("", e);
+	    WebgatherLogger.debug("", e);
 	}
 	try {
-	    play.Logger.debug(" addJobDirToHeritrix(dir) " + dir);
+	    WebgatherLogger.debug(" addJobDirToHeritrix(dir) " + dir);
 	    addJobDirToHeritrix(dir);
 	} catch (Exception e) {
 	    if (dir.exists())
@@ -103,7 +105,7 @@ public class Heritrix {
     private File createJobDir(Gatherconf conf) {
 	try {
 	    // Create Job Directory
-	    play.Logger.debug("Create job Directory " + jobDir + "/"
+	    WebgatherLogger.debug("Create job Directory " + jobDir + "/"
 		    + conf.getName());
 	    File dir = new File(jobDir + "/" + conf.getName());
 	    dir.mkdirs();
@@ -129,8 +131,8 @@ public class Heritrix {
 		    "Edoweb crawl of" + conf.getUrl());
 	    content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
 
-	    play.Logger.debug("Print-----\n" + content + "\n to \n"
-		    + dir.getAbsolutePath() + "/crawler-beans.cxml");
+	    // WebgatherLogger.debug("Print-----\n" + content + "\n to \n"
+		//    + dir.getAbsolutePath() + "/crawler-beans.cxml");
 
 	    Files.write(
 		    Paths.get(dir.getAbsolutePath() + "/crawler-beans.cxml"),
@@ -148,7 +150,7 @@ public class Heritrix {
 	    String response = resource.accept("application/xml")
 		    .post(String.class,
 			    "action=add&addpath=" + dir.getAbsolutePath());
-	    play.Logger.info(response);
+	    WebgatherLogger.info(response);
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
 	}
@@ -175,7 +177,7 @@ public class Heritrix {
 	try {
 	    WebResource resource = client.resource(restUrl + "/engine/job/"
 		    + name);
-	    play.Logger.debug(resource.accept("application/xml").post(
+	    WebgatherLogger.debug(resource.accept("application/xml").post(
 		    String.class, "action=launch"));
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
@@ -207,10 +209,10 @@ public class Heritrix {
 	File[] files = dir.listFiles(file -> {
 	    String now = new SimpleDateFormat("yyyyMMdd")
 		    .format(new java.util.Date());
-	    play.Logger.debug("Directory must start with " + now);
+	    WebgatherLogger.debug("Directory must start with " + now);
 	    return file.isDirectory() && file.getName().startsWith(now);
 	});
-	play.Logger.debug(java.util.Arrays.toString(files));
+	WebgatherLogger.debug(java.util.Arrays.toString(files));
 	if (files == null || files.length <= 0) {
 	    throw new RuntimeException("No directory with timestamp created!");
 	}
@@ -231,7 +233,7 @@ public class Heritrix {
      * @return local path of the latest harvested warc
      */
     public String findLatestWarc(File latest) {
-	play.Logger.debug(latest.getAbsolutePath() + "/warcs");
+	WebgatherLogger.debug(latest.getAbsolutePath() + "/warcs");
 	File warcDir = new File(latest.getAbsolutePath() + "/warcs");
 	return warcDir.listFiles()[0].getAbsolutePath();
     }
@@ -250,7 +252,7 @@ public class Heritrix {
 		    + name);
 	    String response = resource.accept("application/xml").post(
 		    String.class, "action=unpause");
-	    play.Logger.info(response);
+	    WebgatherLogger.info(response);
 	    return response;
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
@@ -263,7 +265,7 @@ public class Heritrix {
      * @return true if a jobdirectory is present
      */
     public boolean jobExists(String name) {
-	play.Logger.debug("Test if jobDir exists " + jobDir + "/" + name);
+	WebgatherLogger.debug("Test if jobDir exists " + jobDir + "/" + name);
 	return new File(jobDir + "/" + name).exists();
     }
 
@@ -303,11 +305,12 @@ public class Heritrix {
     public boolean isBusy() {
 	try {
 	    
+		WebgatherLogger.debug("restUrl="+restUrl);
 	    WebResource resource = client.resource(restUrl + "/engine/");
 	    resource.get(String.class);
 	    return false;
 	} catch (Exception e) {
-	    play.Logger.debug("",e);
+	    WebgatherLogger.debug("",e);
 	    return true;
 	}
     }

@@ -30,18 +30,22 @@ import models.Globals;
 import models.Node;
 import models.RegalObject;
 import models.RegalObject.Provenience;
+import play.Logger;
 
 /**
  * @author Jan Schnasse
  *
  */
 public class Create extends RegalAction {
+	
+	private static final Logger.ALogger WebgatherLogger = Logger.of("webgatherer");
 
     @SuppressWarnings({ "javadoc", "serial" })
     public class WebgathererTooBusyException extends HttpArchiveException {
 
 	public WebgathererTooBusyException(int status, String msg) {
 	    super(status, msg);
+	    WebgatherLogger.error(msg);
 	}
 
     }
@@ -235,16 +239,16 @@ public class Create extends RegalAction {
 		throw new HttpArchiveException(400,
 			n.getContentType() + " is not supported. Operation works only on regalType:\"webpage\"");
 	    }
-	    play.Logger.debug("Create webpageVersion " + n.getPid());
+	    WebgatherLogger.debug("Create webpageVersion " + n.getPid());
 	    Gatherconf conf = Gatherconf.create(n.getConf());
-	    play.Logger.debug("Create webpageVersi " + conf.toString());
+	    WebgatherLogger.debug("Create webpageVersi " + conf.toString());
 	    // execute heritrix job
 	    conf.setName(n.getPid());
 	    if (!Globals.heritrix.jobExists(conf.getName())) {
 		Globals.heritrix.createJob(conf);
 	    }
 	    boolean success = Globals.heritrix.teardown(conf.getName());
-	    play.Logger.debug("Teardown " + conf.getName() + " " + success);
+	    WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
 	    Globals.heritrix.launch(conf.getName());
 
 	    Thread.currentThread().sleep(10000);
@@ -258,7 +262,7 @@ public class Create extends RegalAction {
 	    String uriPath = Globals.heritrix.getUriPath(warcPath);
 
 	    String localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
-	    play.Logger.debug("Path to WARC " + localpath);
+	    WebgatherLogger.debug("Path to WARC " + localpath);
 
 	    // create fedora object with unmanaged content pointing to
 	    // the respective warc container
@@ -284,7 +288,7 @@ public class Create extends RegalAction {
 	    conf.setLocalDir(crawlDir.getAbsolutePath());
 	    String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
-	    play.Logger.info(msg);
+	    WebgatherLogger.info(msg);
 
 	    return webpageVersion;
 	} catch (Exception e) {

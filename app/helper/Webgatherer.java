@@ -101,12 +101,19 @@ public class Webgatherer implements Runnable {
 	    return false;
 	List<Link> parts = n
 		.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
-	if (parts == null || parts.isEmpty())
+	if (parts == null || parts.isEmpty()) {
 	    return true;
+	}
 	Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
 	Calendar cal = Calendar.getInstance();
 	Date now = cal.getTime();
 	cal.setTime(lastHarvest);
+	if( conf.getInterval().equals(models.Gatherconf.Interval.once) ) {
+		WebgatherLogger.info(n.getPid() + " will be gathered only once. It has already been gathered on "
+		+ new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss")
+		.format(lastHarvest));
+		return false;
+	}
 	Date nextTimeHarvest = getSchedule(cal, conf);
 	WebgatherLogger.info(n.getPid()
 		+ " "
@@ -137,6 +144,8 @@ public class Webgatherer implements Runnable {
 	case annually:
 	    cal.add(Calendar.YEAR, 1);
 	    break;
+	case once:
+		break;
 	}
 	return cal.getTime();
     }
