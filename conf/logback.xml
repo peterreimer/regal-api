@@ -6,8 +6,27 @@
     
   <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
      <file>${application.home}/logs/application.log</file>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+       <!-- Daily rollover with compression -->
+       <fileNamePattern>${application.home}/logs/application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+       <!-- keep 366 days worth of history -->
+       <maxHistory>366</maxHistory>
+     </rollingPolicy>
+     <encoder>
+       <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
+     </encoder>
+  </appender>
+
+  <appender name="FILE-WEBGATHERER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+     <file>${application.home}/logs/webgatherer.log</file>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+       <!-- Daily rollover with compression -->
+       <fileNamePattern>${application.home}/logs/webgatherer-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+       <!-- keep 366 days worth of history -->
+       <maxHistory>366</maxHistory>
+     </rollingPolicy>
      <encoder>
        <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
      </encoder>
@@ -27,8 +46,13 @@
     <appender-ref ref="STDOUT" />
   </appender>
 
-  <logger name="play" level="INFO" />
-  <logger name="application" level="DEBUG" />
+  <!--logger name="play" level="INFO" /-->
+  <logger name="application" level="DEBUG">
+    <appender-ref ref="FILE" />
+  </logger>
+  <logger name="webgatherer" level="DEBUG" additivity="false">
+    <appender-ref ref="FILE-WEBGATHERER" />
+  </logger>
   
   <!-- Off these ones as they are annoying, and anyway we manage configuration ourself -->
   <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
@@ -37,6 +61,7 @@
   <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
 
   <root level="WARN">
+    <appender-ref ref="FILE" />
     <appender-ref ref="ASYNCFILE" />
     <appender-ref ref="ASYNCSTDOUT" />
   </root>
