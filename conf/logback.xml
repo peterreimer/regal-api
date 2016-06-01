@@ -12,7 +12,7 @@
        <!-- Daily rollover with compression -->
        <fileNamePattern>${application.home}/logs/application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
        <!-- keep 366 days worth of history -->
-       <maxHistory>366</maxHistory>
+       <maxHistory>9999</maxHistory>
      </rollingPolicy>
      <encoder>
        <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
@@ -25,7 +25,20 @@
        <!-- Daily rollover with compression -->
        <fileNamePattern>${application.home}/logs/webgatherer-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
        <!-- keep 366 days worth of history -->
-       <maxHistory>366</maxHistory>
+       <maxHistory>9999</maxHistory>
+     </rollingPolicy>
+     <encoder>
+       <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
+     </encoder>
+  </appender>
+
+  <appender name="FILE-ADDURN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+     <file>${application.home}/logs/addurn.log</file>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+       <!-- Daily rollover with compression -->
+       <fileNamePattern>${application.home}/logs/addurn-log-%d{yyyy-MM-dd}</fileNamePattern>
+       <!-- keep 366 days worth of history -->
+       <maxHistory>9999</maxHistory>
      </rollingPolicy>
      <encoder>
        <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
@@ -52,6 +65,9 @@
   </logger>
   <logger name="webgatherer" level="DEBUG" additivity="false">
     <appender-ref ref="FILE-WEBGATHERER" />
+  </logger>
+  <logger name="addurn" level="DEBUG" additivity="false">
+    <appender-ref ref="FILE-ADDURN" />
   </logger>
   
   <!-- Off these ones as they are annoying, and anyway we manage configuration ourself -->

@@ -31,11 +31,15 @@ import actions.Read;
 
 import com.ibm.icu.util.Calendar;
 
+import play.Logger;
+
 /**
  * @author Jan Schnasse
  *
  */
 public class UrnAllocator implements Runnable {
+	
+	private static final Logger.ALogger addUrnLogger = Logger.of("addurn");
 
     @Override
     public void run() {
@@ -49,7 +53,7 @@ public class UrnAllocator implements Runnable {
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	String d = dateFormat.format(until);
-	play.Logger
+	addUrnLogger
 		.info("-XPOST /utils/addUrnToAll?namespace=edoweb&snid=hbz:929:02&dateBefore="
 			+ d);
 	List<SearchHit> hits = new Read().list(Globals.namespaces[0], from,
@@ -58,7 +62,7 @@ public class UrnAllocator implements Runnable {
 		.collect(Collectors.toList());
 	List<Node> nodes = new Read().getNodes(ids);
 	nodes.stream().forEach(n -> n.setLastModifiedBy("UrnAllocator"));
-	play.Logger.info(new Modify()
+	addUrnLogger.info(new Modify()
 		.addUrnToAll(nodes, Globals.urnSnid, until));
     }
 }
