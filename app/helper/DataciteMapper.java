@@ -17,8 +17,9 @@
 package helper;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 
 import models.DataciteRecord;
@@ -73,8 +74,8 @@ public class DataciteMapper {
 
     private static void addSizes(Map<String, Object> ld, DataciteRecord rec) {
 	try {
-	    String bibDetails = (String) ((List<String>) ld
-		    .get("bibliographicCitation")).get(0);
+	    String bibDetails = (String) ((HashSet<String>)ld
+		    .get("bibliographicCitation")).iterator().next();
 	    if (bibDetails != null) {
 		rec.sizes.add(new Pair<String, String>(bibDetails, null));
 	    }
@@ -88,8 +89,8 @@ public class DataciteMapper {
 	    DataciteRecord rec) {
 	try {
 	    // Lobid
-	    String lobidUrl = (String) ((List<Map<String, Object>>) ld
-		    .get("parallelEdition")).get(0).get("prefLabel");
+	    String lobidUrl = (String) ((HashSet<Map<String, Object>>) ld
+		    .get("parallelEdition")).iterator().next().get("prefLabel");
 	    if (lobidUrl != null) {
 		// HT
 		String ht = lobidUrl.substring(lobidUrl.lastIndexOf("/") + 1);
@@ -103,7 +104,7 @@ public class DataciteMapper {
 			"LOD-Catalog"));
 	    }
 	    // URN
-	    List<String> urns = (List<String>) ld.get("urn");
+	    Collection<String> urns = (Collection<String>) ld.get("urn");
 	    if (urns != null) {
 		for (String urn : urns) {
 		    rec.alternateIdentifiers.add(new Pair<String, String>(urn,
@@ -135,7 +136,7 @@ public class DataciteMapper {
 
     private static void addLanguage(Map<String, Object> ld, DataciteRecord rec) {
 	try {
-	    List<Map<String, Object>> languages = (List<Map<String, Object>>) ld
+	    Collection<Map<String, Object>> languages = (Collection<Map<String, Object>>) ld
 		    .get("language");
 	    if (languages != null) {
 		for (Map<String, Object> item : languages) {
@@ -152,7 +153,7 @@ public class DataciteMapper {
     private static void addPublicationYear(Map<String, Object> ld,
 	    DataciteRecord rec) {
 	try {
-	    rec.publicationYear = ((List<String>) ld.get("issued")).get(0);
+	    rec.publicationYear = ((HashSet<String>)ld.get("issued")).iterator().next();
 	} catch (NullPointerException e) {
 	    play.Logger
 		    .debug("DataciteMapper: Metadatafield 'PublicationYear' not found!");
@@ -161,7 +162,9 @@ public class DataciteMapper {
 
     private static void addPublisher(Map<String, Object> ld, DataciteRecord rec) {
 	try {
-	    rec.publisher = ((List<String>) ld.get("publisher")).get(0);
+	    play.Logger.debug(ld.get("publisher").getClass()+"");
+	    play.Logger.debug(ld.get("publisher")+"");
+	    rec.publisher = ((HashSet<String>) ld.get("publisher")).iterator().next();
 
 	} catch (NullPointerException e) {
 	    play.Logger
@@ -169,7 +172,7 @@ public class DataciteMapper {
 	}
 	try {
 	    if (rec.publisher == null || rec.publisher.isEmpty()) {
-		rec.publisher = ((List<String>) ld.get("P60489")).get(0);
+		rec.publisher = ((HashSet<String>)ld.get("P60489")).iterator().next();
 	    }
 	} catch (NullPointerException e) {
 
@@ -180,33 +183,33 @@ public class DataciteMapper {
 
     private static void addTitles(Map<String, Object> ld, DataciteRecord rec) {
 	try {
-	    List<String> list = (List<String>) ld.get("title");
+	    Collection<String> list = (Collection<String>) ld.get("title");
 	    if (list != null) {
 		for (String item : list) {
 		    rec.titles.add(new Pair<String, String>(item, ""));
 		}
 	    }
-	    list = (List<String>) ld.get("alternativeTitle");
+	    list = (Collection<String>) ld.get("alternativeTitle");
 	    if (list != null) {
 		for (String item : list) {
 		    rec.titles.add(new Pair<String, String>(item,
 			    "alternativeTitle"));
 		}
 	    }
-	    list = (List<String>) ld.get("otherTitleInformation");
+	    list = (Collection<String>) ld.get("otherTitleInformation");
 	    if (list != null) {
 		for (String item : list) {
 		    rec.titles.add(new Pair<String, String>(item,
 			    "otherTitleInformation"));
 		}
 	    }
-	    list = (List<String>) ld.get("fullTitle");
+	    list = (Collection<String>) ld.get("fullTitle");
 	    if (list != null) {
 		for (String item : list) {
 		    rec.titles.add(new Pair<String, String>(item, "fullTitle"));
 		}
 	    }
-	    list = (List<String>) ld.get("shortTitle");
+	    list = (Collection<String>) ld.get("shortTitle");
 	    if (list != null) {
 		for (String item : list) {
 		    rec.titles
@@ -220,7 +223,7 @@ public class DataciteMapper {
 
     private static void addCreators(Map<String, Object> ld, DataciteRecord rec) {
 	try {
-	    List<Map<String, Object>> creators = (List<Map<String, Object>>) ld
+	    Collection<Map<String, Object>> creators = (Collection<Map<String, Object>>) ld
 		    .get("creator");
 	    if (creators != null) {
 		for (Map<String, Object> item : creators) {
@@ -228,14 +231,14 @@ public class DataciteMapper {
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
-	    List<String> creatorNames = (List<String>) ld.get("creatorName");
+	    Collection<String> creatorNames = (Collection<String>) ld.get("creatorName");
 	    if (creatorNames != null) {
 		for (String item : creatorNames) {
 		    rec.creators.add(new Pair<String, String>(item, null));
 		}
 	    }
 
-	    List<Map<String, Object>> contributors = (List<Map<String, Object>>) ld
+	    Collection<Map<String, Object>> contributors = (Collection<Map<String, Object>>) ld
 		    .get("contributor");
 	    if (contributors != null) {
 		for (Map<String, Object> item : contributors) {
@@ -243,7 +246,7 @@ public class DataciteMapper {
 		    rec.creators.add(new Pair<String, String>(subject, null));
 		}
 	    }
-	    List<String> contributorNames = (List<String>) ld
+	    Collection<String> contributorNames = (Collection<String>) ld
 		    .get("contributorName");
 	    if (contributorNames != null) {
 		for (String item : contributorNames) {
@@ -257,7 +260,7 @@ public class DataciteMapper {
     }
 
     private static void addSubjects(Map<String, Object> ld, DataciteRecord rec) {
-	List<Map<String, Object>> subjects = (List<Map<String, Object>>) ld
+	Collection<Map<String, Object>> subjects = (Collection<Map<String, Object>>) ld
 		.get("subject");
 	if (subjects != null) {
 	    for (Map<String, Object> item : subjects) {
@@ -272,7 +275,7 @@ public class DataciteMapper {
 		rec.subjects.add(new Pair<String, String>(subject, type));
 	    }
 	}
-	// List<String> freeSubjects = (List<String>) ld.get("dc:subject");
+	// List<String> freeSubjects = (HashSet<String>)ld.get("dc:subject");
 	// if (freeSubjects != null) {
 	// for (String item : freeSubjects) {
 	// rec.subjects.add(new Pair<String, String>(item, "FREE"));
