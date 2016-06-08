@@ -19,6 +19,7 @@ package actions;
 import models.User;
 import play.Play;
 import play.libs.F;
+import play.Logger;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -60,6 +61,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	    context.args.put("role", authUser.getRole());
 	    return delegate.call(context);
 	}
+	play.Logger.debug("Authentifizierung fehlgeschlagen !");
 	return unauthorized(context);
     }
 
