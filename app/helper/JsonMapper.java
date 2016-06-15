@@ -194,14 +194,11 @@ public class JsonMapper {
 	aboutMap.put(describes, node.getAggregationUri());
 
 	rdf.put(isDescribedBy, aboutMap);
-	if (node.getDoi() != null)
+	if (node.getDoi() != null){
 	    rdf.put(doi, node.getDoi());
+	}
 	if (node.getUrn() != null) {
-	    Link l = new Link();
-	    l.setPredicate(getUriFromJsonName(l.getPredicate()));
-	    l.setObject(node.getUrn());
-	    l.setLiteral(true);
-	    addLinkToJsonMap(rdf, l);
+	    rdf.put(urn, node.getUrn());
 	}
 
 	if (node.getParentPid() != null)
