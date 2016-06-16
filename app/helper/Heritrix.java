@@ -102,13 +102,19 @@ public class Heritrix {
 
     }
 
-    private File createJobDir(Gatherconf conf) {
+    public File createJobDir(Gatherconf conf) {
+    // nicht nur bei Neuanlage, sondern auch, falls crawlerConf im JobDir erneuert werden muss (refresh)
 	try {
-	    // Create Job Directory
-	    WebgatherLogger.debug("Create job Directory " + jobDir + "/"
-		    + conf.getName());
-	    File dir = new File(jobDir + "/" + conf.getName());
-	    dir.mkdirs();
+		if( conf.getName() == null ) {
+			throw new RuntimeException("The configuration has no name !");
+		}
+		File dir = new File(jobDir + "/" + conf.getName());
+		if( ! dir.exists()) {
+			// Create Job Directory
+		    WebgatherLogger.debug("Create job Directory " + jobDir + "/"
+			    + conf.getName());
+		    dir.mkdirs();	
+		}
 	    // Copy Job-Config to JobDirectory
 	    File crawlerConf = Play.application().getFile(
 		    "conf/crawler-beans.cxml");
@@ -131,8 +137,8 @@ public class Heritrix {
 		    "Edoweb crawl of" + conf.getUrl());
 	    content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
 
-	    // WebgatherLogger.debug("Print-----\n" + content + "\n to \n"
-		//    + dir.getAbsolutePath() + "/crawler-beans.cxml");
+	    WebgatherLogger.debug("Print-----\n" + content + "\n to \n"
+		   + dir.getAbsolutePath() + "/crawler-beans.cxml");
 
 	    Files.write(
 		    Paths.get(dir.getAbsolutePath() + "/crawler-beans.cxml"),
@@ -206,13 +212,15 @@ public class Heritrix {
      */
     public File getCurrentCrawlDir(String name) {
 	File dir = new File(this.jobDir + "/" + name);
+	WebgatherLogger.debug("jobDir/name="+dir.toString());
 	File[] files = dir.listFiles(file -> {
 	    String now = new SimpleDateFormat("yyyyMMdd")
 		    .format(new java.util.Date());
-	    WebgatherLogger.debug("Directory must start with " + now);
+	    // WebgatherLogger.debug("Directory must start with " + now);
+	    // WebgatherLogger.debug("Found File: "+file.getName());
 	    return file.isDirectory() && file.getName().startsWith(now);
 	});
-	WebgatherLogger.debug(java.util.Arrays.toString(files));
+	WebgatherLogger.debug("Found crawl directories: "+java.util.Arrays.toString(files));
 	if (files == null || files.length <= 0) {
 	    throw new RuntimeException("No directory with timestamp created!");
 	}
