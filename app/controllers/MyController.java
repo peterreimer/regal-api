@@ -513,6 +513,7 @@ public class MyController extends Controller {
 		try {
 		    String role = (String) Http.Context.current().args
 			    .get("role");
+		    play.Logger.debug("role={}", role);
 		    if (!modifyingAccessIsAllowed(role)) {
 			return AccessDenied();
 		    }
