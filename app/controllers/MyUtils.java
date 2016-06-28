@@ -204,44 +204,49 @@ public class MyUtils extends MyController {
     @ApiOperation(produces = "application/json,application/html", nickname = "importGatherconf", value = "importGatherconf", notes = "Import Gatherconf", httpMethod = "POST")
     @ApiImplicitParams({ @ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
     public static Promise<Result> importGatherConf(
-	    @QueryParam("namespace") final String namespace) {
+    		@QueryParam("namespace") final String namespace
+    	,	@QueryParam("firstId") 	 final String firstIdStr) {
 
-	return new BulkActionAccessor()
-		.call((userId) -> {
+    	return new BulkActionAccessor().call((userId) -> {
 		    List<Gatherconf> list = new Vector<Gatherconf>();
+		    play.Logger.debug("request: {}", request().body());
 		    String csv = request().body().asText();
-		    list = GatherconfImporter.read(csv);
-		    int id = 0;
+		    play.Logger.debug("userId = {}", userId);
+		    play.Logger.debug("firstId = {}", firstIdStr);
+		    play.Logger.debug("csv = {}", csv);
+
+			int firstId = Integer.parseInt(firstIdStr);
+		    list = GatherconfImporter.read(csv, firstId);
 		    for (Gatherconf conf : list) {
-			RegalObject object = new RegalObject();
-			object.setContentType("webpage");
-			object.setAccessScheme("public");
-			object.setPublishScheme("public");
-			String pid = namespace + ":" + conf.getId();
-			play.Logger.info("Create webpage with id " + pid + ".");
-			Node webpage = null;
-			try {
-			    Node node = read.readNode(pid);
-			    webpage = new Create().updateResource(node, object);
-			} catch (Exception e) {
-			    webpage = new Create().createResource(conf.getId(),
-				    namespace, object);
-			}
-			new actions.Modify().updateConf(webpage,
-				conf.toString());
-			String ht = conf.getName();
-			if ("null".equals(ht) || ht == null || ht.isEmpty()) {
-			    new actions.Modify().updateLobidifyAndEnrichMetadata(
-				    webpage,
-				    "<"
-					    + webpage.getPid()
-					    + "> <http://purl.org/dc/terms/title> \""
-					    + conf.getUrl()
-					    + "\"^^<http://www.w3.org/2001/XMLSchema#string> .");
-			} else {
-			    new actions.Modify().lobidify(webpage, ht);
-			}
-			play.Logger.info("Import Webpage: " + webpage.getPid());
+		    	RegalObject object = new RegalObject();
+		    	object.setContentType("webpage");
+		    	object.setAccessScheme("public");
+		    	object.setPublishScheme("public");
+		    	String pid = namespace + ":" + conf.getId();
+		    	play.Logger.info("Create webpage with id " + pid + ".");
+		    	Node webpage = null;
+		    	try {
+		    		Node node = read.readNode(pid);
+		    		webpage = new Create().updateResource(node, object);
+		    	} catch (Exception e) {
+		    		webpage = new Create().createResource(conf.getId(),
+		    				namespace, object);
+		    	}
+		    	new actions.Modify().updateConf(webpage,
+		    			conf.toString());
+		    	String ht = conf.getName();
+		    	if ("null".equals(ht) || ht == null || ht.isEmpty()) {
+		    		new actions.Modify().updateLobidifyAndEnrichMetadata(
+		    				webpage,
+		    				"<"
+		    						+ webpage.getPid()
+		    						+ "> <http://purl.org/dc/terms/title> \""
+		    						+ conf.getUrl()
+		    						+ "\"^^<http://www.w3.org/2001/XMLSchema#string> .");
+		    	} else {
+		    		new actions.Modify().lobidify(webpage, ht);
+		    	}
+		    	play.Logger.info("Import Webpage: " + webpage.getPid());
 		    }
 
 		    return getJsonResult(list);
