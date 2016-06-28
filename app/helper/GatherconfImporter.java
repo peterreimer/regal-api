@@ -49,7 +49,7 @@ public class GatherconfImporter {
      *            a csv export of old digitool gatherconf
      * @return a List of Gatherconfigs for regal
      */
-    public static List<Gatherconf> read(String csv) {
+    public static List<Gatherconf> read(String csv, int firstId) {
 	try (ICsvMapReader mapReader = new CsvMapReader(new StringReader(csv),
 		PIPE_DELIMITED)) {
 	    Calendar cal = Calendar.getInstance();
@@ -57,41 +57,49 @@ public class GatherconfImporter {
 	    final String[] header = mapReader.getHeader(true);
 	    final CellProcessor[] processors = getProcessors();
 	    Map<String, Object> row;
-	    int id = 1;
+	    int id = firstId;
 	    while ((row = mapReader.read(header, processors)) != null) {
-		cal.add(Calendar.HOUR, 2);
-		Date startDate = cal.getTime();
-		play.Logger.debug("Add new Webpage with startdate: "
-			+ new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss")
-				.format(startDate));
-		Gatherconf conf = new Gatherconf();
-		conf.setId("" + id++);
-		conf.setStartDate(startDate);
-		String levels = (String) row.get("EBENEN");
-		if ("null".equals(levels)) {
-		    conf.setDeepness(-1);
-		} else {
-		    conf.setDeepness(Integer.parseInt(levels));
-		}
-		String intervallString = (String) row.get("INTERVALL_H");
-		if ("null".equals(intervallString)) {
-		    conf.setInterval(Gatherconf.Interval.annually);
-		} else {
-		    int intervall = Integer.parseInt(intervallString);
-		    if (intervall <= 4320) {
-			conf.setInterval(Gatherconf.Interval.halfYearly);
-		    } else {
-			conf.setInterval(Gatherconf.Interval.annually);
-		    }
-		}
-		String robots = (String) row.get("IGNORE_ROBOTS");
-		if (robots != null) {
-		    play.Logger.warn("Robots for " + conf.getUrl() + " is "
-			    + robots);
-		}
-		conf.setRobotsPolicy(Gatherconf.RobotsPolicy.classic);
-		conf.setUrl((String) row.get("URL"));
-		conf.setName((String) row.get("ALEPHIDN"));
+	    	cal.add(Calendar.HOUR, 2);
+	    	Date startDate = cal.getTime();
+	    	play.Logger.debug("Add new Webpage with startdate: "
+	    			+ new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss")
+	    			.format(startDate));
+	    	Gatherconf conf = new Gatherconf();
+	    	conf.setId("" + id++);
+	    	conf.setStartDate(startDate);
+	    	String levels = (String) row.get("EBENEN");
+	    	if ("null".equals(levels)) {
+	    		conf.setDeepness(-1);
+	    	} else {
+	    		conf.setDeepness(Integer.parseInt(levels));
+	    	}
+	    	String intervallString = (String) row.get("INTERVALL_H");
+	    	if ("null".equals(intervallString)) {
+	    		conf.setInterval(Gatherconf.Interval.annually);
+	    	} else {
+	    		int intervall = Integer.parseInt(intervallString);
+	    		if (intervall <= 4320) {
+	    			conf.setInterval(Gatherconf.Interval.halfYearly);
+	    		} else {
+	    			conf.setInterval(Gatherconf.Interval.annually);
+	    		}
+	    	}
+	    	String robots = (String) row.get("IGNORE_ROBOTS");
+	    	if (robots != null) {
+	    		play.Logger.warn("Robots for " + conf.getUrl() + " is "
+	    				+ robots);
+	    	}
+	    	conf.setRobotsPolicy(Gatherconf.RobotsPolicy.classic);
+	    	conf.setUrl((String) row.get("URL"));
+	    	conf.setName((String) row.get("ALEPHIDN"));
+	    	String webSchnitt = (String) row.get("WEBSCHNITT");
+	    	if( webSchnitt.equals("N")) {
+	    		conf.setInterval(Gatherconf.Interval.once);
+	    	}
+	    	String usrStat = (String) row.get("USR_STAT");
+	    	if( usrStat.equals("DA")) {
+	    		conf.setActive(false);
+	    	}
 
 		result.add(conf);
 	    }
