@@ -52,9 +52,6 @@ public class Create extends RegalAction {
 
 	}
 
-	// @Inject
-	// MailerClient mailerClient;
-
 	/**
 	 * @param node
 	 * @param object
