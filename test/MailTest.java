@@ -1,13 +1,11 @@
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static play.test.Helpers.fakeApplication;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import base.BaseModelTest;
 import helper.mail.Mail;
-import play.Play;
-import static play.test.Helpers.fakeApplication;
 
 /**
  * @author I. Kuss
@@ -25,9 +23,12 @@ public class MailTest extends BaseModelTest {
 	@Before
 	public void setUp() {
 		mail = new Mail();
-		mail.setTo(fakeApplication().configuration().getString("javax.mail.totest"));
-		mail.setFrom(fakeApplication().configuration().getString("javax.mail.from"));
-		String mailMsg = "This is a test message from the JUnitTest regal-api/test/MailTest.java";
+		mail.setTo(
+				fakeApplication().configuration().getString("javax.mail.totest"));
+		mail.setFrom(
+				fakeApplication().configuration().getString("javax.mail.from"));
+		String mailMsg =
+				"This is a test message from the JUnitTest regal-api/test/MailTest.java";
 		mail.setMessage(mailMsg);
 		mail.setSubject("INFO Test message from regal-api/test/MailTest");
 	}
