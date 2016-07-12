@@ -17,14 +17,15 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.HttpArchiveException;
-import helper.oai.OaiDispatcher;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import helper.HttpArchiveException;
+import helper.mail.WebgatherExceptionMail;
+import helper.oai.OaiDispatcher;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
@@ -231,6 +232,7 @@ public class Create extends RegalAction {
 	 * @return a new version pointing to a heritrix crawl
 	 */
 	public Node createWebpageVersion(Node n) {
+		Gatherconf conf = null;
 		try {
 			if (Globals.heritrix.isBusy()) {
 				throw new WebgathererTooBusyException(403,
@@ -241,7 +243,7 @@ public class Create extends RegalAction {
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
 			WebgatherLogger.debug("Create webpageVersion " + n.getPid());
-			Gatherconf conf = Gatherconf.create(n.getConf());
+			conf = Gatherconf.create(n.getConf());
 			WebgatherLogger.debug("Create webpageVersi " + conf.toString());
 			// execute heritrix job
 			conf.setName(n.getPid());
@@ -295,7 +297,10 @@ public class Create extends RegalAction {
 
 			return webpageVersion;
 		} catch (Exception e) {
+			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
+			WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
 			throw new RuntimeException(e);
 		}
 	}
-}
+
+} /* END of Class Create */
