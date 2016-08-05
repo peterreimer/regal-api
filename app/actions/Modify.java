@@ -16,17 +16,13 @@
  */
 package actions;
 
-import helper.DataciteClient;
-import helper.HttpArchiveException;
-import helper.MyEtikettMaker;
-import helper.URN;
-import helper.oai.OaiDispatcher;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.Normalizer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,11 +32,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import models.DublinCoreData;
-import models.Globals;
-import models.Node;
-import models.RegalObject;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
@@ -56,6 +47,15 @@ import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
 import archive.fedora.XmlUtils;
 import controllers.MyController;
+import helper.DataciteClient;
+import helper.HttpArchiveException;
+import helper.MyEtikettMaker;
+import helper.URN;
+import helper.oai.OaiDispatcher;
+import models.DublinCoreData;
+import models.Globals;
+import models.Node;
+import models.RegalObject;
 
 /**
  * @author Jan Schnasse
@@ -192,6 +192,51 @@ public class Modify extends RegalAction {
 		}
 	}
 
+	public String updateLobidifyAndEnrichMetadataIfRecentlyUpdated(String pid,
+			String content, LocalDate date) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateLobidifyAndEnrichMetadataIfRecentlyUpdated(node, content,
+					date);
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	public String updateLobidifyAndEnrichMetadataIfRecentlyUpdated(Node node,
+			String content, LocalDate date) {
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
+					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
+					.get(0);
+			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+			try {
+				content = getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(node,
+						alephid, date);
+			} catch (NotUpdatedException e) {
+				return pid + " Not updated. " + e.getMessage();
+			}
+			updateMetadata(node, content);
+			String enrichMessage = enrichMetadata(node);
+			return pid + " metadata successfully updated, lobidified and enriched! "
+					+ enrichMessage;
+		} else {
+			updateMetadata(node, content);
+			String enrichMessage = enrichMetadata(node);
+			return pid + " metadata successfully updated, and enriched! "
+					+ enrichMessage;
+		}
+
+	}
+
 	private String updateMetadata(Node node, String content) {
 		try {
 			String pid = node.getPid();
@@ -221,6 +266,47 @@ public class Modify extends RegalAction {
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}
+	}
+
+	private String getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(
+			Node node, String alephid, LocalDate date) {
+		try {
+			LocalDate resourceDate = getLastModifiedFromLobid(alephid);
+			play.Logger.debug("Lobid resource has been modified on "
+					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+			play.Logger.debug("I will only update if "
+					+ date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+					+ " is before that date.");
+			if (date.isBefore(resourceDate)) {
+				return getLobidDataAsNtripleString(node, alephid);
+			}
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+
+		throw new NotUpdatedException("No updates since " + date.toString());
+
+	}
+
+	private LocalDate getLastModifiedFromLobid(String alephid)
+			throws IOException {
+		String lobidUri = "http://lobid.org/resource/" + alephid;
+		play.Logger.info("GET " + lobidUri + " and analyse date");
+		URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
+		RDFFormat inFormat = RDFFormat.TURTLE;
+		String accept = "text/turtle";
+		Graph graph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+		Iterator<Statement> it = graph.iterator();
+		while (it.hasNext()) {
+			Statement s = it.next();
+			String predicate = s.getPredicate().stringValue();
+			if (predicate.equals("http://purl.org/dc/terms/modified")) {
+				LocalDate date = LocalDate.parse(s.getObject().stringValue(),
+						DateTimeFormatter.ofPattern("yyyyMMdd"));
+				return date;
+			}
+		}
+		return LocalDate.now();
 	}
 
 	private String getLobidDataAsNtripleString(Node node, String alephid) {
@@ -400,6 +486,11 @@ public class Modify extends RegalAction {
 	 */
 	public String lobidify(Node node) {
 		return updateLobidifyAndEnrichMetadata(node, node.getMetadata());
+	}
+
+	public String lobidify(Node node, LocalDate date) {
+		return updateLobidifyAndEnrichMetadataIfRecentlyUpdated(node,
+				node.getMetadata(), date);
 	}
 
 	/**
@@ -637,6 +728,13 @@ public class Modify extends RegalAction {
 		}
 	}
 
+	@SuppressWarnings({ "serial" })
+	private class NotUpdatedException extends RuntimeException {
+		NotUpdatedException(String msg) {
+			super(msg);
+		}
+	}
+
 	/**
 	 * Creates a new doi identifier and registers to datacite
 	 * 
@@ -838,4 +936,5 @@ public class Modify extends RegalAction {
 			throw new HttpArchiveException(500, e);
 		}
 	}
+
 }

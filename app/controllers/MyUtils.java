@@ -16,12 +16,8 @@
  */
 package controllers;
 
-import helper.GatherconfImporter;
-import helper.MyEtikettMaker;
-import helper.Webgatherer;
-import helper.oai.OaiDispatcher;
-
-import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -30,22 +26,23 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiImplicitParam;
+import com.wordnik.swagger.annotations.ApiImplicitParams;
+import com.wordnik.swagger.annotations.ApiOperation;
+
+import actions.BasicAuth;
+import actions.Create;
+import helper.GatherconfImporter;
+import helper.Webgatherer;
+import helper.oai.OaiDispatcher;
 import models.Gatherconf;
 import models.Globals;
 import models.Message;
 import models.Node;
 import models.RegalObject;
-import play.Play;
-import play.cache.Cache;
 import play.libs.F.Promise;
 import play.mvc.Result;
-import actions.BasicAuth;
-import actions.Create;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiImplicitParam;
-import com.wordnik.swagger.annotations.ApiImplicitParams;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * 
@@ -148,6 +145,23 @@ public class MyUtils extends MyController {
 				String result = modify.lobidify(node);
 				return JsonMessage(new Message(result));
 			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json,application/html", nickname = "lobidify", value = "lobidify", notes = "Fetches metadata from lobid.org and PUTs it to /metadata.", httpMethod = "POST")
+	public static Promise<Result> updateMetadata(@PathParam("pid") String pid,
+			@QueryParam("date") String date) {
+		return new ModifyAction().call(pid, userId -> {
+			Node node = readNodeOrNull(pid);
+			if (date != null && !date.isEmpty()) {
+				String result = modify.lobidify(node,
+						LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")));
+				return JsonMessage(new Message(result));
+			} else {
+				String result = modify.lobidify(node);
+				return JsonMessage(new Message(result));
+			}
+
 		});
 	}
 
