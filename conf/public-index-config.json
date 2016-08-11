@@ -1,4 +1,34 @@
 {
+    "settings":
+    {
+		"index" : {
+		   "analysis" : {
+			  "filter" : {
+				 "germansnow" : {
+					"language" : "German2",
+					"type" : "snowball"
+				 }
+			  },
+			  "analyzer" : {
+				 "german" : {
+					"filter" : [
+					   "germansnow",
+					   "icu_folding"
+					],
+					"type" : "custom",
+					"tokenizer" : "icu_tokenizer"
+				 },
+				 "default" : {
+					"sub_analyzers" : [
+					   "standard",
+					   "german"
+					],
+					"type" : "combo"
+				 }
+			  }
+		   }
+		}
+    },
 	"mappings": 
 	{
 		"monograph": {
