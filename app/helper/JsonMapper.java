@@ -86,6 +86,8 @@ public class JsonMapper {
 	final static String fileLabel = "fileLabel";
 
 	final static String[] typePrios = new String[] {
+			"http://purl.org/lobid/lv#ArchivedWebPage",
+			"http://purl.org/ontology/bibo/Report",
 			"http://purl.org/lobid/lv#Biography", "http://purl.org/library/Game",
 			"http://purl.org/lobid/lv#Schoolbook",
 			"http://purl.org/ontology/mo/PublishedScore",
