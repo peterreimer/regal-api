@@ -580,6 +580,12 @@ public class Modify extends RegalAction {
 				enrichStatements.addAll(getStatements(uri));
 			}
 
+			play.Logger.info("Enrich " + node.getPid() + " with geonames.");
+			List<String> geoNameIds = findAllGeonameIds(metadata);
+			for (String uri : geoNameIds) {
+				enrichStatements.addAll(getGeonamesStatements(uri));
+			}
+
 			play.Logger.info("Enrich " + node.getPid() + " with institution.");
 			List<Statement> institutions = findInstitution(node);
 			enrichStatements.addAll(institutions);
@@ -684,9 +690,44 @@ public class Modify extends RegalAction {
 		return filteredStatements;
 	}
 
+	private List<Statement> getGeonamesStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		try {
+			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about.rdf"),
+					RDFFormat.RDFXML, "application/rdf+xml")) {
+				boolean isLiteral = s.getObject() instanceof Literal;
+				if (!(s.getSubject() instanceof BNode)) {
+					if (isLiteral) {
+						ValueFactory v = new ValueFactoryImpl();
+						play.Logger.info("Get data from " + uri);
+						Statement newS = v.createStatement(v.createURI(uri),
+								s.getPredicate(), v.createLiteral(Normalizer.normalize(
+										s.getObject().stringValue(), Normalizer.Form.NFKC)));
+						filteredStatements.add(newS);
+					}
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.warn("Not able to get data from" + uri);
+		}
+		return filteredStatements;
+	}
+
 	private List<String> findAllGndIds(String metadata) {
 		HashMap<String, String> result = new HashMap<String, String>();
 		Matcher m = Pattern.compile("http://d-nb.info/gnd/[1234567890-]*")
+				.matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllGeonameIds(String metadata) {
+		HashMap<String, String> result = new HashMap<String, String>();
+		Matcher m = Pattern.compile("http://www.geonames.org/[1234567890-]*")
 				.matcher(metadata);
 		while (m.find()) {
 			String id = m.group();
