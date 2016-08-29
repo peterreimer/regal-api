@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -62,6 +63,15 @@ import models.RegalObject;
  *
  */
 public class Modify extends RegalAction {
+
+	private static final String alternateName =
+			"http://www.geonames.org/ontology#alternateName";
+	private static final String first =
+			"http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
+	private static final String rest =
+			"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
+	private static final String nil =
+			"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -692,18 +702,28 @@ public class Modify extends RegalAction {
 
 	private List<Statement> getGeonamesStatements(String uri) {
 		play.Logger.info("GET " + uri);
+		ValueFactory v = new ValueFactoryImpl();
 		List<Statement> filteredStatements = new ArrayList<Statement>();
+		List<Literal> alternateNames = new ArrayList<Literal>();
 		try {
 			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about.rdf"),
 					RDFFormat.RDFXML, "application/rdf+xml")) {
 				boolean isLiteral = s.getObject() instanceof Literal;
 				if (!(s.getSubject() instanceof BNode)) {
 					if (isLiteral) {
-						ValueFactory v = new ValueFactoryImpl();
-						play.Logger.info("Get data from " + uri);
-						Statement newS = v.createStatement(v.createURI(uri),
-								s.getPredicate(), v.createLiteral(Normalizer.normalize(
-										s.getObject().stringValue(), Normalizer.Form.NFKC)));
+						Literal l = (Literal) s.getObject();
+						Literal object = v.createLiteral(Normalizer
+								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
+								l.getLanguage());
+						Statement newS =
+								v.createStatement(v.createURI(uri), s.getPredicate(), object);
+						play.Logger.info("Get data from " + uri + " " + newS);
+
+						if (alternateName.equals(s.getPredicate().stringValue())) {
+							newS = v.createStatement(v.createURI(uri), v.createURI(
+									s.getPredicate().stringValue() + "_" + object.getLanguage()),
+									object);
+						}
 						filteredStatements.add(newS);
 					}
 				}
@@ -711,7 +731,34 @@ public class Modify extends RegalAction {
 		} catch (Exception e) {
 			play.Logger.warn("Not able to get data from" + uri);
 		}
+
 		return filteredStatements;
+	}
+
+	private List<Statement> getListAsStatements(List<Literal> list, String uri,
+			String predicate) {
+		List<Statement> listStatements = new ArrayList<Statement>();
+		ValueFactory v = new ValueFactoryImpl();
+		BNode head = v.createBNode();
+		Statement newS =
+				v.createStatement(v.createURI(uri), v.createURI(predicate), head);
+		listStatements.add(newS);
+
+		Resource cur = head;
+		for (Literal l : list) {
+			BNode r = v.createBNode();
+			Statement linkToRest = v.createStatement(cur, v.createURI(rest), r);
+			Statement linkToValue = v.createStatement(cur, v.createURI(first), l);
+			cur = r;
+			listStatements.add(linkToRest);
+			listStatements.add(linkToValue);
+		}
+		Statement endOfList = listStatements.get(listStatements.size() - 1);
+		listStatements.remove(listStatements.size() - 1);
+		Statement linkToNill = v.createStatement(endOfList.getSubject(),
+				v.createURI(rest), v.createURI(nil));
+		listStatements.add(linkToNill);
+		return listStatements;
 	}
 
 	private List<String> findAllGndIds(String metadata) {

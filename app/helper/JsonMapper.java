@@ -332,6 +332,7 @@ public class JsonMapper {
 			postProcess(rdf, "honoree");
 			postProcess(rdf, "singer");
 			postProcess(rdf, "professionalGroup");
+			postProcess(rdf, "editor");
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
