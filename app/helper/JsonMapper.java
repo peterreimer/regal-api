@@ -333,6 +333,9 @@ public class JsonMapper {
 			postProcess(rdf, "singer");
 			postProcess(rdf, "professionalGroup");
 			postProcess(rdf, "editor");
+			postProcess(rdf, "publisher");
+			postProcess(rdf, "recordingLocation");
+			postProcess(rdf, "recordingCoords");
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -556,6 +559,9 @@ public class JsonMapper {
 
 		if (map.containsKey("preferredNameForTheSubjectHeading"))
 			return (String) map.get("preferredNameForTheSubjectHeading");
+
+		if (map.containsKey("alternateName_de"))
+			return (String) map.get("alternateName_de");
 
 		if (map.containsKey(PREF_LABEL))
 			return (String) map.get(PREF_LABEL);

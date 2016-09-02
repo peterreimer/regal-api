@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -72,6 +74,8 @@ public class Modify extends RegalAction {
 			"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
 	private static final String nil =
 			"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+	private static final String PREF_LABEL =
+			"http://www.w3.org/2004/02/skos/core#prefLabel";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -596,6 +600,12 @@ public class Modify extends RegalAction {
 				enrichStatements.addAll(getGeonamesStatements(uri));
 			}
 
+			play.Logger.info("Enrich " + node.getPid() + " with openstreetmap.");
+			List<String> osmIds = findAllOsmIds(metadata);
+			for (String uri : osmIds) {
+				enrichStatements.addAll(getOsmStatements(uri));
+			}
+
 			play.Logger.info("Enrich " + node.getPid() + " with institution.");
 			List<Statement> institutions = findInstitution(node);
 			enrichStatements.addAll(institutions);
@@ -700,6 +710,32 @@ public class Modify extends RegalAction {
 		return filteredStatements;
 	}
 
+	private List<Statement> getOsmStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		try {
+			URL url = new URL(uri);
+			Map<String, String> map = new LinkedHashMap<String, String>();
+			String query = url.getQuery();
+			for (String pair : query.split("&")) {
+				String[] keyValue = pair.split("=");
+				int idx = pair.indexOf("=");
+				map.put(URLDecoder.decode(keyValue[0], "UTF-8"),
+						URLDecoder.decode(keyValue[1], "UTF-8"));
+			}
+			ValueFactory v = new ValueFactoryImpl();
+			Literal object = v.createLiteral(Normalizer.normalize(
+					map.get("mlat") + "," + map.get("mlon"), Normalizer.Form.NFKC));
+			Statement newS =
+					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
+			play.Logger.info("Get data from " + uri + " " + newS);
+			filteredStatements.add(newS);
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+		}
+		return filteredStatements;
+	}
+
 	private List<Statement> getGeonamesStatements(String uri) {
 		play.Logger.info("GET " + uri);
 		ValueFactory v = new ValueFactoryImpl();
@@ -776,6 +812,17 @@ public class Modify extends RegalAction {
 		HashMap<String, String> result = new HashMap<String, String>();
 		Matcher m = Pattern.compile("http://www.geonames.org/[1234567890-]*")
 				.matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllOsmIds(String metadata) {
+		HashMap<String, String> result = new HashMap<String, String>();
+		Matcher m =
+				Pattern.compile("http://www.openstreetmap.org/[^>]*").matcher(metadata);
 		while (m.find()) {
 			String id = m.group();
 			result.put(id, id);
