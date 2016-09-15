@@ -21,6 +21,7 @@ GET /checks/doiStatus				controllers.Checks.doiStatus(from: Int?=0,until: Int?=1
 GET /resource/status				controllers.Resource.listResourcesStatus(namespace?="",contentType?="",from: Int ?=0, until: Int?=100)
 GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
+GET /resource/:pid/edit				controllers.Resource.edit(pid:String,format : String?="json",topicId?=null)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid,field?="")
 GET /resource/:pid/data				controllers.Resource.listData(pid)
 GET /resource/:pid/dc				controllers.Resource.listDc(pid)
