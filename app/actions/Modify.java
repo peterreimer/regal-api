@@ -16,9 +16,11 @@
  */
 package actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.text.Normalizer;
@@ -40,6 +42,7 @@ import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFFormat;
@@ -188,6 +191,7 @@ public class Modify extends RegalAction {
 							+ " This action is not supported."
 							+ " Use HTTP DELETE instead.\n");
 		}
+
 		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
@@ -260,7 +264,10 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
-			RdfUtils.validate(content);
+			// RdfUtils.validate(content);
+			// Extreme Workaround to fix subject uris
+			content = rewriteContent(content, pid);
+			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
 			node.setMetadataFile(file.getAbsolutePath());
 			if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
@@ -280,6 +287,47 @@ public class Modify extends RegalAction {
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}
+	}
+
+	private String rewriteContent(String content, String pid) {
+		Graph graph = RdfUtils.readRdfToGraph(
+				new ByteArrayInputStream(content.getBytes()), RDFFormat.NTRIPLES, "");
+		Iterator<Statement> it = graph.iterator();
+		String subj = pid;
+		while (it.hasNext()) {
+			Statement str = it.next();
+			if ("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
+					.equals(str.getPredicate().stringValue())) {
+				subj = str.getSubject().stringValue();
+				break;
+			}
+		}
+		if (pid.equals(subj))
+			return content;
+		play.Logger.debug("Rewrite " + subj + " to " + pid);
+		graph.removeIf(st -> {
+			return "http://xmlns.com/foaf/0.1/primaryTopic"
+					.equals(st.getPredicate().stringValue());
+		});
+		graph.removeIf(st -> {
+			return "http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
+					.equals(st.getPredicate().stringValue());
+		});
+		graph = RdfUtils.rewriteSubject(subj, pid, graph);
+
+		Resource s = graph.getValueFactory().createURI(pid + ".rdf");
+		URI p = graph.getValueFactory()
+				.createURI("http://xmlns.com/foaf/0.1/primaryTopic");
+		Resource o = graph.getValueFactory().createURI(pid);
+		graph.add(graph.getValueFactory().createStatement(s, p, o));
+
+		s = graph.getValueFactory().createURI(pid);
+		p = graph.getValueFactory()
+				.createURI("http://xmlns.com/foaf/0.1/isPrimaryTopicOf");
+		o = graph.getValueFactory().createURI(pid + ".rdf");
+		graph.add(graph.getValueFactory().createStatement(s, p, o));
+		return RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
+
 	}
 
 	private String getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(

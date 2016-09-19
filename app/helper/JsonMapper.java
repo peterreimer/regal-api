@@ -314,8 +314,8 @@ public class JsonMapper {
 				rdf.put(type, t);
 			postProcessInstitution(rdf);
 			sortCreatorAndContributors(rdf);
-			postProcess(rdf, "subject");
 			postProcess(rdf, "creator");
+			postProcess(rdf, "subject");
 			postProcess(rdf, "contributor");
 			postProcess(rdf, "redaktor");
 			postProcess(rdf, "actor");
@@ -353,7 +353,7 @@ public class JsonMapper {
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.trace("", e);
+			play.Logger.debug("", e);
 		}
 	}
 
@@ -515,29 +515,60 @@ public class JsonMapper {
 					+ RdfUtils.urlEncode(authorsId).replace("+", "%20"));
 			return creatorWithoutId;
 		}
-		Set<Map<String, Object>> creators =
-				(Set<Map<String, Object>>) m.get("creator");
-		if (creators != null) {
-			for (Map<String, Object> creator : creators) {
-				String currentId = (String) creator.get(ID2);
-				play.Logger.debug(creator + " " + currentId + " " + authorsId);
+
+		if (m.get("creator") instanceof List) {
+			List<String> creators = (List<String>) m.get("creator");
+			play.Logger.debug("" + creators.getClass());
+			for (String creator : creators) {
+				String currentId = creator;
+				play.Logger.debug(creator + " - " + currentId + " - " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
-					return creator;
+					Map<String, Object> result = new HashMap<String, Object>();
+					result.put(ID2, currentId);
+					return result;
+				}
+			}
+		} else {
+			Collection<Map<String, Object>> creators =
+					(Collection<Map<String, Object>>) m.get("creator");
+			if (creators != null) {
+				for (Map<String, Object> creator : creators) {
+					String currentId = (String) creator.get(ID2);
+					play.Logger.debug(creator + " " + currentId + " " + authorsId);
+					if (authorsId.compareTo(currentId) == 0) {
+						return creator;
+					}
 				}
 			}
 		}
+
 		return new HashMap<String, Object>();
 	}
 
 	private Map<String, Object> findContributor(Map<String, Object> m,
 			String authorsId) {
-		Set<Map<String, Object>> contributors =
-				(Set<Map<String, Object>>) m.get("contributor");
-		if (contributors != null) {
-			for (Map<String, Object> contributor : contributors) {
-				String currentId = (String) contributor.get(ID2);
+		if (m.get("contributor") instanceof List) {
+			List<String> creators = (List<String>) m.get("contributor");
+			play.Logger.debug("" + creators.getClass());
+			for (String creator : creators) {
+				String currentId = creator;
+				play.Logger.debug(creator + " " + currentId + " " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
-					return contributor;
+					Map<String, Object> result = new HashMap<String, Object>();
+					result.put(ID2, currentId);
+					return result;
+				}
+			}
+		} else {
+			Collection<Map<String, Object>> creators =
+					(Collection<Map<String, Object>>) m.get("contributor");
+			if (creators != null) {
+				for (Map<String, Object> creator : creators) {
+					String currentId = (String) creator.get(ID2);
+					play.Logger.debug(creator + " " + currentId + " " + authorsId);
+					if (authorsId.compareTo(currentId) == 0) {
+						return creator;
+					}
 				}
 			}
 		}
