@@ -884,6 +884,11 @@ public class Modify extends RegalAction {
 						play.Logger.info("Get data from " + uri + " " + newS);
 
 						if (PREF_LABEL.equals(s.getPredicate().stringValue())) {
+							if ("de".equals(object.getLanguage())) {
+								newS = v.createStatement(v.createURI(uri), s.getPredicate(),
+										object);
+								filteredStatements.add(newS);
+							}
 							newS = v.createStatement(v.createURI(uri), v.createURI(
 									s.getPredicate().stringValue() + "_" + object.getLanguage()),
 									object);
