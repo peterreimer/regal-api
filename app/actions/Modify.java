@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.text.Normalizer;
@@ -47,6 +47,11 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
@@ -77,6 +82,7 @@ public class Modify extends RegalAction {
 			"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
 	private static final String nil =
 			"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+
 	private static final String PREF_LABEL =
 			"http://www.w3.org/2004/02/skos/core#prefLabel";
 
@@ -654,6 +660,18 @@ public class Modify extends RegalAction {
 				enrichStatements.addAll(getOsmStatements(uri));
 			}
 
+			play.Logger.info("Enrich " + node.getPid() + " with orcid.");
+			List<String> orcidIds = findAllOrcidIds(metadata);
+			for (String uri : orcidIds) {
+				enrichStatements.addAll(getOrcidStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
+			List<String> agrovocIds = findAllAgrovocIds(metadata);
+			for (String uri : agrovocIds) {
+				enrichStatements.addAll(getAgrovocStatements(uri));
+			}
+
 			play.Logger.info("Enrich " + node.getPid() + " with institution.");
 			List<Statement> institutions = findInstitution(node);
 			enrichStatements.addAll(institutions);
@@ -680,8 +698,7 @@ public class Modify extends RegalAction {
 		for (String p : parents) {
 			ValueFactory v = new ValueFactoryImpl();
 			String label = getEtikett(p);
-			Statement st = v.createStatement(v.createURI(p),
-					v.createURI("http://www.w3.org/2004/02/skos/core#prefLabel"),
+			Statement st = v.createStatement(v.createURI(p), v.createURI(PREF_LABEL),
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
 			catalogParents.add(st);
 		}
@@ -758,6 +775,34 @@ public class Modify extends RegalAction {
 		return filteredStatements;
 	}
 
+	private List<Statement> getOrcidStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		try (InputStream in =
+				RdfUtils.urlToInputStream(new URL(uri), "application/json")) {
+			String str =
+					CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
+			JsonNode hit = new ObjectMapper().readValue(str, JsonNode.class);
+			String label =
+					hit.at("/orcid-profile/orcid-bio/personal-details/family-name/value")
+							.asText()
+							+ ", "
+							+ hit
+									.at("/orcid-profile/orcid-bio/personal-details/given-names/value")
+									.asText();
+			ValueFactory v = new ValueFactoryImpl();
+			Literal object =
+					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
+			Statement newS =
+					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
+			play.Logger.info("Get data from " + uri + " " + newS);
+			filteredStatements.add(newS);
+		} catch (Exception e) {
+			play.Logger.warn("", e);
+		}
+		return filteredStatements;
+	}
+
 	private List<Statement> getOsmStatements(String uri) {
 		play.Logger.info("GET " + uri);
 		List<Statement> filteredStatements = new ArrayList<Statement>();
@@ -804,6 +849,41 @@ public class Modify extends RegalAction {
 						play.Logger.info("Get data from " + uri + " " + newS);
 
 						if (alternateName.equals(s.getPredicate().stringValue())) {
+							newS = v.createStatement(v.createURI(uri), v.createURI(
+									s.getPredicate().stringValue() + "_" + object.getLanguage()),
+									object);
+						}
+						filteredStatements.add(newS);
+					}
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.warn("Not able to get data from" + uri);
+		}
+
+		return filteredStatements;
+	}
+
+	private List<Statement> getAgrovocStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		ValueFactory v = new ValueFactoryImpl();
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		List<Literal> prefLabel = new ArrayList<Literal>();
+		try {
+			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri), RDFFormat.RDFXML,
+					"application/rdf+xml")) {
+				boolean isLiteral = s.getObject() instanceof Literal;
+				if (!(s.getSubject() instanceof BNode)) {
+					if (isLiteral) {
+						Literal l = (Literal) s.getObject();
+						Literal object = v.createLiteral(Normalizer
+								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
+								l.getLanguage());
+						Statement newS =
+								v.createStatement(v.createURI(uri), s.getPredicate(), object);
+						play.Logger.info("Get data from " + uri + " " + newS);
+
+						if (PREF_LABEL.equals(s.getPredicate().stringValue())) {
 							newS = v.createStatement(v.createURI(uri), v.createURI(
 									s.getPredicate().stringValue() + "_" + object.getLanguage()),
 									object);
@@ -871,6 +951,27 @@ public class Modify extends RegalAction {
 		HashMap<String, String> result = new HashMap<String, String>();
 		Matcher m =
 				Pattern.compile("http://www.openstreetmap.org/[^>]*").matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllOrcidIds(String metadata) {
+		HashMap<String, String> result = new HashMap<>();
+		Matcher m = Pattern.compile("http://orcid.org/[^>]*").matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllAgrovocIds(String metadata) {
+		HashMap<String, String> result = new HashMap<>();
+		Matcher m = Pattern.compile("http://aims.fao.org/aos/agrovoc/[^>]*")
+				.matcher(metadata);
 		while (m.find()) {
 			String id = m.group();
 			result.put(id, id);
