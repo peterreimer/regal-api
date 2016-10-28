@@ -574,6 +574,10 @@ public class JsonMapper {
 	}
 
 	private static String findLabel(Map<String, Object> map) {
+
+		if (map.containsKey("preferredNameForTheWork"))
+			return (String) map.get("preferredNameForTheWork");
+
 		if (map.containsKey("preferredNameForThePerson"))
 			return (String) map.get("preferredNameForThePerson");
 
@@ -589,8 +593,11 @@ public class JsonMapper {
 		if (map.containsKey("preferredNameForTheSubjectHeading"))
 			return (String) map.get("preferredNameForTheSubjectHeading");
 
-		if (map.containsKey("alternateName_de"))
+		if (map.containsKey("alternateName_de")) {
 			return (String) map.get("alternateName_de");
+		} else if (map.containsKey("alternateName_en")) {
+			return (String) map.get("alternateName_en");
+		}
 
 		if (map.containsKey(PREF_LABEL))
 			return (String) map.get(PREF_LABEL);
