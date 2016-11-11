@@ -173,6 +173,11 @@ public class DataciteMapper {
 			play.Logger.debug(
 					"DataciteMapper: Metadatafield 'thesisInformation' not found!");
 		}
+
+		if (rec.publisher == null || rec.publisher.isEmpty()) {
+			rec.publisher = "PUBLISSO";
+		}
+
 	}
 
 	private static void addTitles(Map<String, Object> ld, DataciteRecord rec) {
