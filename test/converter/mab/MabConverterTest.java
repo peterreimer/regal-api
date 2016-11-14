@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import archive.fedora.XmlUtils;
+import helper.DataciteMapper;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -108,5 +109,10 @@ public class MabConverterTest {
 			String topic) throws IOException {
 		MabConverter converter = new MabConverter(topic);
 		return converter.convert(input);
+	}
+
+	@Test
+	public void testDataciteMapper() {
+		System.out.println(DataciteMapper.getCurrentYear());
 	}
 }
