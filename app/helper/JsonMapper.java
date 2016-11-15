@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -156,7 +155,7 @@ public class JsonMapper {
 	 * @return a map representing the rdf data on this object
 	 */
 	public Map<String, Object> getLd() {
-		List<Link> ls = node.getRelsExt();
+		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
@@ -272,7 +271,7 @@ public class JsonMapper {
 	 *         metadata has been left out.
 	 */
 	public Map<String, Object> getLdShortStyle() {
-		List<Link> ls = node.getRelsExt();
+		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		rdf.put(ID2, node.getPid());
@@ -309,7 +308,7 @@ public class JsonMapper {
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
-			List<Map<String, Object>> t = getType(rdf);
+			Collection<Map<String, Object>> t = getType(rdf);
 			if (t != null && t.size() != 0)
 				rdf.put(type, t);
 			postProcessInstitution(rdf);
@@ -360,7 +359,8 @@ public class JsonMapper {
 
 	private static void postProcessInstitution(Map<String, Object> rdf) {
 		try {
-			Set<Object> institution = (Set<Object>) rdf.get("institution");
+			Collection<Object> institution =
+					(Collection<Object>) rdf.get("institution");
 			Map<String, Object> inst =
 					((Map<String, Object>) institution.iterator().next());
 			String label = findLabel(inst);
@@ -372,8 +372,8 @@ public class JsonMapper {
 
 	private static void addCatalogLink(Map<String, Object> rdf) {
 		try {
-			String hbzId = ((Set<String>) rdf.get("hbzId")).iterator().next();
-			List<Map<String, Object>> catalogLink = new ArrayList<>();
+			String hbzId = ((Collection<String>) rdf.get("hbzId")).iterator().next();
+			Collection<Map<String, Object>> catalogLink = new ArrayList<>();
 			Map<String, Object> cl = new HashMap<>();
 			cl.put(ID2,
 					"http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
@@ -387,13 +387,13 @@ public class JsonMapper {
 
 	private void sortCreatorAndContributors(Map<String, Object> rdf) {
 		try {
-			List<Map<String, Object>> cr = getSortedListOfCreators(rdf);
+			Collection<Map<String, Object>> cr = getSortedListOfCreators(rdf);
 			if (!cr.isEmpty()) {
 				rdf.put("creator", cr);
 				rdf.remove("creatorName");
 				rdf.remove("contributorName");
 			}
-			List<Map<String, Object>> co = getSortedListOfContributors(rdf);
+			Collection<Map<String, Object>> co = getSortedListOfContributors(rdf);
 			if (!co.isEmpty()) {
 				rdf.put("contributor", co);
 			}
@@ -413,7 +413,8 @@ public class JsonMapper {
 			resolvedObject.put(PREF_LABEL, value);
 		}
 		if (jsonName != null && rdf.containsKey(jsonName)) {
-			List<Object> list = (List<Object>) rdf.get(getJsonName(l.getPredicate()));
+			Collection<Object> list =
+					(Collection<Object>) rdf.get(getJsonName(l.getPredicate()));
 			if (resolvedObject == null) {
 				if (l.isLiteral()) {
 					list.add(l.getObject());
@@ -427,7 +428,7 @@ public class JsonMapper {
 				list.add(resolvedObject);
 			}
 		} else {
-			List<Object> list = new ArrayList<>();
+			Collection<Object> list = new ArrayList<>();
 			if (resolvedObject == null) {
 				if (l.isLiteral()) {
 					list.add(l.getObject());
@@ -444,9 +445,10 @@ public class JsonMapper {
 		}
 	}
 
-	private static List<Map<String, Object>> getType(Map<String, Object> rdf) {
-		List<Map<String, Object>> result = new ArrayList<>();
-		Set<String> types = (Set<String>) rdf.get(type);
+	private static Collection<Map<String, Object>> getType(
+			Map<String, Object> rdf) {
+		Collection<Map<String, Object>> result = new ArrayList<>();
+		Collection<String> types = (Collection<String>) rdf.get(type);
 		if (types != null) {
 			for (String s : typePrios) {
 				if (types.contains(s)) {
@@ -470,10 +472,11 @@ public class JsonMapper {
 		}
 	}
 
-	List<Map<String, Object>> getSortedListOfCreators(
+	Collection<Map<String, Object>> getSortedListOfCreators(
 			Map<String, Object> nodeAsMap) {
-		List<Map<String, Object>> result = new ArrayList<>();
-		Set<String> carray = (Set<String>) nodeAsMap.get("contributorOrder");
+		Collection<Map<String, Object>> result = new ArrayList<>();
+		Collection<String> carray =
+				(Collection<String>) nodeAsMap.get("contributorOrder");
 		if (carray == null || carray.isEmpty())
 			return result;
 		for (String cstr : carray) {
@@ -488,10 +491,11 @@ public class JsonMapper {
 		return result;
 	}
 
-	List<Map<String, Object>> getSortedListOfContributors(
+	Collection<Map<String, Object>> getSortedListOfContributors(
 			Map<String, Object> nodeAsMap) {
-		List<Map<String, Object>> result = new ArrayList<>();
-		Set<String> carray = (Set<String>) nodeAsMap.get("contributorOrder");
+		Collection<Map<String, Object>> result = new ArrayList<>();
+		Collection<String> carray =
+				(Collection<String>) nodeAsMap.get("contributorOrder");
 		if (carray == null || carray.isEmpty())
 			return result;
 		for (String cstr : carray) {
@@ -516,7 +520,7 @@ public class JsonMapper {
 			return creatorWithoutId;
 		}
 		if (m.get("creator") instanceof List) {
-			List<String> creators = (List<String>) m.get("creator");
+			Collection<String> creators = (Collection<String>) m.get("creator");
 			play.Logger.debug("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
@@ -546,7 +550,7 @@ public class JsonMapper {
 	private static Map<String, Object> findContributor(Map<String, Object> m,
 			String authorsId) {
 		if (m.get("contributor") instanceof List) {
-			List<String> creators = (List<String>) m.get("contributor");
+			Collection<String> creators = (Collection<String>) m.get("contributor");
 			play.Logger.debug("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
