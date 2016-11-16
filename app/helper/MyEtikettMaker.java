@@ -85,10 +85,11 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 			result.setName(getJsonName(result));
 		}
 		if (result.getLabel() == null || result.getLabel().isEmpty()) {
-			// result = getLabelFromEtikettWs(uri);
+			// result = new Etikett(uri);
+			// result.setLabel(getLabelFromEtikettWs(uri));
 		}
 		if (result.getLabel() == null || result.getLabel().isEmpty()) {
-			result.setLabel(result.getUri());
+			// result.setLabel(result.getUri());
 		}
 		// play.Logger.debug("Label " + result.getUri() + " with " +
 		// result.getLabel());

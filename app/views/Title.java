@@ -33,7 +33,7 @@ import models.Globals;
 public class Title {
 
 	public static String getTitle(Map<String, Object> hit) {
-		Set<String> title = (Set<String>) hit.get("title");
+		Collection<String> title = (Collection<String>) hit.get("title");
 		return title != null && !title.isEmpty() ? String.join("<br/> ", title)
 				: "";
 	}
@@ -47,7 +47,7 @@ public class Title {
 				return "";
 			}
 		}
-		List<String> authorNames = new ArrayList<String>();
+		Collection<String> authorNames = new ArrayList<String>();
 		for (Map<String, Object> author : authorList) {
 			String authorName = (String) author.get(Globals.profile.getLabelKey());
 			authorNames.add(authorName);
@@ -56,13 +56,13 @@ public class Title {
 				? String.join(" | ", authorNames) + " . " : "";
 	}
 
-	private static List<Map<String, Object>> getContributorList(
+	private static Collection<Map<String, Object>> getContributorList(
 			Map<String, Object> hit) {
-		return (List<Map<String, Object>>) hit.get("contributor");
+		return (Collection<Map<String, Object>>) hit.get("contributor");
 	}
 
 	public static String getIssued(Map<String, Object> hit) {
-		Set<String> issued = (Set<String>) hit.get("issued");
+		Collection<String> issued = (Collection<String>) hit.get("issued");
 		return issued != null && !issued.isEmpty() ? String.join("<br/> ", issued)
 				: "";
 	}

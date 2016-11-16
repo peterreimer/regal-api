@@ -67,6 +67,7 @@ import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.twirl.api.Html;
+import views.html.edit;
 import views.html.mab;
 import views.html.mets;
 import views.html.oaidc;
@@ -500,12 +501,9 @@ public class Resource extends MyController {
 				List<Node> result = read.getNodes(nodeIds);
 
 				if (request().accepts("text/html")) {
-					return ok(
-							resource
-									.render(
-											result.stream().map(n -> new JsonMapper(n).getLd())
-													.collect(Collectors.toList()),
-											Globals.namespaces[0]));
+					return ok(resource.render(result.stream()
+							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
+							Globals.namespaces[0]));
 				} else {
 					return getJsonResult(result);
 				}
@@ -551,12 +549,9 @@ public class Resource extends MyController {
 				}
 				if (request().accepts("text/html")) {
 					List<Node> result = read.getParts(node);
-					return ok(
-							resource
-									.render(
-											result.stream().map(n -> new JsonMapper(n).getLd())
-													.collect(Collectors.toList()),
-											Globals.namespaces[0]));
+					return ok(resource.render(result.stream()
+							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
+							Globals.namespaces[0]));
 				} else if (request().accepts("application/json")) {
 					return getJsonResult(read.getPartsAsTree(node, style));
 				} else {
@@ -977,6 +972,24 @@ public class Resource extends MyController {
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.replaceDoi(node);
 			return JsonMessage(new Message(json(result)));
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "edit", value = "edit", notes = "get a form to edit the resources metadata", response = String.class, httpMethod = "POST")
+	public static Promise<Result> edit(@PathParam("pid") String pid,
+			@QueryParam("format") String format,
+			@QueryParam("topicId") String topicId) {
+		return new ModifyAction().call(pid, userId -> {
+			try {
+				Node node = readNodeOrNull(pid);
+				String rdf = RdfUtils.readRdfToString(
+						new ByteArrayInputStream(node.toString().getBytes("utf-8")),
+						RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
+				// rdf = java.net.URLEncoder.encode(rdf, "utf-8");
+				return ok(edit.render("HELLO", "ntriples", pid, pid + ".rdf", rdf));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
 		});
 	}
 

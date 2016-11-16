@@ -2,7 +2,6 @@ import static org.junit.Assert.assertEquals;
 import static play.test.Helpers.fakeApplication;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import base.BaseModelTest;
 import helper.mail.Mail;
@@ -33,7 +32,6 @@ public class MailTest extends BaseModelTest {
 		mail.setSubject("INFO Test message from regal-api/test/MailTest");
 	}
 
-	@Test
 	public final void testSendMail() {
 		// Test-E-Mail abschicken, Returnwert muss NULL sein
 		assertEquals(mail.sendMail(), (int) 0);

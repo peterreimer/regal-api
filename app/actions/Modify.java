@@ -16,10 +16,13 @@
  */
 package actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -36,11 +40,18 @@ import java.util.regex.Pattern;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFFormat;
 import org.w3c.dom.Element;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
@@ -62,6 +73,18 @@ import models.RegalObject;
  *
  */
 public class Modify extends RegalAction {
+
+	private static final String alternateName =
+			"http://www.geonames.org/ontology#alternateName";
+	private static final String first =
+			"http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
+	private static final String rest =
+			"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
+	private static final String nil =
+			"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+
+	private static final String PREF_LABEL =
+			"http://www.w3.org/2004/02/skos/core#prefLabel";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -174,6 +197,7 @@ public class Modify extends RegalAction {
 							+ " This action is not supported."
 							+ " Use HTTP DELETE instead.\n");
 		}
+
 		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
@@ -246,7 +270,10 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
-			RdfUtils.validate(content);
+			// RdfUtils.validate(content);
+			// Extreme Workaround to fix subject uris
+			content = rewriteContent(content, pid);
+			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
 			node.setMetadataFile(file.getAbsolutePath());
 			if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
@@ -266,6 +293,47 @@ public class Modify extends RegalAction {
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}
+	}
+
+	private String rewriteContent(String content, String pid) {
+		Graph graph = RdfUtils.readRdfToGraph(
+				new ByteArrayInputStream(content.getBytes()), RDFFormat.NTRIPLES, "");
+		Iterator<Statement> it = graph.iterator();
+		String subj = pid;
+		while (it.hasNext()) {
+			Statement str = it.next();
+			if ("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
+					.equals(str.getPredicate().stringValue())) {
+				subj = str.getSubject().stringValue();
+				break;
+			}
+		}
+		if (pid.equals(subj))
+			return content;
+		play.Logger.debug("Rewrite " + subj + " to " + pid);
+		graph.removeIf(st -> {
+			return "http://xmlns.com/foaf/0.1/primaryTopic"
+					.equals(st.getPredicate().stringValue());
+		});
+		graph.removeIf(st -> {
+			return "http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
+					.equals(st.getPredicate().stringValue());
+		});
+		graph = RdfUtils.rewriteSubject(subj, pid, graph);
+
+		Resource s = graph.getValueFactory().createURI(pid + ".rdf");
+		URI p = graph.getValueFactory()
+				.createURI("http://xmlns.com/foaf/0.1/primaryTopic");
+		Resource o = graph.getValueFactory().createURI(pid);
+		graph.add(graph.getValueFactory().createStatement(s, p, o));
+
+		s = graph.getValueFactory().createURI(pid);
+		p = graph.getValueFactory()
+				.createURI("http://xmlns.com/foaf/0.1/isPrimaryTopicOf");
+		o = graph.getValueFactory().createURI(pid + ".rdf");
+		graph.add(graph.getValueFactory().createStatement(s, p, o));
+		return RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
+
 	}
 
 	private String getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(
@@ -580,6 +648,30 @@ public class Modify extends RegalAction {
 				enrichStatements.addAll(getStatements(uri));
 			}
 
+			play.Logger.info("Enrich " + node.getPid() + " with geonames.");
+			List<String> geoNameIds = findAllGeonameIds(metadata);
+			for (String uri : geoNameIds) {
+				enrichStatements.addAll(getGeonamesStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with openstreetmap.");
+			List<String> osmIds = findAllOsmIds(metadata);
+			for (String uri : osmIds) {
+				enrichStatements.addAll(getOsmStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with orcid.");
+			List<String> orcidIds = findAllOrcidIds(metadata);
+			for (String uri : orcidIds) {
+				enrichStatements.addAll(getOrcidStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
+			List<String> agrovocIds = findAllAgrovocIds(metadata);
+			for (String uri : agrovocIds) {
+				enrichStatements.addAll(getAgrovocStatements(uri));
+			}
+
 			play.Logger.info("Enrich " + node.getPid() + " with institution.");
 			List<Statement> institutions = findInstitution(node);
 			enrichStatements.addAll(institutions);
@@ -606,8 +698,7 @@ public class Modify extends RegalAction {
 		for (String p : parents) {
 			ValueFactory v = new ValueFactoryImpl();
 			String label = getEtikett(p);
-			Statement st = v.createStatement(v.createURI(p),
-					v.createURI("http://www.w3.org/2004/02/skos/core#prefLabel"),
+			Statement st = v.createStatement(v.createURI(p), v.createURI(PREF_LABEL),
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
 			catalogParents.add(st);
 		}
@@ -684,9 +775,207 @@ public class Modify extends RegalAction {
 		return filteredStatements;
 	}
 
+	private List<Statement> getOrcidStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		try (InputStream in =
+				RdfUtils.urlToInputStream(new URL(uri), "application/json")) {
+			String str =
+					CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
+			JsonNode hit = new ObjectMapper().readValue(str, JsonNode.class);
+			String label =
+					hit.at("/orcid-profile/orcid-bio/personal-details/family-name/value")
+							.asText()
+							+ ", "
+							+ hit
+									.at("/orcid-profile/orcid-bio/personal-details/given-names/value")
+									.asText();
+			ValueFactory v = new ValueFactoryImpl();
+			Literal object =
+					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
+			Statement newS =
+					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
+			play.Logger.info("Get data from " + uri + " " + newS);
+			filteredStatements.add(newS);
+		} catch (Exception e) {
+			play.Logger.warn("", e);
+		}
+		return filteredStatements;
+	}
+
+	private List<Statement> getOsmStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		try {
+			URL url = new URL(uri);
+			Map<String, String> map = new LinkedHashMap<String, String>();
+			String query = url.getQuery();
+			for (String pair : query.split("&")) {
+				String[] keyValue = pair.split("=");
+				int idx = pair.indexOf("=");
+				map.put(URLDecoder.decode(keyValue[0], "UTF-8"),
+						URLDecoder.decode(keyValue[1], "UTF-8"));
+			}
+			ValueFactory v = new ValueFactoryImpl();
+			Literal object = v.createLiteral(Normalizer.normalize(
+					map.get("mlat") + "," + map.get("mlon"), Normalizer.Form.NFKC));
+			Statement newS =
+					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
+			play.Logger.info("Get data from " + uri + " " + newS);
+			filteredStatements.add(newS);
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+		}
+		return filteredStatements;
+	}
+
+	private List<Statement> getGeonamesStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		ValueFactory v = new ValueFactoryImpl();
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		List<Literal> alternateNames = new ArrayList<Literal>();
+		try {
+			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about.rdf"),
+					RDFFormat.RDFXML, "application/rdf+xml")) {
+				boolean isLiteral = s.getObject() instanceof Literal;
+				if (!(s.getSubject() instanceof BNode)) {
+					if (isLiteral) {
+						Literal l = (Literal) s.getObject();
+						Literal object = v.createLiteral(Normalizer
+								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
+								l.getLanguage());
+						Statement newS =
+								v.createStatement(v.createURI(uri), s.getPredicate(), object);
+						play.Logger.info("Get data from " + uri + " " + newS);
+
+						if (alternateName.equals(s.getPredicate().stringValue())) {
+							newS = v.createStatement(v.createURI(uri), v.createURI(
+									s.getPredicate().stringValue() + "_" + object.getLanguage()),
+									object);
+						}
+						filteredStatements.add(newS);
+					}
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.warn("Not able to get data from" + uri);
+		}
+
+		return filteredStatements;
+	}
+
+	private List<Statement> getAgrovocStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		ValueFactory v = new ValueFactoryImpl();
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		List<Literal> prefLabel = new ArrayList<Literal>();
+		try {
+			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri), RDFFormat.RDFXML,
+					"application/rdf+xml")) {
+				boolean isLiteral = s.getObject() instanceof Literal;
+				if (!(s.getSubject() instanceof BNode)) {
+					if (isLiteral) {
+						Literal l = (Literal) s.getObject();
+						Literal object = v.createLiteral(Normalizer
+								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
+								l.getLanguage());
+						Statement newS =
+								v.createStatement(v.createURI(uri), s.getPredicate(), object);
+						play.Logger.info("Get data from " + uri + " " + newS);
+
+						if (PREF_LABEL.equals(s.getPredicate().stringValue())) {
+							if ("de".equals(object.getLanguage())) {
+								newS = v.createStatement(v.createURI(uri), s.getPredicate(),
+										object);
+								filteredStatements.add(newS);
+							}
+							newS = v.createStatement(v.createURI(uri), v.createURI(
+									s.getPredicate().stringValue() + "_" + object.getLanguage()),
+									object);
+						}
+						filteredStatements.add(newS);
+					}
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.warn("Not able to get data from" + uri);
+		}
+
+		return filteredStatements;
+	}
+
+	private List<Statement> getListAsStatements(List<Literal> list, String uri,
+			String predicate) {
+		List<Statement> listStatements = new ArrayList<Statement>();
+		ValueFactory v = new ValueFactoryImpl();
+		BNode head = v.createBNode();
+		Statement newS =
+				v.createStatement(v.createURI(uri), v.createURI(predicate), head);
+		listStatements.add(newS);
+
+		Resource cur = head;
+		for (Literal l : list) {
+			BNode r = v.createBNode();
+			Statement linkToRest = v.createStatement(cur, v.createURI(rest), r);
+			Statement linkToValue = v.createStatement(cur, v.createURI(first), l);
+			cur = r;
+			listStatements.add(linkToRest);
+			listStatements.add(linkToValue);
+		}
+		Statement endOfList = listStatements.get(listStatements.size() - 1);
+		listStatements.remove(listStatements.size() - 1);
+		Statement linkToNill = v.createStatement(endOfList.getSubject(),
+				v.createURI(rest), v.createURI(nil));
+		listStatements.add(linkToNill);
+		return listStatements;
+	}
+
 	private List<String> findAllGndIds(String metadata) {
 		HashMap<String, String> result = new HashMap<String, String>();
 		Matcher m = Pattern.compile("http://d-nb.info/gnd/[1234567890-]*")
+				.matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllGeonameIds(String metadata) {
+		HashMap<String, String> result = new HashMap<String, String>();
+		Matcher m = Pattern.compile("http://www.geonames.org/[1234567890-]*")
+				.matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllOsmIds(String metadata) {
+		HashMap<String, String> result = new HashMap<String, String>();
+		Matcher m =
+				Pattern.compile("http://www.openstreetmap.org/[^>]*").matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllOrcidIds(String metadata) {
+		HashMap<String, String> result = new HashMap<>();
+		Matcher m = Pattern.compile("http://orcid.org/[^>]*").matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllAgrovocIds(String metadata) {
+		HashMap<String, String> result = new HashMap<>();
+		Matcher m = Pattern.compile("http://aims.fao.org/aos/agrovoc/[^>]*")
 				.matcher(metadata);
 		while (m.find()) {
 			String id = m.group();

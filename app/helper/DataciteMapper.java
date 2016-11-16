@@ -17,6 +17,7 @@
 package helper;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -153,6 +154,13 @@ public class DataciteMapper {
 			play.Logger
 					.debug("DataciteMapper: Metadatafield 'PublicationYear' not found!");
 		}
+		if (rec.publicationYear == null || rec.publicationYear.isEmpty()) {
+			rec.publicationYear = getCurrentYear();
+		}
+	}
+
+	public static String getCurrentYear() {
+		return java.time.Year.now().toString();
 	}
 
 	private static void addPublisher(Map<String, Object> ld, DataciteRecord rec) {
@@ -173,6 +181,11 @@ public class DataciteMapper {
 			play.Logger.debug(
 					"DataciteMapper: Metadatafield 'thesisInformation' not found!");
 		}
+
+		if (rec.publisher == null || rec.publisher.isEmpty()) {
+			rec.publisher = "PUBLISSO";
+		}
+
 	}
 
 	private static void addTitles(Map<String, Object> ld, DataciteRecord rec) {

@@ -250,7 +250,7 @@ public class OaiDispatcher {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
-					|| "webpage".equals(type)) {
+					|| "webpage".equals(type) || "researchData".equals(type)) {
 				node.addTransformer(new Transformer("mets"));
 			}
 		}
@@ -260,7 +260,7 @@ public class OaiDispatcher {
 		String type = node.getContentType();
 		if (node.hasPersistentIdentifier()) {
 			if ("monograph".equals(type) || "journal".equals(type)
-					|| "webpage".equals(type))
+					|| "webpage".equals(type) || "researchData".equals(type))
 				if (node.hasLinkToCatalogId()) {
 					node.addTransformer(new Transformer("aleph"));
 				}
@@ -277,7 +277,7 @@ public class OaiDispatcher {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
-					|| "webpage".equals(type)) {
+					|| "webpage".equals(type) || "researchData".equals(type)) {
 				node.addTransformer(new Transformer("oaidc"));
 			}
 		}
@@ -287,7 +287,7 @@ public class OaiDispatcher {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
-					|| "webpage".equals(type)) {
+					|| "webpage".equals(type) || "researchData".equals(type)) {
 				node.addTransformer(new Transformer("rdf"));
 			}
 		}

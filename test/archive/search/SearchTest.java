@@ -28,12 +28,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import archive.fedora.CopyUtils;
 import archive.search.Search.SearchException;
 import base.BaseModelTest;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
