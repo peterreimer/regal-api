@@ -84,17 +84,41 @@ public class JsonMapper {
 	final static String title = "title";
 	final static String fileLabel = "fileLabel";
 
-	final static String[] typePrios = new String[] { "ArchivedWebPage", "Report",
-			"Biography", "Game", "Schoolbook", "PublishedScore", "Legislation",
-			"ReferenceSource", "OfficialPublication", "Bibliography", "Festschrift",
-			"Proceedings", "ResearchData", "EditedVolume", "Thesis", "Miscellaneous",
-			"http://purl.org/ontology/mo/Record", "Map", "AudioVisualDocument",
-			"AudioDocument", "Image", "Article",
-			"http://rdvocab.info/termList/RDACarrierType/1018", "Print",
+	final static String[] typePrios = new String[] {
+			"http://purl.org/lobid/lv#ArchivedWebPage",
+			"http://purl.org/ontology/bibo/Report",
+			"http://purl.org/lobid/lv#Biography", "http://purl.org/library/Game",
+			"http://purl.org/lobid/lv#Schoolbook",
+			"http://purl.org/ontology/mo/PublishedScore",
+			"http://purl.org/lobid/lv#Legislation",
+			"http://purl.org/ontology/bibo/ReferenceSource",
+			"http://purl.org/lobid/lv#OfficialPublication",
+			"http://purl.org/lobid/lv#Bibliography",
+			"http://purl.org/lobid/lv#Festschrift",
+			"http://purl.org/ontology/bibo/Proceedings",
+			"http://hbz-nrw.de/regal#ResearchData",
+			"http://purl.org/lobid/lv#EditedVolume",
+			"http://purl.org/ontology/bibo/Thesis",
+			"http://purl.org/lobid/lv#Miscellaneous",
+			"http://purl.org/ontology/mo/Record", "http://purl.org/ontology/bibo/Map",
+			"http://purl.org/ontology/bibo/AudioVisualDocument",
+			"http://purl.org/ontology/bibo/AudioDocument",
+			"http://purl.org/ontology/bibo/Image",
+			"http://purl.org/ontology/bibo/Article",
+			"http://rdvocab.info/termList/RDACarrierType/1018",
+			"http://rdvocab.info/termList/RDACarrierType/1010",
 			"http://iflastandards.info/ns/isbd/terms/mediatype/T1002",
-			"MultiVolumeBook", "Journal", "Newspaper", "Series", "Periodical",
-			"Collection", "Book", "ArchivalResource", "Document", "Manifestation",
-			"BibliographicResource" };
+			"http://purl.org/ontology/bibo/MultiVolumeBook",
+			"http://purl.org/ontology/bibo/Journal",
+			"http://purl.org/ontology/bibo/Newspaper",
+			"http://purl.org/ontology/bibo/Series",
+			"http://purl.org/ontology/bibo/Periodical",
+			"http://purl.org/ontology/bibo/Collection",
+			"http://purl.org/ontology/bibo/Book",
+			"http://data.archiveshub.ac.uk/def/ArchivalResource",
+			"http://purl.org/ontology/bibo/Document",
+			"http://purl.org/vocab/frbr/core#Manifestation",
+			"http://purl.org/dc/terms/BibliographicResource" };
 
 	Node node = null;
 	EtikettMakerInterface profile = Globals.profile;
@@ -430,7 +454,7 @@ public class JsonMapper {
 		if (types != null) {
 			for (String s : typePrios) {
 				play.Logger.debug("Search for type: " + s);
-				if (types.contains(s)) {
+				if (types.contains(Globals.profile.getEtikett(s).name)) {
 					Map<String, Object> tmap = new HashMap<>();
 					tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
 					tmap.put(ID2, s);
