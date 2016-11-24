@@ -121,13 +121,12 @@
 	    @value match {
 			case a: String => {
 			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
-	                       <a href=@analyseValue(a)>
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(a)@models.Globals.rechercheUrlSuffix">
 	                       @(map.get(Globals.profile.getLabelKey()))
 	                       </a> |
-	                       <a title="Ähnliche Objekte suchen" href=/find?q="@helper.urlEncode(a)">
+	                       <a href=@analyseValue(a)>
 	                               <span class="glyphicon glyphicon-link"></span>
 	                       </a>
-			
 			}
 			case _ => {		
 				<table class="table table-striped table-condensed">

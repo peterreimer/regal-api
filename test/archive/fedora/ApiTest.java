@@ -99,7 +99,7 @@ public class ApiTest extends BaseModelTest {
 	}
 
 	private Result readObject(String pid, int httpStatus) {
-		Result result = controllerCall(() -> Resource.listResource(pid));
+		Result result = controllerCall(() -> Resource.listResource(pid, ""));
 		Assert.assertEquals(httpStatus, result.status());
 		return result;
 	}
