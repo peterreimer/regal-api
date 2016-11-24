@@ -1,12 +1,12 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@(hit: Map[String,Object],context:Map[String,Object],namespace:String)
+@(hit: Map[String,Object],context:List[String],namespace:String)
 
 <table class="table table-striped table-condensed" id="example" class="display" cellspacing="0" width="100%">
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
 	@context match{
-		case map : Map[String,Object] => {
-			@for(k<-map.keys){
+		case list : List[String] => {
+			@for(k<-context){
 				@tableRow(k,hit)
 			}
 		}
@@ -137,7 +137,7 @@
 }
 
 @getLabel(key: String)={
-		@context match{
+		@hit.get("@context") match{
 			case map : Map[String,Object] => {
 				@map.get(key) match { 
 					case keyMap : Map[String,Object]=> {

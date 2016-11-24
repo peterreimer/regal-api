@@ -1,10 +1,10 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
-
+@import views.Helper 
 @(hit: Map[String,Object],namespace: String)
 
 
 <div class="container">	
-@tags.resourceView(hit,hit.get("@context").asInstanceOf[Map[String,Object]],namespace)
+@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
 </div>
 <script type="text/javascript" charset="utf-8">
 	$(document).ready(function() {
