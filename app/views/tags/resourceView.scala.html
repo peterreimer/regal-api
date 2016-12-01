@@ -2,7 +2,7 @@
 
 @(hit: Map[String,Object],context:List[String],namespace:String)
 
-<table class="table table-striped table-condensed" id="example" class="display" cellspacing="0" width="100%" resource="">
+<table class="table table-striped table-condensed" id="example" class="display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
 	@context match{
 		case list : List[String] => {
@@ -18,10 +18,10 @@
 	@values match {
 		case d if d == null =>{}
 		case _ =>{
-			<tr>
+			<tr class="@key">
 						<td style="display:none;">@getWeight(key)</td>
 						<td class="field-label @key">@getLabel(key)</td>
-						<td class="field-item">
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
 							@values match {
 								case a: String => {
 											@value(a,key)
@@ -37,7 +37,7 @@
 									}
 								}
 								case c : Map[String,Object] => {
-									<table class="table table-striped table-condensed">
+									<table class="table table-striped table-condensed" resource=@c.get("@id")>
 										@for((k,v)<-c){
 											@htmlRow(v,k.asInstanceOf[String])
 											}
@@ -47,9 +47,11 @@
 								case _ => {
 											@values
 								}
-			}
-			</tr>
+							}
+							
+							</tr>
 		}
+		
 	}
 }
 

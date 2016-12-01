@@ -98,7 +98,10 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 
 	@Override
 	public Etikett getEtikettByName(String name) {
-		return maker.getEtikettByName(name);
+		Etikett result = maker.getEtikettByName(name);
+		if (result == null)
+			return new Etikett();
+		return result;
 	}
 
 	/**
