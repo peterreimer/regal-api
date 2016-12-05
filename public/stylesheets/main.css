@@ -21,3 +21,40 @@
 	padding: 0;
 	marging: 0;
 }
+.public-access {
+    position:relative;
+} 
+.public-access:before{
+	color:green;
+	content: "\f13e";
+    font-family: FontAwesome;
+    top:0;
+    left:-5px;
+    padding-right:10px;
+}
+
+.private-access {
+    position:relative;
+} 
+.private-access:before{
+	color:red;
+	content: "\f023";
+   font-family: FontAwesome;
+    top:0;
+    left:-5px;
+    padding-right:10px;
+}
+.restricted-access {
+    position:relative;
+} 
+.restricted-access:before{
+	color:orange;
+    font-family: FontAwesome;
+    top:0;
+    left:-5px;
+    padding-right:10px;
+	content: "\f023";
+}
+ol{
+	list-style-type:none
+}
