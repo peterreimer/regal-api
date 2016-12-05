@@ -542,7 +542,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listAllParts(@PathParam("pid") String pid,
-			@QueryParam("style") String s) {
+			@QueryParam("style") String s, @QueryParam("design") String design) {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
 				String style = "short";
@@ -550,10 +550,16 @@ public class Resource extends MyController {
 					style = "long";
 				}
 				if (request().accepts("text/html")) {
-					List<Node> result = read.getParts(node);
-					return ok(resource.render(result.stream()
-							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
-							Globals.namespaces[0]));
+					if ("frl".equals(design)) {
+						return ok(frlResource.render(read.getMapWithParts(node),
+								Globals.namespaces[0]));
+					} else {
+						List<Map<String, Object>> result = new ArrayList();
+						Map<String, Object> item = read.getMapWithParts(node);
+						result.add(item);
+						return ok(resource.render(result, Globals.namespaces[0]));
+					}
+
 				} else if (request().accepts("application/json")) {
 					return getJsonResult(read.getPartsAsTree(node, style));
 				} else {
