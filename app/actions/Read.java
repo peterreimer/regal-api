@@ -248,10 +248,9 @@ public class Read extends RegalAction {
 		if (parts != null) {
 			for (Map<String, Object> part : parts) {
 				String id = (String) part.get("@id");
-				Map<String, Object> child = new HashMap();
-				child.put(id,
-						new JsonMapper(internalReadNode(id)).getLdWithoutContext());
-				children.add(child);
+
+				children
+						.add(new JsonMapper(internalReadNode(id)).getLdWithoutContext());
 			}
 			nm.put("hasPart", children);
 		}

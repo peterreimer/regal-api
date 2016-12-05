@@ -86,15 +86,31 @@
 }
 
 @value(value: Any,key:String)= {
-	@value match {
-		case a: String => {
-			@analyseString(value.asInstanceOf[String])
-		}
-		case c : Map[String,Object] => {
-					@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
-		}
-		case _ => {
-		
+	@key match {
+		case "hasPart"=>{
+				@value match {
+					case a: String => {
+						@analyseString(value.asInstanceOf[String])
+					}
+					case c : Map[String,Object] => {
+								@displayMap(c,c,key)
+					}
+					case _ => {
+					
+					}
+				}
+		}case _ =>{
+			@value match {
+				case a: String => {
+					@analyseString(value.asInstanceOf[String])
+				}
+				case c : Map[String,Object] => {
+							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
+				}
+				case _ => {
+				
+				}
+			}
 		}
 	}
 }
