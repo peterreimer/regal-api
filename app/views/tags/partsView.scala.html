@@ -11,12 +11,11 @@ case fileMap : Map[String,Object] =>{
 		case hasData : Map[String,Object] =>{
 			<p>
 			<div class="fileView" id=@fileMap.get( "@id")>
-				
-				<table class="table table-striped table-condensed dataTable no-footer">
+				<table>
 					<tr class="accessScheme">
 						<td class="downloadIcon" rowspan="6">
 							<a href="/resource/@fileMap.get("@id")/data"><img
-								src="/public/images/download.png"></img></a>
+								src="/public/images/download.png" width="40pt"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
 								<div class="dc:label">@hasData.get("fileLabel")</div>
 								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
@@ -26,7 +25,7 @@ case fileMap : Map[String,Object] =>{
 					</tr>
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
-				<table class="table table-striped table-condensed dataTable no-footer">
+				<table>
 					<tr class="publishScheme">
 						<td>Metadata</td>
 						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>

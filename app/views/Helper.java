@@ -28,4 +28,18 @@ public class Helper {
 					}
 				}).map(e -> e.getKey()).collect(Collectors.toList());
 	}
+
+	public static String getDataLink(Map<String, Object> hit) {
+		Object parts = hit.get("hasPart");
+		if (parts instanceof List) {
+			Object part = ((List) parts).get(0);
+			if (part instanceof Map) {
+				String id = (String) ((Map<String, Object>) part).get("@id");
+				return ("/resource/" + id + "/data");
+			}
+		}
+		String id = (String) hit.get("@id");
+		return "/resource/" + id + "/data";
+	}
+
 }
