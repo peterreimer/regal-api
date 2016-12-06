@@ -54,6 +54,19 @@
     padding-right:10px;
 	content: "\f023";
 }
+
+.folder {
+    position:relative;
+} 
+.folder:before{
+	color:orange;
+    font-family: FontAwesome;
+    top:0;
+    left:-5px;
+    padding-right:10px;
+	content: "\f114";
+}
+
 ol{
 	list-style-type:none
 }

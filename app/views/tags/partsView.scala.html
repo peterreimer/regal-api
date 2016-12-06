@@ -59,14 +59,24 @@ case fileMap : Map[String,Object] =>{
 			</div>
 			</p>
 		} case _ =>{
-		 <span class=@models.Globals.profile.getEtikett(fileMap.get("@id").toString()).getIcon()></span>
-			 			   <a title="Ähnliche Objekte suchen" href=@models.Globals.rechercheUrlPrefix@helper.urlEncode(fileMap.get("@id").toString())@models.Globals.rechercheUrlSuffix>
-	                       @(fileMap.get(Globals.profile.getLabelKey()))
-	                       </a> |
-	                       <a href=/resource/@fileMap.get("@id").toString()>
-	                               <span class="glyphicon glyphicon-link"></span>
-	                       </a>
-		
+		<p>
+			<div class="fileView" id=@fileMap.get( "@id")>
+				<table>
+					<tr class="accessScheme">
+						<td class="downloadIcon" rowspan="6">
+							<a href="/resource/@fileMap.get("@id")"><img
+								src="/public/images/folder.png" width="40pt"></img></a>
+							<a href="/resource/@fileMap.get("@id")">
+								<div class="dc:label">
+								@views.Helper.getTitle(fileMap)
+								</div>
+						   </a>
+						</td>
+					</tr>
+				</table>
+				
+			</div>
+			</p>
 		} 
 	} 
 } 

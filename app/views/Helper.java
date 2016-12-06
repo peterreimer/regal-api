@@ -1,8 +1,10 @@
 package views;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Helper {
@@ -40,6 +42,22 @@ public class Helper {
 		}
 		String id = (String) hit.get("@id");
 		return "/resource/" + id + "/data";
+	}
+
+	public static String getTitle(Map<String, Object> hit) {
+		Object t = hit.get("title");
+		if (t instanceof List) {
+			Object l = ((List) t).get(0);
+			if (l instanceof String) {
+				return l + "";
+			}
+
+		}
+		if (t instanceof Set) {
+			return ((Set) t).iterator().next() + "";
+		}
+
+		return t + "";
 	}
 
 }
