@@ -60,7 +60,7 @@ libraryDependencies ++= Seq(
   "javax.xml.bind" % "jaxb-api" % "2.2.6",
   "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2",
   "net.sf.supercsv" %"super-csv" %"2.3.1",
-  "com.github.hbz" %"lobid-rdf-to-json" % "8dcd67c7aa7f4fb7b53e875ea0561a4fbb951f89",
+  "com.github.hbz" %"lobid-rdf-to-json" % "ec661046f89dd0ffab8d4ac43abcdba268083b1b",
   "com.fasterxml.jackson.core" %"jackson-core" %"2.6.3",
   "com.fasterxml" %"jackson-module-json-org" %"0.9.1",
   "com.fasterxml.jackson.core" %"jackson-databind" %"2.6.3",
