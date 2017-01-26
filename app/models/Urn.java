@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  *
  */
 @SuppressWarnings("javadoc")
-public class Urn {
+public class Urn implements java.io.Serializable {
 	String resolver = Globals.urnResolverAddress;
 	String urn = null;
 	String resolvesTo = "NONE";

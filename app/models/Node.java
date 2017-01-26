@@ -53,7 +53,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * 
  */
 @XmlRootElement(name = "object")
-public class Node {
+public class Node implements java.io.Serializable {
 
 	/**
 	 * Dublin Core Metadata

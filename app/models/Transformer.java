@@ -22,7 +22,7 @@ import java.util.Vector;
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  */
-public class Transformer {
+public class Transformer implements java.io.Serializable {
 
 	private String id = null;
 	private List<String> prescribedDSIds = null;

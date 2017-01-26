@@ -31,7 +31,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  */
 @SuppressWarnings("javadoc")
 @XmlRootElement(name = "message")
-public class Message {
+public class Message implements java.io.Serializable {
 	String error;
 	String text;
 	int code;

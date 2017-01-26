@@ -26,7 +26,7 @@ import java.util.Map;
  * 
  */
 @SuppressWarnings("javadoc")
-public class MabRecord {
+public class MabRecord implements java.io.Serializable {
 
 	public final String leader = "00740nM2.01200024------h";
 	public final String LDR = "00740nM2.01200024------h";

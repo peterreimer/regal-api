@@ -29,7 +29,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * @author Jan Schnasse
  *
  */
-public class RdfResource {
+public class RdfResource implements java.io.Serializable {
 
 	String uri = null;
 	List<Link> links = new ArrayList<Link>();

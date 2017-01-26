@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegalObject {
+public class RegalObject implements java.io.Serializable {
 
 	/**
 	 * @author jan schnasse

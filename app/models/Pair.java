@@ -9,7 +9,7 @@ import java.util.Objects;
  * -pairs-tuples
  */
 @SuppressWarnings("javadoc")
-public class Pair<L, R> {
+public class Pair<L, R> implements java.io.Serializable {
 
 	private final L left;
 	private final R right;
