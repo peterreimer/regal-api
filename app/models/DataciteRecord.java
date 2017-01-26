@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
  * @author Jan Schnasse
  *
  */
-public class DataciteRecord {
+public class DataciteRecord implements java.io.Serializable {
 
 	/**
 	 * the doi

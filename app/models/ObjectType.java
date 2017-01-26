@@ -20,7 +20,7 @@ package models;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
  */
-public enum ObjectType {
+public enum ObjectType implements java.io.Serializable {
 	/**
 	 * A Monograph consists of one node with one datastream, and one metadata
 	 * stream. To generate a multiple file monograph the file and supplement

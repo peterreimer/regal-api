@@ -25,7 +25,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  */
-public class Link {
+public class Link  implements java.io.Serializable  {
 	boolean isLiteral = false;
 	private String predicateLabel = null;
 	private String predicate = null;

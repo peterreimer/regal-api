@@ -28,7 +28,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * 
  */
 
-public class DublinCoreData {
+public class DublinCoreData implements java.io.Serializable {
 
 	List<String> contributor = new Vector<String>();
 	List<String> coverage = new Vector<String>();
