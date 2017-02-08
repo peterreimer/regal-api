@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -677,9 +678,22 @@ public class Modify extends RegalAction {
 			enrichStatements.addAll(institutions);
 
 			play.Logger.info("Enrich " + node.getPid() + " with parent.");
-			List<Statement> catalogParents = findParents(node, metadata);
+			List<Statement> catalogParents =
+					find(node, metadata, "http://purl.org/dc/terms/isPartOf");
 			enrichStatements.addAll(catalogParents);
+
+			play.Logger.info("Enrich " + node.getPid() + " with inSeries.");
+			List<Statement> series =
+					find(node, metadata, "http://purl.org/lobid/lv#series");
+			enrichStatements.addAll(series);
+
+			play.Logger.info("Enrich " + node.getPid() + " with multiVolumeWork.");
+			List<Statement> multiVolumeWork =
+					find(node, metadata, "http://purl.org/lobid/lv#multiVolumeWork");
+			enrichStatements.addAll(multiVolumeWork);
+
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+
 			updateMetadata(node, metadata);
 
 		} catch (Exception e) {
@@ -690,11 +704,11 @@ public class Modify extends RegalAction {
 		return "Enrichment of " + node.getPid() + " succeeded!";
 	}
 
-	private List<Statement> findParents(Node node, String metadata) {
+	private List<Statement> find(Node node, String metadata, String pred) {
 		List<Statement> catalogParents = new ArrayList<Statement>();
 		// getIsPartOf
-		List<String> parents = RdfUtils.findRdfObjects(node.getPid(),
-				"http://purl.org/dc/terms/isPartOf", metadata, RDFFormat.NTRIPLES);
+		List<String> parents = RdfUtils.findRdfObjects(node.getPid(), pred,
+				metadata, RDFFormat.NTRIPLES);
 		for (String p : parents) {
 			ValueFactory v = new ValueFactoryImpl();
 			String label = getEtikett(p);
@@ -1201,7 +1215,9 @@ public class Modify extends RegalAction {
 	}
 
 	public String lobidify(Node node, String alephid) {
-		return updateMetadata(node, getLobidDataAsNtripleString(node, alephid));
+		updateMetadata(node, getLobidDataAsNtripleString(node, alephid));
+		String enrichMessage = enrichMetadata(node);
+		return enrichMessage;
 	}
 
 	public String getAuthorOrdering(String alephid) {
