@@ -697,6 +697,11 @@ public class Modify extends RegalAction {
 					find(node, metadata, "http://purl.org/dc/terms/language");
 			enrichStatements.addAll(language);
 
+			play.Logger.info("Enrich " + node.getPid() + " with recordingLocation.");
+			List<Statement> recordingLocation =
+					find(node, metadata, "http://hbz-nrw.de/regal#recordingLocation");
+			enrichStatements.addAll(language);
+
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 
 			updateMetadata(node, metadata);
