@@ -692,6 +692,11 @@ public class Modify extends RegalAction {
 					find(node, metadata, "http://purl.org/lobid/lv#multiVolumeWork");
 			enrichStatements.addAll(multiVolumeWork);
 
+			play.Logger.info("Enrich " + node.getPid() + " with language.");
+			List<Statement> language =
+					find(node, metadata, "http://purl.org/dc/terms/language");
+			enrichStatements.addAll(language);
+
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 
 			updateMetadata(node, metadata);
