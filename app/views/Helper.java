@@ -64,44 +64,29 @@ public class Helper {
 	}
 
 	public static String getSeries(Set<Map<String, Object>> hits) {
-		try {
-			StringBuffer result = new StringBuffer();
-			for (Map<String, Object> hit : hits) {
-				// result.append("" + hit);
-				String numbering = (String) hit.get("numbering");
-				Map<String, Object> series =
-						((Set<Map<String, Object>>) hit.get("series")).iterator().next();
-				String label = (String) series.get("prefLabel");
-				String id = (String) series.get("@id");
-				String internLink = URLEncoder.encode(models.Globals.rechercheUrlPrefix
-						+ id + models.Globals.rechercheUrlSuffix, "utf-8");
-				result.append(String.format(
-						"<a title=\"Ähnliche Objekte suchen\" href=\"%s\"> %s</a>",
-						internLink, label));
-				result.append(String.format(
-						"|<a href=\"%s\"><span class=\"glyphicon glyphicon-link\"></span></a>, Band %s",
-						id, numbering));
-			}
-			return result.toString();
-		} catch (Exception e) {
-			play.Logger.warn("", e);
-			return "Can't process data";
-		}
+		return getBibliographicParent(hits, "series");
 	}
 
 	public static String getMultiVolumeWork(Set<Map<String, Object>> hits) {
+		return getBibliographicParent(hits, "multiVolumeWork");
+	}
+
+	public static String getBibliographicParent(Set<Map<String, Object>> hits,
+			String rel) {
 		try {
 			StringBuffer result = new StringBuffer();
 			for (Map<String, Object> hit : hits) {
 				// result.append("" + hit);
 				String numbering = (String) hit.get("numbering");
 				Map<String, Object> series =
-						((Set<Map<String, Object>>) hit.get("multiVolumeWork")).iterator()
-								.next();
+						((Set<Map<String, Object>>) hit.get(rel)).iterator().next();
 				String label = (String) series.get("prefLabel");
 				String id = (String) series.get("@id");
-				String internLink = URLEncoder.encode(models.Globals.rechercheUrlPrefix
-						+ id + models.Globals.rechercheUrlSuffix, "utf-8");
+				id = id.trim();
+				String prefix = models.Globals.rechercheUrlPrefix.substring(0,
+						models.Globals.rechercheUrlPrefix.length() - 1);
+				String internLink = prefix + URLEncoder
+						.encode("\"" + id + models.Globals.rechercheUrlSuffix, "utf-8");
 				result.append(String.format(
 						"<a title=\"Ähnliche Objekte suchen\" href=\"%s\"> %s</a>",
 						internLink, label));
