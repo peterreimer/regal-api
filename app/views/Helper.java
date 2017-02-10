@@ -60,4 +60,35 @@ public class Helper {
 		return t + "";
 	}
 
+	public static String getSeries(Set<Map<String, Object>> hits) {
+		StringBuffer result = new StringBuffer();
+		for (Map<String, Object> hit : hits) {
+			// result.append("" + hit);
+			String numbering = (String) hit.get("numbering");
+			Map<String, Object> series =
+					((Set<Map<String, Object>>) hit.get("series")).iterator().next();
+			String label = (String) series.get("prefLabel");
+			String id = (String) series.get("@id");
+			result.append(String.format("<a href=\"%s\">%s</a>, Band %s", id, label,
+					numbering));
+		}
+		return result.toString();
+	}
+
+	public static String getMultiVolumeWork(Set<Map<String, Object>> hits) {
+		StringBuffer result = new StringBuffer();
+		for (Map<String, Object> hit : hits) {
+			// result.append("" + hit);
+			String numbering = (String) hit.get("numbering");
+			Map<String, Object> series =
+					((Set<Map<String, Object>>) hit.get("multiVolumeWork")).iterator()
+							.next();
+			String label = (String) series.get("prefLabel");
+			String id = (String) series.get("@id");
+			result.append(String.format("<a href=\"%s\">%s</a>, Band %s", id, label,
+					numbering));
+		}
+		return result.toString();
+	}
+
 }

@@ -42,13 +42,46 @@ case fileMap :Map[String,Object] =>{
 
 
 @htmlRow(values: Any,key: String)={
+
 	@key match {
 		case "hasPart"=>{
 			
 		}
 		case "hasData"=>{
 						
-		}case _ =>{
+		}
+		case "inSeries"=>{
+			<tr class="@key">
+				<td style="display:none;">@getWeight(key)</td>
+				<td class="field-label @key">@getLabel(key)</td>
+				<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+				@values match {
+						case d: Set[ Map[String,Object]] => {
+							@Html(views.Helper.getSeries(d))
+						}
+						case _ => {
+							@values
+						}
+				}				
+			</tr>
+		}
+		case "volumeIn"=>{
+			<tr class="@key">
+				<td style="display:none;">@getWeight(key)</td>
+				<td class="field-label @key">@getLabel(key)</td>
+				<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+				@values match {
+						case d: Set[ Map[String,Object]] => {
+							@Html(views.Helper.getMultiVolumeWork(d))
+						}
+						case _ => {
+							@values
+						}
+				}				
+			</tr>
+		
+		}
+		case _ =>{
 		
 			@values match {
 				case d if d == null =>{}
