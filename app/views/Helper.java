@@ -1,5 +1,8 @@
 package views;
 
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -61,34 +64,56 @@ public class Helper {
 	}
 
 	public static String getSeries(Set<Map<String, Object>> hits) {
-		StringBuffer result = new StringBuffer();
-		for (Map<String, Object> hit : hits) {
-			// result.append("" + hit);
-			String numbering = (String) hit.get("numbering");
-			Map<String, Object> series =
-					((Set<Map<String, Object>>) hit.get("series")).iterator().next();
-			String label = (String) series.get("prefLabel");
-			String id = (String) series.get("@id");
-			result.append(String.format("<a href=\"%s\">%s</a>, Band %s", id, label,
-					numbering));
+		try {
+			StringBuffer result = new StringBuffer();
+			for (Map<String, Object> hit : hits) {
+				// result.append("" + hit);
+				String numbering = (String) hit.get("numbering");
+				Map<String, Object> series =
+						((Set<Map<String, Object>>) hit.get("series")).iterator().next();
+				String label = (String) series.get("prefLabel");
+				String id = (String) series.get("@id");
+				String internLink = URLEncoder.encode(models.Globals.rechercheUrlPrefix
+						+ id + models.Globals.rechercheUrlSuffix, "utf-8");
+				result.append(String.format(
+						"<a title=\"Ähnliche Objekte suchen\" href=\"%s\"> %s</a>",
+						internLink, label));
+				result.append(String.format(
+						"|<a href=\"%s\"><span class=\"glyphicon glyphicon-link\"></span></a>, Band %s",
+						id, numbering));
+			}
+			return result.toString();
+		} catch (Exception e) {
+			play.Logger.warn("", e);
+			return "Can't process data";
 		}
-		return result.toString();
 	}
 
 	public static String getMultiVolumeWork(Set<Map<String, Object>> hits) {
-		StringBuffer result = new StringBuffer();
-		for (Map<String, Object> hit : hits) {
-			// result.append("" + hit);
-			String numbering = (String) hit.get("numbering");
-			Map<String, Object> series =
-					((Set<Map<String, Object>>) hit.get("multiVolumeWork")).iterator()
-							.next();
-			String label = (String) series.get("prefLabel");
-			String id = (String) series.get("@id");
-			result.append(String.format("<a href=\"%s\">%s</a>, Band %s", id, label,
-					numbering));
+		try {
+			StringBuffer result = new StringBuffer();
+			for (Map<String, Object> hit : hits) {
+				// result.append("" + hit);
+				String numbering = (String) hit.get("numbering");
+				Map<String, Object> series =
+						((Set<Map<String, Object>>) hit.get("multiVolumeWork")).iterator()
+								.next();
+				String label = (String) series.get("prefLabel");
+				String id = (String) series.get("@id");
+				String internLink = URLEncoder.encode(models.Globals.rechercheUrlPrefix
+						+ id + models.Globals.rechercheUrlSuffix, "utf-8");
+				result.append(String.format(
+						"<a title=\"Ähnliche Objekte suchen\" href=\"%s\"> %s</a>",
+						internLink, label));
+				result.append(String.format(
+						"|<a href=\"%s\"><span class=\"glyphicon glyphicon-link\"></span></a>, Band %s",
+						id, numbering));
+			}
+			return result.toString();
+		} catch (Exception e) {
+			play.Logger.warn("", e);
+			return "Can't process data";
 		}
-		return result.toString();
 	}
 
 }
