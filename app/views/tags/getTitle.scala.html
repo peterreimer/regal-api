@@ -1,21 +1,28 @@
-@* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@
-
+@* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
 @import views.Title 
-
 @(hit:Map[String,Object])
 
 <div class="row">
-	<div class="col-md-12">
-		<div class="title">
-			<div class="titlePre"></div>
-			<div class="titleMain">
-				<h1>
-					<a href=/resource/@hit.get("@id")>@Html(Title.getTitle(hit))</a>
-				</h1>
+<div class="title">
+			<div class="col-md-8">
+					<div class="titlePre"></div>
+					<div class="titleMain">
+						<h1>
+							<a href=/resource/@hit.get( "@id")>@Html(Title.getTitle(hit))</a>
+						</h1>
+					</div>
+			
+					<div class="titlePost">@Html(Title.getAuthorNames(hit))
+						@Html(Title.getIssued(hit))
+					</div>
 			</div>
-			<div class="titlePost">@Html(Title.getAuthorNames(hit))
-				@Html(Title.getIssued(hit))</div>
+			<div class="col-md-4" >
+					<div class="thumby">
+						<a href=@views.Helper.getDataLink(hit)><img src="/public/images/download.png" style="padding-top: 12px; margin-top: 12px;"></img></a>
+					</div>
+			</div>	
 		</div>
-	</div>
 
+
+	
 </div>

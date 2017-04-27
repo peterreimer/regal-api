@@ -463,7 +463,6 @@ public class JsonMapper {
 				}
 			}
 		}
-		result.add(new HashMap<String, Object>());
 		return result;
 	}
 

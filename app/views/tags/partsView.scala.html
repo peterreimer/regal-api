@@ -1,0 +1,85 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
+
+@(value:Any) 
+
+@value match{ 
+
+case fileMap : Map[String,Object] =>{
+
+	@fileMap.get("hasData") match{ 
+	
+		case hasData : Map[String,Object] =>{
+			<p>
+			<div class="fileView" id=@fileMap.get( "@id")>
+				<table>
+					<tr class="accessScheme">
+						<td class="downloadIcon" rowspan="6">
+							<a href="/resource/@fileMap.get("@id")/data"><img
+								src="/public/images/download.png" width="40pt"></img></a>
+							<a href="/resource/@fileMap.get("@id")">
+								<div class="dc:label">@hasData.get("fileLabel")</div>
+								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								<span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+							</a>
+						</td>
+					</tr>
+				</table>
+				<div class="fileDetails" style="display:none;visibility:hide;">
+				<table>
+					<tr class="publishScheme">
+						<td>Metadata</td>
+						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+							@fileMap.get("publishScheme")</td>
+					</tr>
+					<tr>
+							<td>Data</td>
+							<td><span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								@fileMap.get("accessScheme")</td>
+					</tr>
+					<tr>
+						<td>Label</td>
+						<td><div class="dc:label">@hasData.get("fileLabel")</div></td>
+					</tr>
+					<tr>
+						<td>Format</td>
+						<td><div class="mimeType">@hasData.get("format")</div></td>
+					</tr>
+					<tr>
+						<td>Size</td>
+						<td><div class="size">@hasData.get("size")</div></td>
+					</tr>
+					<tr class="identifier">
+						<td>Details</td>
+						<td><div class="dc:identifier">
+								<a href="/resource/@fileMap.get("@id")">@fileMap.get("@id")</a>
+							</div></td>
+					</tr>
+					</table>
+				</div>
+			</div>
+			</p>
+		} case _ =>{
+		<p>
+			<div class="fileView" id=@fileMap.get( "@id")>
+				<table>
+					<tr class="accessScheme">
+						<td class="downloadIcon" rowspan="6">
+							<a href="/resource/@fileMap.get("@id")"><img
+								src="/public/images/folder.png" width="40pt"></img></a>
+							<a href="/resource/@fileMap.get("@id")">
+								<div class="dc:label">
+								@views.Helper.getTitle(fileMap)
+								</div>
+						   </a>
+						</td>
+					</tr>
+				</table>
+				
+			</div>
+			</p>
+		} 
+	} 
+} 
+case _ =>{ } 
+}
+

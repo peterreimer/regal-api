@@ -303,4 +303,9 @@ public class Globals {
 			return 9000;
 		}
 	}
+
+	public static String rechercheUrlPrefix = Play.application().configuration()
+			.getString("regal-api.rechercheUrl.prefix");
+	public static String rechercheUrlSuffix = Play.application().configuration()
+			.getString("regal-api.rechercheUrl.suffix");
 }
