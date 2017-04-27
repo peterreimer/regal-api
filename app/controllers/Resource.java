@@ -74,6 +74,7 @@ import views.html.oaidc;
 import views.html.resource;
 import views.html.search;
 import views.html.status;
+import views.html.frlResource;
 
 /**
  * 
@@ -171,11 +172,12 @@ public class Resource extends MyController {
 	}
 
 	@ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
-	public static Promise<Result> listResource(@PathParam("pid") String pid) {
+	public static Promise<Result> listResource(@PathParam("pid") String pid,
+			@QueryParam("design") String design) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 
 		if (request().accepts("text/html"))
-			return asHtml(pid);
+			return asHtml(pid, design);
 		if (request().accepts("application/rdf+xml"))
 			return asRdf(pid);
 		if (request().accepts("text/plain"))
@@ -540,7 +542,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listAllParts(@PathParam("pid") String pid,
-			@QueryParam("style") String s) {
+			@QueryParam("style") String s, @QueryParam("design") String design) {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
 				String style = "short";
@@ -548,10 +550,16 @@ public class Resource extends MyController {
 					style = "long";
 				}
 				if (request().accepts("text/html")) {
-					List<Node> result = read.getParts(node);
-					return ok(resource.render(result.stream()
-							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
-							Globals.namespaces[0]));
+					if ("frl".equals(design)) {
+						return ok(frlResource.render(read.getMapWithParts(node),
+								Globals.namespaces[0]));
+					} else {
+						List<Map<String, Object>> result = new ArrayList();
+						Map<String, Object> item = read.getMapWithParts(node);
+						result.add(item);
+						return ok(resource.render(result, Globals.namespaces[0]));
+					}
+
 				} else if (request().accepts("application/json")) {
 					return getJsonResult(read.getPartsAsTree(node, style));
 				} else {
@@ -637,12 +645,16 @@ public class Resource extends MyController {
 	}
 
 	@ApiOperation(produces = "application/html", nickname = "asHtml", value = "asHtml", notes = "Returns a html display of the resource", response = Message.class, httpMethod = "GET")
-	public static Promise<Result> asHtml(@PathParam("pid") String pid) {
+	public static Promise<Result> asHtml(@PathParam("pid") String pid,
+			@QueryParam("design") String design) {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
 				List<Node> nodes = new ArrayList<Node>();
 				nodes.add(node);
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
+				if ("frl".equals(design)) {
+					return ok(frlResource.render(node.getLd(), Globals.namespaces[0]));
+				}
 				return ok(
 						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
 								.collect(Collectors.toList()), Globals.namespaces[0]));
