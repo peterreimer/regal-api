@@ -105,12 +105,12 @@ case fileMap :Map[String,Object] =>{
 								  		}
 										case b: Set[Any] => {
 											@for(field <- b){
-												@value(field,key)
+												@value(field,key)<br/>
 											}
 										}
 										case d: List[Any] => {
 											@for(field <- d){
-												@value(field,key)
+												@value(field,key)<br/>
 											}
 										}
 										case c : Map[String,Object] => {
@@ -187,6 +187,7 @@ case fileMap :Map[String,Object] =>{
 	                       <a href=@analyseValue(a)>
 	                               <span class="glyphicon glyphicon-link"></span>
 	                       </a>
+	                       <br/>
 			}
 			case _ => {		
 				<table class="table table-striped table-condensed">
