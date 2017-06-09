@@ -110,25 +110,30 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	 *         '#' or last index of '/'
 	 */
 	public String getJsonName(Etikett e) {
-		String result = null;
-		String uri = e.getUri();
+		try {
+			String result = null;
+			String uri = e.getUri();
 
-		if (e.getName() != null) {
-			result = e.getName();
-		}
-		if (result == null || result.isEmpty()) {
-			String prefix = "";
-			if (uri.startsWith("http://purl.org/dc/elements"))
-				prefix = "dc:";
-			if (uri.contains("#"))
-				return prefix + uri.split("#")[1];
-			else if (uri.startsWith("http")) {
-				int i = uri.lastIndexOf("/");
-				return prefix + uri.substring(i + 1);
+			if (e.getName() != null) {
+				result = e.getName();
 			}
-			result = prefix + uri;
+			if (result == null || result.isEmpty()) {
+				String prefix = "";
+				if (uri.startsWith("http://purl.org/dc/elements"))
+					prefix = "dc:";
+				if (uri.contains("#"))
+					return prefix + uri.split("#")[1];
+				else if (uri.startsWith("http")) {
+					int i = uri.lastIndexOf("/");
+					return prefix + uri.substring(i + 1);
+				}
+				result = prefix + uri;
+			}
+			return result;
+		} catch (Exception ex) {
+			play.Logger.error("", ex);
+			return e.getUri();
 		}
-		return result;
 	}
 
 	private Map<String, Object> getAnnotatedContext() {
