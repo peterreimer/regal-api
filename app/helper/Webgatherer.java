@@ -18,9 +18,11 @@ package helper;
 
 import play.Logger;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.text.ParseException;
 
 import com.ibm.icu.util.Calendar;
 
@@ -104,25 +106,44 @@ public class Webgatherer implements Runnable {
 	private boolean isOutstanding(Node n, Gatherconf conf) {
 		if (new Date().before(conf.getStartDate()))
 			return false;
+		// Falls schon ein Crawl läuft, nie mit true zurückkehren !!
 		List<Link> parts = n.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
 		if (parts == null || parts.isEmpty()) {
 			return true;
 		}
-		Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
-		Calendar cal = Calendar.getInstance();
-		Date now = cal.getTime();
-		cal.setTime(lastHarvest);
-		if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
-			WebgatherLogger.info(n.getPid()
-					+ " will be gathered only once. It has already been gathered on "
-					+ new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss").format(lastHarvest));
+		try {
+			File latest = Globals.heritrix.getCurrentCrawlDir(conf.getName());
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
+			Date latestDate = sdf.parse(latest.getAbsolutePath().substring(0, 8));
+			Calendar latestCalendar = Calendar.getInstance();
+			latestCalendar.setTime(latestDate);
+			if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
+				WebgatherLogger.info(n.getPid()
+						+ " will be gathered only once. It has already been gathered on "
+						+ sdf_hr.format(latestDate));
+				return false;
+			}
+			WebgatherLogger.info(conf.getName() + " has been last gathered on "
+					+ sdf_hr.format(latestDate));
+			WebgatherLogger
+					.info(conf.getName() + " shall be launched " + conf.getInterval());
+			Date nextDateHarvest = getSchedule(latestCalendar, conf);
+			WebgatherLogger.info(conf.getName() + " should be next gathered on "
+					+ sdf_hr.format(nextDateHarvest));
+			Date today = new Date();
+			if (sdf.format(nextDateHarvest).compareTo(sdf.format(today)) > 0) {
+				WebgatherLogger.info(
+						n.getPid() + " " + n.getConf() + " will be launched next time at "
+								+ new SimpleDateFormat("yyyy-MM-dd").format(nextDateHarvest));
+				return false;
+			}
+			WebgatherLogger.info(conf.getName() + " will be launched now!");
+			return true;
+		} catch (ParseException e) {
+			WebgatherLogger.error("Cannot parse date string.", e);
 			return false;
 		}
-		Date nextTimeHarvest = getSchedule(cal, conf);
-		WebgatherLogger.info(n.getPid() + " " + n.getConf()
-				+ " will be launched next time at "
-				+ new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss").format(nextTimeHarvest));
-		return now.after(nextTimeHarvest);
 	}
 
 	private static Date getSchedule(Calendar cal, Gatherconf conf) {
