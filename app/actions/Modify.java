@@ -218,10 +218,11 @@ public class Modify extends RegalAction {
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
 			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
-			content = getLobidDataAsNtripleString(node, alephid);
-			updateMetadata(node, content);
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
+			content = getLobidDataAsNtripleString(node, alephid);
+			updateMetadata(node, content);
+
 			String enrichMessage = enrichMetadata(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
@@ -253,10 +254,11 @@ public class Modify extends RegalAction {
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
 			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
-			content = getLobidDataAsNtripleString(node, alephid);
-			updateMetadata(node, content);
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
+			content = getLobidDataAsNtripleString(node, alephid);
+			updateMetadata(node, content);
+
 			String enrichMessage = enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
@@ -489,8 +491,8 @@ public class Modify extends RegalAction {
 					f.createURI(archive.fedora.Vocabulary.REL_MAB_527),
 					f.createURI(lobidUri));
 			graph.add(parallelEditionStatement);
-			tryToImportOrderingFromLobidData2(alephid, pid, graph, f);
-			tryToGetTypeFromLobidData2(alephid, pid, graph, f);
+			tryToImportOrderingFromLobidData2(node, graph, f);
+			tryToGetTypeFromLobidData2(node, graph, f);
 			return RdfUtils.graphToString(
 					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
 		} catch (Exception e) {
@@ -499,7 +501,8 @@ public class Modify extends RegalAction {
 
 	}
 
-	private String getLobid2DataAsNtripleString(Node node, String alephid) {
+	private static String getLobid2DataAsNtripleString(Node node,
+			String alephid) {
 		String pid = node.getPid();
 		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
 		play.Logger.info("GET " + lobidUri);
@@ -522,38 +525,38 @@ public class Modify extends RegalAction {
 
 	}
 
-	private void tryToImportOrderingFromLobidData2(String alephid, String pid,
-			Graph graph, ValueFactory f) {
+	private void tryToImportOrderingFromLobidData2(Node node, Graph graph,
+			ValueFactory f) {
 		try {
-			String ordering = getAuthorOrdering(alephid);
+			String ordering = getAuthorOrdering(node);
 			if (ordering != null) {
 				Statement contributorOrderStatement =
-						f.createStatement(f.createURI(pid),
+						f.createStatement(f.createURI(node.getPid()),
 								f.createURI("http://purl.org/lobid/lv#contributorOrder"),
 								f.createLiteral(ordering));
 				graph.add(contributorOrderStatement);
 			}
 		} catch (Exception e) {
-			play.Logger.error(alephid + ": Ordering info not available!");
+			play.Logger.error(node.getPid() + ": Ordering info not available!");
 		}
 	}
 
-	private void tryToGetTypeFromLobidData2(String alephid, String pid,
-			Graph graph, ValueFactory f) {
+	private void tryToGetTypeFromLobidData2(Node node, Graph graph,
+			ValueFactory f) {
 		try {
-			List<String> type = getType(alephid);
+			List<String> type = getType(node);
 			if (!type.isEmpty()) {
 				for (String t : type) {
-					Statement contributorOrderStatement =
-							f.createStatement(f.createURI(pid),
+					Statement typeStatement =
+							f.createStatement(f.createURI(node.getPid()),
 									f.createURI(
 											"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-									f.createLiteral(t));
-					graph.add(contributorOrderStatement);
+									f.createURI(t));
+					graph.add(typeStatement);
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.error(alephid + ": Ordering info not available!");
+			play.Logger.error(node.getPid() + ": Ordering info not available!");
 		}
 	}
 
@@ -1486,7 +1489,6 @@ public class Modify extends RegalAction {
 			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
 			node.setMetadata2File(file.getAbsolutePath());
-
 			node.setMetadata2(content);
 			return pid + " metadata2 successfully updated!";
 		} catch (RdfException e) {
@@ -1496,13 +1498,10 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	public String getAuthorOrdering(String alephid) {
-		try {
-			URL lobidUrl = new URL(
-					"http://gaia.hbz-nrw.de:9200/resources/_all/" + alephid + "/_source");
-			RDFFormat inFormat = RDFFormat.JSONLD;
-			String accept = "application/json";
-			Graph myGraph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+	private static String getAuthorOrdering(Node node) {
+		try (InputStream in =
+				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
+			Graph myGraph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			Iterator<Statement> statements = myGraph.iterator();
 			while (statements.hasNext()) {
 				Statement curStatement = statements.next();
@@ -1518,21 +1517,21 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	public List<String> getType(String alephid) {
-		try {
-			List<String> result = new ArrayList<String>();
-			URL lobidUrl = new URL(
-					"http://gaia.hbz-nrw.de:9200/resources/_all/" + alephid + "/_source");
-			RDFFormat inFormat = RDFFormat.JSONLD;
-			String accept = "application/json";
-			Graph myGraph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+	private static List<String> getType(Node node) {
+		try (InputStream in =
+				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
+			List<String> result = new ArrayList<>();
+			Graph myGraph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			Iterator<Statement> statements = myGraph.iterator();
 			while (statements.hasNext()) {
 				Statement curStatement = statements.next();
+				String subj = curStatement.getSubject().stringValue();
 				String pred = curStatement.getPredicate().stringValue();
 				String obj = curStatement.getObject().stringValue();
-				if ("http://www.w3.org/1999/02/22-rdf-syntax-ns#type".equals(pred)) {
-					result.add(obj);
+				if (subj.equals(node.getPid())) {
+					if ("http://www.w3.org/1999/02/22-rdf-syntax-ns#type".equals(pred)) {
+						result.add(obj);
+					}
 				}
 			}
 			return result;

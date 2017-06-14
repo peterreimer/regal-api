@@ -605,7 +605,7 @@ public class Node implements java.io.Serializable {
 	 */
 	@JsonIgnore()
 	public String getMetadata2() {
-		return metadata;
+		return metadata2;
 	}
 
 	/**
