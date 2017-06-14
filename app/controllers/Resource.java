@@ -238,6 +238,34 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "text/plain", nickname = "listMetadata", value = "listMetadata", notes = "Shows Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listMetadata2(@PathParam("pid") String pid,
+			@QueryParam("field") String field) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			String result = read.readMetadata2(node, field);
+			RDFFormat format = null;
+			if (request().accepts("application/rdf+xml")) {
+				format = RDFFormat.RDFXML;
+				response().setContentType("application/rdf+xml");
+			} else if (request().accepts("text/turtle")) {
+				format = RDFFormat.TURTLE;
+				response().setContentType("text/turtle");
+			} else if (request().accepts("text/plain")) {
+				format = RDFFormat.NTRIPLES;
+				response().setContentType("text/plain");
+			}
+			try (
+					InputStream in = new ByteArrayInputStream(result.getBytes("utf-8"))) {
+				String rdf =
+						RdfUtils.readRdfToString(in, RDFFormat.NTRIPLES, format, "");
+				return ok(rdf);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {
 		return new ReadDataAction().call(pid, node -> {
@@ -378,6 +406,21 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "updateMetadata2", value = "updateMetadata2", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateMetadata2(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			try {
+				String result = modify.updateLobidify2AndEnrichMetadata(pid,
+						request().body().asText());
+				return JsonMessage(new Message(result));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "updateData", value = "updateData", notes = "Updates the data of a resource", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
@@ -454,6 +497,14 @@ public class Resource extends MyController {
 	public static Promise<Result> deleteMetadata(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			String result = delete.deleteMetadata(pid);
+			return JsonMessage(new Message(result));
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "deleteMetadata", value = "deleteMetadata", notes = "Deletes a resources metadata", response = Message.class, httpMethod = "DELETE")
+	public static Promise<Result> deleteMetadata2(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			String result = delete.deleteMetadata2(pid);
 			return JsonMessage(new Message(result));
 		});
 	}
@@ -793,6 +844,15 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "enrichMetadata", value = "enrichMetadata", notes = "Includes linked resources into metadata", response = String.class, httpMethod = "POST")
 	public static Promise<Result> enrichMetadata(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, userId -> {
+			Node node = readNodeOrNull(pid);
+			String result = modify.enrichMetadata(node);
+			return JsonMessage(new Message(json(result)));
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "enrichMetadata", value = "enrichMetadata", notes = "Includes linked resources into metadata", response = String.class, httpMethod = "POST")
+	public static Promise<Result> enrichMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			String result = modify.enrichMetadata(node);
