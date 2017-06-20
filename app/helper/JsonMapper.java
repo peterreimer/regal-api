@@ -99,7 +99,6 @@ public class JsonMapper {
 			"http://hbz-nrw.de/regal#ResearchData",
 			"http://purl.org/lobid/lv#EditedVolume",
 			"http://purl.org/ontology/bibo/Thesis",
-			"http://purl.org/lobid/lv#Miscellaneous",
 			"http://purl.org/ontology/mo/Record", "http://purl.org/ontology/bibo/Map",
 			"http://purl.org/ontology/bibo/AudioVisualDocument",
 			"http://purl.org/ontology/bibo/AudioDocument",
@@ -118,6 +117,7 @@ public class JsonMapper {
 			"http://data.archiveshub.ac.uk/def/ArchivalResource",
 			"http://purl.org/ontology/bibo/Document",
 			"http://purl.org/vocab/frbr/core#Manifestation",
+			"http://purl.org/lobid/lv#Miscellaneous",
 			"http://purl.org/dc/terms/BibliographicResource" };
 
 	Node node = null;
