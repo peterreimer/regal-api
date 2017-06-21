@@ -49,6 +49,8 @@ public class Webgatherer implements Runnable {
 
 		WebgatherLogger.info("List 50000 resources of type webpage from namespace "
 				+ Globals.namespaces[0] + ".");
+		play.Logger.info("List 50000 resources of type webpage from namespace "
+				+ Globals.namespaces[0] + ".");
 		List<Node> webpages =
 				new Read().listRepo("webpage", Globals.namespaces[0], 0, 50000);
 		WebgatherLogger.info("Found " + webpages.size() + " webpages.");
@@ -106,7 +108,7 @@ public class Webgatherer implements Runnable {
 	private boolean isOutstanding(Node n, Gatherconf conf) {
 		if (new Date().before(conf.getStartDate()))
 			return false;
-		// Falls schon ein Crawl läuft, nie mit true zurückkehren !!
+		// if a crawl job is still running, never return with true !!
 		List<Link> parts = n.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
 		if (parts == null || parts.isEmpty()) {
 			return true;
