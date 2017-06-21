@@ -476,6 +476,23 @@ public class Utils {
 		}
 	}
 
+	void updateMetadata2Stream(Node node) {
+		try {
+			File file = new File(node.getMetadata2File());
+			if (dataStreamExists(node.getPid(), "metadata2")) {
+				new ModifyDatastream(node.getPid(), "metadata2").versionable(true)
+						.dsLabel("n-triple rdf metadata2").dsState("A").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "metadata2").versionable(true)
+						.dsState("A").dsLabel("n-triple rdf metadata2").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	void readRelsExt(Node node) throws FedoraClientException {
 		FedoraResponse response =
 				new GetDatastreamDissemination(node.getPid(), "RELS-EXT").download(true)

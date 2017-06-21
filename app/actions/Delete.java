@@ -149,6 +149,16 @@ public class Delete extends RegalAction {
 	}
 
 	/**
+	 * @param pid a namespace qualified id
+	 * @return a message
+	 */
+	public String deleteMetadata2(String pid) {
+		Globals.fedora.deleteDatastream(pid, "metadata2");
+		updateIndex(pid);
+		return pid + ": metadata2 - datastream successfully deleted! ";
+	}
+
+	/**
 	 * @param pid the pid og the object
 	 * @return a message
 	 */

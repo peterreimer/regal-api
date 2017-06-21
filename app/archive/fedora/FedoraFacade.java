@@ -264,6 +264,7 @@ public class FedoraFacade {
 		getDatesFromFedora(node);
 		getChecksumFromFedora(node);
 		getMetadataFromFedora(node);
+		getMetadata2FromFedora(node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getObjectTimestampFromFedora(node);
@@ -309,6 +310,17 @@ public class FedoraFacade {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "metadata").execute();
 			node.setMetadata(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name metadata is optional
+		}
+	}
+
+	private void getMetadata2FromFedora(Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(node.getPid(), "metadata2").execute();
+			node.setMetadata2(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -365,6 +377,9 @@ public class FedoraFacade {
 		}
 		if (node.getMetadataFile() != null) {
 			utils.updateMetadataStream(node);
+		}
+		if (node.getMetadata2File() != null) {
+			utils.updateMetadata2Stream(node);
 		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);

@@ -185,6 +185,20 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * @param pid The pid that must be updated
+	 * @param content The metadata as rdf string
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichMetadata(String pid, String content) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateLobidify2AndEnrichMetadata(node, content);
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * @param node The node that must be updated
 	 * @param content The metadata as rdf string
 	 * @return a short message
@@ -204,9 +218,48 @@ public class Modify extends RegalAction {
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
 			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+			content = getLobid2DataAsNtripleString(node, alephid);
+			updateMetadata2(node, content);
 			content = getLobidDataAsNtripleString(node, alephid);
 			updateMetadata(node, content);
+
 			String enrichMessage = enrichMetadata(node);
+			return pid + " metadata successfully updated, lobidified and enriched! "
+					+ enrichMessage;
+		} else {
+			updateMetadata(node, content);
+			String enrichMessage = enrichMetadata(node);
+			return pid + " metadata successfully updated, and enriched! "
+					+ enrichMessage;
+		}
+	}
+
+	/**
+	 * @param node The node that must be updated
+	 * @param content The metadata as rdf string
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichMetadata(Node node, String content) {
+
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
+					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
+					.get(0);
+			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+			content = getLobid2DataAsNtripleString(node, alephid);
+			updateMetadata2(node, content);
+			content = getLobidDataAsNtripleString(node, alephid);
+			updateMetadata(node, content);
+
+			String enrichMessage = enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
 		} else {
@@ -250,6 +303,13 @@ public class Modify extends RegalAction {
 				return pid + " Not updated. " + e.getMessage();
 			}
 			updateMetadata(node, content);
+			try {
+				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
+						alephid, date);
+			} catch (NotUpdatedException e) {
+				return pid + " Not updated. " + e.getMessage();
+			}
+			updateMetadata2(node, content);
 			String enrichMessage = enrichMetadata(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
@@ -354,6 +414,47 @@ public class Modify extends RegalAction {
 
 	}
 
+	private String getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(
+			Node node, String alephid, LocalDate date) {
+		try {
+			LocalDate resourceDate = getLastModifiedFromLobid2(alephid);
+			play.Logger.debug("Lobid resource has been modified on "
+					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+			play.Logger.debug("I will only update if "
+					+ date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+					+ " is before that date.");
+			if (date.isBefore(resourceDate)) {
+				return getLobid2DataAsNtripleString(node, alephid);
+			}
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+
+		throw new NotUpdatedException("No updates since " + date.toString());
+
+	}
+
+	private LocalDate getLastModifiedFromLobid2(String alephid)
+			throws IOException {
+		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
+		play.Logger.info("GET " + lobidUri + " and analyse date");
+		URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
+		RDFFormat inFormat = RDFFormat.TURTLE;
+		String accept = "text/turtle";
+		Graph graph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+		Iterator<Statement> it = graph.iterator();
+		while (it.hasNext()) {
+			Statement s = it.next();
+			String predicate = s.getPredicate().stringValue();
+			if (predicate.equals("http://purl.org/dc/terms/modified")) {
+				LocalDate date = LocalDate.parse(s.getObject().stringValue(),
+						DateTimeFormatter.ofPattern("yyyyMMdd"));
+				return date;
+			}
+		}
+		return LocalDate.now();
+	}
+
 	private LocalDate getLastModifiedFromLobid(String alephid)
 			throws IOException {
 		String lobidUri = "http://lobid.org/resource/" + alephid;
@@ -390,7 +491,8 @@ public class Modify extends RegalAction {
 					f.createURI(archive.fedora.Vocabulary.REL_MAB_527),
 					f.createURI(lobidUri));
 			graph.add(parallelEditionStatement);
-			tryToImportOrderingFromLobidData2(alephid, pid, graph, f);
+			tryToImportOrderingFromLobidData2(node, graph, f);
+			tryToGetTypeFromLobidData2(node, graph, f);
 			return RdfUtils.graphToString(
 					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
 		} catch (Exception e) {
@@ -399,19 +501,62 @@ public class Modify extends RegalAction {
 
 	}
 
-	private void tryToImportOrderingFromLobidData2(String alephid, String pid,
-			Graph graph, ValueFactory f) {
+	private static String getLobid2DataAsNtripleString(Node node,
+			String alephid) {
+		String pid = node.getPid();
+		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
+		play.Logger.info("GET " + lobidUri);
 		try {
-			String ordering = getAuthorOrdering(alephid);
+			URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
+			RDFFormat inFormat = RDFFormat.TURTLE;
+			String accept = "text/turtle";
+			Graph graph =
+					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+			ValueFactory f = RdfUtils.valueFactory;
+			Statement parallelEditionStatement = f.createStatement(f.createURI(pid),
+					f.createURI(archive.fedora.Vocabulary.REL_MAB_527),
+					f.createURI(lobidUri));
+			graph.add(parallelEditionStatement);
+			return RdfUtils.graphToString(
+					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+
+	}
+
+	private void tryToImportOrderingFromLobidData2(Node node, Graph graph,
+			ValueFactory f) {
+		try {
+			String ordering = getAuthorOrdering(node);
 			if (ordering != null) {
 				Statement contributorOrderStatement =
-						f.createStatement(f.createURI(pid),
+						f.createStatement(f.createURI(node.getPid()),
 								f.createURI("http://purl.org/lobid/lv#contributorOrder"),
 								f.createLiteral(ordering));
 				graph.add(contributorOrderStatement);
 			}
 		} catch (Exception e) {
-			play.Logger.error(alephid + ": Ordering info not available!");
+			play.Logger.error(node.getPid() + ": Ordering info not available!");
+		}
+	}
+
+	private void tryToGetTypeFromLobidData2(Node node, Graph graph,
+			ValueFactory f) {
+		try {
+			List<String> type = getType(node);
+			if (!type.isEmpty()) {
+				for (String t : type) {
+					Statement typeStatement =
+							f.createStatement(f.createURI(node.getPid()),
+									f.createURI(
+											"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+									f.createURI(t));
+					graph.add(typeStatement);
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.error(node.getPid() + ": Ordering info not available!");
 		}
 	}
 
@@ -710,6 +855,94 @@ public class Modify extends RegalAction {
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 
 			updateMetadata(node, metadata);
+
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+			return "Enrichment of " + node.getPid() + " partially failed !\n"
+					+ e.getMessage();
+		}
+		return "Enrichment of " + node.getPid() + " succeeded!";
+	}
+
+	public String enrichMetadata2(Node node) {
+		try {
+			play.Logger.info("Enrich " + node.getPid());
+			String metadata = node.getMetadata2();
+			if (metadata == null || metadata.isEmpty()) {
+				play.Logger.info("No metadata2 to enrich " + node.getPid());
+				return "No metadata2 to enrich " + node.getPid();
+			}
+			play.Logger.info("Enrich " + node.getPid() + " with gnd.");
+			List<String> gndIds = findAllGndIds(metadata);
+			List<Statement> enrichStatements = new ArrayList<Statement>();
+			for (String uri : gndIds) {
+				enrichStatements.addAll(getStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with geonames.");
+			List<String> geoNameIds = findAllGeonameIds(metadata);
+			for (String uri : geoNameIds) {
+				enrichStatements.addAll(getGeonamesStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with openstreetmap.");
+			List<String> osmIds = findAllOsmIds(metadata);
+			for (String uri : osmIds) {
+				enrichStatements.addAll(getOsmStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with orcid.");
+			List<String> orcidIds = findAllOrcidIds(metadata);
+			for (String uri : orcidIds) {
+				enrichStatements.addAll(getOrcidStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
+			List<String> agrovocIds = findAllAgrovocIds(metadata);
+			for (String uri : agrovocIds) {
+				enrichStatements.addAll(getAgrovocStatements(uri));
+			}
+
+			play.Logger.info("Enrich " + node.getPid() + " with institution.");
+			List<Statement> institutions = findInstitution(node);
+			enrichStatements.addAll(institutions);
+
+			play.Logger.info("Enrich " + node.getPid() + " with parent.");
+			List<Statement> catalogParents =
+					find(node, metadata, "http://purl.org/dc/terms/isPartOf");
+			enrichStatements.addAll(catalogParents);
+
+			play.Logger.info("Enrich " + node.getPid() + " with inSeries.");
+			List<Statement> series =
+					find(node, metadata, "http://purl.org/lobid/lv#series");
+			enrichStatements.addAll(series);
+
+			play.Logger.info("Enrich " + node.getPid() + " with multiVolumeWork.");
+			List<Statement> multiVolumeWork =
+					find(node, metadata, "http://purl.org/lobid/lv#multiVolumeWork");
+			enrichStatements.addAll(multiVolumeWork);
+
+			play.Logger.info("Enrich " + node.getPid() + " with language.");
+			List<Statement> language =
+					find(node, metadata, "http://purl.org/dc/terms/language");
+			enrichStatements.addAll(language);
+
+			play.Logger.info("Enrich " + node.getPid() + " with recordingLocation.");
+			List<Statement> recordingLocation =
+					find(node, metadata, "http://hbz-nrw.de/regal#recordingLocation");
+			enrichStatements.addAll(recordingLocation);
+
+			List<Statement> collectionOne =
+					find(node, metadata, "info:regal/zettel/collectionOne");
+			enrichStatements.addAll(collectionOne);
+
+			List<Statement> containedIn =
+					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
+			enrichStatements.addAll(containedIn);
+
+			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+
+			updateMetadata2(node, metadata);
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -1235,13 +1468,40 @@ public class Modify extends RegalAction {
 		return enrichMessage;
 	}
 
-	public String getAuthorOrdering(String alephid) {
+	public String lobidify2(Node node, String alephid) {
+		updateMetadata2(node, getLobid2DataAsNtripleString(node, alephid));
+		String enrichMessage = enrichMetadata2(node);
+		return enrichMessage;
+	}
+
+	private String updateMetadata2(Node node, String content) {
 		try {
-			URL lobidUrl = new URL(
-					"http://gaia.hbz-nrw.de:9200/resources/_all/" + alephid + "/_source");
-			RDFFormat inFormat = RDFFormat.JSONLD;
-			String accept = "application/json";
-			Graph myGraph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+			String pid = node.getPid();
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			// RdfUtils.validate(content);
+			// Extreme Workaround to fix subject uris
+			content = rewriteContent(content, pid);
+			// Workaround end
+			File file = CopyUtils.copyStringToFile(content);
+			node.setMetadata2File(file.getAbsolutePath());
+			node.setMetadata2(content);
+			return pid + " metadata2 successfully updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	private static String getAuthorOrdering(Node node) {
+		try (InputStream in =
+				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
+			Graph myGraph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			Iterator<Statement> statements = myGraph.iterator();
 			while (statements.hasNext()) {
 				Statement curStatement = statements.next();
@@ -1252,6 +1512,29 @@ public class Modify extends RegalAction {
 				}
 			}
 			return null;
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	private static List<String> getType(Node node) {
+		try (InputStream in =
+				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
+			List<String> result = new ArrayList<>();
+			Graph myGraph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+			Iterator<Statement> statements = myGraph.iterator();
+			while (statements.hasNext()) {
+				Statement curStatement = statements.next();
+				String subj = curStatement.getSubject().stringValue();
+				String pred = curStatement.getPredicate().stringValue();
+				String obj = curStatement.getObject().stringValue();
+				if (subj.equals(node.getPid())) {
+					if ("http://www.w3.org/1999/02/22-rdf-syntax-ns#type".equals(pred)) {
+						result.add(obj);
+					}
+				}
+			}
+			return result;
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}

@@ -61,6 +61,7 @@ public class Node implements java.io.Serializable {
 	public DublinCoreData dublinCoreData = new DublinCoreData();
 
 	private String metadataFile = null;
+	private String metadata2File = null;
 	private String seqFile = null;
 	private String confFile = null;
 	private String uploadFile = null;
@@ -69,6 +70,7 @@ public class Node implements java.io.Serializable {
 	private List<Transformer> transformer = new Vector<Transformer>();
 
 	private String metadata = null;
+	private String metadata2 = null;
 	private String seq = null;
 
 	private String conf = null;
@@ -298,6 +300,22 @@ public class Node implements java.io.Serializable {
 	 */
 	public void setMetadataFile(String metadataFile) {
 		this.metadataFile = metadataFile;
+	}
+
+	/**
+	 * The metadata file
+	 * 
+	 * @return the absolute path to file
+	 */
+	public String getMetadata2File() {
+		return metadata2File;
+	}
+
+	/**
+	 * @param metadataFile The absolutepath to the metadatafile
+	 */
+	public void setMetadata2File(String metadataFile) {
+		this.metadata2File = metadataFile;
 	}
 
 	/**
@@ -579,6 +597,23 @@ public class Node implements java.io.Serializable {
 	 */
 	public Node setMetadata(String metadata) {
 		this.metadata = metadata;
+		return this;
+	}
+
+	/**
+	 * @return n-triple metadata as string
+	 */
+	@JsonIgnore()
+	public String getMetadata2() {
+		return metadata2;
+	}
+
+	/**
+	 * @param metadata n-triple metadata as string
+	 * @return this
+	 */
+	public Node setMetadata2(String metadata2) {
+		this.metadata2 = metadata2;
 		return this;
 	}
 

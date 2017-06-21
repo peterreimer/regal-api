@@ -471,6 +471,31 @@ public class Read extends RegalAction {
 
 	/**
 	 * @param node
+	 * @param field the shortname of metadata field
+	 * @return the ntriples or just one field
+	 */
+	public String readMetadata2(Node node, String field) {
+		try {
+			String metadata = node.getMetadata2();
+			if (metadata == null)
+				return null;
+			if (field == null || field.isEmpty()) {
+				return metadata;
+			} else {
+				String pred = getUriFromJsonName(field);
+				List<String> value = RdfUtils.findRdfObjects(node.getPid(), pred,
+						metadata, RDFFormat.NTRIPLES);
+				return value == null || value.isEmpty() ? null : value.get(0);
+			}
+		} catch (UrlConnectionException e) {
+			throw new HttpArchiveException(404, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * @param node
 	 * @return a webgather configuration
 	 */
 	public String readConf(Node node) {
