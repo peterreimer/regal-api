@@ -44,8 +44,6 @@ public class Create extends RegalAction {
 			Logger.of("application");
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
-	final String wgetDataDir =
-			Play.application().configuration().getString("regal-api.wget.dataDir");
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public class WebgathererTooBusyException extends HttpArchiveException {
@@ -330,8 +328,8 @@ public class Create extends RegalAction {
 			// hier auf ein bestehendes WARC in wget-data/ verweisen
 			String crawlDateTimestamp = label.substring(0, 4) + label.substring(5, 7)
 					+ label.substring(8, 10); // crawl-Datum im Format yyyymmdd
-			File crawlDir = new File(
-					this.wgetDataDir + "/" + conf.getName() + "/" + crawlDateTimestamp);
+			File crawlDir = new File(Globals.wgetDataDir + "/" + conf.getName() + "/"
+					+ crawlDateTimestamp);
 			ApplicationLogger.debug("crawlDir=" + crawlDir.toString());
 			File warcDir = new File(crawlDir.getAbsolutePath() + "/warcs");
 			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
