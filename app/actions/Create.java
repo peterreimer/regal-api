@@ -44,6 +44,8 @@ public class Create extends RegalAction {
 			Logger.of("application");
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+	final String wgetDataDir =
+			Play.application().configuration().getString("regal-api.wget.dataDir");
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public class WebgathererTooBusyException extends HttpArchiveException {
