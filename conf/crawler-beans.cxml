@@ -111,7 +111,7 @@ ${URL}
   <!-- <property name="alsoCheckVia" value="false" /> -->
   <!-- <property name="surtsSourceFile" value="" /> -->
   <!-- <property name="surtsDumpFile" value="${launchId}/surts.dump" /> -->
-  ${ACCEPTSURTS_SURTSSOURCE_BEGIN_CMT}<property name="surtsSource">
+  <!-- <property name="surtsSource">
         <bean class="org.archive.spring.ConfigString">
          <property name="value">
           <value>
@@ -121,7 +121,7 @@ ${URL}
           </value>
          </property> 
         </bean>
-       </property>${ACCEPTSURTS_SURTSSOURCE_END_CMT}
+       </property> -->
  </bean>
 
  <!-- SCOPE: rules for which discovered URIs to crawl; order is very 
