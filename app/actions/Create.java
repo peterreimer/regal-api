@@ -301,7 +301,7 @@ public class Create extends RegalAction {
 		} catch (Exception e) {
 			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
 			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
-			WebgatherLogger.error("Crawl of Webpage " + n.getName() + ","
+			WebgatherLogger.error("Crawl of Webpage " + n.getPid() + ","
 					+ conf.getUrl() + " has failed !");
 			throw new RuntimeException(e);
 		}

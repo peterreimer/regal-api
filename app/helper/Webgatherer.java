@@ -114,7 +114,7 @@ public class Webgatherer implements Runnable {
 			return true;
 		}
 		try {
-			File latest = Globals.heritrix.getCurrentCrawlDir(conf.getName());
+			File latest = Globals.heritrix.getCurrentCrawlDir(n.getPid());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
 			Date latestDate = sdf.parse(latest.getAbsolutePath().substring(0, 8));
@@ -126,12 +126,12 @@ public class Webgatherer implements Runnable {
 						+ sdf_hr.format(latestDate));
 				return false;
 			}
-			WebgatherLogger.info(conf.getName() + " has been last gathered on "
+			WebgatherLogger.info(n.getPid() + " has been last gathered on "
 					+ sdf_hr.format(latestDate));
 			WebgatherLogger
-					.info(conf.getName() + " shall be launched " + conf.getInterval());
+					.info(n.getPid() + " shall be launched " + conf.getInterval());
 			Date nextDateHarvest = getSchedule(latestCalendar, conf);
-			WebgatherLogger.info(conf.getName() + " should be next gathered on "
+			WebgatherLogger.info(n.getPid() + " should be next gathered on "
 					+ sdf_hr.format(nextDateHarvest));
 			Date today = new Date();
 			if (sdf.format(nextDateHarvest).compareTo(sdf.format(today)) > 0) {
@@ -140,7 +140,7 @@ public class Webgatherer implements Runnable {
 								+ new SimpleDateFormat("yyyy-MM-dd").format(nextDateHarvest));
 				return false;
 			}
-			WebgatherLogger.info(conf.getName() + " will be launched now!");
+			WebgatherLogger.info(n.getPid() + " will be launched now!");
 			return true;
 		} catch (ParseException e) {
 			WebgatherLogger.error("Cannot parse date string.", e);
