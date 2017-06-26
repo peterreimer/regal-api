@@ -10,7 +10,7 @@ case fileMap : Map[String,Object] =>{
 	
 		case hasData : Map[String,Object] =>{
 			<p>
-			<div class="fileView" id=@fileMap.get( "@id")>
+			<div class="fileView file" id=@fileMap.get( "@id")>
 				<table>
 					<tr class="accessScheme">
 						<td class="downloadIcon" rowspan="6">
@@ -60,7 +60,7 @@ case fileMap : Map[String,Object] =>{
 			</p>
 		} case _ =>{
 		<p>
-			<div class="fileView" id=@fileMap.get( "@id")>
+			<div class="fileView part" id=@fileMap.get( "@id")>
 				<table>
 					<tr class="accessScheme">
 						<td class="downloadIcon" rowspan="6">					
