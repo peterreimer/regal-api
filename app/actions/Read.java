@@ -508,7 +508,7 @@ public class Read extends RegalAction {
 			if (conf.getOpenWaybackLink() == null
 					|| conf.getOpenWaybackLink().isEmpty()) {
 				String owDatestamp =
-						new SimpleDateFormat("yyyyMMdd").format(new Date());
+						new SimpleDateFormat("yyyyMMdd").format(node.getCreationDate());
 				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
 						+ "/" + conf.getUrl());
 			}
