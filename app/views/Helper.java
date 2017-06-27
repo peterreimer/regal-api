@@ -10,6 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
+
+import actions.Read;
+import models.Gatherconf;
+import models.Node;
+
 public class Helper {
 
 	public static List<String> getOrderedListOfKeysFromContext(
@@ -101,4 +108,22 @@ public class Helper {
 		}
 	}
 
+	public static String getWaybackLink(String pid) {
+		try {
+			play.Logger.debug("Get Waybacklinkg for " + pid);
+			String waybackLink = "";
+			Node node = new Read().readNode(pid);
+			String confstring = node.getConf();
+			if (confstring == null)
+				return "";
+			ObjectMapper mapper = JsonUtil.mapper();
+			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
+			waybackLink = conf.getOpenWaybackLink();
+
+			return waybackLink != null ? waybackLink : "";
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return "";
+		}
+	}
 }
