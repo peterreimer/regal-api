@@ -176,8 +176,14 @@ public class Resource extends MyController {
 			@QueryParam("design") String design) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 
-		if (request().accepts("text/html"))
-			return asHtml(pid, design);
+		if (request().accepts("text/html")) {
+			Node node = readNodeOrNull(pid);
+			List<Map<String, Object>> result = new ArrayList<>();
+			Map<String, Object> item = read.getMapWithParts(node);
+			result.add(item);
+			return Promise
+					.promise(() -> ok(resource.render(result, Globals.namespaces[0])));
+		}
 		if (request().accepts("application/rdf+xml"))
 			return asRdf(pid);
 		if (request().accepts("text/plain"))
