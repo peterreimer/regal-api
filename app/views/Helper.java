@@ -115,7 +115,7 @@ public class Helper {
 			Node node = new Read().readNode(pid);
 			String confstring = node.getConf();
 			if (confstring == null)
-				return "";
+				return "../" + pid;
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
 			waybackLink = conf.getOpenWaybackLink();
@@ -123,7 +123,7 @@ public class Helper {
 			return waybackLink != null ? waybackLink : "";
 		} catch (Exception e) {
 			play.Logger.error("", e);
-			return "";
+			return "../" + pid;
 		}
 	}
 }
