@@ -181,6 +181,22 @@ public class DataciteMapper {
 			play.Logger.debug(
 					"DataciteMapper: Metadatafield 'thesisInformation' not found!");
 		}
+		try {
+			if (rec.publisher == null || rec.publisher.isEmpty()) {
+				Collection<Map<String, Object>> institutions =
+						(Collection<Map<String, Object>>) ld.get("institution");
+				if (institutions != null) {
+					for (Map<String, Object> item : institutions) {
+						String subject = (String) item.get("prefLabel");
+						rec.publisher = subject;
+					}
+				}
+			}
+		} catch (Exception e) {
+
+			play.Logger
+					.debug("DataciteMapper: Metadatafield 'institution' not found!");
+		}
 
 		if (rec.publisher == null || rec.publisher.isEmpty()) {
 			rec.publisher = "PUBLISSO";
@@ -260,6 +276,21 @@ public class DataciteMapper {
 				}
 			}
 
+			if (rec.creators.isEmpty()) {
+				Collection<Map<String, Object>> editors =
+						(Collection<Map<String, Object>>) ld.get("editor");
+				if (editors != null) {
+					for (Map<String, Object> item : editors) {
+						String subject = (String) item.get("prefLabel");
+						rec.creators.add(new Pair<String, String>(subject, null));
+					}
+				}
+			}
+
+			if (rec.creators.isEmpty()) {
+				rec.creators.add(
+						new Pair<String, String>("No author information available.", null));
+			}
 		} catch (NullPointerException e) {
 			play.Logger.debug("", e);
 		}
