@@ -3,6 +3,7 @@ package views;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
 import models.Gatherconf;
+import models.Globals;
 import models.Node;
 
 public class Helper {
@@ -118,9 +120,17 @@ public class Helper {
 				return "../" + pid;
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
-			waybackLink = conf.getOpenWaybackLink();
+			if (conf.getOpenWaybackLink() == null
+					|| conf.getOpenWaybackLink().isEmpty()) {
+				String owDatestamp =
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
+						+ "/" + conf.getUrl());
 
-			return waybackLink != null ? waybackLink : "";
+			}
+			play.Logger.debug(waybackLink);
+			waybackLink = conf.getOpenWaybackLink();
+			return waybackLink != null ? waybackLink : "../" + pid;
 		} catch (Exception e) {
 			play.Logger.error("", e);
 			return "../" + pid;
