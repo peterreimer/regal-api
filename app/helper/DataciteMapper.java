@@ -102,11 +102,9 @@ public class DataciteMapper {
 						.add(new Pair<String, String>(lobidUrl, "LOD-Catalog"));
 			}
 			// URN
-			Collection<String> urns = (Collection<String>) ld.get("urn");
-			if (urns != null) {
-				for (String urn : urns) {
-					rec.alternateIdentifiers.add(new Pair<String, String>(urn, "URN"));
-				}
+			String urn = (String) ld.get("urn");
+			if (urn != null && !urn.isEmpty()) {
+				rec.alternateIdentifiers.add(new Pair<String, String>(urn, "URN"));
 			}
 			// URL
 			String pid = (String) ld.get("@id");
