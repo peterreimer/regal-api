@@ -97,7 +97,7 @@ case _ =>{ }
 				<table>
 					<tr class="accessScheme">
 						<td class="downloadIcon" rowspan="6">
-							<a href=@Helper.getWaybackLink(fileMap.get("@id").toString())><img
+							<a href="@Helper.getWaybackLink(fileMap.get("@id").toString())" target="_blank" ><img
 								src="/public/images/download.png" width="40pt"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
 								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>

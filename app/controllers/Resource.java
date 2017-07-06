@@ -176,8 +176,14 @@ public class Resource extends MyController {
 			@QueryParam("design") String design) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 
-		if (request().accepts("text/html"))
-			return asHtml(pid, design);
+		if (request().accepts("text/html")) {
+			Node node = readNodeOrNull(pid);
+			List<Map<String, Object>> result = new ArrayList<>();
+			Map<String, Object> item = read.getMapWithParts(node);
+			result.add(item);
+			return Promise
+					.promise(() -> ok(resource.render(result, Globals.namespaces[0])));
+		}
 		if (request().accepts("application/rdf+xml"))
 			return asRdf(pid);
 		if (request().accepts("text/plain"))
@@ -554,12 +560,9 @@ public class Resource extends MyController {
 				List<Node> result = read.getNodes(nodeIds);
 
 				if (request().accepts("text/html")) {
-					return ok(
-							resource
-									.render(
-											result.stream().map(n -> new JsonMapper(n).getLd())
-													.collect(Collectors.toList()),
-											Globals.namespaces[0]));
+					return ok(resource.render(result.stream()
+							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
+							Globals.namespaces[0]));
 				} else {
 					return getJsonResult(result);
 				}
@@ -953,10 +956,15 @@ public class Resource extends MyController {
 					// hier die neue conf auch im JobDir von Heritrix ablegen
 					conf.setName(pid);
 					play.Logger.debug("conf.toString=" + conf.toString());
+					String result = modify.updateConf(node, conf.toString());
 					Globals.heritrix.createJobDir(conf);
+					return JsonMessage(new Message(result, 200));
+				} else {
+
+					throw new HttpArchiveException(409,
+							"Please provide JSON config in request body.");
 				}
-				String result = modify.updateConf(node, conf.toString());
-				return JsonMessage(new Message(result, 200));
+
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

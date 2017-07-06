@@ -112,26 +112,31 @@ public class Helper {
 
 	public static String getWaybackLink(String pid) {
 		try {
-			play.Logger.debug("Get Waybacklink for " + pid);
+			play.Logger.debug("Get Waybacklinkg for " + pid);
 			String waybackLink = "";
 			Node node = new Read().readNode(pid);
 			String confstring = node.getConf();
 			if (confstring == null)
-				return "";
+
+				return "../" + pid;
+
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
 			if (conf.getOpenWaybackLink() == null
 					|| conf.getOpenWaybackLink().isEmpty()) {
 				String owDatestamp =
-						new SimpleDateFormat("yyyyMMdd").format(node.getCreationDate());
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
 				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
 						+ "/" + conf.getUrl());
+
 			}
+			play.Logger.debug(waybackLink);
 			waybackLink = conf.getOpenWaybackLink();
-			return waybackLink != null ? waybackLink : "";
+			return waybackLink != null ? waybackLink : "../" + pid;
 		} catch (Exception e) {
-			play.Logger.error("Couldn't get Waybacklink!", e);
-			return "";
+			play.Logger.error("", e);
+			return "../" + pid;
+
 		}
 	}
 }
