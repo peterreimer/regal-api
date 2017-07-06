@@ -117,7 +117,9 @@ public class Helper {
 			Node node = new Read().readNode(pid);
 			String confstring = node.getConf();
 			if (confstring == null)
+
 				return "../" + pid;
+
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
 			if (conf.getOpenWaybackLink() == null
@@ -134,6 +136,7 @@ public class Helper {
 		} catch (Exception e) {
 			play.Logger.error("", e);
 			return "../" + pid;
+
 		}
 	}
 }
