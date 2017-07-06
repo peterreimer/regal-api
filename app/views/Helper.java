@@ -112,7 +112,7 @@ public class Helper {
 
 	public static String getWaybackLink(String pid) {
 		try {
-			play.Logger.debug("Get Waybacklinkg for " + pid);
+			play.Logger.debug("Get Waybacklink for " + pid);
 			String waybackLink = "";
 			Node node = new Read().readNode(pid);
 			String confstring = node.getConf();
@@ -130,7 +130,7 @@ public class Helper {
 			waybackLink = conf.getOpenWaybackLink();
 			return waybackLink != null ? waybackLink : "";
 		} catch (Exception e) {
-			play.Logger.error("", e);
+			play.Logger.error("Couldn't get Waybacklink!", e);
 			return "";
 		}
 	}
