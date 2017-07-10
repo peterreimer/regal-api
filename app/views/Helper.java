@@ -3,12 +3,21 @@ package views;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
+
+import actions.Read;
+import models.Gatherconf;
+import models.Globals;
+import models.Node;
 
 public class Helper {
 
@@ -101,4 +110,33 @@ public class Helper {
 		}
 	}
 
+	public static String getWaybackLink(String pid) {
+		try {
+			play.Logger.debug("Get Waybacklinkg for " + pid);
+			String waybackLink = "";
+			Node node = new Read().readNode(pid);
+			String confstring = node.getConf();
+			if (confstring == null)
+
+				return "../" + pid;
+
+			ObjectMapper mapper = JsonUtil.mapper();
+			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
+			if (conf.getOpenWaybackLink() == null
+					|| conf.getOpenWaybackLink().isEmpty()) {
+				String owDatestamp =
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
+						+ "/" + conf.getUrl());
+
+			}
+			play.Logger.debug(waybackLink);
+			waybackLink = conf.getOpenWaybackLink();
+			return waybackLink != null ? waybackLink : "../" + pid;
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return "../" + pid;
+
+		}
+	}
 }

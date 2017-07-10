@@ -505,9 +505,13 @@ public class Read extends RegalAction {
 				return "";
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
-			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-			conf.setOpenWaybackLink(
-					Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
+			if (conf.getOpenWaybackLink() == null
+					|| conf.getOpenWaybackLink().isEmpty()) {
+				String owDatestamp =
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
+						+ "/" + conf.getUrl());
+			}
 			return conf.toString();
 		} catch (UrlConnectionException e) {
 			throw new HttpArchiveException(404, e);
