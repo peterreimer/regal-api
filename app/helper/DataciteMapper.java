@@ -71,9 +71,8 @@ public class DataciteMapper {
 
 	private static void addSizes(Map<String, Object> ld, DataciteRecord rec) {
 		try {
-			String bibDetails =
-					(String) ((HashSet<String>) ld.get("bibliographicCitation"))
-							.iterator().next();
+			String bibDetails = ((HashSet<String>) ld.get("bibliographicCitation"))
+					.iterator().next().toString();
 			if (bibDetails != null) {
 				rec.sizes.add(new Pair<String, String>(bibDetails, null));
 			}
@@ -87,8 +86,8 @@ public class DataciteMapper {
 		try {
 			// Lobid
 			String lobidUrl =
-					(String) ((HashSet<Map<String, Object>>) ld.get("parallelEdition"))
-							.iterator().next().get("prefLabel");
+					((HashSet<Map<String, Object>>) ld.get("parallelEdition")).iterator()
+							.next().get("prefLabel").toString();
 			if (lobidUrl != null) {
 				// HT
 				String ht = lobidUrl.substring(lobidUrl.lastIndexOf("/") + 1);
@@ -102,7 +101,7 @@ public class DataciteMapper {
 						.add(new Pair<String, String>(lobidUrl, "LOD-Catalog"));
 			}
 			// URN
-			String urn = (String) ld.get("urn");
+			String urn = ld.get("urn").toString();
 			if (urn != null && !urn.isEmpty()) {
 				rec.alternateIdentifiers.add(new Pair<String, String>(urn, "URN"));
 			}
@@ -185,7 +184,7 @@ public class DataciteMapper {
 						(Collection<Map<String, Object>>) ld.get("institution");
 				if (institutions != null) {
 					for (Map<String, Object> item : institutions) {
-						String subject = (String) item.get("prefLabel");
+						String subject = item.get("prefLabel").toString();
 						rec.publisher = subject;
 					}
 				}
@@ -246,7 +245,7 @@ public class DataciteMapper {
 					(Collection<Map<String, Object>>) ld.get("creator");
 			if (creators != null) {
 				for (Map<String, Object> item : creators) {
-					String subject = (String) item.get("prefLabel");
+					String subject = item.get("prefLabel").toString();
 					rec.creators.add(new Pair<String, String>(subject, null));
 				}
 			}
@@ -262,7 +261,7 @@ public class DataciteMapper {
 					(Collection<Map<String, Object>>) ld.get("contributor");
 			if (contributors != null) {
 				for (Map<String, Object> item : contributors) {
-					String subject = (String) item.get("prefLabel");
+					String subject = item.get("prefLabel").toString();
 					rec.creators.add(new Pair<String, String>(subject, null));
 				}
 			}
@@ -279,7 +278,7 @@ public class DataciteMapper {
 						(Collection<Map<String, Object>>) ld.get("editor");
 				if (editors != null) {
 					for (Map<String, Object> item : editors) {
-						String subject = (String) item.get("prefLabel");
+						String subject = item.get("prefLabel").toString();
 						rec.creators.add(new Pair<String, String>(subject, null));
 					}
 				}
@@ -299,7 +298,7 @@ public class DataciteMapper {
 				(Collection<Map<String, Object>>) ld.get("subject");
 		if (subjects != null) {
 			for (Map<String, Object> item : subjects) {
-				String subject = (String) item.get("prefLabel");
+				String subject = item.get("prefLabel").toString();
 				String id = (String) item.get("@id");
 				String type = "GND";
 				if (id.startsWith("http://d-nb.info/gnd/")) {
