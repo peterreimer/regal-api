@@ -22,7 +22,6 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
 import helper.HttpArchiveException;
 import helper.mail.WebgatherExceptionMail;
 import helper.oai.OaiDispatcher;
@@ -356,6 +355,7 @@ public class Create extends RegalAction {
 			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
+			webpageVersion.setLocalData(warcPath);
 			webpageVersion.setMimeType("application/warc");
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
