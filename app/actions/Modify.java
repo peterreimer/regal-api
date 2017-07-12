@@ -283,6 +283,7 @@ public class Modify extends RegalAction {
 
 	public String updateLobidifyAndEnrichMetadataIfRecentlyUpdated(Node node,
 			String content, LocalDate date) {
+		StringBuffer msg = new StringBuffer();
 		String pid = node.getPid();
 		if (content == null) {
 			throw new HttpArchiveException(406,
@@ -299,20 +300,25 @@ public class Modify extends RegalAction {
 			try {
 				content = getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
+				updateMetadata(node, content);
+				msg.append(enrichMetadata(node));
 			} catch (NotUpdatedException e) {
-				return pid + " Not updated. " + e.getMessage();
+				play.Logger.info(pid + " Not updated. " + e.getMessage());
+				msg.append(pid + " Not updated. " + e.getMessage());
 			}
-			updateMetadata(node, content);
+
 			try {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
+				updateMetadata2(node, content);
+				msg.append(enrichMetadata2(node));
 			} catch (NotUpdatedException e) {
-				return pid + " Not updated. " + e.getMessage();
+				play.Logger.info(pid + " Not updated. " + e.getMessage());
+				msg.append(pid + " Not updated. " + e.getMessage());
 			}
-			updateMetadata2(node, content);
-			String enrichMessage = enrichMetadata(node);
+
 			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ enrichMessage;
+					+ msg;
 		} else {
 			return pid + " no updates available. Resource has no AlephId.";
 		}
@@ -398,11 +404,12 @@ public class Modify extends RegalAction {
 			Node node, String alephid, LocalDate date) {
 		try {
 			LocalDate resourceDate = getLastModifiedFromLobid(alephid);
-			play.Logger.debug("Lobid resource has been modified on "
+			play.Logger.info("Lobid resource has been modified on "
 					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-			play.Logger.debug("I will only update if "
+			play.Logger.info("I will only update if local date "
 					+ date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-					+ " is before that date.");
+					+ " is before remote date "
+					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
 			if (date.isBefore(resourceDate)) {
 				return getLobidDataAsNtripleString(node, alephid);
 			}
@@ -418,11 +425,12 @@ public class Modify extends RegalAction {
 			Node node, String alephid, LocalDate date) {
 		try {
 			LocalDate resourceDate = getLastModifiedFromLobid2(alephid);
-			play.Logger.debug("Lobid resource has been modified on "
+			play.Logger.info("Lobid resource has been modified on "
 					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-			play.Logger.debug("I will only update if "
+			play.Logger.info("I will only update if local date "
 					+ date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-					+ " is before that date.");
+					+ " is before remote date "
+					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
 			if (date.isBefore(resourceDate)) {
 				return getLobid2DataAsNtripleString(node, alephid);
 			}
@@ -436,7 +444,7 @@ public class Modify extends RegalAction {
 
 	private LocalDate getLastModifiedFromLobid2(String alephid)
 			throws IOException {
-		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
+		String lobidUri = "http://lobid.org/resources/" + alephid;
 		play.Logger.info("GET " + lobidUri + " and analyse date");
 		URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
 		RDFFormat inFormat = RDFFormat.TURTLE;

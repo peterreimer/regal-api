@@ -647,8 +647,8 @@ public class JsonMapper {
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
 		changeDcIsPartOfToRegalIsPartOf(rdf);
-		rdf.remove("describedby");
-		rdf.remove("sameAs");
+		// rdf.remove("describedby");
+		// rdf.remove("sameAs");
 
 		rdf.put(ID2, node.getPid());
 		rdf.put(primaryTopic, node.getPid());
@@ -725,12 +725,8 @@ public class JsonMapper {
 			rdf.put(hasData, hasDataMap);
 		}
 
-		// play.Logger.debug("CONF: " + node.getConf());
-
 		rdf.put("@context", profile.getContext().get("@context"));
 		postprocessing(rdf);
-
-		play.Logger.debug("LD2 is\n" + rdf);
 		return rdf;
 	}
 

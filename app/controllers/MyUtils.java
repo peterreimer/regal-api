@@ -16,10 +16,13 @@
  */
 package controllers;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.ws.rs.DefaultValue;
@@ -158,11 +161,24 @@ public class MyUtils extends MyController {
 						LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")));
 				return JsonMessage(new Message(result));
 			} else {
-				String result = modify.lobidify(node);
+				LocalDate lastUpdate = getUpdateTimeStamp(node);
+				String result = modify.lobidify(node, lastUpdate);
 				return JsonMessage(new Message(result));
 			}
 
 		});
+	}
+
+	private static LocalDate getUpdateTimeStamp(Node node) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		String lastUpdate = formatter.format(new Date());
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("modified").toString();
+		} catch (Exception e) {
+			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
+		}
+		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
 
 	@ApiOperation(produces = "application/json,application/html", nickname = "addObjectTimestamp", value = "addObjectTimestamp", notes = "Add a objectTimestamp", httpMethod = "POST")
