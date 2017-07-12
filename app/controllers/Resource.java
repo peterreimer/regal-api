@@ -721,10 +721,36 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/html", nickname = "asHtml2", value = "asHtml2", notes = "Returns a html2 display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asHtml2(@PathParam("pid") String pid,
+			@QueryParam("design") String design) {
+		return new ReadMetadataAction().call(pid, node -> {
+			try {
+				List<Map<String, Object>> result = new ArrayList<>();
+				Map<String, Object> item = read.getMapWithParts2(node);
+				result.add(item);
+				response().setHeader("Content-Type", "text/html; charset=utf-8");
+				if ("frl".equals(design)) {
+					return ok(frlResource.render(item, Globals.namespaces[0]));
+				}
+				return ok(resource.render(result, Globals.namespaces[0]));
+			} catch (Exception e) {
+				return JsonMessage(new Message(e, 500));
+			}
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asJson(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
 			return getJsonResult(node);
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "asJso2n", value = "asJson2", notes = "Returns a json2 display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asJson2(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			return getJsonResult(node.getLd2());
 		});
 	}
 

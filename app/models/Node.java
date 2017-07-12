@@ -1221,4 +1221,21 @@ public class Node implements java.io.Serializable {
 		return new JsonMapper(this).getLd();
 	}
 
+	public String toString2() {
+		play.Logger.debug("Enter String2");
+		ObjectMapper mapper = JsonUtil.mapper();
+
+		try {
+			return mapper.writeValueAsString(new JsonMapper(this).getLd2());
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return super.toString();
+		}
+
+	}
+
+	public Map<String, Object> getLd2() {
+		return new JsonMapper(this).getLd2();
+	}
+
 }

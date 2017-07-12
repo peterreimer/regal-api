@@ -95,6 +95,8 @@ public class Search {
 		for (String i : index) {
 			play.Logger.info("Init elasticsearch index " + i);
 			init(i);
+			play.Logger.info("Init elasticsearch index " + i + "2");
+			init(i + "2");
 		}
 	}
 
