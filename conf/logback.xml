@@ -60,13 +60,13 @@
   </appender>
 
   <!--logger name="play" level="INFO" /-->
-  <logger name="application" level="DEBUG" additivity="false">
+  <logger name="application" level="INFO" additivity="false">
     <appender-ref ref="FILE" />
   </logger>
-  <logger name="webgatherer" level="DEBUG" additivity="false">
+  <logger name="webgatherer" level="INFO" additivity="false">
     <appender-ref ref="FILE-WEBGATHERER" />
   </logger>
-  <logger name="addurn" level="DEBUG" additivity="false">
+  <logger name="addurn" level="INFO" additivity="false">
     <appender-ref ref="FILE-ADDURN" />
   </logger>
   

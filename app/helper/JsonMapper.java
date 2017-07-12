@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 
 import org.openrdf.rio.RDFFormat;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
@@ -137,6 +139,16 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLdWithoutContext() {
 		Map<String, Object> map = getLd();
+		map.remove("@context");
+		return map;
+
+	}
+
+	/**
+	 * @return a map without the context document
+	 */
+	public Map<String, Object> getLd2WithoutContext() {
+		Map<String, Object> map = getLd2();
 		map.remove("@context");
 		return map;
 
@@ -262,6 +274,19 @@ public class JsonMapper {
 			return rdf;
 		} catch (Exception e) {
 			play.Logger.debug(node.getPid() + " has no descriptive Metadata!");
+		}
+		return null;
+	}
+
+	private Map<String, Object> getDescriptiveMetadata2() {
+		try {
+			InputStream stream = new ByteArrayInputStream(
+					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
+			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
+					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
+			return rdf;
+		} catch (Exception e) {
+			play.Logger.debug(node.getPid() + " has no descriptive Metadata2!");
 		}
 		return null;
 	}
@@ -614,6 +639,95 @@ public class JsonMapper {
 		}
 
 		return result;
+	}
+
+	public Map<String, Object> getLd2() {
+		Collection<Link> ls = node.getRelsExt();
+		Map<String, Object> m = getDescriptiveMetadata2();
+		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+
+		changeDcIsPartOfToRegalIsPartOf(rdf);
+		// rdf.remove("describedby");
+		// rdf.remove("sameAs");
+
+		rdf.put(ID2, node.getPid());
+		rdf.put(primaryTopic, node.getPid());
+		for (Link l : ls) {
+			if (HAS_PART.equals(l.getPredicate()))
+				continue;
+			if (REL_HBZ_ID.equals(l.getPredicate()))
+				continue;
+			if (IS_PART_OF.equals(l.getPredicate()))
+				continue;
+			addLinkToJsonMap(rdf, l);
+		}
+		addPartsToJsonMap(rdf);
+		rdf.remove("isNodeType");
+
+		rdf.put(contentType, node.getContentType());
+		rdf.put(accessScheme, node.getAccessScheme());
+		rdf.put(publishScheme, node.getPublishScheme());
+		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
+				.collect(Collectors.toList()));
+		rdf.put(catalogId, node.getCatalogId());
+
+		if (node.getFulltext() != null)
+			rdf.put(fulltext_ocr, node.getFulltext());
+
+		Map<String, Object> aboutMap = new TreeMap<>();
+		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
+		if (node.getCreatedBy() != null)
+			aboutMap.put(createdBy, node.getCreatedBy());
+		if (node.getLegacyId() != null)
+			aboutMap.put(legacyId, node.getLegacyId());
+		if (node.getImportedFrom() != null)
+			aboutMap.put(importedFrom, node.getImportedFrom());
+		if (node.getName() != null)
+			aboutMap.put(name, node.getName());
+		if (node.getLastModifiedBy() != null)
+			aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
+
+		aboutMap.put(modified, node.getLastModified());
+		if (node.getObjectTimestamp() != null) {
+			aboutMap.put(objectTimestamp, node.getObjectTimestamp());
+		} else {
+			aboutMap.put(objectTimestamp, node.getLastModified());
+		}
+		aboutMap.put(created, node.getCreationDate());
+		aboutMap.put(describes, node.getAggregationUri());
+
+		rdf.put(isDescribedBy, aboutMap);
+		if (node.getDoi() != null) {
+			rdf.put(doi, node.getDoi());
+		}
+		if (node.getUrn() != null) {
+			rdf.put(urn, node.getUrn());
+		}
+
+		if (node.getParentPid() != null)
+			rdf.put(parentPid, node.getParentPid());
+
+		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
+			Map<String, Object> hasDataMap = new TreeMap<>();
+			hasDataMap.put(ID2, node.getDataUri());
+			hasDataMap.put(format, node.getMimeType());
+			hasDataMap.put(size, node.getFileSize());
+			if (node.getFileLabel() != null)
+				hasDataMap.put(fileLabel, node.getFileLabel());
+			if (node.getChecksum() != null) {
+				Map<String, Object> checksumMap = new TreeMap<>();
+				checksumMap.put(checksumValue, node.getChecksum());
+				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
+				checksumMap.put(type,
+						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+				hasDataMap.put(checksum, checksumMap);
+			}
+			rdf.put(hasData, hasDataMap);
+		}
+
+		rdf.put("@context", profile.getContext().get("@context"));
+		postprocessing(rdf);
+		return rdf;
 	}
 
 }

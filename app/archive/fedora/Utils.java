@@ -180,6 +180,7 @@ public class Utils {
 						.predicate(link.getPredicate())
 						.object(link.getObject(), link.isLiteral()).execute();
 			} catch (FedoraClientException e) {
+				play.Logger.warn(e.getMessage());
 				play.Logger.debug("", e);
 			}
 		}
@@ -199,6 +200,7 @@ public class Utils {
 								.object(link.getObject(), true).execute();
 					} catch (Exception e2) {
 
+						play.Logger.warn(e2.getMessage());
 						play.Logger.debug("", e2);
 					}
 
@@ -717,6 +719,7 @@ public class Utils {
 								.execute();
 					}
 				} catch (Exception e) {
+					play.Logger.warn(e.getMessage());
 					play.Logger.debug("", e);
 				}
 			}

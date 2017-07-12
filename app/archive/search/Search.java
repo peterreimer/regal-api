@@ -95,12 +95,14 @@ public class Search {
 		for (String i : index) {
 			play.Logger.info("Init elasticsearch index " + i);
 			init(i);
+			play.Logger.info("Init elasticsearch index " + i + "2");
+			init(i + "2");
 		}
 	}
 
 	void init(String index) {
 		try {
-			play.Logger.debug("Configure " + index);
+			play.Logger.info("Configure " + index);
 			String indexConfig = CopyUtils.copyToString(
 					Play.application().resourceAsStream(Globals.elasticsearchSettings),
 					"utf-8");
@@ -108,7 +110,7 @@ public class Search {
 			client.admin().indices().prepareCreate(index).setSource(indexConfig)
 					.execute().actionGet();
 		} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-			play.Logger.debug("Index already exists!");
+			play.Logger.info("Index already exists!");
 		} catch (Exception e) {
 			play.Logger
 					.warn("Problems when creating " + index + " :" + e.getMessage());
@@ -269,7 +271,7 @@ public class Search {
 				}
 				msg.append("\n");
 				result.add(msg.toString());
-				play.Logger.debug("Add " + node.getPid() + " to bulk action");
+				play.Logger.info("Add " + node.getPid() + " to bulk action");
 			} catch (Exception e) {
 				play.Logger.warn("", e);
 				result.add("A problem occured: " + e.getMessage());
@@ -280,15 +282,15 @@ public class Search {
 			BulkResponse bulkResponse = internalIndexBulk.execute().actionGet();
 			if (bulkResponse.hasFailures()) {
 				result.add(bulkResponse.buildFailureMessage());
-				play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+				play.Logger.warn("FAIL: " + bulkResponse.buildFailureMessage());
 			}
 
-			play.Logger.debug("Start building public Index " + index);
+			play.Logger.info("Start building public Index " + index);
 
 			bulkResponse = publicIndexBulk.execute().actionGet();
 			if (bulkResponse.hasFailures()) {
 				result.add(bulkResponse.buildFailureMessage());
-				play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+				play.Logger.warn("FAIL: " + bulkResponse.buildFailureMessage());
 			}
 		} catch (Exception e) {
 			play.Logger.warn("", e);

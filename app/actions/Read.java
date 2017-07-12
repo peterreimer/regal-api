@@ -257,6 +257,24 @@ public class Read extends RegalAction {
 		return nm;
 	}
 
+	public Map<String, Object> getMapWithParts2(Node node) {
+		Map<String, Object> nm = node.getLd2();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> parts =
+				(List<Map<String, Object>>) nm.get("hasPart");
+		List<Map<String, Object>> children = new ArrayList();
+		if (parts != null) {
+			for (Map<String, Object> part : parts) {
+				String id = (String) part.get("@id");
+
+				children
+						.add(new JsonMapper(internalReadNode(id)).getLdWithoutContext());
+			}
+			nm.put("hasPart", children);
+		}
+		return nm;
+	}
+
 	/**
 	 * @param list a list of nodes to create a json like map for
 	 * @return a map with objects
