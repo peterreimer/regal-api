@@ -84,7 +84,7 @@ public class HardCodedUser implements User {
 		}
 		if (role == null)
 			throw new RuntimeException("No valid credentials!");
-		play.Logger.debug("You are authorized with role " + role);
+		play.Logger.info("You are authorized with role " + role);
 		return this;
 	}
 

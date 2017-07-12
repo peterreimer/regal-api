@@ -276,7 +276,7 @@ public class Globals {
 				ips.putAll(computeRange(address));
 			}
 		}
-		play.Logger.debug(
+		play.Logger.info(
 				"The following IPs can access restricted data with anonymous login: "
 						+ ips);
 		return ips;

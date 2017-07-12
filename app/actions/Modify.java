@@ -857,6 +857,7 @@ public class Modify extends RegalAction {
 			updateMetadata(node, metadata);
 
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"
 					+ e.getMessage();
@@ -1086,6 +1087,7 @@ public class Modify extends RegalAction {
 			play.Logger.info("Get data from " + uri + " " + newS);
 			filteredStatements.add(newS);
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 		}
 		return filteredStatements;

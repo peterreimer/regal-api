@@ -56,6 +56,7 @@ public class Index {
 			return pid + " removed from " + Globals.PDFBOX_OCR_INDEX_PREF + index
 					+ "\n";
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			return pid + " cannot be removed from" + Globals.PDFBOX_OCR_INDEX_PREF
 					+ index + "\n";
@@ -69,6 +70,7 @@ public class Index {
 			msg.append(
 					pid + " removed from " + Globals.PUBLIC_INDEX_PREF + index + "\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(pid + " cannot be removed from" + Globals.PUBLIC_INDEX_PREF
 					+ index + "\n");
@@ -78,6 +80,7 @@ public class Index {
 			msg.append(
 					pid + " removed from " + Globals.PUBLIC_INDEX_PREF + index + "2\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(pid + " cannot be removed from" + Globals.PUBLIC_INDEX_PREF
 					+ index + "2\n");
@@ -91,6 +94,7 @@ public class Index {
 			Globals.search.delete(pid, index, type);
 			msg.append(pid + " removed from " + index + "\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(pid + " cannot be removed from" + index + "\n");
 		}
@@ -98,6 +102,7 @@ public class Index {
 			Globals.search.delete(pid, index + "2", type);
 			msg.append(pid + " removed from " + index + "2\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(pid + " cannot be removed from" + index + "2\n");
 		}
@@ -155,17 +160,18 @@ public class Index {
 			msg.append(
 					pid + " indexed in " + Globals.PUBLIC_INDEX_PREF + index + "\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(
 					pid + " not indexed in " + Globals.PUBLIC_INDEX_PREF + index + "\n");
 		}
-		play.Logger.debug("LD2 as String\n" + data.toString2());
 		try {
 			Globals.search.index(Globals.PUBLIC_INDEX_PREF + index + "2", type, pid,
 					data.toString2());
 			msg.append(
 					pid + " indexed in " + Globals.PUBLIC_INDEX_PREF + index + "2\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(
 					pid + " not indexed in " + Globals.PUBLIC_INDEX_PREF + index + "2\n");
@@ -181,6 +187,7 @@ public class Index {
 			return pid + " indexed in " + Globals.PDFBOX_OCR_INDEX_PREF + index
 					+ "\n";
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			return pid + " not indexed in " + Globals.PDFBOX_OCR_INDEX_PREF + index
 					+ "\n";
@@ -194,6 +201,7 @@ public class Index {
 			Globals.search.index(index, type, pid, data.toString());
 			msg.append(pid + " indexed in " + index + "\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(pid + " not indexed in " + index + "\n");
 		}
@@ -201,6 +209,7 @@ public class Index {
 			Globals.search.index(index + "2", type, pid, data.toString2());
 			msg.append(pid + " indexed in " + index + "2\n");
 		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			msg.append(pid + " not indexed in " + index + "2\n");
 		}

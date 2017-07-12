@@ -63,7 +63,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 			context.args.put("role", authUser.getRole());
 			return delegate.call(context);
 		}
-		play.Logger.debug("Authentifizierung fehlgeschlagen !");
+		play.Logger.info("Authentifizierung fehlgeschlagen !");
 		return unauthorized(context);
 	}
 
@@ -75,6 +75,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 			cl = Class.forName(userImpl);
 			return ((User) cl.newInstance()).authenticate(username, password);
 		} catch (Throwable e) {
+			play.Logger.info(e.getMessage(), e);
 			play.Logger.debug("", e);
 			return null;
 		}

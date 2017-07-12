@@ -619,8 +619,10 @@ public class FedoraFacade {
 			parent.removeRelation(HAS_PART, node.getPid());
 			updateNode(parent);
 		} catch (NodeNotFoundException e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 		} catch (ReadNodeException e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 		}
 	}

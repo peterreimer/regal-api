@@ -184,7 +184,7 @@ public class Create extends RegalAction {
 			inheritRights(parent, node);
 			updateIndex(parentPid);
 		} catch (Exception e) {
-			play.Logger.debug("Fail link " + node.getPid() + " to " + parentPid + "",
+			play.Logger.warn("Fail link " + node.getPid() + " to " + parentPid + "",
 					e);
 		}
 	}
@@ -210,7 +210,7 @@ public class Create extends RegalAction {
 				Globals.fedora.unlinkParent(node);
 				updateIndex(pp);
 			} catch (HttpArchiveException e) {
-				play.Logger.debug("", e);
+				play.Logger.warn("", e);
 			}
 		}
 	}

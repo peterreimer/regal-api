@@ -80,7 +80,7 @@ public class Global extends GlobalSettings {
 
 	@SuppressWarnings("rawtypes")
 	public Action onRequest(Request request, Method actionMethod) {
-		play.Logger.debug("\n" + request.toString() + "\n\t"
+		play.Logger.info("\n" + request.toString() + "\n\t"
 				+ mapToString(request.headers()) + "\n\t" + request.body().toString());
 		return super.onRequest(request, actionMethod);
 	}

@@ -108,7 +108,7 @@ public class DataciteClient {
 					: "https://mds.datacite.org/doi";
 			WebResource resource = webclient.resource(url);
 			String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
-			play.Logger.debug("PostBody:\n" + postBody);
+			play.Logger.info("PostBody:\n" + postBody);
 			String response =
 					resource.type("application/xml").post(String.class, postBody);
 			return response;
