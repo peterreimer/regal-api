@@ -254,12 +254,13 @@ public class Create extends RegalAction {
 			}
 			boolean success = Globals.heritrix.teardown(conf.getName());
 			WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
-			Globals.heritrix.launch(conf.getName());
 
+			Globals.heritrix.launch(conf.getName());
+			WebgatherLogger.debug("Launched " + conf.getName());
 			Thread.currentThread().sleep(10000);
 
 			Globals.heritrix.unpause(conf.getName());
-
+			WebgatherLogger.debug("Unpaused " + conf.getName());
 			Thread.currentThread().sleep(10000);
 
 			File crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
@@ -304,8 +305,9 @@ public class Create extends RegalAction {
 		} catch (Exception e) {
 			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
 			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
-			WebgatherLogger.error("Crawl of Webpage " + n.getPid() + ","
-					+ conf.getUrl() + " has failed !");
+			WebgatherLogger.warn("Crawl of Webpage " + n.getPid() + ","
+					+ conf.getUrl() + " has failed !\n\tReason: " + e.getMessage());
+			WebgatherLogger.debug("", e);
 			throw new RuntimeException(e);
 		}
 	}

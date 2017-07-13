@@ -17,6 +17,7 @@
 package helper;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 
 import models.Gatherconf;
 import play.Logger;
@@ -79,7 +81,9 @@ public class Heritrix {
 	 * Create job directory with config. Add Job to heritrix
 	 * "https://webarchive.jira.com/wiki/display/Heritrix/Heritrix+3.x+API+Guide#Heritrix3.xAPIGuide-AddJobDirectory"
 	 * 
-	 * "curl -v -d \"action=add&addpath=/Users/hstern/job\" -k -u admin:admin --anyauth --location -H \"Accept:application/xml\" https://localhost:8443/engine"
+	 * "curl -v -d \"action=add&addpath=/Users/hstern/job\" -k -u admin:admin
+	 * --anyauth --location -H \"Accept:application/xml\"
+	 * https://localhost:8443/engine"
 	 * 
 	 * @param conf
 	 */
@@ -147,8 +151,8 @@ public class Heritrix {
 			}
 			content = content.replaceAll("\\$\\{SURT_DOMAIN_STR\\}", surtDomainStr);
 
-			WebgatherLogger.debug("Print-----\n" + content + "\n to \n"
-					+ dir.getAbsolutePath() + "/crawler-beans.cxml");
+			// WebgatherLogger.debug("Print-----\n" + content + "\n to \n" +
+			// dir.getAbsolutePath() + "/crawler-beans.cxml");
 
 			Files.write(Paths.get(dir.getAbsolutePath() + "/crawler-beans.cxml"),
 					content.getBytes(charset));
@@ -171,7 +175,8 @@ public class Heritrix {
 	}
 
 	/**
-	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H \"Accept: application/xml\" https://localhost:8443/engine/job/myjob"
+	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H
+	 * \"Accept: application/xml\" https://localhost:8443/engine/job/myjob"
 	 * 
 	 * @param name
 	 * @return the url to the warc file
@@ -240,12 +245,52 @@ public class Heritrix {
 	}
 
 	/**
+	 * @param name the jobs name e.g. the pid
+	 * @return the servers directory where to store the data
+	 * 
+	 *         Im Unterschied zu getCurrentCrawlDir wird nicht der Pfad mit dem
+	 *         aktuellen Datum zurückgegeben, sondern der Pfad mit dem LETZTEN
+	 *         (=neuesten) Datum - oder NULL, falls noch gar nicht gecrawlt wurde.
+	 */
+	public File getLatestCrawlDir(String name) {
+		File dir = new File(this.jobDir + "/" + name);
+		WebgatherLogger.debug("jobDir/name=" + dir.toString());
+		// gibt es das Verzeichnis überhaupt ?
+		if (!dir.exists() || !dir.isDirectory()) {
+			WebgatherLogger
+					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			return null;
+		}
+		File[] files = dir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File d) {
+				return (d.isDirectory() && d.getName().matches("^[0-9]+"));
+			}
+		});
+		if (files == null || files.length <= 0) {
+			WebgatherLogger
+					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			return null;
+		}
+		WebgatherLogger
+				.debug("Found crawl directories: " + java.util.Arrays.toString(files));
+		Arrays.sort(files, Collections.reverseOrder());
+		File latest = files[files.length - 1];
+		return latest;
+	}
+
+	/**
 	 * @param latest dir of the latest (most recent) job
-	 * @return local path of the latest harvested warc
+	 * @return local path of the latest harvested warc or NULL
 	 */
 	public String findLatestWarc(File latest) {
 		WebgatherLogger.debug(latest.getAbsolutePath() + "/warcs");
 		File warcDir = new File(latest.getAbsolutePath() + "/warcs");
+		if (!warcDir.exists() || !warcDir.isDirectory()) {
+			String msg = "Zu " + latest.getAbsolutePath()
+					+ " wurde kein WARC-Verzeichnis gefunden!";
+			throw new RuntimeException(msg);
+		}
 		return warcDir.listFiles()[0].getAbsolutePath();
 	}
 
