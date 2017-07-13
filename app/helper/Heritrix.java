@@ -81,7 +81,9 @@ public class Heritrix {
 	 * Create job directory with config. Add Job to heritrix
 	 * "https://webarchive.jira.com/wiki/display/Heritrix/Heritrix+3.x+API+Guide#Heritrix3.xAPIGuide-AddJobDirectory"
 	 * 
-	 * "curl -v -d \"action=add&addpath=/Users/hstern/job\" -k -u admin:admin --anyauth --location -H \"Accept:application/xml\" https://localhost:8443/engine"
+	 * "curl -v -d \"action=add&addpath=/Users/hstern/job\" -k -u admin:admin
+	 * --anyauth --location -H \"Accept:application/xml\"
+	 * https://localhost:8443/engine"
 	 * 
 	 * @param conf
 	 */
@@ -163,7 +165,8 @@ public class Heritrix {
 	}
 
 	/**
-	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H \"Accept: application/xml\" https://localhost:8443/engine/job/myjob"
+	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H
+	 * \"Accept: application/xml\" https://localhost:8443/engine/job/myjob"
 	 * 
 	 * @param name
 	 * @return the url to the warc file
@@ -274,9 +277,9 @@ public class Heritrix {
 		WebgatherLogger.debug(latest.getAbsolutePath() + "/warcs");
 		File warcDir = new File(latest.getAbsolutePath() + "/warcs");
 		if (!warcDir.exists() || !warcDir.isDirectory()) {
-			WebgatherLogger.info("Zu " + latest.getAbsolutePath()
-					+ " wurde kein WARC-Verzeichnis gefunden!");
-			return null;
+			String msg = "Zu " + latest.getAbsolutePath()
+					+ " wurde kein WARC-Verzeichnis gefunden!";
+			throw new RuntimeException(msg);
 		}
 		return warcDir.listFiles()[0].getAbsolutePath();
 	}

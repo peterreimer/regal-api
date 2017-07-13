@@ -263,9 +263,6 @@ public class Create extends RegalAction {
 
 			File crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
 			String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
-			if (warcPath == null) {
-				throw new RuntimeException("Keinen WARC-Pfad gefunden!");
-			}
 			String uriPath = Globals.heritrix.getUriPath(warcPath);
 
 			String localpath =
@@ -303,11 +300,10 @@ public class Create extends RegalAction {
 		} catch (Exception e) {
 			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
 			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
-			WebgatherLogger.error(e.toString());
-			WebgatherLogger.error("Crawl of Webpage " + n.getPid() + ","
-					+ conf.getUrl() + " has failed !");
-			return null;
-			// throw new RuntimeException(e);
+			WebgatherLogger.warn("Crawl of Webpage " + n.getPid() + ","
+					+ conf.getUrl() + " has failed !\n\tReason: " + e.getMessage());
+			WebgatherLogger.debug("", e);
+			throw new RuntimeException(e);
 		}
 	}
 
