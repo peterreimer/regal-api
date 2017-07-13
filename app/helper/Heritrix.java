@@ -48,6 +48,9 @@ public class Heritrix {
 	final String jobDir =
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 
+	final String dataDir =
+			Play.application().configuration().getString("regal-api.wget.dataDir");
+
 	final static Client client = HeritrixWebclient.createWebclient();
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");

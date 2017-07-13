@@ -125,6 +125,7 @@ public class Create extends RegalAction {
 		node.setDataUri(node.getAggregationUri() + "/data");
 		node.setContextDocumentUri(
 				"http://" + Globals.server + "/public/edoweb-resources.json");
+		// node.setLabel("Hannes");
 		Globals.fedora.createNode(node);
 		return node;
 	}
@@ -333,12 +334,15 @@ public class Create extends RegalAction {
 			// hier auf ein bestehendes WARC in wget-data/ verweisen
 			String crawlDateTimestamp = label.substring(0, 4) + label.substring(5, 7)
 					+ label.substring(8, 10); // crawl-Datum im Format yyyymmdd
-			File crawlDir = new File(Globals.wgetDataDir + "/" + conf.getName() + "/"
+			File crawlDir = new File(Globals.wget.dataDir + "/" + conf.getName() + "/"
 					+ crawlDateTimestamp);
 			ApplicationLogger.debug("crawlDir=" + crawlDir.toString());
 			File warcDir = new File(crawlDir.getAbsolutePath() + "/warcs");
 			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
 			ApplicationLogger.debug("Path to WARC " + warcPath);
+			String uriPath = Globals.wget.getUriPath(warcPath);
+			String localpath = Globals.wgetData + "/wget-data" + uriPath;
+			ApplicationLogger.debug("URI-Path to WARC " + localpath);
 
 			// create fedora object with unmanaged content pointing to
 			// the respective warc container
@@ -355,7 +359,7 @@ public class Create extends RegalAction {
 			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
-			webpageVersion.setLocalData(warcPath);
+			webpageVersion.setLocalData(localpath);
 			webpageVersion.setMimeType("application/warc");
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
@@ -372,7 +376,7 @@ public class Create extends RegalAction {
 
 			return webpageVersion;
 		} catch (Exception e) {
-			WebgatherLogger.error(
+			ApplicationLogger.error(
 					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
 					versionPid, n.getPid());
 			throw new RuntimeException(e);

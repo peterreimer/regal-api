@@ -202,6 +202,8 @@ public class FedoraFacade {
 	 */
 	public void createNode(Node node) {
 		try {
+			play.Logger.debug("node.getPid()=" + node.getPid());
+			play.Logger.debug("node.getLabel()=" + node.getLabel());
 			new Ingest(node.getPid()).label(node.getLabel()).execute();
 			DublinCoreHandler.updateDc(node);
 			List<Transformer> cms = node.getTransformer();
