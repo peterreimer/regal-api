@@ -143,7 +143,8 @@ public class MyUtils extends MyController {
 			Node node = readNodeOrNull(pid);
 			if (alephid != null && !alephid.isEmpty()) {
 				String result = modify.lobidify(node, alephid);
-				return JsonMessage(new Message(result));
+				String result2 = modify.lobidify2(node, alephid);
+				return JsonMessage(new Message(result + "\n" + result2));
 			} else {
 				String result = modify.lobidify(node);
 				return JsonMessage(new Message(result));
