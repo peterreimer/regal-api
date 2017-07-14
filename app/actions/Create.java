@@ -367,9 +367,8 @@ public class Create extends RegalAction {
 			webpageVersion = updateResource(webpageVersion);
 
 			conf.setLocalDir(crawlDir.getAbsolutePath());
-			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-			conf.setOpenWaybackLink(
-					Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
+			conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink
+					+ crawlDateTimestamp + "/" + conf.getUrl());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
 			ApplicationLogger.info(msg);

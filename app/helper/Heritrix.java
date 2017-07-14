@@ -48,9 +48,6 @@ public class Heritrix {
 	final String jobDir =
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 
-	final String dataDir =
-			Play.application().configuration().getString("regal-api.wget.dataDir");
-
 	final static Client client = HeritrixWebclient.createWebclient();
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -178,8 +175,8 @@ public class Heritrix {
 	}
 
 	/**
-	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H
-	 * \"Accept: application/xml\" https://localhost:8443/engine/job/myjob"
+	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H \
+	 * "Accept: application/xml\" https://localhost:8443/engine/job/myjob"
 	 * 
 	 * @param name
 	 * @return the url to the warc file
