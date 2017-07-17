@@ -175,8 +175,8 @@ public class Heritrix {
 	}
 
 	/**
-	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H
-	 * \"Accept: application/xml\" https://localhost:8443/engine/job/myjob"
+	 * "curl -v -d \"action=launch\" -k -u admin:admin --anyauth --location -H \
+	 * "Accept: application/xml\" https://localhost:8443/engine/job/myjob"
 	 * 
 	 * @param name
 	 * @return the url to the warc file

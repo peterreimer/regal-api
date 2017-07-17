@@ -19,6 +19,7 @@ package models;
 import helper.Heritrix;
 import helper.MyEtikettMaker;
 import helper.TaskManager;
+import helper.Wget;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -187,10 +188,21 @@ public class Globals {
 	public static Heritrix heritrix = new Heritrix();
 
 	/**
+	 * Global wget instance
+	 */
+	public static Wget wget = new Wget();
+
+	/**
 	 * Url to heritrix data directory
 	 */
 	public static String heritrixData = Play.application().configuration()
 			.getString("regal-api.heritrix.dataUrl");
+
+	/**
+	 * Url to wget data directory
+	 */
+	public static String wgetData =
+			Play.application().configuration().getString("regal-api.wget.dataUrl");
 
 	/**
 	 * Datacite provides a service for minting Dois. Configure your user here.
@@ -259,9 +271,6 @@ public class Globals {
 			Play.application().configuration().getString("regal-api.etikett.user");
 	public static String etikettPwd =
 			Play.application().configuration().getString("regal-api.etikett.pwd");
-
-	public static final String wgetDataDir =
-			Play.application().configuration().getString("regal-api.wget.dataDir");
 
 	/**
 	 * @param ipWhiteList
