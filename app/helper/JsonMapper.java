@@ -286,9 +286,10 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.debug(node.getPid() + " has no descriptive Metadata2!");
+			play.Logger.warn(node.getPid()
+					+ " has no descriptive Metadata2! Try to return metadata2 instead.");
 		}
-		return null;
+		return getDescriptiveMetadata();
 	}
 
 	/**
@@ -702,7 +703,7 @@ public class JsonMapper {
 		}
 		if (node.getUrn() != null) {
 			rdf.put(urn, node.getUrn());
-		} 
+		}
 
 		if (node.getParentPid() != null)
 			rdf.put(parentPid, node.getParentPid());
