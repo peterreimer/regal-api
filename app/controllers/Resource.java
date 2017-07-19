@@ -75,6 +75,7 @@ import views.html.resource;
 import views.html.search;
 import views.html.status;
 import views.html.frlResource;
+import views.html.tags.getTitle;
 
 /**
  * 
@@ -1113,6 +1114,18 @@ public class Resource extends MyController {
 						RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
 				// rdf = java.net.URLEncoder.encode(rdf, "utf-8");
 				return ok(edit.render("HELLO", "ntriples", pid, pid + ".rdf", rdf));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
+
+	@ApiOperation(produces = "text/html", nickname = "listTitle", value = "listTitle", notes = "get an extended title", response = String.class, httpMethod = "GET")
+	public static Promise<Result> listTitle(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, userId -> {
+			try {
+				Node node = readNodeOrNull(pid);
+				return ok(getTitle.render(node.getLd2()));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}
