@@ -702,7 +702,7 @@ public class JsonMapper {
 		}
 		if (node.getUrn() != null) {
 			rdf.put(urn, node.getUrn());
-		}
+		} 
 
 		if (node.getParentPid() != null)
 			rdf.put(parentPid, node.getParentPid());

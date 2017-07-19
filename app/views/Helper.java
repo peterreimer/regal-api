@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -138,5 +139,78 @@ public class Helper {
 			return "../" + pid;
 
 		}
+	}
+
+	public static String listContributions(Map<String, Object> h) {
+		StringBuffer result = new StringBuffer();
+		JsonNode hit = new ObjectMapper().valueToTree(h);
+		for (JsonNode c : hit.at("/contribution")) {
+			String name = c.at("/agent/0/label").asText();
+			String role = c.at("/role/0/label").asText();
+			String roleUri = c.at("/role/0/@id").asText();
+			String uri = c.at("/agent/0/@id").asText();
+			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)) {
+				result.append("<tr class=\"" + roleUri + "\">");
+				result.append(String.format(
+						"<td> <a title=\"Ähnliche Objekte suchen\" href=\"%s\">%s <span style=\"font-size:smaller;\">(%s)</span></a><span class=\"separator\">|</span>"
+								+ "<a href=\"" + uri + "\"  target=\"_blank\">"
+								+ "<span class=\"glyphicon glyphicon-link\"></span></a><br/></td>",
+						getRechercheUrl(uri), name, role));
+				result.append("</tr>\n");
+			}
+		}
+
+		return result.toString();
+	}
+
+	public static String getRechercheUrl(String uri) {
+		try {
+			return "" + Globals.rechercheUrlPrefix + ""
+					+ URLEncoder.encode(uri, "utf-8") + "" + Globals.rechercheUrlSuffix;
+		} catch (Exception e) {
+			play.Logger.warn("", e);
+		}
+		return "" + Globals.rechercheUrlPrefix + "" + uri + ""
+				+ Globals.rechercheUrlSuffix;
+	}
+
+	public static String listAuthors(Map<String, Object> h) {
+		StringBuffer result = new StringBuffer();
+		JsonNode hit = new ObjectMapper().valueToTree(h);
+		for (JsonNode c : hit.at("/contribution")) {
+
+			String name = c.at("/agent/0/label").asText();
+			String role = c.at("/role/0/label").asText();
+			String roleUri = c.at("/role/0/@id").asText();
+			String uri = c.at("/agent/0/@id").asText();
+
+			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
+					|| "http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+
+				result.append(String.format(
+						" <a title=\"Ähnliche Objekte suchen\" href=\"%s\">%s</a><span class=\"separator\">|</span>"
+								+ "<a href=\"" + uri + "\"  target=\"_blank\">"
+								+ "<span class=\"glyphicon glyphicon-link\"></span></a>, ",
+						getRechercheUrl(uri), name));
+
+			}
+		}
+		if (result.length() > 2) {
+			result.replace(result.length() - 2, result.length(), "");
+		}
+		return result.toString();
+	}
+
+	public static boolean contributionContainsAdditionalFields(
+			Map<String, Object> h) {
+		JsonNode hit = new ObjectMapper().valueToTree(h);
+		for (JsonNode c : hit.at("/contribution")) {
+			String roleUri = c.at("/role/0/@id").asText();
+			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
+					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

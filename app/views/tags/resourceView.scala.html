@@ -50,6 +50,24 @@ case fileMap :Map[String,Object] =>{
 		case "hasData"=>{
 						
 		}
+		case "contribution"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+			    @if(views.Helper.contributionContainsAdditionalFields(hit)){
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@Html(views.Helper.listContributions(hit))
+					</table>
+					</td>
+				</tr>
+				}
+				}
+			}
+		}
 		case "inSeries"=>{
 			@values match {
 			case nullCase if nullCase == null =>{}
