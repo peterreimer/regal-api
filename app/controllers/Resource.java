@@ -1125,7 +1125,7 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			try {
 				Node node = readNodeOrNull(pid);
-				return ok(getTitle.render(node.getLd2()));
+				return ok(getTitle.render(node.getLd2(), Globals.namespaces[0]));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}

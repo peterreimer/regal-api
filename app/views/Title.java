@@ -48,7 +48,7 @@ public class Title {
 			authorList = getContributorList(hit);
 			if (authorList == null || authorList.isEmpty()) {
 
-				return Helper.listAuthors(hit);
+				return "";
 
 			}
 		}

@@ -4,8 +4,10 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -141,26 +143,69 @@ public class Helper {
 		}
 	}
 
-	public static String listContributions(Map<String, Object> h) {
-		StringBuffer result = new StringBuffer();
+	public static List<Map<String, Object>> listContributions(
+			Map<String, Object> h) {
+		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/contribution")) {
 			String name = c.at("/agent/0/label").asText();
 			String role = c.at("/role/0/label").asText();
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
-			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)) {
-				result.append("<tr class=\"" + roleUri + "\">");
-				result.append(String.format(
-						"<td> <a title=\"Ähnliche Objekte suchen\" href=\"%s\">%s <span style=\"font-size:smaller;\">(%s)</span></a><span class=\"separator\">|</span>"
-								+ "<a href=\"" + uri + "\"  target=\"_blank\">"
-								+ "<span class=\"glyphicon glyphicon-link\"></span></a><br/></td>",
-						getRechercheUrl(uri), name, role));
-				result.append("</tr>\n");
+			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
+					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+				Map<String, Object> contribution = new HashMap<>();
+				contribution.put("id", uri);
+				contribution.put("label", name);
+				contribution.put("roleName", role);
+				contribution.put("roleId", roleUri);
+				result.add(contribution);
 			}
 		}
+		return result;
+	}
 
-		return result.toString();
+	public static List<Object> listSubjects(Map<String, Object> h) {
+		List<Object> result = new ArrayList<>();
+		JsonNode hit = new ObjectMapper().valueToTree(h);
+		for (JsonNode c : hit.at("/subject")) {
+			if (c.has("componentList")) {
+				result.add(getComponentList(c));
+			} else {
+				String name = c.at("/label").asText();
+				String uri = c.at("/@id").asText();
+				String source = c.at("/source/0/label").asText();
+				String sourceId = c.at("/source/0/@id").asText();
+
+				Map<String, Object> subject = new HashMap<>();
+				subject.put("id", uri);
+				subject.put("label", name);
+				subject.put("source", source);
+				subject.put("sourceId", sourceId);
+				result.add(subject);
+			}
+		}
+		return result;
+	}
+
+	private static List<Map<String, Object>> getComponentList(
+			JsonNode componentList) {
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (JsonNode c : componentList.at("/componentList")) {
+			String name = c.at("/label").asText();
+			String uri = c.at("/@id").asText();
+			String source = c.at("/source/0/label").asText();
+			String sourceId = c.at("/source/0/@id").asText();
+
+			Map<String, Object> subject = new HashMap<>();
+			subject.put("id", uri);
+			subject.put("label", name);
+			subject.put("source", source);
+			subject.put("sourceId", sourceId);
+
+			result.add(subject);
+		}
+		return result;
 	}
 
 	public static String getRechercheUrl(String uri) {
@@ -174,11 +219,10 @@ public class Helper {
 				+ Globals.rechercheUrlSuffix;
 	}
 
-	public static String listAuthors(Map<String, Object> h) {
-		StringBuffer result = new StringBuffer();
+	public static List<Map<String, Object>> listAuthors(Map<String, Object> h) {
+		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/contribution")) {
-
 			String name = c.at("/agent/0/label").asText();
 			String role = c.at("/role/0/label").asText();
 			String roleUri = c.at("/role/0/@id").asText();
@@ -186,19 +230,15 @@ public class Helper {
 
 			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
 					|| "http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
-
-				result.append(String.format(
-						" <a title=\"Ähnliche Objekte suchen\" href=\"%s\">%s</a><span class=\"separator\">|</span>"
-								+ "<a href=\"" + uri + "\"  target=\"_blank\">"
-								+ "<span class=\"glyphicon glyphicon-link\"></span></a>, ",
-						getRechercheUrl(uri), name));
-
+				Map<String, Object> contribution = new HashMap<>();
+				contribution.put("id", uri);
+				contribution.put("label", name);
+				contribution.put("roleName", role);
+				contribution.put("roleId", roleUri);
+				result.add(contribution);
 			}
 		}
-		if (result.length() > 2) {
-			result.replace(result.length() - 2, result.length(), "");
-		}
-		return result.toString();
+		return result;
 	}
 
 	public static boolean contributionContainsAdditionalFields(

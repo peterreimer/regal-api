@@ -1500,6 +1500,8 @@ public class Modify extends RegalAction {
 			File file = CopyUtils.copyStringToFile(content);
 			node.setMetadata2File(file.getAbsolutePath());
 			node.setMetadata2(content);
+			OaiDispatcher.makeOAISet(node);
+			reindexNodeAndParent(node);
 			return pid + " metadata2 successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);

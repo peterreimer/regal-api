@@ -50,6 +50,26 @@ case fileMap :Map[String,Object] =>{
 		case "hasData"=>{
 						
 		}
+		case "subject"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				 @if(hit.contains("subject")){
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td>
+						<ol>
+						@for(c <-views.Helper.listSubjects(hit)){
+						@displaySubjects(c)
+						}
+						</ol>
+						</td>
+					</tr>
+				}
+				}
+			}
+		}
 		case "contribution"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
@@ -60,7 +80,9 @@ case fileMap :Map[String,Object] =>{
 					<td class="field-label @key">@getLabel(key)</td>
 					<td>
 					<table>
-					@Html(views.Helper.listContributions(hit))
+					@for(c <-views.Helper.listContributions(hit)){
+						@displayContributions(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())
+					}
 					</table>
 					</td>
 				</tr>
@@ -156,6 +178,49 @@ case fileMap :Map[String,Object] =>{
 	}
 }
 
+@displayContributions(id:String,label:String,roleId:String,roleName:String)={
+		<tr class=@roleId>
+			
+			 			<td>    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @label <span style="font-size:smaller;">(@roleName)</span>
+	                       </a> <span class="separator">|</span>
+	                       <a href=@analyseValue(id)  target="_blank">
+	                               <span class="glyphicon glyphicon-link"></span>
+	                       </a>
+	                       <br/>	</td> 
+	   </tr>	
+}
+
+@displaySubjects(entry:Any)={
+
+	@entry match {
+		case map:Map[String,Object] =>{
+		
+			@displaySubject(map.get("id").toString(),map.get("label").toString(),map.get("sourceId").toString(),map.get("source").toString())
+			
+		}
+		case list: List[Map[String,Object]] =>{
+			<ol class="componentList">
+			@for(e<-list){
+			   @displaySubjects(e)
+			}
+			</ol>
+		}
+	}
+}
+@displaySubject(id:String,label:String,roleId:String,roleName:String)={
+		
+			<li class=@roleId>
+			 		<a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @label
+	                       </a> <span class="separator">|</span>
+	                       <a href=@analyseValue(id)  target="_blank">
+	                               <span class="glyphicon glyphicon-link"></span> 
+	                       </a>
+	                       </li>
+	                      
+}
+
 
 @analyseString(v: String)={
 	@v match {
@@ -218,6 +283,7 @@ case fileMap :Map[String,Object] =>{
 			}
 		}
 }
+
 
 @getLabel(key: String)={
 		@hit.get("@context") match{
