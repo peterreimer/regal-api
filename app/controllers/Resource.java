@@ -1122,7 +1122,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "text/html", nickname = "listTitle", value = "listTitle", notes = "get an extended title", response = String.class, httpMethod = "GET")
 	public static Promise<Result> listTitle(@PathParam("pid") String pid) {
-		return new ModifyAction().call(pid, userId -> {
+		return new ReadMetadataAction().call(pid, userId -> {
 			try {
 				Node node = readNodeOrNull(pid);
 				return ok(getTitle.render(node.getLd2(), Globals.namespaces[0]));
