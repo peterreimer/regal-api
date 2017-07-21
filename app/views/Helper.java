@@ -253,4 +253,23 @@ public class Helper {
 		}
 		return false;
 	}
+
+	public static String getLobidIsPartOf(Set<Map<String, Object>> publ) {
+		for (Map<String, Object> p : publ) {
+			JsonNode hit = new ObjectMapper().valueToTree(p);
+			return hit.at("/hasSuperordinate/0/label").asText();
+		}
+		return "Can't process data!";
+	}
+
+	public static String getPublication(Set<Map<String, Object>> publ) {
+		for (Map<String, Object> p : publ) {
+			JsonNode hit = new ObjectMapper().valueToTree(p);
+			String location = hit.at("/location").asText();
+			String publishedBy = hit.at("/publishedBy").asText();
+			String startDate = hit.at("/startDate").asText();
+			return startDate + "<br/>" + location + "<br/>" + publishedBy;
+		}
+		return "Can't process data!";
+	}
 }

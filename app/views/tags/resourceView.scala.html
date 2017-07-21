@@ -47,8 +47,51 @@ case fileMap :Map[String,Object] =>{
 		case "hasPart"=>{
 			
 		}
+		case "inCollection"=>{
+			
+		}
 		case "hasData"=>{
 						
+		}
+		case "publication"=>{
+					@values match {
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+			<tr class="@key">
+				<td style="display:none;">@getWeight(key)</td>
+				<td class="field-label @key">@getLabel(key)</td>
+				<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+				@values match {
+						case d: Set[ Map[String,Object]] => {
+							@Html(views.Helper.getPublication(d))
+						}
+						case _ => {
+							@values
+						}
+				}				
+			</tr>
+			}
+			}			
+		}
+		case "lv:isPartOf"=>{
+			@values match {
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+			<tr class="@key">
+				<td style="display:none;">@getWeight(key)</td>
+				<td class="field-label @key">@getLabel(key)</td>
+				<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+				@values match {
+						case d: Set[ Map[String,Object]] => {
+							@Html(views.Helper.getLobidIsPartOf(d))
+						}
+						case _ => {
+							@values
+						}
+				}				
+			</tr>
+			}
+			}		
 		}
 		case "subject"=>{
 			@values match {
