@@ -14,7 +14,7 @@
 		case a if v.startsWith("http") => {
 			@v
 		}
-		case a if v.startsWith(namespace) => {
+		case a if v.startsWith(namespace) => { 
 			/resource/@v
 		}
 		case _ => {
@@ -30,24 +30,29 @@
 					<div class="titleMain">
 						<h1 class="title" id="page-title">
 							@Html(Title.getTitle(hit))
+							@if(hit.contains("P60493")){
+							: @hit.get("P60493")
+							}
 						</h1>
 					</div>
-					@if(hit.contains("contribution")){
 					<h2 id="page-title-suffix" class="titlePost title-suffix">
-						<ol id="author-title-list">
-							@for(c <-views.Helper.listAuthors(hit)){
+						@if(hit.contains("contribution")){
 						
-								<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
+							<ol id="author-title-list">
+								@for(c <-views.Helper.listAuthors(hit)){
+							
+									<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
+						
+								}
+							</ol>
+						
+						}else{
+							@Html(Title.getAuthorNames(hit))
+						}
+						
+						. @Html(Title.getIssued(hit))
+					</h2>
 					
-							}
-						</ol>
-						@Html(Title.getIssued(hit))
-					</h2>
-					}else{
-					<h2 id="page-title-suffix" class="titlePost title-suffix">@Html(Title.getAuthorNames(hit))
-						@Html(Title.getIssued(hit))
-					</h2>
-					}
 			</div>
 			
 		</div>
