@@ -27,22 +27,21 @@
 <div class="title">
 			<div class="col-md-8">
 					<div class="titlePre"></div>
-					<div class="titleMain">
-						<h1 class="title" id="page-title">
+					<h1 class="title" id="page-title">
+					<span class="titleMain">
 							@Html(Title.getTitle(hit))
-							@if(hit.contains("P60493")){
-							: @hit.get("P60493")
-							}
-						</h1>
-					</div>
+					</span>
+					@if(hit.contains("P60493")){
+						<span class="otherTitle">
+						: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
+						</span>
+						}
+					</h1>
 					<h2 id="page-title-suffix" class="titlePost title-suffix">
 						@if(hit.contains("contribution")){
-						
 							<ol id="author-title-list">
 								@for(c <-views.Helper.listAuthors(hit)){
-							
 									<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
-						
 								}
 							</ol>
 						
@@ -50,7 +49,7 @@
 							@Html(Title.getAuthorNames(hit))
 						}
 						
-						. @Html(Title.getIssued(hit))
+						@Html(Title.getIssued(hit))
 					</h2>
 					
 			</div>
