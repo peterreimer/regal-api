@@ -364,6 +364,7 @@ public class JsonMapper {
 			postProcess(rdf, "recordingCoords");
 			postProcess(rdf, "collectionOne");
 			postProcess(rdf, "containedIn");
+			postProcess(rdf, "medium");
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -391,8 +392,7 @@ public class JsonMapper {
 			String hbzId = ((Collection<String>) rdf.get("hbzId")).iterator().next();
 			Collection<Map<String, Object>> catalogLink = new ArrayList<>();
 			Map<String, Object> cl = new HashMap<>();
-			cl.put(ID2,
-					"http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
+			cl.put(ID2, "https://lobid.org/resources/" + hbzId);
 			cl.put(PREF_LABEL, hbzId);
 			catalogLink.add(cl);
 			rdf.put("catalogLink", catalogLink);
@@ -619,6 +619,8 @@ public class JsonMapper {
 		} else if (map.containsKey("alternateName_en")) {
 			return (String) map.get("alternateName_en");
 		}
+		if (map.containsKey("label"))
+			return (String) map.get("label");
 
 		if (map.containsKey(PREF_LABEL))
 			return (String) map.get(PREF_LABEL);
