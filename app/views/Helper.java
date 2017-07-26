@@ -321,6 +321,16 @@ public class Helper {
 		return false;
 	}
 
+	public static String getContainedIn(Set<Map<String, Object>> containedIn) {
+		JsonNode hit = new ObjectMapper().valueToTree(containedIn);
+		String uri = hit.at("/0/@id").asText();
+		String label = hit.at("/0/label").asText();
+		if (uri != null && !uri.isEmpty()) {
+			label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+		}
+		return "<a href=\"" + uri + "\">" + label + "</a>";
+	}
+
 	public static String getLobidIsPartOf(Set<Map<String, Object>> isPartOf) {
 
 		JsonNode hit = new ObjectMapper().valueToTree(isPartOf);
