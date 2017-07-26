@@ -321,15 +321,19 @@ public class Helper {
 		return false;
 	}
 
-	public static String getLobidIsPartOf(Set<Map<String, Object>> publ) {
-		for (Map<String, Object> p : publ) {
-			JsonNode hit = new ObjectMapper().valueToTree(p);
-			String uri = hit.at("/hasSuperordinate/0/@id").asText();
-			String label = MyEtikettMaker.getLabelFromEtikettWs(uri);
-			String numbering = hit.at("/numbering").asText();
+	public static String getLobidIsPartOf(Set<Map<String, Object>> isPartOf) {
+
+		JsonNode hit = new ObjectMapper().valueToTree(isPartOf);
+		String uri = hit.at("/0/hasSuperordinate/0/@id").asText();
+		String label = hit.at("/0/hasSuperordinate/0/label").asText();
+		if (uri != null && !uri.isEmpty()) {
+			label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+		}
+		String numbering = hit.at("/0/numbering").asText();
+		if (numbering != null && !numbering.isEmpty()) {
 			return "<a href=\"" + uri + "\">" + label + "</a>, " + numbering;
 		}
-		return "Can't process data!";
+		return label;
 	}
 
 	public static String getPublication(Set<Map<String, Object>> publ) {
