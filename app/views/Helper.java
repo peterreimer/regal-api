@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
+import helper.MyEtikettMaker;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
@@ -323,7 +324,10 @@ public class Helper {
 	public static String getLobidIsPartOf(Set<Map<String, Object>> publ) {
 		for (Map<String, Object> p : publ) {
 			JsonNode hit = new ObjectMapper().valueToTree(p);
-			return hit.at("/hasSuperordinate/0/label").asText();
+			String uri = hit.at("/hasSuperordinate/0/@id").asText();
+			String label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+			String numbering = hit.at("/numbering").asText();
+			return "<a href=\"" + uri + "\">" + label + "</a>, " + numbering;
 		}
 		return "Can't process data!";
 	}
