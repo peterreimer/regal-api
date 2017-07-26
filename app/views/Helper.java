@@ -174,8 +174,10 @@ public class Helper {
 			} else {
 				String name = c.at("/label").asText();
 				String uri = c.at("/@id").asText();
-				String source = c.at("/source/0/label").asText();
+				if (uri.contains("rpb#nr"))
+					continue;
 				String sourceId = c.at("/source/0/@id").asText();
+				String source = c.at("/source/0/label").asText();
 
 				Map<String, Object> subject = new HashMap<>();
 				subject.put("id", uri);
@@ -186,6 +188,70 @@ public class Helper {
 			}
 		}
 		return result;
+
+	}
+
+	public static String getSubjectSource(String sourceId, String uri) {
+		String source = "";
+		if ("https://w3id.org/lobid/rpb2".equals(sourceId)) {
+			source = "lbz " + getLbzId(uri);
+		} else if ("https://w3id.org/lobid/rpb".equals(sourceId)) {
+			source = "rpb " + getRPbId(uri);
+		} else if ("http://d-nb.info/gnd/4149423-4".equals(sourceId)) {
+			source = "ddc " + getDdcId(uri);
+		} else if ("http://d-nb.info/gnd/7749153-1".equals(sourceId)) {
+			source = "gnd " + getGndId(uri);
+		} else if ("http://purl.org/lobid/nwbib".equals(sourceId)) {
+			source = "nwbib " + getNwbibId(uri);
+		}
+		return source;
+	}
+
+	private static String getNwbibId(String uri) {
+		try {
+			return uri.split("#")[1].substring(1);
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+
+	private static String getGndId(String uri) {
+		try {
+			String[] parts = uri.split("/");
+			return parts[parts.length - 1];
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+
+	private static String getDdcId(String uri) {
+		try {
+			String[] parts = uri.split("/");
+			return parts[parts.length - 1];
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+
+	private static String getRPbId(String uri) {
+		try {
+			return uri.split("#")[1].substring(1);
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+
+	private static String getLbzId(String uri) {
+		try {
+			return uri.split("#")[1].substring(1);
+		} catch (Exception e) {
+
+		}
+		return "";
 	}
 
 	private static List<Map<String, Object>> getComponentList(

@@ -6,7 +6,8 @@
 @value match{ 
 
 case fileMap : Map[String,Object] =>{
-
+	
+			<div class="fileView file" id=@fileMap.get( "@id") >
 	@fileMap.get("contentType") match{
 				case "version" => {
 					@addVersionView(fileMap)
@@ -25,6 +26,8 @@ case fileMap : Map[String,Object] =>{
 				}
 				case _ =>{ } 
 			}
+				</div>
+			
 }
 case _ =>{ } 
 }
@@ -32,8 +35,7 @@ case _ =>{ }
 @addFileView(fileMap:Map[String,Object])={
 @fileMap.get("hasData") match{ 
 		case hasData : Map[String,Object] =>{
-			<p>
-			<div class="fileView file" id=@fileMap.get( "@id")>
+		
 				<table>
 					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">
@@ -79,8 +81,7 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+		
 		} case _ =>{
 			@addPartView(fileMap)
 		} 
@@ -92,8 +93,6 @@ case _ =>{ }
 	
 		case hasData : Map[String,Object] =>{
 		
-			<p>
-			<div class="fileView version" id=@fileMap.get( "@id")>
 				<table>
 					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">
@@ -138,11 +137,9 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+	
 		} case _ =>{
-		<p>
-			<div class="fileView version" id=@fileMap.get( "@id")>
+
 				<table>
 					<tr class="accessSchemeSummary">
 						<td class="downloadIcon" rowspan="6">					
@@ -178,14 +175,11 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+	
 		} 
 	} 
 } 
 @addPartView(fileMap:Map[String,Object])={
-		<p>
-			<div class="fileView part" id=@fileMap.get( "@id")>
 				<table>
 					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">					
@@ -221,7 +215,6 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+			
 } 
 
