@@ -224,13 +224,15 @@ public class Modify extends RegalAction {
 			updateMetadata(node, content);
 
 			String enrichMessage = enrichMetadata(node);
+			String enrichMessage2 = enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ enrichMessage;
+					+ enrichMessage + " " + enrichMessage2;
 		} else {
 			updateMetadata(node, content);
 			String enrichMessage = enrichMetadata(node);
+			String enrichMessage2 = enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
-					+ enrichMessage;
+					+ enrichMessage + " " + enrichMessage2;
 		}
 	}
 
@@ -264,7 +266,7 @@ public class Modify extends RegalAction {
 					+ enrichMessage;
 		} else {
 			updateMetadata(node, content);
-			String enrichMessage = enrichMetadata(node);
+			String enrichMessage = enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;
 		}
@@ -877,7 +879,7 @@ public class Modify extends RegalAction {
 
 	public String enrichMetadata2(Node node) {
 		try {
-			play.Logger.info("Enrich " + node.getPid());
+			play.Logger.info("Enrich 2 " + node.getPid());
 			String metadata = node.getMetadata2();
 			if (metadata == null || metadata.isEmpty()) {
 				play.Logger.info("No metadata2 to enrich " + node.getPid());
@@ -1021,6 +1023,7 @@ public class Modify extends RegalAction {
 			play.Logger.info("No institution found for " + node.getPid());
 
 		}
+		play.Logger.info("ADD to collection: " + result);
 		return result;
 	}
 
