@@ -135,15 +135,16 @@ public class JsonMapper {
 			this.node = n;
 			if (node == null)
 				throw new NullPointerException(
-						"JsonConverter can not work on node with value NULL!");
+						"JsonMapper can not work on node with value NULL!");
 			if (node.getMetadata() == null)
-				throw new NullPointerException("JsonConverter found NULL on "
-						+ node.getPid() + ". Metadata stream is NULL!");
+				throw new NullPointerException(
+						node.getPid() + " metadata stream is NULL!");
 			if (node.getMetadata2() == null)
-				throw new NullPointerException("JsonConverter found NULL on "
-						+ node.getPid() + ". Metadata2 stream is NULL!");
+				throw new NullPointerException(
+						node.getPid() + " metadata2 stream is NULL!");
 		} catch (Exception e) {
-			play.Logger.warn("", e);
+			play.Logger.warn("", e.getMessage());
+			play.Logger.debug("", e);
 		}
 	}
 
