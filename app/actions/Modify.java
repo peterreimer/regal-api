@@ -154,7 +154,7 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
-			play.Logger.info(content);
+			play.Logger.info("Write ordering info to fedora \n\t" + content);
 			File file = CopyUtils.copyStringToFile(content);
 			Node node = new Read().readNode(pid);
 			if (node != null) {
@@ -303,6 +303,7 @@ public class Modify extends RegalAction {
 				updateMetadata(node, content);
 				msg.append(enrichMetadata(node));
 			} catch (NotUpdatedException e) {
+				play.Logger.debug("", e);
 				play.Logger.info(pid + " Not updated. " + e.getMessage());
 				msg.append(pid + " Not updated. " + e.getMessage());
 			}
@@ -313,6 +314,7 @@ public class Modify extends RegalAction {
 				updateMetadata2(node, content);
 				msg.append(enrichMetadata2(node));
 			} catch (NotUpdatedException e) {
+				play.Logger.debug("", e);
 				play.Logger.info(pid + " Not updated. " + e.getMessage());
 				msg.append(pid + " Not updated. " + e.getMessage());
 			}
@@ -765,7 +767,7 @@ public class Modify extends RegalAction {
 		}
 		Node parent = new Read().readNode(copySource);
 		String subject = node.getPid();
-		play.Logger.debug("Try to enrich " + node.getPid() + " with "
+		play.Logger.trace("Try to enrich " + node.getPid() + " with "
 				+ parent.getPid() + " . Looking for field " + field);
 		String pred = getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(subject, pred,
@@ -1005,7 +1007,7 @@ public class Modify extends RegalAction {
 					if (gndId.endsWith("16269969-4")) {
 						gndId = gndEndpoint + "2006655-7";
 					}
-					play.Logger.debug("Add data from " + gndId);
+					play.Logger.trace("Add data from " + gndId);
 					ValueFactory v = new ValueFactoryImpl();
 					Statement link = v.createStatement(v.createURI(node.getPid()),
 							v.createURI("http://dbpedia.org/ontology/institution"),
@@ -1032,7 +1034,7 @@ public class Modify extends RegalAction {
 				if (!(s.getSubject() instanceof BNode)) {
 					if (isLiteral) {
 						ValueFactory v = new ValueFactoryImpl();
-						play.Logger.info("Get data from " + uri);
+						play.Logger.trace("Get data from " + uri);
 						Statement newS = v.createStatement(v.createURI(uri),
 								s.getPredicate(), v.createLiteral(Normalizer.normalize(
 										s.getObject().stringValue(), Normalizer.Form.NFKC)));
@@ -1047,7 +1049,7 @@ public class Modify extends RegalAction {
 	}
 
 	private List<Statement> getOrcidStatements(String uri) {
-		play.Logger.info("GET " + uri);
+		play.Logger.trace("GET " + uri);
 		List<Statement> filteredStatements = new ArrayList<Statement>();
 		try (InputStream in =
 				RdfUtils.urlToInputStream(new URL(uri), "application/json")) {
@@ -1066,7 +1068,7 @@ public class Modify extends RegalAction {
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
 			Statement newS =
 					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
-			play.Logger.info("Get data from " + uri + " " + newS);
+			play.Logger.trace("Get data from " + uri + " " + newS);
 			filteredStatements.add(newS);
 		} catch (Exception e) {
 			play.Logger.warn("", e);
@@ -1075,7 +1077,7 @@ public class Modify extends RegalAction {
 	}
 
 	private List<Statement> getOsmStatements(String uri) {
-		play.Logger.info("GET " + uri);
+		play.Logger.trace("GET " + uri);
 		List<Statement> filteredStatements = new ArrayList<Statement>();
 		try {
 			URL url = new URL(uri);
@@ -1092,7 +1094,7 @@ public class Modify extends RegalAction {
 					map.get("mlat") + "," + map.get("mlon"), Normalizer.Form.NFKC));
 			Statement newS =
 					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
-			play.Logger.info("Get data from " + uri + " " + newS);
+			play.Logger.trace("Get data from " + uri + " " + newS);
 			filteredStatements.add(newS);
 		} catch (Exception e) {
 			play.Logger.warn(e.getMessage());
@@ -1102,7 +1104,7 @@ public class Modify extends RegalAction {
 	}
 
 	private List<Statement> getGeonamesStatements(String uri) {
-		play.Logger.info("GET " + uri);
+		play.Logger.trace("GET " + uri);
 		ValueFactory v = new ValueFactoryImpl();
 		List<Statement> filteredStatements = new ArrayList<Statement>();
 		List<Literal> alternateNames = new ArrayList<Literal>();
@@ -1118,7 +1120,7 @@ public class Modify extends RegalAction {
 								l.getLanguage());
 						Statement newS =
 								v.createStatement(v.createURI(uri), s.getPredicate(), object);
-						play.Logger.info("Get data from " + uri + " " + newS);
+						play.Logger.trace("Get data from " + uri + " " + newS);
 
 						if (alternateName.equals(s.getPredicate().stringValue())) {
 							newS = v.createStatement(v.createURI(uri), v.createURI(
@@ -1137,7 +1139,7 @@ public class Modify extends RegalAction {
 	}
 
 	private List<Statement> getAgrovocStatements(String uri) {
-		play.Logger.info("GET " + uri);
+		play.Logger.trace("GET " + uri);
 		ValueFactory v = new ValueFactoryImpl();
 		List<Statement> filteredStatements = new ArrayList<Statement>();
 		List<Literal> prefLabel = new ArrayList<Literal>();
@@ -1153,7 +1155,7 @@ public class Modify extends RegalAction {
 								l.getLanguage());
 						Statement newS =
 								v.createStatement(v.createURI(uri), s.getPredicate(), object);
-						play.Logger.info("Get data from " + uri + " " + newS);
+						play.Logger.trace("Get data from " + uri + " " + newS);
 
 						if (PREF_LABEL.equals(s.getPredicate().stringValue())) {
 							if ("de".equals(object.getLanguage())) {
