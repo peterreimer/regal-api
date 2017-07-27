@@ -341,28 +341,43 @@ public class Helper {
 	}
 
 	public static String getContainedIn(Set<Map<String, Object>> containedIn) {
-		JsonNode hit = new ObjectMapper().valueToTree(containedIn);
-		String uri = hit.at("/0/@id").asText();
-		String label = hit.at("/0/label").asText();
-		if (uri != null && !uri.isEmpty()) {
-			label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+		String label = "http://lobid.org";
+		String uri = "http://lobid.org";
+		try {
+			JsonNode hit = new ObjectMapper().valueToTree(containedIn);
+			uri = hit.at("/0/@id").asText();
+			label = hit.at("/0/label").asText();
+			if (uri != null && !uri.isEmpty()) {
+				label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+			}
+			return "<a href=\"" + uri + "\">" + label + "</a>";
+		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
+			play.Logger.debug("", e);
 		}
 		return "<a href=\"" + uri + "\">" + label + "</a>";
 	}
 
 	public static String getLobidIsPartOf(Set<Map<String, Object>> isPartOf) {
-
-		JsonNode hit = new ObjectMapper().valueToTree(isPartOf);
-		String uri = hit.at("/0/hasSuperordinate/0/@id").asText();
-		String label = hit.at("/0/hasSuperordinate/0/label").asText();
-		if (uri != null && !uri.isEmpty()) {
-			label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+		String label = "http://lobid.org";
+		String uri = "http://lobid.org";
+		try {
+			JsonNode hit = new ObjectMapper().valueToTree(isPartOf);
+			uri = hit.at("/0/hasSuperordinate/0/@id").asText();
+			label = hit.at("/0/hasSuperordinate/0/label").asText();
+			if (uri != null && !uri.isEmpty()) {
+				label = MyEtikettMaker.getLabelFromEtikettWs(uri);
+			}
+			String numbering = hit.at("/0/numbering").asText();
+			if (numbering != null && !numbering.isEmpty()) {
+				return "<a href=\"" + uri + "\">" + label + "</a>, Band " + numbering;
+			}
+			return label;
+		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
+			play.Logger.debug("", e);
 		}
-		String numbering = hit.at("/0/numbering").asText();
-		if (numbering != null && !numbering.isEmpty()) {
-			return "<a href=\"" + uri + "\">" + label + "</a>, Band " + numbering;
-		}
-		return label;
+		return "<a href=\"" + uri + "\">" + uri + "</a>";
 	}
 
 	public static String getPublication(Set<Map<String, Object>> publ) {
