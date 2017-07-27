@@ -174,11 +174,31 @@ public class Helper {
 				result.add(getComponentList(c));
 			} else {
 				String name = c.at("/label").asText();
+				if (name != null && !name.isEmpty()) {
+					String uri = c.at("/@id").asText();
+					if (uri.contains("rpb#nr"))
+						continue;
+					String sourceId = c.at("/source/0/@id").asText();
+					String source = c.at("/source/0/label").asText();
+
+					Map<String, Object> subject = new HashMap<>();
+					subject.put("id", uri);
+					subject.put("label", name);
+					subject.put("source", source);
+					subject.put("sourceId", sourceId);
+					result.add(subject);
+				}
+			}
+		}
+		if (result.isEmpty()) {
+			for (JsonNode c : hit.at("/subject")) {
+
+				String name = c.at("/prefLabel").asText();
 				String uri = c.at("/@id").asText();
 				if (uri.contains("rpb#nr"))
 					continue;
-				String sourceId = c.at("/source/0/@id").asText();
-				String source = c.at("/source/0/label").asText();
+				String sourceId = uri;
+				String source = "";
 
 				Map<String, Object> subject = new HashMap<>();
 				subject.put("id", uri);
@@ -189,7 +209,6 @@ public class Helper {
 			}
 		}
 		return result;
-
 	}
 
 	public static String getSubjectSource(String sourceId, String uri) {
@@ -341,7 +360,7 @@ public class Helper {
 		}
 		String numbering = hit.at("/0/numbering").asText();
 		if (numbering != null && !numbering.isEmpty()) {
-			return "<a href=\"" + uri + "\">" + label + "</a>, " + numbering;
+			return "<a href=\"" + uri + "\">" + label + "</a>, Band " + numbering;
 		}
 		return label;
 	}
@@ -352,7 +371,24 @@ public class Helper {
 			String location = hit.at("/location").asText();
 			String publishedBy = hit.at("/publishedBy").asText();
 			String startDate = hit.at("/startDate").asText();
-			return startDate + "<br/>" + location + "<br/>" + publishedBy;
+
+			if (startDate != null && !startDate.isEmpty()) {
+				startDate = startDate + "<br/>";
+			} else {
+				startDate = "";
+			}
+			if (location != null && !location.isEmpty()) {
+				location = location + "<br/>";
+			} else {
+				location = "";
+			}
+			if (publishedBy != null && !publishedBy.isEmpty()) {
+				publishedBy = publishedBy;
+			} else {
+				publishedBy = "";
+			}
+
+			return startDate + location + publishedBy;
 		}
 		return "Can't process data!";
 	}
