@@ -193,7 +193,7 @@
 				}
 			}
 		}
-		case "volumeIn"=>{
+		case "lv:volumeIn"=>{
 		@values match {
 			case nullCase if nullCase == null =>{}
 			case _ =>{
@@ -283,7 +283,7 @@
 		case list: List[Map[String,Object]] =>{
 			<tr class="egal">
 			    <td>
-	           	   Schlagwortkette
+	           	   Schlagwortfolge
 	           </td>
 			 	<td class="subject" style="text-align:left;">
 			 	<ol class="componentList">@for(e<-list){
