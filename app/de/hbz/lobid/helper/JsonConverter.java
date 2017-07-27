@@ -139,29 +139,38 @@ public class JsonConverter {
 
 	private void createObject(Map<String, Object> jsonResult, Statement s,
 			Etikett e) {
-		String key = e.name;
-		if (s.getObject() instanceof org.openrdf.model.Literal) {
-			addLiteralToJsonResult(jsonResult, key, s.getObject().stringValue());
-		} else {
-			if (s.getObject() instanceof org.openrdf.model.BNode) {
-				if (isList(s)) {
-					addListToJsonResult(jsonResult, key, ((BNode) s.getObject()).getID());
-				} else {
-					addBlankNodeToJsonResult(jsonResult, key,
-							((BNode) s.getObject()).getID());
-				}
+		try {
+			String key = e.name;
+			if (key == null)
+				throw new NullPointerException(
+						"Misconfiguration! Please provide a name for " + e.getUri()
+								+ " in labels.json");
+			if (s.getObject() instanceof org.openrdf.model.Literal) {
+				addLiteralToJsonResult(jsonResult, key, s.getObject().stringValue());
 			} else {
-				if (s.getPredicate().stringValue().equals(RDF_TYPE)) {
-					try {
-						addLiteralToJsonResult(jsonResult, key,
-								etikette.getEtikett(s.getObject().stringValue()).name);
-					} catch (Exception ex) {
-						logger.info("", ex);
+				if (s.getObject() instanceof org.openrdf.model.BNode) {
+					if (isList(s)) {
+						addListToJsonResult(jsonResult, key,
+								((BNode) s.getObject()).getID());
+					} else {
+						addBlankNodeToJsonResult(jsonResult, key,
+								((BNode) s.getObject()).getID());
 					}
 				} else {
-					addObjectToJsonResult(jsonResult, key, s.getObject().stringValue());
+					if (s.getPredicate().stringValue().equals(RDF_TYPE)) {
+						try {
+							addLiteralToJsonResult(jsonResult, key,
+									etikette.getEtikett(s.getObject().stringValue()).name);
+						} catch (Exception ex) {
+							logger.info("", ex);
+						}
+					} else {
+						addObjectToJsonResult(jsonResult, key, s.getObject().stringValue());
+					}
 				}
 			}
+		} catch (Exception exc) {
+			play.Logger.warn("", exc);
 		}
 	}
 
