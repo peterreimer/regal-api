@@ -173,18 +173,25 @@ public class MyUtils extends MyController {
 
 	private static LocalDate getUpdateTimeStamp(Node node) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		// initialise date
 		String lastUpdate = formatter.format(new Date());
-		try {
-			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("describedby")).iterator().next()).get("modified").toString();
-		} catch (Exception e) {
-			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
-		}
+		// try to set date to created (should work in any case)
 		try {
 			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
 					.get("describedby")).iterator().next()).get("created").toString();
 		} catch (Exception e) {
-			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
+			play.Logger.warn(
+					node.getPid() + " couldn't get created timestamp " + e.getMessage());
+			play.Logger.debug("", e);
+		}
+		// try to set date to modified (overrides created)
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("modified").toString();
+		} catch (Exception e) {
+			play.Logger.info(
+					node.getPid() + " couldn't get modified timestamp " + e.getMessage());
+			play.Logger.debug("", e);
 		}
 		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
