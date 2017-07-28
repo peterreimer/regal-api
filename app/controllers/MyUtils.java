@@ -177,13 +177,13 @@ public class MyUtils extends MyController {
 			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
 					.get("describedby")).iterator().next()).get("modified").toString();
 		} catch (Exception e) {
-			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
+			play.Logger.warn("Couldn't get modified timestamp " + e.getMessage());
 		}
 		try {
 			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
 					.get("describedby")).iterator().next()).get("created").toString();
 		} catch (Exception e) {
-			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
+			play.Logger.warn("Couldn't get created timestamp " + e.getMessage());
 		}
 		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
