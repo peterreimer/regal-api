@@ -179,6 +179,12 @@ public class MyUtils extends MyController {
 		} catch (Exception e) {
 			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
 		}
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("created").toString();
+		} catch (Exception e) {
+			play.Logger.warn("Couldn't get timestamp " + e.getMessage());
+		}
 		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
 
