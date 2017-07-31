@@ -348,9 +348,13 @@ public class JsonMapper {
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
-			Collection<Map<String, Object>> t = getType(rdf);
-			if (t != null && t.size() != 0)
-				rdf.put(type, t);
+			if (!"file".equals(rdf.get("contentType"))) {
+				Collection<Map<String, Object>> t = getType(rdf);
+				if (t != null && t.size() != 0)
+					rdf.put(type, t);
+			} else {
+				rdf.remove(type);
+			}
 			sortCreatorAndContributors(rdf);
 			postProcess(rdf, "institution");
 			postProcess(rdf, "creator");
@@ -479,9 +483,12 @@ public class JsonMapper {
 			Map<String, Object> rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 		Collection<String> types = (Collection<String>) rdf.get(type);
+
 		play.Logger.trace("Found types: " + types);
 		if (types != null) {
 			for (String s : typePrios) {
+				if (s == null)
+					continue;
 				play.Logger.trace("Search for type: " + s);
 				if (types.contains(Globals.profile.getEtikett(s).name)) {
 					Map<String, Object> tmap = new HashMap<>();
