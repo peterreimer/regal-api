@@ -4,9 +4,9 @@
 
 @displayAuthors(id:String,label:String,roleId:String,roleName:String)={
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
-	                       @label</a> <span class="separator">|</span>
+	                       @label
 	                       <a href=@analyseValue(id)  target="_blank">
-	                               <span class="glyphicon glyphicon-link"></span>
+	                               <span class="octicon-link-external"></span>
 	                       </a>
 }
 @analyseValue(v: String)={

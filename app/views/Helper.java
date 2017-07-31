@@ -214,6 +214,7 @@ public class Helper {
 				subject.put("label", name);
 				subject.put("source", source);
 				subject.put("sourceId", sourceId);
+				subject.put("sourceName", getSubjectSource(sourceId, uri));
 				result1.add(subject);
 			}
 		}
