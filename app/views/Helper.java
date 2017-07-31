@@ -169,11 +169,12 @@ public class Helper {
 	}
 
 	public static List<Object> listSubjects(Map<String, Object> h) {
-		List<Object> result = new ArrayList<>();
+		List<Object> result1 = new ArrayList<>();
+		List<Map<String, Object>> result2 = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/subject")) {
 			if (c.has("componentList")) {
-				result.add(getComponentList(c));
+				result1.add(getComponentList(c));
 			} else {
 				String name = c.at("/label").asText();
 				if (name != null && !name.isEmpty()) {
@@ -188,11 +189,17 @@ public class Helper {
 					subject.put("label", name);
 					subject.put("source", source);
 					subject.put("sourceId", sourceId);
-					result.add(subject);
+					subject.put("sourceName", getSubjectSource(sourceId, uri));
+					result2.add(subject);
 				}
 			}
 		}
-		if (result.isEmpty()) {
+
+		result1.addAll(result2.stream()
+				.sorted((a, b) -> a.get("sourceName").toString()
+						.compareTo(b.get("sourceName").toString()))
+				.collect(Collectors.toList()));
+		if (result1.isEmpty()) {
 			for (JsonNode c : hit.at("/subject")) {
 
 				String name = c.at("/prefLabel").asText();
@@ -207,10 +214,10 @@ public class Helper {
 				subject.put("label", name);
 				subject.put("source", source);
 				subject.put("sourceId", sourceId);
-				result.add(subject);
+				result1.add(subject);
 			}
 		}
-		return result;
+		return result1;
 	}
 
 	public static String getSubjectSource(String sourceId, String uri) {

@@ -287,7 +287,7 @@
 
 	@entry match {
 		case map:Map[String,Object] =>{
-			@displaySubject(map.get("id").toString(),map.get("label").toString(),map.get("sourceId").toString(),views.Helper.getSubjectSource(map.get("sourceId").toString(),map.get("id").toString()))
+			@displaySubject(map.get("id").toString(),map.get("label").toString(),map.get("sourceId").toString(),map.get("sourceName").toString())
 		}
 		case list: List[Map[String,Object]] =>{
 			<tr class="egal">
@@ -296,7 +296,7 @@
 	           </td>
 			 	<td class="subject" style="text-align:left;">
 			 	<ol class="componentList">@for(e<-list){
-					   @displayComponentList(e.get("id").toString(),e.get("label").toString(),e.get("sourceId").toString(),views.Helper.getSubjectSource(e.get("sourceId").toString(),e.get("id").toString()))
+					   @displayComponentList(e.get("id").toString(),e.get("label").toString(),e.get("sourceId").toString(),e.get("sourceName").toString())
 					}
 	            </ol>
 	           </td>
