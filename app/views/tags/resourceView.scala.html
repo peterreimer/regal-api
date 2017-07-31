@@ -4,10 +4,6 @@
 
 <table class="table table-striped table-condensed" id="example" class="display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
-	@hit.get("hasData") match{ 
-		case fileMap :Map[String,Object] =>{} 
-		case _ =>{} 
-	}
 	@context match{
 		case list : List[String] => {
 			@for(k<-context){
@@ -43,7 +39,20 @@
 			
 		}
 		case "hasData"=>{
-						
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+					
+						@values match {
+								case d:  Map[String,Object] => {
+									@getFileInfo(views.Helper.getFile(d),namespace)
+								}
+								case _ => {
+									@values
+								}
+						}	
+				}
+			}				
 		}
 		case "publication"=>{
 					@values match {

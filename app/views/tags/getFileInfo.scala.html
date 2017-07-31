@@ -1,0 +1,25 @@
+@* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
+@(hit:Map[String,String],namespace:String)
+
+
+<tr>
+<td style="display:none;">1</td>
+<td class="field-label fileName">Dateiname</td>
+<td class="field-item">@hit.get("fileName")</td>
+</tr>
+<tr class="mimeType">
+<td style="display:none;">2</td>
+<td class="field-label fileFormat">Format</td>
+<td class="field-item">@hit.get("fileFormat")</td>
+</tr>
+<tr>
+<td style="display:none;">3</td>
+<td class="field-label fileSize">Größe</td>
+<td class="field-item">@hit.get("fileSize")</td>
+</tr>
+<tr>
+<td style="display:none;">4</td>
+<td class="field-label checksum">MD5</td>
+<td class="field-item">@hit.get("md5")</td>
+</tr>
+

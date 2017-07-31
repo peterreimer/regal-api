@@ -3,6 +3,7 @@ package views;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -407,4 +409,51 @@ public class Helper {
 		}
 		return "Can't process data!";
 	}
+
+	public static Map<String, String> getFile(Map<String, Object> fileMap) {
+
+		String id = "unknown";
+		String fileName = "unknown";
+		String fileSize = "unknown";
+		String md5 = "unknown";
+		String fileFormat = "unknown";
+		try {
+			JsonNode hit = new ObjectMapper().valueToTree(fileMap);
+			fileName = hit.at("/fileLabel").asText();
+			fileSize = hit.at("/size").asText();
+			fileFormat = hit.at("/format").asText();
+			md5 = hit.at("/checksum/checksumValue").asText();
+			id = hit.at("/@id").asText();
+		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
+			play.Logger.debug("", e);
+		}
+		Map<String, String> result = new TreeMap<>();
+		result.put("fileName", fileName);
+		result.put("fileSize", getPrettySize(fileSize));
+		result.put("md5", md5);
+		result.put("fileFormat", fileFormat);
+		result.put("id", id);
+		return result;
+	}
+
+	private static String getPrettySize(String fileSize) {
+		String hrSize = "";
+		DecimalFormat dec = new DecimalFormat("0.00");
+		Long size = Long.parseLong(fileSize);
+		double k = size / 1024.0;
+		double m = size / 1048576.0;
+		double g = size / 1073741824.0;
+		if (g > 1) {
+			hrSize = dec.format(g).concat("GB");
+		} else if (m > 1) {
+			hrSize = dec.format(m).concat("MB");
+		} else if (k > 1) {
+			hrSize = dec.format(k).concat("KB");
+		} else {
+			hrSize = dec.format(size).concat("B");
+		}
+		return hrSize;
+	}
+
 }
