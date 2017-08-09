@@ -331,7 +331,8 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
 			conf.setName(n.getPid());
 			conf.setId(versionPid);
-			Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(label);
+			Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+					.parse(label + " 12:00:00");
 			conf.setStartDate(startDate);
 
 			// hier auf ein bestehendes WARC in wget-data/ verweisen
