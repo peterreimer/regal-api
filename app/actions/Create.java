@@ -330,6 +330,8 @@ public class Create extends RegalAction {
 			conf = Gatherconf.create(n.getConf());
 			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
 			conf.setName(n.getPid());
+			Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(label);
+			conf.setStartDate(startDate);
 
 			// hier auf ein bestehendes WARC in wget-data/ verweisen
 			String crawlDateTimestamp = label.substring(0, 4) + label.substring(5, 7)
