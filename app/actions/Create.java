@@ -330,6 +330,7 @@ public class Create extends RegalAction {
 			conf = Gatherconf.create(n.getConf());
 			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
 			conf.setName(n.getPid());
+			conf.setId(versionPid);
 			Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(label);
 			conf.setStartDate(startDate);
 
