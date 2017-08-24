@@ -19,6 +19,7 @@ package helper;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,12 +35,16 @@ import org.supercsv.prefs.CsvPreference;
 import com.ibm.icu.util.Calendar;
 
 import models.Gatherconf;
+import play.Logger;
 
 /**
  * @author Jan Schnasse
  *
  */
 public class GatherconfImporter {
+
+	private static final Logger.ALogger WebgatherLogger =
+			Logger.of("webgatherer");
 
 	private static final CsvPreference PIPE_DELIMITED =
 			new CsvPreference.Builder('"', '|', "\n").build();
@@ -58,8 +63,11 @@ public class GatherconfImporter {
 			Map<String, Object> row;
 			int id = firstId;
 			while ((row = mapReader.read(header, processors)) != null) {
+				WebgatherLogger.info("read row " + row.toString());
 				cal.add(Calendar.HOUR, 2);
-				Date startDate = cal.getTime();
+				String startDateStr = (String) row.get("ENTRY_DATE");
+				Date startDate =
+						new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(startDateStr);
 				play.Logger.debug("Add new Webpage with startdate: "
 						+ new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(startDate));
 				Gatherconf conf = new Gatherconf();
@@ -103,6 +111,10 @@ public class GatherconfImporter {
 			return result;
 		} catch (IOException e) {
 			throw new HttpArchiveException(500, e);
+		} catch (ParseException pe) {
+			WebgatherLogger.warn(
+					"Parsing of Gatherconf list failed. Perhaps a wrong date format.");
+			throw new RuntimeException(pe);
 		}
 	}
 
@@ -133,7 +145,7 @@ public class GatherconfImporter {
 						new Optional(), // EXTENDED_TEXT
 						new Optional(), // IGNORE_ROBOTS
 						new Optional() // DEACT_MSG
-		}; // EMPTY
+				}; // EMPTY
 		return processors;
 	}
 }
