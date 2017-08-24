@@ -33,6 +33,7 @@ case _ =>{ }
 }
 
 @addFileView(fileMap:Map[String,Object])={
+
 @fileMap.get("hasData") match{ 
 		case hasData : Map[String,Object] =>{
 		
@@ -42,7 +43,7 @@ case _ =>{ }
 							<a href="/resource/@fileMap.get("@id")/data"><img
 								src="/public/images/download.png" width="40pt"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
-								<div class="dc:label">@hasData.get("fileLabel")</div>
+								<div class="dc:label">@views.Helper.getTitle(fileMap)</div>
 								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							</a>
