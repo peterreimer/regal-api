@@ -47,8 +47,13 @@ case _ =>{ }
 								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							</a>
+						  
 						</td>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
 					</tr>
+					
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
@@ -80,6 +85,7 @@ case _ =>{ }
 								<a href="/resource/@fileMap.get("@id")">@fileMap.get("@id")</a>
 							</div></td>
 					</tr>
+					
 					</table>
 				</div>
 		
@@ -103,8 +109,12 @@ case _ =>{ }
 								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							</a>
+						  
 						</td>
-					</tr>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
+				 	</tr>
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
@@ -153,7 +163,11 @@ case _ =>{ }
 								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 						   </a>
+						  
 						</td>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
 					</tr>
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
@@ -181,6 +195,7 @@ case _ =>{ }
 	} 
 } 
 @addPartView(fileMap:Map[String,Object])={
+
 				<table>
 					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">					
@@ -193,9 +208,13 @@ case _ =>{ }
 								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 						   </a>
+						  
 						</td>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
 					</tr>
-				</table>
+				</table>		
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
 					<tr class="publishSchemeSummary">
@@ -218,4 +237,8 @@ case _ =>{ }
 				</div>
 			
 } 
+
+@addLastModified(lm:Map[String,String])={
+<div style="text-align:right;"><a href=/resource/@lm.get("id")>@lm.get("title")</a></div>
+}
 

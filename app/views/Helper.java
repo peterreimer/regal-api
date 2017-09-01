@@ -465,4 +465,12 @@ public class Helper {
 		return hrSize;
 	}
 
+	public static Map<String, String> getLastModified(String pid) {
+		Read read = new Read();
+		Map<String, String> result = new HashMap<>();
+		Node n = read.getLastModifiedChild(read.readNode(pid));
+		result.put("id", n.getPid());
+		result.put("title", getTitle(n.getLd2()));
+		return result;
+	}
 }
