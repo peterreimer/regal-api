@@ -1,0 +1,45 @@
+{
+  "@context" : "http://lobid.org/context/lobid-resources.json",
+  "bibliographicCitation" : [ "Rheine gestern, heute, morgen. - 11 (1983), S. 26-38 : Abb." ],
+  "collectedBy" : [ {
+    "id" : "http://lobid.org/resources/NWBib"
+  } ],
+  "containedIn" : [ {
+    "id" : "http://lobid.org/resources/HT003759287#!"
+  } ],
+  "contribution" : [ {
+    "agent" : [ {
+      "id" : "http://d-nb.info/gnd/105745944",
+      "label" : "Schmidt, Eckhard",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  } ],
+  "coverage" : [ "Rheine" ],
+  "describedby" : [ {
+    "dateCreated" : "19960814",
+    "dateModified" : "19960814",
+    "id" : "http://lobid.org/resources/BT000040377"
+  } ],
+  "hbzId" : [ "BT000040377" ],
+  "id" : "http://lobid.org/resources/BT000040377#!",
+  "isPartOf" : [ {
+    "id" : "http://lobid.org/resources/HT003759287#!"
+  } ],
+  "isPrimaryTopicOf" : [ {
+    "id" : "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3DBT000040377"
+  } ],
+  "medium" : [ {
+    "id" : "http://rdvocab.info/termList/RDAproductionMethod/1010",
+    "label" : "Print"
+  } ],
+  "nwbibsubject" : [ {
+    "id" : "http://purl.org/lobid/nwbib#s584060",
+    "label" : "Tierschutz"
+  } ],
+  "type" : [ "BibliographicResource", "Article" ]
+}

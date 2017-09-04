@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import models.Globals;
 
 /**
@@ -44,7 +47,9 @@ public class Title {
 		if (authorList == null || authorList.isEmpty()) {
 			authorList = getContributorList(hit);
 			if (authorList == null || authorList.isEmpty()) {
+
 				return "";
+
 			}
 		}
 		Collection<String> authorNames = new ArrayList<String>();

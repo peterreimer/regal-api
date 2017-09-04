@@ -129,9 +129,23 @@ public class JsonMapper {
 	/**
 	 * @param node the node will be mapped to json ld in accordance to the profile
 	 */
-	public JsonMapper(Node node) {
-		jsonConverter = new JsonConverter(profile);
-		this.node = node;
+	public JsonMapper(final Node n) {
+		try {
+			jsonConverter = new JsonConverter(profile);
+			this.node = n;
+			if (node == null)
+				throw new NullPointerException(
+						"JsonMapper can not work on node with value NULL!");
+			if (node.getMetadata() == null)
+				throw new NullPointerException(
+						node.getPid() + " metadata stream is NULL!");
+			if (node.getMetadata2() == null)
+				throw new NullPointerException(
+						node.getPid() + " metadata2 stream is NULL!");
+		} catch (Exception e) {
+			play.Logger.warn("", e.getMessage());
+			play.Logger.debug("", e);
+		}
 	}
 
 	/**
@@ -249,9 +263,6 @@ public class JsonMapper {
 			}
 			rdf.put(hasData, hasDataMap);
 		}
-
-		// play.Logger.debug("CONF: " + node.getConf());
-
 		rdf.put("@context", profile.getContext().get("@context"));
 		postprocessing(rdf);
 		return rdf;
@@ -273,7 +284,9 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.debug(node.getPid() + " has no descriptive Metadata!");
+			play.Logger
+					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
+			play.Logger.debug("", e);
 		}
 		return null;
 	}
@@ -286,9 +299,11 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.debug(node.getPid() + " has no descriptive Metadata2!");
+			play.Logger.warn(node.getPid()
+					+ " has no descriptive Metadata2! Try to return metadata instead.");
+			play.Logger.debug("", e);
 		}
-		return null;
+		return getDescriptiveMetadata();
 	}
 
 	/**
@@ -333,9 +348,13 @@ public class JsonMapper {
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
-			Collection<Map<String, Object>> t = getType(rdf);
-			if (t != null && t.size() != 0)
-				rdf.put(type, t);
+			if (!"file".equals(rdf.get("contentType"))) {
+				Collection<Map<String, Object>> t = getType(rdf);
+				if (t != null && t.size() != 0)
+					rdf.put(type, t);
+			} else {
+				rdf.remove(type);
+			}
 			sortCreatorAndContributors(rdf);
 			postProcess(rdf, "institution");
 			postProcess(rdf, "creator");
@@ -363,6 +382,7 @@ public class JsonMapper {
 			postProcess(rdf, "recordingCoords");
 			postProcess(rdf, "collectionOne");
 			postProcess(rdf, "containedIn");
+			postProcess(rdf, "medium");
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -373,15 +393,15 @@ public class JsonMapper {
 			Collection<Map<String, Object>> roles =
 					(Collection<Map<String, Object>>) m.get(role);
 			if (roles != null) {
-				play.Logger.debug("Found roles: " + roles);
+				play.Logger.trace("Found roles: " + roles);
 				for (Map<String, Object> r : roles) {
 					String prefLabel = findLabel(r);
-					play.Logger.debug("Found label " + prefLabel + " for role " + r);
+					play.Logger.trace("Found label " + prefLabel + " for role " + r);
 					r.put(PREF_LABEL, prefLabel);
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.debug("", e);
+			play.Logger.debug("Problem processing key " + role, e);
 		}
 	}
 
@@ -390,13 +410,12 @@ public class JsonMapper {
 			String hbzId = ((Collection<String>) rdf.get("hbzId")).iterator().next();
 			Collection<Map<String, Object>> catalogLink = new ArrayList<>();
 			Map<String, Object> cl = new HashMap<>();
-			cl.put(ID2,
-					"http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
+			cl.put(ID2, "https://lobid.org/resources/" + hbzId);
 			cl.put(PREF_LABEL, hbzId);
 			catalogLink.add(cl);
 			rdf.put("catalogLink", catalogLink);
 		} catch (Exception e) {
-			play.Logger.debug("No catalog link available!");
+			play.Logger.trace("No catalog link available!");
 		}
 	}
 
@@ -464,10 +483,13 @@ public class JsonMapper {
 			Map<String, Object> rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 		Collection<String> types = (Collection<String>) rdf.get(type);
-		play.Logger.debug("Found types: " + types);
+
+		play.Logger.trace("Found types: " + types);
 		if (types != null) {
 			for (String s : typePrios) {
-				play.Logger.debug("Search for type: " + s);
+				if (s == null)
+					continue;
+				play.Logger.trace("Search for type: " + s);
 				if (types.contains(Globals.profile.getEtikett(s).name)) {
 					Map<String, Object> tmap = new HashMap<>();
 					tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
@@ -537,10 +559,10 @@ public class JsonMapper {
 		}
 		if (m.get("creator") instanceof List) {
 			Collection<String> creators = (Collection<String>) m.get("creator");
-			play.Logger.debug("" + creators.getClass());
+			play.Logger.trace("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
-				play.Logger.debug(creator + " - " + currentId + " - " + authorsId);
+				play.Logger.trace(creator + " - " + currentId + " - " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
 					Map<String, Object> result = new HashMap<>();
 					result.put(ID2, currentId);
@@ -553,7 +575,7 @@ public class JsonMapper {
 			if (creators != null) {
 				for (Map<String, Object> creator : creators) {
 					String currentId = (String) creator.get(ID2);
-					play.Logger.debug(creator + " " + currentId + " " + authorsId);
+					play.Logger.trace(creator + " " + currentId + " " + authorsId);
 					if (authorsId.compareTo(currentId) == 0) {
 						return creator;
 					}
@@ -567,10 +589,10 @@ public class JsonMapper {
 			String authorsId) {
 		if (m.get("contributor") instanceof List) {
 			Collection<String> creators = (Collection<String>) m.get("contributor");
-			play.Logger.debug("" + creators.getClass());
+			play.Logger.trace("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
-				play.Logger.debug(creator + " " + currentId + " " + authorsId);
+				play.Logger.trace(creator + " " + currentId + " " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
 					Map<String, Object> result = new HashMap<>();
 					result.put(ID2, currentId);
@@ -618,6 +640,8 @@ public class JsonMapper {
 		} else if (map.containsKey("alternateName_en")) {
 			return (String) map.get("alternateName_en");
 		}
+		if (map.containsKey("label"))
+			return (String) map.get("label");
 
 		if (map.containsKey(PREF_LABEL))
 			return (String) map.get(PREF_LABEL);

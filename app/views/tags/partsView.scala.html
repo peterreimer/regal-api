@@ -6,7 +6,8 @@
 @value match{ 
 
 case fileMap : Map[String,Object] =>{
-
+	
+			<div class="fileView file" id=@fileMap.get( "@id") >
 	@fileMap.get("contentType") match{
 				case "version" => {
 					@addVersionView(fileMap)
@@ -25,38 +26,45 @@ case fileMap : Map[String,Object] =>{
 				}
 				case _ =>{ } 
 			}
+				</div>
+			
 }
 case _ =>{ } 
 }
 
 @addFileView(fileMap:Map[String,Object])={
+
 @fileMap.get("hasData") match{ 
 		case hasData : Map[String,Object] =>{
-			<p>
-			<div class="fileView file" id=@fileMap.get( "@id")>
+		
 				<table>
-					<tr class="accessScheme">
+					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">
 							<a href="/resource/@fileMap.get("@id")/data"><img
 								src="/public/images/download.png" width="40pt"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
-								<div class="dc:label">@hasData.get("fileLabel")</div>
-								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<div class="dc:label">@views.Helper.getTitle(fileMap)</div>
+								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							</a>
+						  
 						</td>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
 					</tr>
+					
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
-					<tr class="publishScheme">
+					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr>
@@ -77,10 +85,10 @@ case _ =>{ }
 								<a href="/resource/@fileMap.get("@id")">@fileMap.get("@id")</a>
 							</div></td>
 					</tr>
+					
 					</table>
 				</div>
-			</div>
-			</p>
+		
 		} case _ =>{
 			@addPartView(fileMap)
 		} 
@@ -92,30 +100,32 @@ case _ =>{ }
 	
 		case hasData : Map[String,Object] =>{
 		
-			<p>
-			<div class="fileView version" id=@fileMap.get( "@id")>
 				<table>
-					<tr class="accessScheme">
+					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">
 							<a href="@Helper.getWaybackLink(fileMap.get("@id").toString())" target="_blank" ><img
 								src="/public/images/download.png" width="40pt"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
-								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							</a>
+						  
 						</td>
-					</tr>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
+				 	</tr>
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
-					<tr class="publishScheme">
+					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr>
@@ -138,13 +148,11 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+	
 		} case _ =>{
-		<p>
-			<div class="fileView version" id=@fileMap.get( "@id")>
+
 				<table>
-					<tr class="accessScheme">
+					<tr class="accessSchemeSummary">
 						<td class="downloadIcon" rowspan="6">					
 							<a href="/resource/@fileMap.get("@id")"><img
 								src="/public/images/folder.png" width="40pt"></img></a>
@@ -152,22 +160,26 @@ case _ =>{ }
 								<div class="dc:label">
 								@views.Helper.getTitle(fileMap)
 								</div>
-								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 						   </a>
+						  
 						</td>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
 					</tr>
 				</table>
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
-					<tr class="publishScheme">
+					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr class="identifier">
@@ -178,16 +190,14 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+	
 		} 
 	} 
 } 
 @addPartView(fileMap:Map[String,Object])={
-		<p>
-			<div class="fileView part" id=@fileMap.get( "@id")>
+
 				<table>
-					<tr class="accessScheme">
+					<tr class="partSummary">
 						<td class="downloadIcon" rowspan="6">					
 							<a href="/resource/@fileMap.get("@id")"><img
 								src="/public/images/folder.png" width="40pt"></img></a>
@@ -195,22 +205,26 @@ case _ =>{ }
 								<div class="dc:label">
 								@views.Helper.getTitle(fileMap)
 								</div>
-								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 						   </a>
+						  
 						</td>
+						<td>
+				 			@addLastModified(views.Helper.getLastModified(fileMap.get("@id").toString()))	
+				 		</td>
 					</tr>
-				</table>
+				</table>		
 				<div class="fileDetails" style="display:none;visibility:hide;">
 				<table>
-					<tr class="publishScheme">
+					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr class="identifier">
@@ -221,7 +235,10 @@ case _ =>{ }
 					</tr>
 					</table>
 				</div>
-			</div>
-			</p>
+			
 } 
+
+@addLastModified(lm:Map[String,String])={
+<div style="text-align:right;"><a href=/resource/@lm.get("id")>@lm.get("title")</a></div>
+}
 

@@ -1,0 +1,82 @@
+{
+  "@context" : "http://lobid.org/context/lobid-resources.json",
+  "bibliographicCitation" : [ "Medien und Terrorismus; Christian Schicha ... (Hg.); 2002; S. 80 - 93" ],
+  "containedIn" : [ {
+    "id" : "http://lobid.org/resources/HT013384949#!"
+  } ],
+  "contribution" : [ {
+    "agent" : [ {
+      "id" : "http://d-nb.info/gnd/186186193",
+      "label" : "Kim, Richard",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  }, {
+    "agent" : [ {
+      "id" : "http://d-nb.info/gnd/122021878",
+      "label" : "Werthes, Sascha",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  }, {
+    "agent" : [ {
+      "id" : "http://d-nb.info/gnd/11075851X",
+      "label" : "Conrad, Christoph",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  } ],
+  "contributorOrder" : [ "http://d-nb.info/gnd/122021878 | http://d-nb.info/gnd/186186193 | http://d-nb.info/gnd/11075851X" ],
+  "describedby" : [ {
+    "dateCreated" : "20080125",
+    "id" : "http://lobid.org/resources/HT015414894"
+  } ],
+  "exemplar" : [ {
+    "describedby" : [ {
+      "id" : "http://lobid.org/items/HT015414894:DE-6:"
+    } ],
+    "exemplarOf" : "http://lobid.org/resources/HT015414894#!",
+    "id" : "http://lobid.org/items/HT015414894:DE-6:#!",
+    "owner" : [ {
+      "id" : "http://lobid.org/organisation/DE-6"
+    } ],
+    "type" : [ "Item" ]
+  } ],
+  "hbzId" : [ "HT015414894" ],
+  "id" : "http://lobid.org/resources/HT015414894#!",
+  "isPartOf" : [ {
+    "id" : "http://lobid.org/resources/HT013384949#!"
+  } ],
+  "isPrimaryTopicOf" : [ {
+    "id" : "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3DHT015414894"
+  } ],
+  "issued" : [ "2002" ],
+  "language" : [ {
+    "id" : "http://id.loc.gov/vocabulary/iso639-2/deu"
+  } ],
+  "medium" : [ {
+    "id" : "http://rdvocab.info/termList/RDAproductionMethod/1010",
+    "label" : "Print"
+  } ],
+  "otherTitleInformation" : [ "Internationale Krisenkommunikation - eine Herausforderung im 21. Jahrhundert" ],
+  "placeOfPublication" : [ "Münster [u.a.]" ],
+  "publicationStatement" : [ "2002; Münster [u.a.]" ],
+  "sameAs" : [ {
+    "id" : "http://hub.culturegraph.org/resource/HBZ-HT015414894"
+  } ],
+  "statementOfResponsibility" : [ "Sascha Werthes ; Richard Kim ; Christoph Conrad" ],
+  "title" : [ "Die Terrorkrise als Medienereignis?" ],
+  "type" : [ "BibliographicResource", "Article" ]
+}
