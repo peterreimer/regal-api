@@ -144,7 +144,8 @@ public class MyUtils extends MyController {
 			if (alephid != null && !alephid.isEmpty()) {
 				String result = modify.lobidify(node, alephid);
 				String result2 = modify.lobidify2(node, alephid);
-				return JsonMessage(new Message(result + "\n" + result2));
+				return JsonMessage(new Message("Load " + alephid + " to " + pid + ".\n"
+						+ result + "\n" + result2));
 			} else {
 				String result = modify.lobidify(node);
 				return JsonMessage(new Message(result));
@@ -192,7 +193,6 @@ public class MyUtils extends MyController {
 					node.getPid() + " couldn't get modified timestamp " + e.getMessage());
 			play.Logger.debug("", e);
 		}
-
 		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
 

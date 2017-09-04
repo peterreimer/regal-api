@@ -60,7 +60,6 @@ libraryDependencies ++= Seq(
   "javax.xml.bind" % "jaxb-api" % "2.2.6",
   "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2",
   "net.sf.supercsv" %"super-csv" %"2.3.1",
-  "com.github.hbz" %"lobid-rdf-to-json" % "ec661046f89dd0ffab8d4ac43abcdba268083b1b",
   "com.fasterxml.jackson.core" %"jackson-core" %"2.6.3",
   "com.fasterxml" %"jackson-module-json-org" %"0.9.1",
   "com.fasterxml.jackson.core" %"jackson-databind" %"2.6.3",
@@ -73,7 +72,7 @@ val root = (project in file(".")).enablePlugins(PlayJava)
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "http://repo1.maven.org/maven2","edoweb releases" at "http://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "http://maven.ontotext.com/content/repositories/aduna/" ,
-"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty", "jitpack" at "https://jitpack.io"
+"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty"
 )
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")

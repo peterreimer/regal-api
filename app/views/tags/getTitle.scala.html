@@ -1,26 +1,59 @@
 @* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
 @import views.Title 
-@(hit:Map[String,Object])
+@(hit:Map[String,Object],namespace:String)
+
+@displayAuthors(id:String,label:String,roleId:String,roleName:String)={
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @label
+	                       <a href=@analyseValue(id)  target="_blank">
+	                               <span class="octicon-link-external"></span>
+	                       </a>
+}
+@analyseValue(v: String)={
+	@v match {
+		case a if v.startsWith("http") => {
+			@v
+		}
+		case a if v.startsWith(namespace) => { 
+			/resource/@v
+		}
+		case _ => {
+			@v
+		}
+	}
+}
 
 <div class="row">
 <div class="title">
 			<div class="col-md-8">
 					<div class="titlePre"></div>
-					<div class="titleMain">
-						<h1>
-							<a href=/resource/@hit.get( "@id")>@Html(Title.getTitle(hit))</a>
-						</h1>
-					</div>
-			
-					<div class="titlePost">@Html(Title.getAuthorNames(hit))
+					<h1 class="title" id="page-title">
+					<span class="titleMain">
+							@Html(Title.getTitle(hit))
+					</span>
+					@if(hit.contains("P60493")){
+						<span class="otherTitle">
+						: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
+						</span>
+						}
+					</h1>
+					<h2 id="page-title-suffix" class="titlePost title-suffix">
+						@if(hit.contains("contribution")){
+							<ol id="author-title-list">
+								@for(c <-views.Helper.listAuthors(hit)){
+									<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
+								}
+							</ol>
+						
+						}else{
+							@Html(Title.getAuthorNames(hit))
+						}
+						
 						@Html(Title.getIssued(hit))
-					</div>
+					</h2>
+					
 			</div>
-			<div class="col-md-4" >
-					<div class="thumby">
-						<a href=@views.Helper.getDataLink(hit)><img src="/public/images/download.png" style="padding-top: 12px; margin-top: 12px;"></img></a>
-					</div>
-			</div>	
+			
 		</div>
 
 

@@ -36,7 +36,7 @@
 	<div  class="col-md-11">
 	
 			@for( hit <- hits){
-			@tags.getTitle(hit)
+			@tags.getTitle(hit,namespace)
 			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
 			}
 		

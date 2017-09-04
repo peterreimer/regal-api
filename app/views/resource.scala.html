@@ -9,7 +9,7 @@
 
 		@for( hit <- hits){
 			<div class="container">
-			@tags.getTitle(hit)
+			@tags.getTitle(hit,namespace)
 			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
 			</div>
 

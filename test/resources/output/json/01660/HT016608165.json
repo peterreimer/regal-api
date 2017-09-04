@@ -1,0 +1,94 @@
+{
+  "@context" : "http://lobid.org/context/lobid-resources.json",
+  "bibliographicCitation" : [ "Mélodies; Claude Debussy; 1980" ],
+  "containedIn" : [ {
+    "id" : "http://lobid.org/resources/HT016607985#!"
+  } ],
+  "contribution" : [ {
+    "agent" : [ {
+      "altLabel" : [ "Debussy, Claude-Achille", "Debussy, Achille-Claude", "Debussy, ...", "Debussy, Claude Achille", "Debussy, C. A.", "Debussy, Claudio", "Debussy, Achille", "Debussy, C.", "Debjussi, Klod", "Debussy, Claude A.", "Debussy, Claude Achill" ],
+      "id" : "http://d-nb.info/gnd/118524186",
+      "label" : "Debussy, Claude",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  }, {
+    "agent" : [ {
+      "id" : "http://d-nb.info/gnd/130290637",
+      "label" : "Mesplé, Mady",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  }, {
+    "agent" : [ {
+      "id" : "http://d-nb.info/gnd/124362869",
+      "label" : "Baldwin, Dalton",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/cre",
+      "label" : "Creator"
+    } ],
+    "type" : [ "Contribution" ]
+  }, {
+    "agent" : [ {
+      "altLabel" : [ "Follain de Banville, Théodore", "Banville, Théodore Follain de", "Banville, Teodoro de", "Banville, Th. de", "Banville, Théodore" ],
+      "id" : "http://d-nb.info/gnd/119080389",
+      "label" : "Banville, Théodore de",
+      "type" : [ "Person" ]
+    } ],
+    "role" : [ {
+      "id" : "http://id.loc.gov/vocabulary/relators/ctb",
+      "label" : "Mitwirkende"
+    } ],
+    "type" : [ "Contribution" ]
+  } ],
+  "contributorOrder" : [ "http://d-nb.info/gnd/118524186 | http://d-nb.info/gnd/130290637 | http://d-nb.info/gnd/124362869 | http://d-nb.info/gnd/119080389" ],
+  "describedby" : [ {
+    "dateCreated" : "20101130",
+    "id" : "http://lobid.org/resources/HT016608165"
+  } ],
+  "exemplar" : [ {
+    "describedby" : [ {
+      "id" : "http://lobid.org/items/HT016608165:DE-575:"
+    } ],
+    "exemplarOf" : "http://lobid.org/resources/HT016608165#!",
+    "id" : "http://lobid.org/items/HT016608165:DE-575:#!",
+    "owner" : [ {
+      "id" : "http://lobid.org/organisation/DE-575"
+    } ],
+    "type" : [ "Item" ]
+  } ],
+  "hbzId" : [ "HT016608165" ],
+  "id" : "http://lobid.org/resources/HT016608165#!",
+  "isPartOf" : [ {
+    "id" : "http://lobid.org/resources/HT016607985#!"
+  } ],
+  "isPrimaryTopicOf" : [ {
+    "id" : "http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3DHT016608165"
+  } ],
+  "issued" : [ "1980" ],
+  "language" : [ {
+    "id" : "http://id.loc.gov/vocabulary/iso639-2/fra"
+  } ],
+  "medium" : [ {
+    "id" : "http://purl.org/ontology/bibo/AudioDocument"
+  } ],
+  "otherTitleInformation" : [ "[L 15]" ],
+  "placeOfPublication" : [ "[S.l.]" ],
+  "publicationStatement" : [ "1980; [S.l.]" ],
+  "sameAs" : [ {
+    "id" : "http://hub.culturegraph.org/resource/HBZ-HT016608165"
+  } ],
+  "statementOfResponsibility" : [ "Claude Debussy. [Text:] (Théodore de Banville)" ],
+  "title" : [ "Pierrot" ],
+  "type" : [ "BibliographicResource", "Article" ]
+}

@@ -75,6 +75,7 @@ import views.html.resource;
 import views.html.search;
 import views.html.status;
 import views.html.frlResource;
+import views.html.tags.getTitle;
 
 /**
  * 
@@ -179,10 +180,17 @@ public class Resource extends MyController {
 		if (request().accepts("text/html")) {
 			Node node = readNodeOrNull(pid);
 			List<Map<String, Object>> result = new ArrayList<>();
-			Map<String, Object> item = read.getMapWithParts(node);
-			result.add(item);
-			return Promise
-					.promise(() -> ok(resource.render(result, Globals.namespaces[0])));
+			if ("frl".equals(design)) {
+				Map<String, Object> item = read.getMapWithParts2(node);
+				result.add(item);
+				return Promise
+						.promise(() -> ok(frlResource.render(item, Globals.namespaces[0])));
+			} else {
+				Map<String, Object> item = read.getMapWithParts(node);
+				result.add(item);
+				return Promise
+						.promise(() -> ok(resource.render(result, Globals.namespaces[0])));
+			}
 		}
 		if (request().accepts("application/rdf+xml"))
 			return asRdf(pid);
@@ -608,7 +616,7 @@ public class Resource extends MyController {
 				}
 				if (request().accepts("text/html")) {
 					if ("frl".equals(design)) {
-						return ok(frlResource.render(read.getMapWithParts(node),
+						return ok(frlResource.render(read.getMapWithParts2(node),
 								Globals.namespaces[0]));
 					} else {
 						List<Map<String, Object>> result = new ArrayList();
@@ -710,7 +718,7 @@ public class Resource extends MyController {
 				nodes.add(node);
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				if ("frl".equals(design)) {
-					return ok(frlResource.render(node.getLd(), Globals.namespaces[0]));
+					return ok(frlResource.render(node.getLd2(), Globals.namespaces[0]));
 				}
 				return ok(
 						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
@@ -1106,6 +1114,18 @@ public class Resource extends MyController {
 						RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
 				// rdf = java.net.URLEncoder.encode(rdf, "utf-8");
 				return ok(edit.render("HELLO", "ntriples", pid, pid + ".rdf", rdf));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
+
+	@ApiOperation(produces = "text/html", nickname = "listTitle", value = "listTitle", notes = "get an extended title", response = String.class, httpMethod = "GET")
+	public static Promise<Result> listTitle(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, userId -> {
+			try {
+				Node node = readNodeOrNull(pid);
+				return ok(getTitle.render(node.getLd2(), Globals.namespaces[0]));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}
