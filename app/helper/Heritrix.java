@@ -275,7 +275,7 @@ public class Heritrix {
 		WebgatherLogger
 				.debug("Found crawl directories: " + java.util.Arrays.toString(files));
 		Arrays.sort(files, Collections.reverseOrder());
-		File latest = files[files.length - 1];
+		File latest = files[0];
 		return latest;
 	}
 
