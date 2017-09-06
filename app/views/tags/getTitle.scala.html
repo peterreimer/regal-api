@@ -31,11 +31,16 @@
 					<span class="titleMain">
 							@Html(Title.getTitle(hit))
 					</span>
+					@if(hit.contains("corporateBodyForTitle")){
+					    <span class="corporateBodyForTitle">
+						/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
+						</span>
+					 }
 					@if(hit.contains("P60493")){
 						<span class="otherTitle">
 						: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
 						</span>
-						}
+					 }
 					</h1>
 					<h2 id="page-title-suffix" class="titlePost title-suffix">
 						@if(hit.contains("contribution")){
