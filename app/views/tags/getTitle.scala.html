@@ -3,11 +3,17 @@
 @(hit:Map[String,Object],namespace:String)
 
 @displayAuthors(id:String,label:String,roleId:String,roleName:String)={
+						@if(id != null && !id.isEmpty()){
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label
 	                       <a href=@analyseValue(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
+	                       }else{
+	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       	@label
+	                       	</a>
+	                       }
 }
 @analyseValue(v: String)={
 	@v match {
