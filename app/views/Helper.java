@@ -381,7 +381,19 @@ public class Helper {
 			}
 			String numbering = hit.at("/0/numbering").asText();
 			if (numbering != null && !numbering.isEmpty()) {
-				return "<a href=\"" + uri + "\">" + label + "</a>, Band " + numbering;
+
+				String prefix = models.Globals.rechercheUrlPrefix.substring(0,
+						models.Globals.rechercheUrlPrefix.length() - 1);
+				String internLink = prefix + URLEncoder
+						.encode("\"" + uri + models.Globals.rechercheUrlSuffix, "utf-8");
+				String link = String.format(
+						"<a title=\"Ähnliche Objekte suchen\" href=\"%s\"> %s</a>",
+						internLink, label);
+				String externLink = String.format(
+						"<a href=\"%s\"><span class=\"glyphicon glyphicon-link\"></span></a>, Band %s",
+						uri, numbering);
+
+				return link + " " + externLink;
 			}
 			return label;
 		} catch (Exception e) {
