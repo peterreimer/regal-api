@@ -33,7 +33,8 @@ import java.util.stream.Collectors;
 
 import org.openrdf.rio.RDFFormat;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
@@ -388,6 +389,18 @@ public class JsonMapper {
 		}
 	}
 
+	private static boolean mediumArrayContains(Map<String, Object> rdf,
+			String key) {
+		boolean result = false;
+		JsonNode n = new ObjectMapper().valueToTree(rdf);
+		JsonNode mediumArray = n.at("/medium");
+		for (JsonNode item : mediumArray) {
+			if (key.equals(item.at("/@id").asText("no Value found")))
+				result = true;
+		}
+		return result;
+	}
+
 	private static void postProcess(Map<String, Object> m, String role) {
 		try {
 			Collection<Map<String, Object>> roles =
@@ -482,8 +495,19 @@ public class JsonMapper {
 	private static Collection<Map<String, Object>> getType(
 			Map<String, Object> rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
-		Collection<String> types = (Collection<String>) rdf.get(type);
 
+		// Special case medium is video - override type
+		if (mediumArrayContains(rdf,
+				"http://rdaregistry.info/termList/RDAMediaType/1008")) {
+			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
+			Map<String, Object> tmap = new HashMap<>();
+			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
+			tmap.put(ID2, s);
+			result.add(tmap);
+			rdf.put(type, result);
+			return result;
+		}
+		Collection<String> types = (Collection<String>) rdf.get(type);
 		play.Logger.trace("Found types: " + types);
 		if (types != null) {
 			for (String s : typePrios) {
