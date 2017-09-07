@@ -909,6 +909,7 @@ public class Node implements java.io.Serializable {
 		List<Link> sorted = new ArrayList<Link>();
 		if (nodeIds == null || nodeIds.isEmpty())
 			return sorted;
+		nodeIds.sort((a, b) -> a.getObject().compareTo(b.getObject()));
 		for (String i : seq) {
 			int j = -1;
 			if ((j = nodeIds.stream().map((Link l) -> l.getObject())
