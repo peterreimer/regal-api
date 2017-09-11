@@ -498,7 +498,9 @@ public class JsonMapper {
 
 		// Special case medium is video - override type
 		if (mediumArrayContains(rdf,
-				"http://rdaregistry.info/termList/RDAMediaType/1008")) {
+				"http://rdaregistry.info/termList/RDAMediaType/1008")
+				|| mediumArrayContains(rdf,
+						"http://rdvocab.info/termList/RDACarrierType/1050")) {
 			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
 			Map<String, Object> tmap = new HashMap<>();
 			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
