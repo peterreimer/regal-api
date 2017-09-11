@@ -266,6 +266,7 @@ public class JsonMapper {
 		}
 		rdf.put("@context", profile.getContext().get("@context"));
 		postprocessing(rdf);
+		rdf.remove("note");
 		return rdf;
 	}
 
@@ -356,7 +357,7 @@ public class JsonMapper {
 			} else {
 				rdf.remove(type);
 			}
-			rdf.remove("note");
+
 			sortCreatorAndContributors(rdf);
 			postProcess(rdf, "institution");
 			postProcess(rdf, "creator");
