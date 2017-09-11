@@ -356,6 +356,7 @@ public class JsonMapper {
 			} else {
 				rdf.remove(type);
 			}
+			rdf.remove("note");
 			sortCreatorAndContributors(rdf);
 			postProcess(rdf, "institution");
 			postProcess(rdf, "creator");
