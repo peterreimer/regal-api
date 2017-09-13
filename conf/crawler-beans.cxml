@@ -118,7 +118,8 @@ ${URL}
           <value>
             ${URL}
             ${URL_NO_WWW}
-            ${SURT_DOMAIN_STR}
+            ${URL_SURT_FORM}
+            ${DOMAINS_SURT_FORM}
           </value>
          </property> 
         </bean>

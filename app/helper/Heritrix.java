@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -142,14 +143,16 @@ public class Heritrix {
 			content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
 			content = content.replaceAll("\\$\\{URL_NO_WWW\\}", "http://"
 					+ conf.getUrl().replaceAll("^http://", "").replaceAll("^www\\.", ""));
-			String urlRaw = conf.getUrl().replaceAll("^http://", "")
-					.replaceAll("^www\\.", "").replaceAll("/$", "");
-			String[] domains = urlRaw.split("\\.");
-			String surtDomainStr = "+http://(";
-			for (int i = domains.length - 1; i >= 0; i--) {
-				surtDomainStr += domains[i] + ",";
+			content = content.replaceAll("\\$\\{URL_SURT_FORM\\}",
+					urlSurtForm(conf.getUrl()));
+			ArrayList<String> domains = conf.getDomains();
+			String domainsSurtForm = "";
+			for (int i = 0; i < domains.size(); i++) {
+				String domain = domains.get(i);
+				domainsSurtForm += urlSurtForm(domain) + "\n";
 			}
-			content = content.replaceAll("\\$\\{SURT_DOMAIN_STR\\}", surtDomainStr);
+			content =
+					content.replaceAll("\\$\\{DOMAINS_SURT_FORM\\}", domainsSurtForm);
 
 			// WebgatherLogger.debug("Print-----\n" + content + "\n to \n" +
 			// dir.getAbsolutePath() + "/crawler-beans.cxml");
@@ -161,6 +164,24 @@ public class Heritrix {
 
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Converts an URL to its SURT form, cf.
+	 * http://crawler.archive.org/articles/user_manual/glossary.html#surt
+	 * 
+	 * @param url the URL/URI to be converted
+	 * @return the SURT form of the url
+	 */
+	private static String urlSurtForm(String url) {
+		String urlRaw = url.replaceAll("^http://", "").replaceAll("^www\\.", "")
+				.replaceAll("/$", "");
+		String[] urlParts = urlRaw.split("\\.");
+		String urlSurtForm = "+http://(";
+		for (int i = urlParts.length - 1; i >= 0; i--) {
+			urlSurtForm += urlParts[i] + ",";
+		}
+		return urlSurtForm;
 	}
 
 	private void addJobDirToHeritrix(File dir) {
