@@ -1221,7 +1221,7 @@ public class Node implements java.io.Serializable {
 	public Map<String, Object> getLd() {
 		Map<String, Object> result = new JsonMapper(this).getLd();
 		Map<String, Object> newData = getLd2();
-		result.put("type", newData.get("type"));
+		result.put("rdftype", newData.get("rdftype"));
 		return result;
 	}
 
