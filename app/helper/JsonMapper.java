@@ -116,6 +116,7 @@ public class JsonMapper {
 			"http://purl.org/ontology/bibo/Series",
 			"http://purl.org/ontology/bibo/Periodical",
 			"http://purl.org/ontology/bibo/Collection",
+			"http://purl.org/ontology/bibo/Standard",
 			"http://purl.org/ontology/bibo/Book",
 			"http://data.archiveshub.ac.uk/def/ArchivalResource",
 			"http://purl.org/ontology/bibo/Document",
