@@ -71,6 +71,7 @@ import views.html.edit;
 import views.html.mab;
 import views.html.mets;
 import views.html.oaidc;
+import views.html.wgl;
 import views.html.resource;
 import views.html.search;
 import views.html.status;
@@ -771,6 +772,20 @@ public class Resource extends MyController {
 			String xml = result.toString();
 			if (validate) {
 				validate(xml, "public/schemas/oai_dc.xsd");
+			}
+			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "application/xml", nickname = "asWgl", value = "asWgl", notes = "Returns metadata for Open Leibnis", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asWgl(@PathParam("pid") String pid,
+			@QueryParam("validate") boolean validate) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("application/xml");
+			Html result = wgl.render(transform.wgl(pid));
+			String xml = result.toString();
+			if (validate) {
+				validate(xml, "public/schemas/oai_wgl.xsd");
 			}
 			return ok(result);
 		});

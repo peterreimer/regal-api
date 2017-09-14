@@ -21,6 +21,7 @@ import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
 import helper.oai.OaiDcMapper;
+import helper.oai.WglMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -171,6 +172,18 @@ public class Transform {
 		String uri = Globals.urnbase + node.getPid();
 		DublinCoreData data =
 				new OaiDcMapper(node).getData().addIdentifier(uri, "dcterms-Uri");
+		return data;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a wgl mapping
+	 */
+	public DublinCoreData wgl(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		DublinCoreData data =
+				new WglMapper(node).getData().addIdentifier(uri, "dcterms-Uri");
 		return data;
 	}
 
