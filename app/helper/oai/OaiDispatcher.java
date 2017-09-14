@@ -71,6 +71,7 @@ public class OaiDispatcher {
 		addAlephTransformer(node);
 		addMetsTransformer(node);
 		addRdfTransformer(node);
+		addWglTransformer(node);
 	}
 
 	public static String initContentModels(String namespace) {
@@ -98,10 +99,14 @@ public class OaiDispatcher {
 		transformers.add(new Transformer(namespace + "rdf", "rdf",
 				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
 						+ "/resource/(pid)." + namespace + "rdf"));
+		transformers.add(new Transformer(namespace + "wgl", "wgl",
+				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
+						+ "/resource/(pid)." + namespace + "wgl"));
 		OaiDispatcher.contentModelsInit(transformers);
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
-				+ "aleph, " + namespace + "mets" + namespace + "rdf";
+				+ "aleph, " + namespace + "mets, " + namespace + "rdf, " + namespace
+				+ "wgl";
 		play.Logger.info(result);
 		return result;
 	}
@@ -241,6 +246,8 @@ public class OaiDispatcher {
 					continue; // implicitly added - or not allowed to set
 				if ("rdf".equals(t))
 					continue; // implicitly added - or not allowed to set
+				if ("wgl".equals(t))
+					continue; // implicitly added - or not allowed to set
 				node.addTransformer(new Transformer(t));
 			}
 		}
@@ -292,6 +299,15 @@ public class OaiDispatcher {
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
 				node.addTransformer(new Transformer("rdf"));
+			}
+		}
+	}
+
+	private static void addWglTransformer(Node node) {
+		String type = node.getContentType();
+		if ("public".equals(node.getPublishScheme())) {
+			if ("article".equals(type)) {
+				node.addTransformer(new Transformer("wgl"));
 			}
 		}
 	}
