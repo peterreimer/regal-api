@@ -102,7 +102,7 @@ public class EtikettMaker implements EtikettMakerInterface {
 		if (e.label == null || e.label.isEmpty()) { // fallback
 			e.label = e.name;
 		}
-		logger.debug("Find etikett for " + uri + " : " + e.name);
+		logger.trace("Find etikett for " + uri + " : " + e.name);
 		return e;
 	}
 

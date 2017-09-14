@@ -20,6 +20,7 @@ import helper.Heritrix;
 import helper.MyEtikettMaker;
 import helper.TaskManager;
 import helper.Wget;
+import helper.oai.WglContributor;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -320,4 +321,6 @@ public class Globals {
 			.getString("regal-api.rechercheUrl.prefix");
 	public static String rechercheUrlSuffix = Play.application().configuration()
 			.getString("regal-api.rechercheUrl.suffix");
+
+	public static WglContributor wglContributor = new WglContributor();
 }

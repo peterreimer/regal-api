@@ -136,4 +136,8 @@ public class OaiDcMapper {
 		data.addType("regal:" + node.getContentType());
 		return data;
 	}
+
+	public Node getNode() {
+		return node;
+	}
 }
