@@ -25,7 +25,6 @@ public class WglMapper {
 	}
 
 	private List<String> getWglContributor(Node node) {
-
 		List<String> result = new ArrayList<>();
 		JsonNode n = new ObjectMapper().valueToTree(node.getLd());
 		JsonNode collectionOneArray = n.at("/collectionOne");
@@ -33,13 +32,13 @@ public class WglMapper {
 			String id = item.at("/@id").asText("no Value found");
 			result.add(Globals.wglContributor.acronymOf(id));
 		}
-
-		JsonNode institutionArray = n.at("/institution");
-		for (JsonNode item : institutionArray) {
-			String id = item.at("/@id").asText("no Value found");
-			result.add(Globals.wglContributor.acronymOf(id));
+		if (result.isEmpty()) {
+			JsonNode institutionArray = n.at("/institution");
+			for (JsonNode item : institutionArray) {
+				String id = item.at("/@id").asText("no Value found");
+				result.add(Globals.wglContributor.acronymOf(id));
+			}
 		}
-
 		return result;
 	}
 
