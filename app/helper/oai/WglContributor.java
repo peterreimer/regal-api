@@ -72,8 +72,8 @@ public class WglContributor {
 				String label = (String) row.get("Label");
 				String wglAcronym = (String) row.get("WGL-contributor");
 				String gndId = (String) row.get("DNB-Link");
-				gndIdToAcronym.put(gndId, wglAcronym);
-				gndIdToLabel.put(gndId, label);
+				gndIdToAcronym.put(gndId.trim(), wglAcronym.trim());
+				gndIdToLabel.put(gndId.trim(), label.trim());
 			}
 		} catch (Exception e) {
 			play.Logger.error("", e);
