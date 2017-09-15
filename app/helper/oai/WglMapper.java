@@ -47,7 +47,7 @@ public class WglMapper {
 		JsonNode n = new ObjectMapper().valueToTree(node.getLd());
 		data.setWglContributor(getWglContributor(n));
 		data.setWglSubject(getWglSubject(n));
-		data.setCreator(getList(n, "/contributorLabel"));
+		data.setCreator(getCreator(n));
 		data.setDescription(getList(n, "/abstractText"));
 		data.setTitle(getList(n, "/title"));
 		data.setDate(getList(n, "/publicationYear"));
@@ -60,6 +60,15 @@ public class WglMapper {
 		data.addSubjects(getList(n, "/subjectName"));
 		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
 		return data;
+	}
+
+	private List<String> getCreator(JsonNode n) {
+		List<String> result = getList(n, "/contributorLabel");
+		if (result.isEmpty()) {
+			result.addAll(getComplexList(n, "/creator", "/prefLabel"));
+			result.addAll(getList(n, "/creatorName"));
+		}
+		return result;
 	}
 
 	private List<String> getWglSubject(JsonNode n) {
