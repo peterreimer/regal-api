@@ -182,8 +182,7 @@ public class Transform {
 	public DublinCoreData wgl(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		DublinCoreData data =
-				new WglMapper(node).getData().addIdentifier(uri, "dcterms-Uri");
+		DublinCoreData data = new WglMapper(node).getData().addIdentifier(uri);
 		return data;
 	}
 

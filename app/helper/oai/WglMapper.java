@@ -33,21 +33,96 @@ import models.Node;
  */
 public class WglMapper {
 
-	OaiDcMapper dcMapper;
+	Node node;
 
 	public WglMapper(Node node) {
-		dcMapper = new OaiDcMapper(node);
+		this.node = node;
 	}
 
 	public DublinCoreData getData() {
-		DublinCoreData data = dcMapper.getData();
-		data.setWglContributor(getWglContributor(dcMapper.getNode()));
+		DublinCoreData data = new DublinCoreData();
+		if (node == null)
+			return data;
+
+		JsonNode n = new ObjectMapper().valueToTree(node.getLd());
+		data.setWglContributor(getWglContributor(n));
+		data.setWglSubject(getWglSubject(n));
+		data.setCreator(getList(n, "/contributorLabel"));
+		data.setDescription(getList(n, "/abstractText"));
+		data.setTitle(getList(n, "/title"));
+		data.setDate(getList(n, "/publicationYear"));
+		data.setPublisher(getList(n, "/publisher"));
+		data.addIdentifier(getString(n, "/urn"));
+		data.addIdentifier(getString(n, "/doi"));
+		data.setCoverage(getList(n, "/bibliographicCitation"));
+		data.setSource(getComplexList(n, "/containedIn", "/prefLabel"));
+		data.setSubject(getComplexList(n, "/subject", "/prefLabel"));
+		data.addSubjects(getList(n, "/subjectName"));
+		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
 		return data;
 	}
 
-	private List<String> getWglContributor(Node node) {
+	private List<String> getWglSubject(JsonNode n) {
 		List<String> result = new ArrayList<>();
-		JsonNode n = new ObjectMapper().valueToTree(node.getLd());
+		JsonNode a = n.at("/ddc");
+		for (JsonNode item : a) {
+			String ddcId = item.at("/@id").asText("no Value found");
+			if (ddcId.endsWith("570/")) {
+				result.add("Biowissenschaften/Biologie");
+			} else if (ddcId.endsWith("580/")) {
+				result.add("Biowissenschaften/Biologie");
+			} else if (ddcId.endsWith("590/")) {
+				result.add("Biowissenschaften/Biologie");
+			} else if (ddcId.endsWith("540/")) {
+				result.add("Chemie");
+			} else if (ddcId.endsWith("550/")) {
+				result.add("Geowissenschaften");
+			} else if (ddcId.endsWith("940/")) {
+				result.add("Geschichte");
+			} else if (ddcId.endsWith("943/")) {
+				result.add("Geschichte");
+			} else if (ddcId.endsWith("020/")) {
+				result.add("Informatik");
+			} else if (ddcId.endsWith("630/")) {
+				result.add("Landwirtschaft");
+			} else if (ddcId.endsWith("610/")) {
+				result.add("Medizin, Gesundheit");
+			} else if (ddcId.endsWith("530/")) {
+				result.add("Physik");
+			} else if (ddcId.endsWith("150/")) {
+				result.add("Psychologie");
+			}
+		}
+
+		a = n.at("/professionalGroup");
+		for (JsonNode item : a) {
+			String label = item.at("/prefLabel").asText("no Value found");
+			if ("Ernährung".equals(label)) {
+				result.add("Ernährungswissenschaft");
+			} else if ("Bibliotheks- und Informationswissenschaft".equals(label)) {
+				result.add("Informatik");
+			} else if ("Agrar".equals(label)) {
+				result.add("Landwirtschaft");
+			} else if ("Medizin, Gesundheit".equals(label)) {
+				result.add("Medizin, Gesundheit");
+			}
+		}
+		return result;
+	}
+
+	private List<String> getComplexList(JsonNode n, String string,
+			String string2) {
+		List<String> result = new ArrayList<>();
+		JsonNode a = n.at(string);
+		for (JsonNode item : a) {
+			String str = item.at(string2).asText("no Value found");
+			result.add(str);
+		}
+		return result;
+	}
+
+	private List<String> getWglContributor(JsonNode n) {
+		List<String> result = new ArrayList<>();
 		JsonNode collectionOneArray = n.at("/collectionOne");
 		for (JsonNode item : collectionOneArray) {
 			String id = item.at("/@id").asText("no Value found");
@@ -61,6 +136,28 @@ public class WglMapper {
 			}
 		}
 		return result;
+	}
+
+	private List<String> getList(JsonNode n, String string) {
+		List<String> result = new ArrayList<>();
+		JsonNode a = n.at(string);
+		for (JsonNode item : a) {
+			String str = item.asText("no Value found");
+			result.add(str);
+		}
+		return result;
+	}
+
+	private String getString(JsonNode n, String string) {
+		StringBuffer result = new StringBuffer();
+		JsonNode a = n.at(string);
+		for (JsonNode item : a) {
+			String str = item.asText("no Value found");
+			result.append(str + " ,");
+		}
+		if (result.length() == 0)
+			return null;
+		return result.subSequence(0, result.length() - 2).toString();
 	}
 
 }

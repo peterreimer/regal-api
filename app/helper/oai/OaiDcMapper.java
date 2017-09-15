@@ -91,6 +91,7 @@ public class OaiDcMapper {
 		if (node == null)
 			return data;
 		List<Link> ld = node.getLinks();
+
 		for (Link l : ld) {
 			if ("http://purl.org/dc/terms/title".equals(l.getPredicate())) {
 				data.addTitle(l.getObject());
@@ -134,6 +135,7 @@ public class OaiDcMapper {
 		if (node.hasDoi())
 			data.addIdentifier(node.getDoi(), "hbz-doi");
 		data.addType("regal:" + node.getContentType());
+
 		return data;
 	}
 

@@ -46,6 +46,32 @@ public class DublinCoreData implements java.io.Serializable {
 	List<String> title = new Vector<>();
 	List<String> type = new Vector<>();
 	List<String> wglcontributor = new Vector<>();
+	List<String> wglSubject = new Vector<>();
+
+	/**
+	 * @return wgl:wglcontributor
+	 */
+	public List<String> getWglSubject() {
+		return wglSubject;
+	}
+
+	/**
+	 * @param cwgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData setWglSubject(List<String> wglSubject) {
+		this.wglSubject = wglSubject;
+		return this;
+	}
+
+	/**
+	 * @param e wgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData addWglSubject(String e) {
+		wglSubject.add(e);
+		return this;
+	}
 
 	/**
 	 * @return wgl:wglcontributor
@@ -326,6 +352,8 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return this
 	 */
 	public DublinCoreData addIdentifier(String e) {
+		if (e == null || e.isEmpty())
+			return this;
 		identifier.add(new Pair<String, String>(e, null));
 		return this;
 	}
@@ -336,6 +364,8 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return the modified Data
 	 */
 	public DublinCoreData addIdentifier(String value, String type) {
+		if (value == null || value.isEmpty())
+			return this;
 		identifier.add(new Pair<String, String>(value, type));
 		return this;
 	}
@@ -559,6 +589,11 @@ public class DublinCoreData implements java.io.Serializable {
 	 */
 	public DublinCoreData addSubject(String e) {
 		subject.add(e);
+		return this;
+	}
+
+	public DublinCoreData addSubjects(List<String> list) {
+		subject.addAll(list);
 		return this;
 	}
 
