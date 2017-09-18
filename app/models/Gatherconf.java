@@ -19,6 +19,8 @@ package models;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -47,6 +49,7 @@ public class Gatherconf {
 	String name;
 	boolean active;
 	String url;
+	ArrayList<String> domains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
 	Interval interval;
@@ -60,6 +63,7 @@ public class Gatherconf {
 	 */
 	public Gatherconf() {
 		url = null;
+		domains = new ArrayList<String>();
 		active = true;
 		deepness = -1;
 		robotsPolicy = null;
@@ -90,6 +94,20 @@ public class Gatherconf {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	/**
+	 * @param domain a domain that shall be included in the crawl
+	 */
+	public void addDomain(String domain) {
+		this.domains.add(domain);
+	}
+
+	/**
+	 * @return a list of domains to be included in the crawl
+	 */
+	public ArrayList<String> getDomains() {
+		return domains;
 	}
 
 	/**
