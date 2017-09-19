@@ -59,6 +59,7 @@ public class WglMapper {
 		data.setSubject(getComplexList(n, "/subject", "/prefLabel"));
 		data.addSubjects(getList(n, "/subjectName"));
 		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
+		data.setRights(getComplexList(n, "/license", "/prefLabel"));
 		return data;
 	}
 

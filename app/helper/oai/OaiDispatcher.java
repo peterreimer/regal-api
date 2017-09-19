@@ -32,6 +32,9 @@ import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import actions.Modify;
 import archive.fedora.RdfUtils;
 
@@ -306,7 +309,7 @@ public class OaiDispatcher {
 	private static void addWglTransformer(Node node) {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
-			if ("article".equals(type)) {
+			if ("article".equals(type) && node.getLd().containsKey("collectionOne")) {
 				node.addTransformer(new Transformer("wgl"));
 			}
 		}
