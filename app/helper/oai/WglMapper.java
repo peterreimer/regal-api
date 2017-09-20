@@ -34,9 +34,11 @@ import models.Node;
 public class WglMapper {
 
 	Node node;
+	String uri;
 
-	public WglMapper(Node node) {
+	public WglMapper(Node node, String uri) {
 		this.node = node;
+		this.uri = uri;
 	}
 
 	public DublinCoreData getData() {
@@ -52,15 +54,16 @@ public class WglMapper {
 		data.setTitle(getList(n, "/title"));
 		data.setDate(getList(n, "/publicationYear"));
 		data.setPublisher(getList(n, "/publisher"));
-		data.addIdentifier(getString(n, "/urn"));
-		data.addIdentifier(getString(n, "/doi"));
 		data.setSource(getSource(n));
 		data.setSubject(getComplexList(n, "/subject", "/prefLabel"));
 		data.addSubjects(getList(n, "/subjectName"));
 		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
 		data.setRights(getComplexList(n, "/license", "/prefLabel"));
+		data.addIdentifier(uri);
 		data.addIdentifier(getComplexList(n, "/publisherVersion", "/@id"));
 		data.addIdentifier(getComplexList(n, "/additionalMaterial", "/@id"));
+		data.addIdentifier(getString(n, "/urn"));
+		data.addIdentifier(getString(n, "/doi"));
 		return data;
 	}
 
@@ -85,6 +88,9 @@ public class WglMapper {
 		if (parts.length != 2)
 			return citation;
 
+		if (parts[1].contains("-")) {
+			return "Volume " + parts[0] + ", Pages " + parts[1];
+		}
 		return "Volume " + parts[0] + ", Articlenumber " + parts[1];
 	}
 
