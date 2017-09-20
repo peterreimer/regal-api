@@ -11,6 +11,18 @@
 @field(list: Seq[String],fieldname: String)() = {
 @for(i <- list){<@fieldname>@i</@fieldname>}
 }
+
+@fieldCombined(list: Seq[String],fieldname: String)() = {
+<@fieldname>
+@for((item, index) <- list.zipWithIndex) {
+	@item 
+	@if(index != list.size-1){
+		; 
+	}
+}
+</@fieldname>
+}
+
 @import models.Pair
 @typedField(list: Seq[Pair[String,String]],fieldname: String)() = {
 @for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
@@ -30,7 +42,7 @@
 @field(data.getLanguage(),"wgl:language")
 @field(data.getContributor(),"wgl:contributor")
 @field(data.getType(),"wgl:type")
-@field(data.getSubject(),"wgl:subject")
+@fieldCombined(data.getSubject(),"wgl:subject")
 @field(data.getDescription(),"wgl:description")
 @field(data.getSource(),"wgl:source")
 @field(data.getCoverage(),"wgl:coverage")
