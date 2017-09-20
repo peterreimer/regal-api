@@ -39,7 +39,12 @@
 	: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
  }
 </wgl:title>
-@field(data.getDate(),"wgl:date")
+
+@for(i <- data.getDate()){
+<wgl:date>
+@i.substring(0,4)
+</wgl:date>
+}
 @field(data.getCreator(),"wgl:creator")
 @field(data.getLanguage(),"wgl:language")
 @field(data.getContributor(),"wgl:contributor")
@@ -52,10 +57,7 @@
 @field(data.getWglSubject(),"wgl:wglsubject")
 @field(data.getRights(),"wgl:rights")
 @typedField(data.getIdentifier(),"wgl:identifier")
-<wgl:wgltype lang="de">
+<wgl:wgltype>
 Zeitschriftenartikel
-</wgl:wgltype>
-<wgl:wgltype lang="en">
-Journal article
 </wgl:wgltype>
 </oai_wgl:wgl>

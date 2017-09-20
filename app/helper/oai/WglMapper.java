@@ -59,6 +59,8 @@ public class WglMapper {
 		data.addSubjects(getList(n, "/subjectName"));
 		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
 		data.setRights(getComplexList(n, "/license", "/prefLabel"));
+		data.addIdentifier(getComplexList(n, "/publisherVersion", "/@id"));
+		data.addIdentifier(getComplexList(n, "/additionalMaterial", "/@id"));
 		return data;
 	}
 
@@ -72,10 +74,18 @@ public class WglMapper {
 
 		List<String> result = new ArrayList<>();
 		for (int i = 0; i < a.size(); i++) {
-			result.add(a.get(i) + " " + b.get(i));
+			result.add(a.get(i) + " , " + parseBibliographicCitation(b.get(i)));
 		}
 
 		return result;
+	}
+
+	private String parseBibliographicCitation(String citation) {
+		String[] parts = citation.split(":");
+		if (parts.length != 2)
+			return citation;
+
+		return "Volume " + parts[0] + ", Articlenumber " + parts[1];
 	}
 
 	private List<String> getCreator(JsonNode n) {

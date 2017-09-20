@@ -358,6 +358,16 @@ public class DublinCoreData implements java.io.Serializable {
 		return this;
 	}
 
+	public DublinCoreData addIdentifier(List<String> list) {
+		if (identifier == null) {
+			identifier = new Vector<>();
+		}
+		for (String i : list) {
+			addIdentifier(i);
+		}
+		return this;
+	}
+
 	/**
 	 * @param value the actual identifier
 	 * @param type type of the identifier preferred a qualified:name
