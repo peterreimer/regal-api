@@ -13,14 +13,16 @@
 }
 
 @fieldCombined(list: Seq[String],fieldname: String)() = {
-<@fieldname>
-@for((item, index) <- list.zipWithIndex) {
-	@item 
-	@if(index != list.size-1){
-		; 
+@if(list.size>0){
+	<@fieldname>
+	@for((item, index) <- list.zipWithIndex) {
+		@item 
+		@if(index != list.size-1){
+			; 
+		}
 	}
+	</@fieldname>
 }
-</@fieldname>
 }
 
 @import models.Pair
