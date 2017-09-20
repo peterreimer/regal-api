@@ -54,13 +54,28 @@ public class WglMapper {
 		data.setPublisher(getList(n, "/publisher"));
 		data.addIdentifier(getString(n, "/urn"));
 		data.addIdentifier(getString(n, "/doi"));
-		data.setCoverage(getList(n, "/bibliographicCitation"));
-		data.setSource(getComplexList(n, "/containedIn", "/prefLabel"));
+		data.setSource(getSource(n));
 		data.setSubject(getComplexList(n, "/subject", "/prefLabel"));
 		data.addSubjects(getList(n, "/subjectName"));
 		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
 		data.setRights(getComplexList(n, "/license", "/prefLabel"));
 		return data;
+	}
+
+	private List<String> getSource(JsonNode n) {
+		List<String> a = getComplexList(n, "/containedIn", "/prefLabel");
+		List<String> b = getList(n, "/bibliographicCitation");
+
+		if (a.size() != b.size()) {
+			return a;
+		}
+
+		List<String> result = new ArrayList<>();
+		for (int i = 0; i < a.size(); i++) {
+			result.add(a.get(i) + " " + b.get(i));
+		}
+
+		return result;
 	}
 
 	private List<String> getCreator(JsonNode n) {
