@@ -77,7 +77,7 @@ public class WglMapper {
 
 		List<String> result = new ArrayList<>();
 		for (int i = 0; i < a.size(); i++) {
-			result.add(a.get(i) + " , " + parseBibliographicCitation(b.get(i)));
+			result.add(a.get(i) + ", " + parseBibliographicCitation(b.get(i)));
 		}
 
 		return result;
@@ -88,10 +88,30 @@ public class WglMapper {
 		if (parts.length != 2)
 			return citation;
 
-		if (parts[1].contains("-")) {
-			return "Volume " + parts[0] + ", Pages " + parts[1];
+		if (parts[0] == null || parts[0].isEmpty()) {
+			if (parts[1] != null && !parts[1].isEmpty()) {
+				return findArticleNumberOrPages(parts[1]);
+			} else {
+				return "";
+			}
 		}
-		return "Volume " + parts[0] + ", Articlenumber " + parts[1];
+
+		if (parts[1] == null || parts[1].isEmpty()) {
+			if (parts[0] != null && !parts[0].isEmpty()) {
+				return "Volume " + parts[0];
+			} else {
+				return "";
+			}
+		}
+
+		return "Volume " + parts[0] + ", " + findArticleNumberOrPages(parts[1]);
+	}
+
+	private String findArticleNumberOrPages(String in) {
+		if (in.contains("-")) {
+			return "Pages " + in;
+		}
+		return "Articlenumber " + in;
 	}
 
 	private List<String> getCreator(JsonNode n) {
