@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+
 import models.Gatherconf;
 import play.Logger;
 import play.Play;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * @author Jan Schnasse
@@ -149,7 +149,7 @@ public class Heritrix {
 			String domainsSurtForm = "";
 			for (int i = 0; i < domains.size(); i++) {
 				String domain = domains.get(i);
-				domainsSurtForm += urlSurtForm(domain) + "\n";
+				domainsSurtForm += "            " + urlSurtForm(domain) + "\n";
 			}
 			content =
 					content.replaceAll("\\$\\{DOMAINS_SURT_FORM\\}", domainsSurtForm);
