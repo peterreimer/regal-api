@@ -77,7 +77,8 @@ public class WglMapper {
 
 		List<String> result = new ArrayList<>();
 		for (int i = 0; i < a.size(); i++) {
-			result.add(a.get(i) + ", " + parseBibliographicCitation(b.get(i)));
+			// result.add(a.get(i) + ", " + parseBibliographicCitation(b.get(i)));
+			result.add(a.get(i) + ", " + b.get(i));
 		}
 
 		return result;
