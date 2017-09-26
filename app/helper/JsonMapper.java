@@ -388,6 +388,9 @@ public class JsonMapper {
 			postProcess(rdf, "collectionOne");
 			postProcess(rdf, "containedIn");
 			postProcess(rdf, "medium");
+			postProcess(rdf, "predecessor");
+			postProcess(rdf, "successor");
+			postProcess(rdf, "primaryForm");
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}

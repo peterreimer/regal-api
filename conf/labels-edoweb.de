@@ -20163,7 +20163,7 @@
 }, {
   "uri" : "http://rdaregistry.info/Elements/u/P60261",
   "comment" : "",
-  "label" : "predecessor",
+  "label" : "Vorgänger",
   "icon" : "",
   "name" : "predecessor",
   "referenceType" : "@id",
@@ -20174,7 +20174,7 @@
 }, {
   "uri" : "http://rdaregistry.info/Elements/u/P60278",
   "comment" : "",
-  "label" : "successor",
+  "label" : "Nachfolger",
   "icon" : "",
   "name" : "successor",
   "referenceType" : "@id",
