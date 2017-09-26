@@ -186,6 +186,7 @@ public class RdfUtils {
 		try {
 			con = (HttpURLConnection) url.openConnection();
 			con.setConnectTimeout(15000);
+			con.setRequestProperty("User-Agent", "Regal Webservice");
 			con.setReadTimeout(15000);
 			con.setRequestProperty("Accept", accept);
 			con.connect();
@@ -363,7 +364,7 @@ public class RdfUtils {
 
 	private static void addStatements(String pid, List<Link> links,
 			RepositoryConnection con, SailRepository myRepository)
-					throws RepositoryException {
+			throws RepositoryException {
 
 		ValueFactory f = myRepository.getValueFactory();
 		URI subject = f.createURI("info:fedora/" + pid);
