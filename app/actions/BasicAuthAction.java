@@ -42,9 +42,13 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	public F.Promise<Result> call(Http.Context context) throws Throwable {
 
 		String authHeader = context.request().getHeader(AUTHORIZATION);
-
 		if (authHeader == null) {
-			return unauthorized(context);
+			if (context.request().method().equals("GET")) {
+				context.args.put("role", "edoweb-anonymous");
+				return delegate.call(context);
+			} else {
+				return unauthorized(context);
+			}
 		}
 
 		String auth = authHeader.substring(6);
