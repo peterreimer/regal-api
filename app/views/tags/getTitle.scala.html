@@ -2,6 +2,19 @@
 @import views.Title 
 @(hit:Map[String,Object],namespace:String)
 
+@displayCreators(id:String,label:String)={
+						@if(id != null && !id.isEmpty()){
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @label
+	                       <a href=@analyseValue(id)  target="_blank">
+	                               <span class="octicon-link-external"></span>
+	                       </a>
+	                       }else{
+	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       	@label
+	                       	</a>
+	                       }
+}
 @displayAuthors(id:String,label:String,roleId:String,roleName:String)={
 						@if(id != null && !id.isEmpty()){
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
@@ -57,7 +70,11 @@
 							</ol>
 						
 						}else{
-							@Html(Title.getAuthorNames(hit))
+							<ol id="author-title-list">
+							@for(c <-views.Helper.listCreators(hit)){
+									<li>@displayCreators(c.get("id").toString(),c.get("label").toString())</li>
+								}
+								</ol>
 						}
 						
 						@Html(Title.getIssued(hit))

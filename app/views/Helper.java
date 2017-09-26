@@ -338,6 +338,21 @@ public class Helper {
 		return result;
 	}
 
+	public static List<Map<String, Object>> listCreators(Map<String, Object> h) {
+		List<Map<String, Object>> result = new ArrayList<>();
+		JsonNode hit = new ObjectMapper().valueToTree(h);
+		for (JsonNode c : hit.at("/creator")) {
+			String name = c.at("/prefLabel").asText();
+			String uri = c.at("/@id").asText();
+
+			Map<String, Object> contribution = new HashMap<>();
+			contribution.put("id", uri);
+			contribution.put("label", name);
+			result.add(contribution);
+		}
+		return result;
+	}
+
 	public static boolean contributionContainsAdditionalFields(
 			Map<String, Object> h) {
 		JsonNode hit = new ObjectMapper().valueToTree(h);
