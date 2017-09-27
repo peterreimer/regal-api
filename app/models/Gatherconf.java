@@ -18,9 +18,8 @@ package models;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Date;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -46,6 +45,11 @@ public class Gatherconf {
 		classic, ignore, obey
 	}
 
+	@SuppressWarnings("javadoc")
+	public enum CrawlerSelection {
+		heritrix, wpull
+	}
+
 	String name;
 	boolean active;
 	String url;
@@ -53,6 +57,8 @@ public class Gatherconf {
 	int deepness;
 	RobotsPolicy robotsPolicy;
 	Interval interval;
+	CrawlerSelection crawlerSelection;
+	ArrayList<String> urlsExcluded;
 	Date startDate;
 	String localDir;
 	String openWaybackLink;
@@ -68,6 +74,8 @@ public class Gatherconf {
 		deepness = -1;
 		robotsPolicy = null;
 		interval = null;
+		crawlerSelection = CrawlerSelection.heritrix;
+		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		name = null;
 		openWaybackLink = null;
@@ -150,6 +158,34 @@ public class Gatherconf {
 	 */
 	public void setInterval(Interval interval) {
 		this.interval = interval;
+	}
+
+	/**
+	 * @return a crawler selection
+	 */
+	public CrawlerSelection getCrawlerSelection() {
+		return crawlerSelection;
+	}
+
+	/**
+	 * @param crawlerSelection a crawler selection
+	 */
+	public void setCrawlerSelection(CrawlerSelection crawlerSelection) {
+		this.crawlerSelection = crawlerSelection;
+	}
+
+	/**
+	 * @param urlExcluded an URL or URI that shall be excluded in the crawl
+	 */
+	public void addUrlExcluded(String urlExcluded) {
+		this.urlsExcluded.add(urlExcluded);
+	}
+
+	/**
+	 * @return a list of URLs/URIs to be excluded in the crawl
+	 */
+	public ArrayList<String> getUrlsExcluded() {
+		return urlsExcluded;
 	}
 
 	/**
