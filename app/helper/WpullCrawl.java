@@ -17,6 +17,7 @@
 package helper;
 
 import models.Gatherconf;
+import models.Globals;
 import play.Logger;
 import play.Play;
 
@@ -36,11 +37,8 @@ public class WpullCrawl {
 
 	private Gatherconf conf = null;
 	private String date = null;
+	private String datetime = null;
 	private File crawlDir = null;
-	/*
-	 * variable localhost remains zero as wpull has no administrative surface on
-	 * localhost (in contrast to heritrix)
-	 */
 	private String localpath = null;
 	private int exitState = 0;
 	private String msg = null;
@@ -82,7 +80,7 @@ public class WpullCrawl {
 				throw new RuntimeException("The configuration has no name !");
 			}
 			date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-			String datetime =
+			datetime =
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			if (!crawlDir.exists()) {
@@ -133,6 +131,8 @@ public class WpullCrawl {
 					" --no-host-directories --convert-links --page-requisites --no-parent";
 			executeCommand += " --database=" + warcFilename + ".db";
 			executeCommand += " --no-check-certificate";
+			WebgatherLogger.info("Executing command " + executeCommand);
+			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
 			String[] execArr = executeCommand.split(" ");
 			ProcessBuilder pb = new ProcessBuilder(execArr);
 			pb.directory(crawlDir);
@@ -143,6 +143,13 @@ public class WpullCrawl {
 			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
 			assert pb.redirectOutput().file() == log;
 			assert proc.getInputStream().read() == -1;
+			/*
+			 * den Pfad zum WARC unter Globals.heritrixData zu hängen ist eigentlich
+			 * Blödsinn, aber ohne localpath wird im Frontend kein Link zu Openwayback
+			 * erzeugt (warum nicht ?)
+			 */
+			localpath = Globals.heritrixData + "/wpull-data" + "/" + conf.getName()
+					+ "/" + datetime + "/" + warcFilename + ".warc.gz";
 			// exitState = proc.waitFor(); // don't wait
 		} catch (IOException ioe) {
 			WebgatherLogger.error(ioe.toString());
