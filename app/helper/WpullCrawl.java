@@ -135,8 +135,10 @@ public class WpullCrawl {
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
 			String[] execArr = executeCommand.split(" ");
 			ProcessBuilder pb = new ProcessBuilder(execArr);
+			assert crawlDir.isDirectory();
 			pb.directory(crawlDir);
 			File log = new File(crawlDir.toString() + "/crawl.log");
+			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
 			Process proc = pb.start();
