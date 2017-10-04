@@ -116,11 +116,11 @@ public class WpullCrawl {
 			executeCommand += " --recursive";
 			ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
 			if (urlsExcluded.size() > 0) {
-				executeCommand += " --reject-regex=\".*" + urlsExcluded.get(0);
-				for (int i = 1; i < domains.size(); i++) {
+				executeCommand += " --reject-regex=.*" + urlsExcluded.get(0);
+				for (int i = 1; i < urlsExcluded.size(); i++) {
 					executeCommand += "|" + urlsExcluded.get(i);
 				}
-				executeCommand += ".*\"";
+				executeCommand += ".*";
 			}
 			executeCommand += " --link-extractors=javascript,html,css";
 			executeCommand += " --warc-file=" + warcFilename;
