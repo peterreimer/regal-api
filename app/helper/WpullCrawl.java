@@ -45,6 +45,8 @@ public class WpullCrawl {
 
 	final String jobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
+	final String crawler =
+			Play.application().configuration().getString("regal-api.wpull.crawler");
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -104,7 +106,7 @@ public class WpullCrawl {
 			String urlRaw = conf.getUrl().replaceAll("^http://", "")
 					.replaceAll("^https://", "").replaceAll("/$", "");
 			String warcFilename = "WEB-" + urlRaw + "-" + date;
-			String executeCommand = "wpull3 " + conf.getUrl();
+			String executeCommand = crawler + " " + conf.getUrl();
 			ArrayList<String> domains = conf.getDomains();
 			if (domains.size() > 0) {
 				executeCommand += " --span-hosts";
