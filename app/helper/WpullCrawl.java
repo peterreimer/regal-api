@@ -18,10 +18,12 @@ package helper;
 
 import models.Gatherconf;
 import play.Logger;
+import play.Play;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -33,9 +35,18 @@ import java.util.ArrayList;
 public class WpullCrawl {
 
 	private Gatherconf conf = null;
+	private String date = null;
 	private File crawlDir = null;
+	/*
+	 * variable localhost remains zero as wpull has no administrative surface on
+	 * localhost (in contrast to heritrix)
+	 */
 	private String localpath = null;
 	private int exitState = 0;
+	private String msg = null;
+
+	final String jobDir =
+			Play.application().configuration().getString("regal-api.wpull.jobDir");
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -65,8 +76,26 @@ public class WpullCrawl {
 	 * creates a new wpull crawler job
 	 */
 	public void createJob() {
-		// create subdirectory in wpull-data/
-		// crawlDir = ...
+		WebgatherLogger.debug("Create new job " + conf.getName());
+		try {
+			if (conf.getName() == null) {
+				throw new RuntimeException("The configuration has no name !");
+			}
+			date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+			String datetime =
+					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
+			crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
+			if (!crawlDir.exists()) {
+				// create job directory
+				WebgatherLogger.debug("Create job Directory " + jobDir + "/"
+						+ conf.getName() + "/" + datetime);
+				crawlDir.mkdirs();
+			}
+		} catch (Exception e) {
+			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
+			WebgatherLogger.error(msg);
+			throw new RuntimeException(msg);
+		}
 	}
 
 	/**
@@ -74,30 +103,35 @@ public class WpullCrawl {
 	 */
 	public void startJob() {
 		try {
-			// localpath = ...
-			String urlRaw = conf.getUrl().replaceAll("http://", "")
-					.replaceAll("https://", "").replaceAll("/$", "");
-			// date = ...
-			// String warcFilename = ...
+			String urlRaw = conf.getUrl().replaceAll("^http://", "")
+					.replaceAll("^https://", "").replaceAll("/$", "");
+			String warcFilename = "WEB-" + urlRaw + "-" + date;
 			String executeCommand = "wpull3 " + conf.getUrl();
 			ArrayList<String> domains = conf.getDomains();
-			// loop over domains
-			executeCommand +=
-					" --span-hosts --domains=$url_raw,www.bernkastel.de,www.rlpdirekt.de --recursive";
+			if (domains.size() > 0) {
+				executeCommand += " --span-hosts";
+			}
+			executeCommand += " --domains=" + urlRaw;
+			for (int i = 0; i < domains.size(); i++) {
+				executeCommand += "," + domains.get(i);
+			}
+			executeCommand += " --recursive";
 			ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
-			// loop over urlsExcluded
-			executeCommand +=
-					" --reject-regex=\".*Veranstaltungskalender|Bürgerservice.*\"";
+			if (urlsExcluded.size() > 0) {
+				executeCommand += " --reject-regex=\".*" + urlsExcluded.get(0);
+				for (int i = 1; i < domains.size(); i++) {
+					executeCommand += "|" + urlsExcluded.get(i);
+				}
+				executeCommand += ".*\"";
+			}
 			executeCommand += " --link-extractors=javascript,html,css";
-			executeCommand += " --warc-file=WEB-" + urlRaw + "-${datum}"; // replace
-																																		// by
-																																		// warcFilename
+			executeCommand += " --warc-file=" + warcFilename;
 			executeCommand +=
-					" --user-agent \"InconspiciousWebBrowser/1.0\" --no-robots";
+					" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots";
 			executeCommand += " --escaped-fragment --strip-session-id";
 			executeCommand +=
 					" --no-host-directories --convert-links --page-requisites --no-parent";
-			executeCommand += " --database WEB-${url_raw}-${datum}.db";
+			executeCommand += " --database=" + warcFilename + ".db";
 			executeCommand += " --no-check-certificate";
 			String[] execArr = executeCommand.split(" ");
 			ProcessBuilder pb = new ProcessBuilder(execArr);

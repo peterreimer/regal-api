@@ -285,7 +285,7 @@ public class Create extends RegalAction {
 					throw new RuntimeException("Crawl job returns with exit state "
 							+ wpullCrawl.getExitState() + "!");
 				}
-				WebgatherLogger.debug("Path to WARC " + localpath);
+				WebgatherLogger.debug("Path to WARC " + crawlDir.getAbsolutePath());
 			} else {
 				throw new RuntimeException(
 						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
@@ -306,7 +306,9 @@ public class Create extends RegalAction {
 			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
-			webpageVersion.setLocalData(localpath);
+			if (localpath != null) {
+				webpageVersion.setLocalData(localpath);
+			}
 			webpageVersion.setMimeType("application/warc");
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
