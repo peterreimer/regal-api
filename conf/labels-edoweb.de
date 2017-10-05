@@ -8923,7 +8923,7 @@
 }, {
   "uri" : "http://purl.org/lobid/lv#subjectAltLabel",
   "comment" : "",
-  "label" : "Ähnliche Themen",
+  "label" : "Freie Schlagwörter",
   "icon" : "",
   "name" : "subjectAltLabel",
   "referenceType" : "String",
@@ -17116,7 +17116,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/rpb#n546028",
-  "label" : "Alternative Energiequelle",
+  "comment" : "",
+  "label" : "Erneuerbare Energien",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
