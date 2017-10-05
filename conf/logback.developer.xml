@@ -65,7 +65,7 @@
   <logger name="application" level="INFO">
     <appender-ref ref="FILE" />
   </logger>
-  <logger name="webgatherer" level="INFO" additivity="false">
+  <logger name="webgatherer" level="DEBUG" additivity="false">
     <appender-ref ref="FILE-WEBGATHERER" />
   </logger>
   <logger name="addurn" level="INFO" additivity="false">

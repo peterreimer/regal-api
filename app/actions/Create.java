@@ -25,6 +25,7 @@ import java.util.List;
 import helper.HttpArchiveException;
 import helper.mail.WebgatherExceptionMail;
 import helper.oai.OaiDispatcher;
+import helper.WpullCrawl;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
@@ -235,41 +236,60 @@ public class Create extends RegalAction {
 	 */
 	public Node createWebpageVersion(Node n) {
 		Gatherconf conf = null;
+		File crawlDir = null;
+		String localpath = null;
 		try {
-			if (Globals.heritrix.isBusy()) {
-				throw new WebgathererTooBusyException(403,
-						"Webgatherer is too busy! Please try again later.");
-			}
 			if (!"webpage".equals(n.getContentType())) {
 				throw new HttpArchiveException(400, n.getContentType()
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
-			WebgatherLogger.debug("Create webpageVersion " + n.getPid());
+			WebgatherLogger.debug("Create webpageVersion for name " + n.getPid());
 			conf = Gatherconf.create(n.getConf());
-			WebgatherLogger.debug("Create webpageVersi " + conf.toString());
-			// execute heritrix job
+			WebgatherLogger
+					.debug("Create webpageVersion with conf " + conf.toString());
 			conf.setName(n.getPid());
-			if (!Globals.heritrix.jobExists(conf.getName())) {
-				Globals.heritrix.createJob(conf);
+			if (conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.heritrix)) {
+				if (Globals.heritrix.isBusy()) {
+					throw new WebgathererTooBusyException(403,
+							"Webgatherer is too busy! Please try again later.");
+				}
+				if (!Globals.heritrix.jobExists(conf.getName())) {
+					Globals.heritrix.createJob(conf);
+				}
+				boolean success = Globals.heritrix.teardown(conf.getName());
+				WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
+
+				Globals.heritrix.launch(conf.getName());
+				WebgatherLogger.debug("Launched " + conf.getName());
+				Thread.currentThread().sleep(10000);
+
+				Globals.heritrix.unpause(conf.getName());
+				WebgatherLogger.debug("Unpaused " + conf.getName());
+				Thread.currentThread().sleep(10000);
+
+				crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
+				String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
+				String uriPath = Globals.heritrix.getUriPath(warcPath);
+
+				localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
+				WebgatherLogger.debug("Path to WARC " + localpath);
+			} else if (conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.wpull)) {
+				WpullCrawl wpullCrawl = new WpullCrawl(conf);
+				wpullCrawl.createJob();
+				wpullCrawl.startJob();
+				crawlDir = wpullCrawl.getCrawlDir();
+				localpath = wpullCrawl.getLocalpath();
+				if (wpullCrawl.getExitState() != 0) {
+					throw new RuntimeException("Crawl job returns with exit state "
+							+ wpullCrawl.getExitState() + "!");
+				}
+				WebgatherLogger.debug("Path to WARC " + crawlDir.getAbsolutePath());
+			} else {
+				throw new RuntimeException(
+						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
 			}
-			boolean success = Globals.heritrix.teardown(conf.getName());
-			WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
-
-			Globals.heritrix.launch(conf.getName());
-			WebgatherLogger.debug("Launched " + conf.getName());
-			Thread.currentThread().sleep(10000);
-
-			Globals.heritrix.unpause(conf.getName());
-			WebgatherLogger.debug("Unpaused " + conf.getName());
-			Thread.currentThread().sleep(10000);
-
-			File crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
-			String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
-			String uriPath = Globals.heritrix.getUriPath(warcPath);
-
-			String localpath =
-					Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
-			WebgatherLogger.debug("Path to WARC " + localpath);
 
 			// create fedora object with unmanaged content pointing to
 			// the respective warc container
@@ -286,7 +306,9 @@ public class Create extends RegalAction {
 			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
-			webpageVersion.setLocalData(localpath);
+			if (localpath != null) {
+				webpageVersion.setLocalData(localpath);
+			}
 			webpageVersion.setMimeType("application/warc");
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
@@ -303,7 +325,6 @@ public class Create extends RegalAction {
 
 			return webpageVersion;
 		} catch (Exception e) {
-			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
 			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
 			WebgatherLogger.warn("Crawl of Webpage " + n.getPid() + ","
 					+ conf.getUrl() + " has failed !\n\tReason: " + e.getMessage());
