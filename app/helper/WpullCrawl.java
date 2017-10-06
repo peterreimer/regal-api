@@ -132,7 +132,7 @@ public class WpullCrawl {
 			executeCommand +=
 					" --no-host-directories --convert-links --page-requisites --no-parent";
 			executeCommand += " --database=" + warcFilename + ".db";
-			executeCommand += " --no-check-certificate";
+			executeCommand += " --no-check-certificate --no-directories";
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
 			String[] execArr = executeCommand.split(" ");
