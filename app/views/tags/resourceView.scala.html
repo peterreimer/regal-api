@@ -26,12 +26,12 @@
 						<td class="field-label hasPart">@getLabel("hasPart")</td>
 						<td class="field-item"
 							property="@models.Globals.profile.getEtikettByName("hasPart").getUri()">	
-							<ol id="hasPartList" class="list-group row">			
+							<ol id="hasPartList">			
 								@for(field <- d){
-								<li class="list-group-item col-xs-2">@tags.partsView(field)</li> 
+								<li>@tags.partsView(field)</li>
 								}
 							</ol>
-					</tr> 
+					</tr>
 				} case _ =>{} 
 			}
 		}

@@ -162,7 +162,7 @@ public class Resource extends MyController {
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				List<Node> nodes = read.listRepo(contentType, namespace, from, until);
 				return ok(
-						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
+						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd2())
 								.collect(Collectors.toList()), Globals.namespaces[0]));
 			} catch (HttpArchiveException e) {
 				return HtmlMessage(new Message(e, e.getCode()));
@@ -180,6 +180,8 @@ public class Resource extends MyController {
 
 		if (request().accepts("text/html")) {
 			Node node = readNodeOrNull(pid);
+			if (node == null)
+				return Promise.promise(() -> notFound("404 - Not found " + pid));
 			List<Map<String, Object>> result = new ArrayList<>();
 			if ("frl".equals(design)) {
 				Map<String, Object> item = read.getMapWithParts2(node);
@@ -187,7 +189,7 @@ public class Resource extends MyController {
 				return Promise
 						.promise(() -> ok(frlResource.render(item, Globals.namespaces[0])));
 			} else {
-				Map<String, Object> item = read.getMapWithParts(node);
+				Map<String, Object> item = read.getMapWithParts2(node);
 				result.add(item);
 				return Promise
 						.promise(() -> ok(resource.render(result, Globals.namespaces[0])));
