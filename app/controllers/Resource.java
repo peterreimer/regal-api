@@ -718,30 +718,12 @@ public class Resource extends MyController {
 				nodes.add(node);
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				if ("frl".equals(design)) {
-					return ok(frlResource.render(node.getLd2(), Globals.namespaces[0]));
+					return ok(frlResource.render(read.getMapWithParts2(node),
+							Globals.namespaces[0]));
 				}
 				return ok(
-						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
+						resource.render(nodes.stream().map(n -> read.getMapWithParts2(n))
 								.collect(Collectors.toList()), Globals.namespaces[0]));
-			} catch (Exception e) {
-				return JsonMessage(new Message(e, 500));
-			}
-		});
-	}
-
-	@ApiOperation(produces = "application/html", nickname = "asHtml2", value = "asHtml2", notes = "Returns a html2 display of the resource", response = Message.class, httpMethod = "GET")
-	public static Promise<Result> asHtml2(@PathParam("pid") String pid,
-			@QueryParam("design") String design) {
-		return new ReadMetadataAction().call(pid, node -> {
-			try {
-				List<Map<String, Object>> result = new ArrayList<>();
-				Map<String, Object> item = read.getMapWithParts2(node);
-				result.add(item);
-				response().setHeader("Content-Type", "text/html; charset=utf-8");
-				if ("frl".equals(design)) {
-					return ok(frlResource.render(item, Globals.namespaces[0]));
-				}
-				return ok(resource.render(result, Globals.namespaces[0]));
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
 			}
