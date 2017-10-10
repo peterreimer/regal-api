@@ -40,6 +40,7 @@ public class WpullCrawl {
 	private String datetime = null;
 	private File crawlDir = null;
 	private String localpath = null;
+	private String warcFilename = null;
 	private int exitState = 0;
 	private String msg = null;
 
@@ -103,36 +104,7 @@ public class WpullCrawl {
 	 */
 	public void startJob() {
 		try {
-			String urlRaw = conf.getUrl().replaceAll("^http://", "")
-					.replaceAll("^https://", "").replaceAll("/$", "");
-			String warcFilename = "WEB-" + urlRaw + "-" + date;
-			String executeCommand = crawler + " " + conf.getUrl();
-			ArrayList<String> domains = conf.getDomains();
-			if (domains.size() > 0) {
-				executeCommand += " --span-hosts";
-			}
-			executeCommand += " --domains=" + urlRaw;
-			for (int i = 0; i < domains.size(); i++) {
-				executeCommand += "," + domains.get(i);
-			}
-			executeCommand += " --recursive";
-			ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
-			if (urlsExcluded.size() > 0) {
-				executeCommand += " --reject-regex=.*" + urlsExcluded.get(0);
-				for (int i = 1; i < urlsExcluded.size(); i++) {
-					executeCommand += "|" + urlsExcluded.get(i);
-				}
-				executeCommand += ".*";
-			}
-			executeCommand += " --link-extractors=javascript,html,css";
-			executeCommand += " --warc-file=" + warcFilename;
-			executeCommand +=
-					" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots";
-			executeCommand += " --escaped-fragment --strip-session-id";
-			executeCommand +=
-					" --no-host-directories --convert-links --page-requisites --no-parent";
-			executeCommand += " --database=" + warcFilename + ".db";
-			executeCommand += " --no-check-certificate";
+			String executeCommand = buildExecCommand();
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
 			String[] execArr = executeCommand.split(" ");
@@ -155,10 +127,49 @@ public class WpullCrawl {
 			localpath = Globals.heritrixData + "/wpull-data" + "/" + conf.getName()
 					+ "/" + datetime + "/" + warcFilename + ".warc.gz";
 			// exitState = proc.waitFor(); // don't wait
-		} catch (IOException ioe) {
-			WebgatherLogger.error(ioe.toString());
-			throw new RuntimeException("wpull crawl not successfully started!", ioe);
+		} catch (Exception e) {
+			WebgatherLogger.error(e.toString());
+			throw new RuntimeException("wpull crawl not successfully started!", e);
 		}
+	}
+
+	/**
+	 * Builds a shell executable command which starts a wpull crawl
+	 * 
+	 * @return the shell executable command as a String
+	 */
+	private String buildExecCommand() {
+		String urlRaw = conf.getUrl().replaceAll("^http://", "")
+				.replaceAll("^https://", "").replaceAll("/$", "");
+		warcFilename = "WEB-" + urlRaw + "-" + date;
+		StringBuilder sb = new StringBuilder();
+		sb.append(crawler + " " + conf.getUrl());
+		ArrayList<String> domains = conf.getDomains();
+		if (domains.size() > 0) {
+			sb.append(" --span-hosts");
+		}
+		sb.append(" --domains=" + urlRaw);
+		for (int i = 0; i < domains.size(); i++) {
+			sb.append("," + domains.get(i));
+		}
+		sb.append(" --recursive");
+		ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
+		if (urlsExcluded.size() > 0) {
+			sb.append(" --reject-regex=.*" + urlsExcluded.get(0));
+			for (int i = 1; i < urlsExcluded.size(); i++) {
+				sb.append("|" + urlsExcluded.get(i));
+			}
+			sb.append(".*");
+		}
+		sb.append(" --link-extractors=javascript,html,css");
+		sb.append(" --warc-file=" + warcFilename);
+		sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
+		sb.append(" --escaped-fragment --strip-session-id");
+		sb.append(
+				" --no-host-directories --convert-links --page-requisites --no-parent");
+		sb.append(" --database=" + warcFilename + ".db");
+		sb.append(" --no-check-certificate --no-directories");
+		return sb.toString();
 	}
 
 }
