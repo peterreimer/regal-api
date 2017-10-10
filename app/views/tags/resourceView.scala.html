@@ -35,6 +35,26 @@
 				} case _ =>{} 
 			}
 		}
+		case "notification"=>{
+		@values match {
+				case d: String => { 
+					<tr class="notification" style="border:solid; border-color:#ff5555;;">
+						<td style="display:none;">@getWeight("notification")</td>
+						<td class="field-label hasPart">@getLabel("notification")</td>
+						<td class="field-item"
+							property="@models.Globals.profile.getEtikettByName("notification").getUri()">	
+							
+							<ol id="notification" class="list-group row">	
+							
+							 <span style="color:#ff5555;" class="fa fa-exclamation-triangle"></span>	
+							 <span style="color:#8c2e0b;">	
+								@values
+								</span>
+							</ol>
+					</tr> 
+					} case _ =>{} 
+			}
+		}
 		case "inCollection"=>{
 			
 		}

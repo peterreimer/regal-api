@@ -566,13 +566,12 @@ public class Resource extends MyController {
 					return getJsonResult(nodeIds);
 				}
 				List<Node> result = read.getNodes(nodeIds);
-
+				List<Map<String, Object>> list =
+						result.stream().map(n -> n.getLd2()).collect(Collectors.toList());
 				if (request().accepts("text/html")) {
-					return ok(resource.render(result.stream()
-							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
-							Globals.namespaces[0]));
+					return ok(resource.render(list, Globals.namespaces[0]));
 				} else {
-					return getJsonResult(result);
+					return getJsonResult(list);
 				}
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
