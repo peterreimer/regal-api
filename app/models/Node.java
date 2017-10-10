@@ -27,7 +27,9 @@ import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1220,6 +1222,10 @@ public class Node implements java.io.Serializable {
 	@JsonValue
 	public Map<String, Object> getLd() {
 		Map<String, Object> result = new JsonMapper(this).getLd();
+		if ("D".equals(getState())) {
+			result.put("notification", "Dieses Objekt wurde gelöscht");
+
+		}
 		Map<String, Object> newData = getLd2();
 		result.put("rdftype", newData.get("rdftype"));
 		result.put("webPageArchived", newData.get("webPageArchived"));
@@ -1237,7 +1243,11 @@ public class Node implements java.io.Serializable {
 	}
 
 	public Map<String, Object> getLd2() {
-		return new JsonMapper(this).getLd2();
+		Map<String, Object> result = new JsonMapper(this).getLd2();
+		if ("D".equals(getState())) {
+			result.put("notification", "Dieses Objekt wurde gelöscht");
+		}
+		return result;
 	}
 
 }
