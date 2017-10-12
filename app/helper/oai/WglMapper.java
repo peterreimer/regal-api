@@ -57,7 +57,7 @@ public class WglMapper {
 		data.setSource(getSource(n));
 		data.setSubject(getComplexList(n, "/subject", "/prefLabel"));
 		data.addSubjects(getList(n, "/subjectName"));
-		data.setLanguage(getComplexList(n, "/language", "/prefLabel"));
+		data.setLanguage(getLanguage(n));
 		data.setRights(getComplexList(n, "/license", "/prefLabel"));
 		data.addIdentifier(uri);
 		data.addIdentifier(getComplexList(n, "/publisherVersion", "/@id"));
@@ -65,6 +65,24 @@ public class WglMapper {
 		data.addIdentifier(getString(n, "/urn"));
 		data.addIdentifier(getString(n, "/doi"));
 		return data;
+	}
+
+	private List<String> getLanguage(JsonNode n) {
+		List<String> languageIds = getComplexList(n, "/language", "/@id");
+		List<String> result = new ArrayList<>();
+		for (String lang : languageIds) {
+			result.add(getLanguageAbrev(lang));
+		}
+		return result;
+	}
+
+	private String getLanguageAbrev(String lang) {
+		try {
+			return lang.substring(lang.lastIndexOf("/") + 1);
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+		}
+		return "";
 	}
 
 	private List<String> getSource(JsonNode n) {
