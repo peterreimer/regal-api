@@ -25,7 +25,7 @@
 	 <script src="@controllers.routes.Assets.at("javascripts/jquery.dataTables.min.js")"></script>
 	  <script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
-				$('#example').dataTable( {
+				$('.resourceView').dataTable( {
     				"order": [0,'asc'],paging: false,searching: false
 				} );
 			} );
@@ -36,7 +36,8 @@
 		<div class="container">	
 					<div class="container">
 						<div class="row">
-						
+							 <div class="col-md-11">@tags.searchForm("*")</div>
+
 						</div>
 				</div>
         @content

@@ -34,11 +34,16 @@
 	<div class="container-fluid">
 <div class="row">
 	<div  class="col-md-11">
-	
+			<ol class="searchResults">
 			@for( hit <- hits){
-			@tags.getTitle(hit,namespace)
-			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
+			<li class="searchResult">
+			<div class="container">
+			@tags.resourceShortView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
+			</div>
+			</li>
+			<hr/>
 			}
+			</ol>
 		
 </div>
 </div>

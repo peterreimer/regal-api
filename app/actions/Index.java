@@ -18,6 +18,8 @@ package actions;
 
 import java.util.List;
 
+import archive.fedora.Utils;
+import controllers.MyController;
 import models.Globals;
 import models.Node;
 
@@ -156,7 +158,8 @@ public class Index {
 		StringBuffer msg = new StringBuffer();
 		try {
 			Globals.search.index(Globals.PUBLIC_INDEX_PREF + index, type, pid,
-					data.toString());
+					MyController.mapper
+							.writeValueAsString(new Read().getMapWithParts(data)));
 			msg.append(
 					pid + " indexed in " + Globals.PUBLIC_INDEX_PREF + index + "\n");
 		} catch (Exception e) {
@@ -167,7 +170,8 @@ public class Index {
 		}
 		try {
 			Globals.search.index(Globals.PUBLIC_INDEX_PREF + index + "2", type, pid,
-					data.toString2());
+					MyController.mapper
+							.writeValueAsString(new Read().getMapWithParts2(data)));
 			msg.append(
 					pid + " indexed in " + Globals.PUBLIC_INDEX_PREF + index + "2\n");
 		} catch (Exception e) {
@@ -198,7 +202,8 @@ public class Index {
 			Node data) {
 		StringBuffer msg = new StringBuffer();
 		try {
-			Globals.search.index(index, type, pid, data.toString());
+			Globals.search.index(index, type, pid, MyController.mapper
+					.writeValueAsString(new Read().getMapWithParts(data)));
 			msg.append(pid + " indexed in " + index + "\n");
 		} catch (Exception e) {
 			play.Logger.warn(e.getMessage());
@@ -206,7 +211,8 @@ public class Index {
 			msg.append(pid + " not indexed in " + index + "\n");
 		}
 		try {
-			Globals.search.index(index + "2", type, pid, data.toString2());
+			Globals.search.index(index + "2", type, pid, MyController.mapper
+					.writeValueAsString(new Read().getMapWithParts2(data)));
 			msg.append(pid + " indexed in " + index + "2\n");
 		} catch (Exception e) {
 			play.Logger.warn(e.getMessage());

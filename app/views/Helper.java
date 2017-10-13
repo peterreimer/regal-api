@@ -418,7 +418,9 @@ public class Helper {
 		return "<a href=\"" + uri + "\">" + uri + "</a>";
 	}
 
-	public static String getPublication(Set<Map<String, Object>> publ) {
+	public static Map<String, String> getPublicationMap(
+			Set<Map<String, Object>> publ) {
+		Map<String, String> result = new HashMap<>();
 		for (Map<String, Object> p : publ) {
 			JsonNode hit = new ObjectMapper().valueToTree(p);
 			String location = hit.at("/location").asText();
@@ -426,24 +428,16 @@ public class Helper {
 			String startDate = hit.at("/startDate").asText();
 
 			if (startDate != null && !startDate.isEmpty()) {
-				startDate = startDate + "<br/>";
-			} else {
-				startDate = "";
+				result.put("regal:publishYear", startDate);
 			}
 			if (location != null && !location.isEmpty()) {
-				location = location + "<br/>";
-			} else {
-				location = "";
+				result.put("regal:publishLocation", location);
 			}
 			if (publishedBy != null && !publishedBy.isEmpty()) {
-				publishedBy = publishedBy;
-			} else {
-				publishedBy = "";
+				result.put("regal:publishedBy", publishedBy);
 			}
-
-			return startDate + location + publishedBy;
 		}
-		return "Can't process data!";
+		return result;
 	}
 
 	public static Map<String, String> getFile(Map<String, Object> fileMap) {

@@ -197,7 +197,7 @@ public class Search {
 		SearchResponse response = client.prepareSearch(index).setQuery(query)
 				.setFrom(from).setSize(until - from).execute().actionGet();
 		return response.getHits();
-	}
+	} 
 
 	Map<String, Object> getSettings(String index, String type) {
 		try {

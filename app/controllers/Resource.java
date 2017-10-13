@@ -590,7 +590,8 @@ public class Resource extends MyController {
 			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
 			try {
 				SearchHits hits = Globals.search.query(
-						new String[] { Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0],
+						new String[] {
+								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
 								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
 						queryString, from, until);
 				List<SearchHit> list = Arrays.asList(hits.getHits());
