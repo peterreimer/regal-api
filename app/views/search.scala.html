@@ -13,7 +13,7 @@
 		</li>
 		<li class="disabled">
 			<a style="width:60%; text-align: center; white-space: nowrap;" href="#">
-			@from bis @if(until <= allHits){@until} else{@allHits} von @allHits
+			@from to @if(until <= allHits){@until} else{@allHits} of @allHits
 			</a>
 		</li>
 		<li class="next @if(until >= allHits){disabled}">
@@ -25,10 +25,9 @@
 </nav>
 }
 
-@main("") {
+@main("Regal Suche") {
 <div class="container">
 	<div class="row">
-		<div class="col-md-6"></div>
 		<div class="col-md-5">@pagination(totalNum,from,until)</div>
 	</div>
 	<div class="container-fluid">
@@ -48,7 +47,6 @@
 </div>
 </div>
 	<div class="row">
-		<div class="col-md-6"></div>
 		<div class="col-md-5">@pagination(totalNum,from,until)</div>
 	</div>
 </div>

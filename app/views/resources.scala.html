@@ -2,16 +2,16 @@
 
 @import views.Helper
 
-@(hit:Map[String,Object],namespace: String)
+@(hits: List[Map[String,Object]],namespace: String)
 
 
-@main(hit.get("title").toString()) {
+@main("") {
 
-		
+		@for( hit <- hits){
 			@tags.getTitle(hit,namespace)
 			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
 
-	
+	}
 }
 
 

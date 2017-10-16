@@ -32,15 +32,98 @@
 		</script>
     </head>
 	<body onload="">
-			<p/>
-		<div class="container">	
-					<div class="container">
-						<div class="row">
-							 <div class="col-md-11">@tags.searchForm("*")</div>
-
-						</div>
+	
+    <img  src="/public/images/books.jpg" alt="">
+	<nav class="navbar navbar-default" role="navigation">
+	  <div class="collapse navbar-collapse">
+		    <ul class="nav navbar-nav">
+		    <li><a class="navbar-brand" href="/">Home</a>
+		      
+		    </ul>
+		    <div class="col-sm-4 col-md-4">
+		     	@tags.searchForm("*")
+		    </div>
+		    <ul class="nav navbar-nav navbar-right">
+		      <li><a href="#">Login</a></li>
+		      <li class="dropdown">
+		        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Add<b class="caret"></b></a>
+		        <ul class="dropdown-menu">
+		          <li><a href="/add/catalog">Catalog Object</a></li>
+		          <li><a href="/add/webpage">Webpage</a></li>
+		          <li><a href="/add/zettel">Article</a></li>
+		          <li class="divider"></li>
+		          <li><a href="/add/part">Part</a></li>
+		          <li class="divider"></li>
+		          <li><a href="/add/file">File</a></li>
+		        </ul>
+		      </li>
+		    </ul>
+	  	</div><!-- /.navbar-collapse -->
+	</nav>
+		<div class="container-fluid">	
+		
+			<div class="row">
+			<div class="col-md-1">
 				</div>
-        @content
-		</div>
+				<div class="col-md-2">
+					<div class="row facets">
+						<h3 class="facets_header">Sacherschließung</h1>
+						<ol class="facets_nav" >
+						<li><a href="">Medizin</a></li>
+						<li><a href="">Landwirtschaft</a></li>
+						</ol>
+						
+		                <a class="more_facets_link" href="#more_facets_subject_exact" data-for="facets_subject_exact">
+		                    <span class="more_facets_text">
+		                        All <span class="fa fa-caret-down"></i>
+		                    </span>
+                		</a>
+                		
+                		<h3 class="facets_header">Sammlung</h1>
+						<ol class="facets_nav" >
+						<li><a href="">Institut für Radiologie</a></li>
+						<li><a href="">Institut für Stammzellforschung</a></li>
+						</ol>
+						
+		                <a class="more_facets_link" href="#more_facets_collection_exact" data-for="facets_collection_exact">
+		                    <span class="more_facets_text">
+		                        All <span class="fa fa-caret-down"></i>
+		                    </span>
+                		</a>
+                
+					</div>
+				</div>
+				<div class="col-md-7">	
+					<ul class="nav nav-tabs">
+					 <li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
+					  <li><a href="#2a" data-toggle="tab">Download</a></li>
+					</ul> 
+					<div class="tab-content">
+				  		<div class="tab-pane active" id="1a">
+			        		@content
+			        	</div>
+		       
+				  		<div class="tab-pane" id="2a">
+		
+			        	</div>
+		        	</div>
+		        </div>
+		        <div class="col-md-2"></div>
+	       </div>
+	   </div>
+	
+	   <footer style="background-color:#f8f8f8;"/>
+		   <img src="/public/images/books.jpg"  width="100%" height="160px"/>
+		   <ul style="list-style:none;">
+		   <li>
+		   <a href="">About</a></li>
+		    <li>
+		   <a href="">Contact</a></li>
+		    <li>
+		    <li>
+		   <a href="">Software</a></li>
+		   <a href="/public/html/impressum.html">Impressum</a>
+		   </li></ul>
+	   </footer>
 	</body>
 </html>

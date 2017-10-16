@@ -17,7 +17,9 @@
 package archive.search;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import play.Play;
 import actions.Transform;
 import archive.fedora.CopyUtils;
@@ -53,6 +57,8 @@ import archive.fedora.CopyUtils;
  * 
  */
 public class Search {
+
+	Map<String, Object> facets;
 
 	@SuppressWarnings("serial")
 	class InvalidRangeException extends RuntimeException {
@@ -74,6 +80,7 @@ public class Search {
 
 	Search(Client client) {
 		this.client = client;
+		initFacets();
 	}
 
 	void init(String[] index, String config) {
@@ -194,10 +201,11 @@ public class Search {
 
 	SearchHits query(String[] index, QueryBuilder query, int from, int until) {
 		refresh();
-		SearchResponse response = client.prepareSearch(index).setQuery(query)
-				.setFrom(from).setSize(until - from).execute().actionGet();
+		SearchResponse response =
+				client.prepareSearch(index).setQuery(query).setFrom(from)
+						.setSize(until - from).setFacets(facets).execute().actionGet();
 		return response.getHits();
-	} 
+	}
 
 	Map<String, Object> getSettings(String index, String type) {
 		try {
@@ -302,4 +310,15 @@ public class Search {
 		client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 
+	private void initFacets() {
+
+		ObjectMapper mapper = new ObjectMapper();
+		try (InputStream in =
+				play.Play.application().resourceAsStream("facets.conf")) {
+			Map map = mapper.readValue(in, Map.class);
+			facets = (Map<String, Object>) map.get("facets");
+		} catch (Exception e) {
+			facets = new HashMap<>();
+		}
+	}
 }
