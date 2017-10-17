@@ -1,6 +1,11 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@(title: String)(content: Html)
+@import org.elasticsearch.search.aggregations.Aggregation
+@import org.elasticsearch.search.aggregations.Aggregations
+@import org.elasticsearch.search.aggregations.bucket.terms.Terms
+@import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket
+
+@(title: String,aggregations:Aggregations)(content: Html)
 
 <!DOCTYPE html>
 
@@ -67,30 +72,11 @@
 				</div>
 				<div class="col-md-2">
 					<div class="row facets">
-						<h3 class="facets_header">Sacherschließung</h1>
-						<ol class="facets_nav" >
-						<li><a href="">Medizin</a></li>
-						<li><a href="">Landwirtschaft</a></li>
-						</ol>
-						
-		                <a class="more_facets_link" href="#more_facets_subject_exact" data-for="facets_subject_exact">
-		                    <span class="more_facets_text">
-		                        All <span class="fa fa-caret-down"></i>
-		                    </span>
-                		</a>
+					
+				@loadFacets(aggregations)	
+				
                 		
-                		<h3 class="facets_header">Sammlung</h1>
-						<ol class="facets_nav" >
-						<li><a href="">Institut für Radiologie</a></li>
-						<li><a href="">Institut für Stammzellforschung</a></li>
-						</ol>
-						
-		                <a class="more_facets_link" href="#more_facets_collection_exact" data-for="facets_collection_exact">
-		                    <span class="more_facets_text">
-		                        All <span class="fa fa-caret-down"></i>
-		                    </span>
-                		</a>
-                
+                		
 					</div>
 				</div>
 				<div class="col-md-7">	
@@ -127,3 +113,27 @@
 	   </footer>
 	</body>
 </html>
+
+@loadFacets(aggs:Aggregations)={
+
+	@aggs match {
+		case a : Aggregations =>{
+			@for(agg  <- aggs.asList()) {
+							<h3 class="facets_header">@models.Globals.profile.getEtikettByName(agg.getName()).getLabel()</h1>
+							
+								<ol class="facets_nav" >
+					
+								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
+									<li> <a href="">@b.getKey() (@b.getDocCount())</a></li>
+								}
+							
+				                <a class="more_facets_link" href="#more_facets_subject_exact" data-for="facets_subject_exact">
+				                    <span class="more_facets_text">
+				                        All <span class="fa fa-caret-down"></i>
+				                    </span>
+		                		</a>
+			}
+		}
+		case _ =>{}	
+	}
+}

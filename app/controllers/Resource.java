@@ -35,8 +35,14 @@ import java.util.stream.Collectors;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+
 import org.openrdf.rio.RDFFormat;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -189,9 +195,17 @@ public class Resource extends MyController {
 				return Promise
 						.promise(() -> ok(frlResource.render(item, Globals.namespaces[0])));
 			} else {
+				SearchResponse response = Globals.search.query(
+						new String[] {
+								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
+								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
+						"@id:\"" + pid + "\"", 0, 1);
+				SearchHits hits = response.getHits();
+
+				Aggregations aggs = response.getAggregations();
 				Map<String, Object> item = read.getMapWithParts2(node);
-				return Promise
-						.promise(() -> ok(resource.render(item, Globals.namespaces[0])));
+				return Promise.promise(
+						() -> ok(resource.render(item, aggs, Globals.namespaces[0])));
 			}
 		}
 		if (request().accepts("application/rdf+xml"))
@@ -571,7 +585,7 @@ public class Resource extends MyController {
 				List<Map<String, Object>> list =
 						result.stream().map(n -> n.getLd2()).collect(Collectors.toList());
 				if (request().accepts("text/html")) {
-					return ok(resource.render(list, Globals.namespaces[0]));
+					return ok(resources.render(list, Globals.namespaces[0]));
 				} else {
 					return getJsonResult(list);
 				}
@@ -588,16 +602,19 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(null, node -> {
 			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
 			try {
-				SearchHits hits = Globals.search.query(
+				SearchResponse response = Globals.search.query(
 						new String[] {
 								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
 								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
 						queryString, from, until);
+				SearchHits hits = response.getHits();
+
+				Aggregations aggs = response.getAggregations();
 				List<SearchHit> list = Arrays.asList(hits.getHits());
 				hitMap = read.hitlistToMap(list);
 				if (request().accepts("text/html")) {
-					return ok(search.render(hitMap, queryString, hits.getTotalHits(),
-							from, until, Globals.namespaces[0]));
+					return ok(search.render(hitMap, aggs, queryString,
+							hits.getTotalHits(), from, until, Globals.namespaces[0]));
 				} else {
 					return getJsonResult(hitMap);
 				}
@@ -721,7 +738,7 @@ public class Resource extends MyController {
 					return ok(frlResource.render(read.getMapWithParts2(node),
 							Globals.namespaces[0]));
 				}
-				return ok(resource.render(read.getMapWithParts2(node),
+				return ok(resource.render(read.getMapWithParts2(node), null,
 						Globals.namespaces[0]));
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
@@ -958,7 +975,8 @@ public class Resource extends MyController {
 				Node result = read.getLastModifiedChild(node, contentType);
 				if (request().accepts("text/html")) {
 					response().setHeader("Content-Type", "text/html; charset=utf-8");
-					return ok(resource.render(result.getLd2(), Globals.namespaces[0]));
+					return ok(
+							resource.render(result.getLd2(), null, Globals.namespaces[0]));
 				} else {
 					return getJsonResult(result);
 				}

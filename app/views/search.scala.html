@@ -1,6 +1,9 @@
-@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+@*Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
 @import views.Helper 
-@(hits: List[Map[String,Object]],q: String,totalNum: Long,from: Int, until: Int,namespace:String)
+@import org.elasticsearch.search.aggregations.Aggregations
+
+@(hits: List[Map[String,Object]],aggregations:Aggregations,q: String,totalNum: Long,from: Int, until: Int,namespace:String)
 
 
 @pagination(allHits: Long,from: Int,until: Int)={
@@ -25,7 +28,7 @@
 </nav>
 }
 
-@main("Regal Suche") {
+@main("Regal Suche",aggregations) {
 <div class="container">
 	<div class="row">
 		<div class="col-md-5">@pagination(totalNum,from,until)</div>

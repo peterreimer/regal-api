@@ -777,13 +777,14 @@ public class Read extends RegalAction {
 		List<SearchHit> result = new ArrayList<SearchHit>();
 		int step = 100;
 		int start = 0;
-		SearchHits hits =
-				Globals.search.query(new String[] { namespace }, query, start, step);
+		SearchHits hits = Globals.search
+				.query(new String[] { namespace }, query, start, step).getHits();
 		long size = hits.getTotalHits();
 
 		result.addAll(Arrays.asList((hits.getHits())));
 		for (int i = 0; i < (size - (size % step)); i += step) {
-			hits = Globals.search.query(new String[] { namespace }, query, i, step);
+			hits = Globals.search.query(new String[] { namespace }, query, i, step)
+					.getHits();
 			result.addAll(Arrays.asList((hits.getHits())));
 		}
 		return result;

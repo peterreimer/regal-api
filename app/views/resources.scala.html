@@ -5,7 +5,7 @@
 @(hits: List[Map[String,Object]],namespace: String)
 
 
-@main("") {
+@main("",null) {
 
 		@for( hit <- hits){
 			@tags.getTitle(hit,namespace)

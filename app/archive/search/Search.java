@@ -58,7 +58,7 @@ import archive.fedora.CopyUtils;
  */
 public class Search {
 
-	Map<String, Object> facets;
+	Map<String, Object> aggregations;
 
 	@SuppressWarnings("serial")
 	class InvalidRangeException extends RuntimeException {
@@ -80,7 +80,7 @@ public class Search {
 
 	Search(Client client) {
 		this.client = client;
-		initFacets();
+		initAggregations();
 	}
 
 	void init(String[] index, String config) {
@@ -192,19 +192,21 @@ public class Search {
 		return response.getHits();
 	}
 
-	SearchHits query(String[] index, String queryString, int from, int until) {
+	SearchResponse query(String[] index, String queryString, int from,
+			int until) {
 		refresh();
 		play.Logger.debug("Search for " + queryString);
 		QueryBuilder query = QueryBuilders.queryString(queryString);
 		return query(index, query, from, until);
 	}
 
-	SearchHits query(String[] index, QueryBuilder query, int from, int until) {
+	SearchResponse query(String[] index, QueryBuilder query, int from,
+			int until) {
 		refresh();
-		SearchResponse response =
-				client.prepareSearch(index).setQuery(query).setFrom(from)
-						.setSize(until - from).setFacets(facets).execute().actionGet();
-		return response.getHits();
+		SearchResponse response = client.prepareSearch(index).setQuery(query)
+				.setFrom(from).setSize(until - from).setAggregations(aggregations)
+				.execute().actionGet();
+		return response;
 	}
 
 	Map<String, Object> getSettings(String index, String type) {
@@ -310,15 +312,15 @@ public class Search {
 		client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 
-	private void initFacets() {
+	private void initAggregations() {
 
 		ObjectMapper mapper = new ObjectMapper();
 		try (InputStream in =
-				play.Play.application().resourceAsStream("facets.conf")) {
+				play.Play.application().resourceAsStream("aggregations.conf")) {
 			Map map = mapper.readValue(in, Map.class);
-			facets = (Map<String, Object>) map.get("facets");
+			aggregations = (Map<String, Object>) map.get("aggs");
 		} catch (Exception e) {
-			facets = new HashMap<>();
+			aggregations = new HashMap<>();
 		}
 	}
 }
