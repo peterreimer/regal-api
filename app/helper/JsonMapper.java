@@ -266,7 +266,7 @@ public class JsonMapper {
 			}
 			rdf.put(hasData, hasDataMap);
 		}
-		rdf.put("@context", profile.getContext().get("@context"));
+		rdf.put("@context", "http://api.localhost/context.json");
 		postprocessing(rdf);
 		rdf.remove("note");
 		return rdf;
@@ -392,8 +392,29 @@ public class JsonMapper {
 			postProcess(rdf, "successor");
 			postProcess(rdf, "primaryForm");
 			postProcess(rdf, "natureOfContent");
+			postProcessContribution(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
+		}
+	}
+
+	private void postProcessContribution(Map<String, Object> rdf) {
+		try {
+			Collection<Map<String, Object>> contributions =
+					(Collection<Map<String, Object>>) rdf.get("contribution");
+			for (Map<String, Object> contribution : contributions) {
+				Collection<Map<String, Object>> agents =
+						(Collection<Map<String, Object>>) contribution.get("agent");
+				if (agents != null) {
+					for (Map<String, Object> agent : agents) {
+						String prefLabel = findLabel(agent);
+						agent.put(PREF_LABEL, prefLabel);
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			play.Logger.debug("Problem processing key contribution.agent", e);
 		}
 	}
 
@@ -783,7 +804,7 @@ public class JsonMapper {
 			rdf.put(hasData, hasDataMap);
 		}
 
-		rdf.put("@context", profile.getContext().get("@context"));
+		rdf.put("@context", "http://api.localhost/context.json");
 		postprocessing(rdf);
 		return rdf;
 	}

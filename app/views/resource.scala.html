@@ -10,7 +10,7 @@
 
 		
 			@tags.getTitle(hit,namespace)
-			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
+			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
 
 	
 }

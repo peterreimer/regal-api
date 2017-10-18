@@ -535,7 +535,7 @@
 
 
 @getLabel(key: String)={
-		@hit.get("@context") match{
+		@Globals.profile.getContext().get("@context") match{
 			case map : Map[String,Object] => {
 				@map.get(key) match { 
 					case keyMap : Map[String,Object]=> {

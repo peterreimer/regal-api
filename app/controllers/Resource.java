@@ -205,7 +205,7 @@ public class Resource extends MyController {
 				Aggregations aggs = response.getAggregations();
 				Map<String, Object> item = read.getMapWithParts2(node);
 				return Promise.promise(
-						() -> ok(resource.render(item, aggs, Globals.namespaces[0])));
+						() -> ok(resource.render(item, null, Globals.namespaces[0])));
 			}
 		}
 		if (request().accepts("application/rdf+xml"))
@@ -222,13 +222,13 @@ public class Resource extends MyController {
 				String result = "";
 				if (request().accepts("application/rdf+xml")) {
 					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(node.toString().getBytes("utf-8")),
+							new ByteArrayInputStream(node.toString2().getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
 					response().setContentType("application/rdf+xml");
 					return ok(result);
 				} else if (request().accepts("text/plain")) {
 					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(node.toString().getBytes("utf-8")),
+							new ByteArrayInputStream(node.toString2().getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.NTRIPLES, node.getAggregationUri());
 					response().setContentType("text/plain");
 					return ok(result);
@@ -749,7 +749,7 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asJson(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
-			return getJsonResult(node);
+			return getJsonResult(node.getLd());
 		});
 	}
 
