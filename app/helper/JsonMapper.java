@@ -42,6 +42,7 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
+import play.Play;
 
 /**
  * @author jan schnasse
@@ -266,7 +267,7 @@ public class JsonMapper {
 			}
 			rdf.put(hasData, hasDataMap);
 		}
-		rdf.put("@context", "http://api.localhost/context.json");
+		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
 		postprocessing(rdf);
 		rdf.remove("note");
 		return rdf;
@@ -804,7 +805,7 @@ public class JsonMapper {
 			rdf.put(hasData, hasDataMap);
 		}
 
-		rdf.put("@context", "http://api.localhost/context.json");
+		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
 		postprocessing(rdf);
 		return rdf;
 	}
