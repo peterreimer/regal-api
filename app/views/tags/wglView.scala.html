@@ -1,0 +1,63 @@
+@(data:DublinCoreData,hit:Map[String,Object])
+@import views.Title
+<oai_wgl:wgl
+	xmlns:oai_wgl="http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/"
+	xmlns:wgl="http://www.leibnizopen.de/fileadmin/default/documents/wgl_dc/"
+	xmlns:doc="http://www.lyncode.com/xoai"
+	xmlns:xalan="http://xml.apache.org/xslt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/ http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/oai_wgl.xsd">
+
+@field(list: Seq[String],fieldname: String)() = {
+@for(i <- list){<@fieldname>@i</@fieldname>}
+}
+
+@fieldCombined(list: Seq[String],fieldname: String)() = {
+@if(list.size>0){
+	<@fieldname>
+	@for((item, index) <- list.zipWithIndex) {
+		@item 
+		@if(index != list.size-1){
+			; 
+		}
+	}
+	</@fieldname>
+}
+}
+
+@import models.Pair
+@typedField(list: Seq[Pair[String,String]],fieldname: String)() = {
+@for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
+}
+
+<wgl:title>
+@Html(Title.getTitle(hit))
+@if(hit.contains("corporateBodyForTitle")){
+	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
+}
+@if(hit.contains("P60493")){
+	: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
+ }
+</wgl:title>
+
+@for(i <- data.getDate()){
+<wgl:date>
+@i.substring(0,4)
+</wgl:date>
+}
+@field(data.getCreator(),"wgl:creator")
+@field(data.getLanguage(),"wgl:language")
+@field(data.getContributor(),"wgl:contributor")
+@field(data.getType(),"wgl:type")
+@fieldCombined(data.getSubject(),"wgl:subject")
+@field(data.getDescription(),"wgl:description")
+@field(data.getSource(),"wgl:source")
+@field(data.getCoverage(),"wgl:coverage")
+@field(data.getWglContributor(),"wgl:wglcontributor")
+@field(data.getWglSubject(),"wgl:wglsubject")
+@field(data.getRights(),"wgl:rights")
+@typedField(data.getIdentifier(),"wgl:identifier")
+<wgl:wgltype>
+Zeitschriftenartikel
+</wgl:wgltype>
+</oai_wgl:wgl>
