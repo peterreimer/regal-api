@@ -18,16 +18,16 @@ package de.hbz.lobid.helper;
 
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Collection;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Statement;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 /**
  * @author Jan Schnasse
@@ -40,11 +40,12 @@ public class RdfUtils {
 	 * @param baseUrl see sesame docu
 	 * @return a Graph representing the rdf in the input stream
 	 */
-	public static Graph readRdfToGraph(final InputStream inputStream,
-			final RDFFormat inf, final String baseUrl) {
+	public static Collection<Statement> readRdfToGraph(
+			final InputStream inputStream, final RDFFormat inf,
+			final String baseUrl) {
 		try {
 			final RDFParser rdfParser = Rio.createParser(inf);
-			final org.openrdf.model.Graph myGraph = new TreeModel();
+			Collection<Statement> myGraph = new TreeModel();
 			final StatementCollector collector = new StatementCollector(myGraph);
 			rdfParser.setRDFHandler(collector);
 			rdfParser.parse(inputStream, baseUrl);
@@ -63,7 +64,7 @@ public class RdfUtils {
 	 */
 	public static String readRdfToString(InputStream in, RDFFormat inf,
 			RDFFormat outf, String baseUrl) {
-		Graph myGraph = null;
+		Collection<Statement> myGraph = null;
 		myGraph = readRdfToGraph(in, inf, baseUrl);
 		return graphToString(myGraph, outf);
 	}
@@ -75,7 +76,8 @@ public class RdfUtils {
 	 * @param outf the expected output format
 	 * @return a rdf string
 	 */
-	public static String graphToString(Graph myGraph, RDFFormat outf) {
+	public static String graphToString(Collection<Statement> myGraph,
+			RDFFormat outf) {
 		StringWriter out = new StringWriter();
 		RDFWriter writer = Rio.createWriter(outf, out);
 		try {

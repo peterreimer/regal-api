@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
 

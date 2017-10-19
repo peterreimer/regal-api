@@ -1,13 +1,15 @@
 package controllers;
 
+import java.util.Collection;
+
 import javax.ws.rs.PathParam;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -24,20 +26,20 @@ public class AuthorsController extends MyController {
 	public static Promise<Result> getAuthorsRdf(
 			@PathParam("authorname") String authorname) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
-		Graph g = new TreeModel();
+		Collection<Statement> g = new TreeModel();
 		ValueFactory f = RdfUtils.valueFactory;
-		URI subj = f.createURI(Globals.protocol + Globals.server + "/authors/"
+		IRI subj = f.createIRI(Globals.protocol + Globals.server + "/authors/"
 				+ RdfUtils.urlEncode(authorname));
-		URI pred = f.createURI("http://www.w3.org/2004/02/skos/core#prefLabel");
+		IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
 		Literal obj = f.createLiteral(RdfUtils.urlDecode(authorname));
 		g.add(f.createStatement(subj, pred, obj));
 		g.add(f.createStatement(subj,
-				f.createURI(
+				f.createIRI(
 						"http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson"),
 				obj));
 		g.add(f.createStatement(subj,
-				f.createURI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-				f.createURI(
+				f.createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+				f.createIRI(
 						"http://d-nb.info/standards/elementset/gnd#UndifferentiatedPerson")));
 		return Promise.promise(() -> {
 			String body = "";

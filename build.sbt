@@ -28,27 +28,8 @@ libraryDependencies ++= Seq(
   "com.sun.jersey.contribs" % "jersey-apache-client" % "1.18.1",
   "com.sun.jersey" % "jersey-json" % "1.18.1",
   "com.sun.jersey" % "jersey-bundle" % "1.18.1",
-  "org.openrdf.sesame" % "sesame-repository-api" % "2.7.10" ,
-  "org.openrdf.sesame" % "sesame-core" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-rio" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-sail" % "2.7.10",
-  "org.openrdf.sesame" % "sesame" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-http-client" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-rio-ntriples" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-rio-api" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-rio-rdfxml" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-rio-n3" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-rio-turtle" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-queryresultio-api" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-queryresultio" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-query" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-model" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-http-protocol" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-http" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-repository-sail" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-sail-memory" % "2.7.10",
-  "org.openrdf.sesame" % "sesame-sail-nativerdf" % "2.7.10",
-  "com.github.jsonld-java" % "jsonld-java-sesame" % "0.5.1" ,
+  "org.eclipse.rdf4j" % "rdf4j-runtime" % "2.2.2" exclude("org.apache.lucene" , "lucene-core") ,
+  "com.github.jsonld-java" % "jsonld-java" % "0.11.1",
   "pl.matisoft" %% "swagger-play24" % "1.4",
   "com.yourmediashelf.fedora.client" % "fedora-client" % "0.7",
   "com.yourmediashelf.fedora.client" % "fedora-client-core" % "0.7",
@@ -64,8 +45,10 @@ libraryDependencies ++= Seq(
   "com.fasterxml" %"jackson-module-json-org" %"0.9.1",
   "com.fasterxml.jackson.core" %"jackson-databind" %"2.6.3",
   "com.fasterxml.jackson.dataformat" %"jackson-dataformat-xml" %"2.6.3",
-  "javax.mail" % "mail" % "1.4.2"
+  "javax.mail" % "mail" % "1.4.2",
+  "org.apache.lucene" % "lucene-core" % "4.7.2"
 )
+
 
 val root = (project in file(".")).enablePlugins(PlayJava)
 

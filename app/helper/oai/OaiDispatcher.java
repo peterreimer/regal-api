@@ -28,9 +28,9 @@ import models.Link;
 import models.Node;
 import models.Transformer;
 
-import org.openrdf.model.Statement;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

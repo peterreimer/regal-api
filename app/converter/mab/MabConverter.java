@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import models.MabRecord;
 
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de

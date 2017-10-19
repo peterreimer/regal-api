@@ -49,7 +49,7 @@ import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
 import play.Logger;

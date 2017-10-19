@@ -28,6 +28,7 @@ import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,15 +39,14 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -364,7 +364,7 @@ public class Modify extends RegalAction {
 	}
 
 	private String rewriteContent(String content, String pid) {
-		Graph graph = RdfUtils.readRdfToGraph(
+		Collection<Statement> graph = RdfUtils.readRdfToGraph(
 				new ByteArrayInputStream(content.getBytes()), RDFFormat.NTRIPLES, "");
 		Iterator<Statement> it = graph.iterator();
 		String subj = pid;
@@ -388,18 +388,16 @@ public class Modify extends RegalAction {
 					.equals(st.getPredicate().stringValue());
 		});
 		graph = RdfUtils.rewriteSubject(subj, pid, graph);
+		ValueFactory vf = SimpleValueFactory.getInstance();
+		Resource s = vf.createIRI(pid + ".rdf");
+		IRI p = vf.createIRI("http://xmlns.com/foaf/0.1/primaryTopic");
+		Resource o = vf.createIRI(pid);
+		graph.add(vf.createStatement(s, p, o));
 
-		Resource s = graph.getValueFactory().createURI(pid + ".rdf");
-		URI p = graph.getValueFactory()
-				.createURI("http://xmlns.com/foaf/0.1/primaryTopic");
-		Resource o = graph.getValueFactory().createURI(pid);
-		graph.add(graph.getValueFactory().createStatement(s, p, o));
-
-		s = graph.getValueFactory().createURI(pid);
-		p = graph.getValueFactory()
-				.createURI("http://xmlns.com/foaf/0.1/isPrimaryTopicOf");
-		o = graph.getValueFactory().createURI(pid + ".rdf");
-		graph.add(graph.getValueFactory().createStatement(s, p, o));
+		s = vf.createIRI(pid);
+		p = vf.createIRI("http://xmlns.com/foaf/0.1/isPrimaryTopicOf");
+		o = vf.createIRI(pid + ".rdf");
+		graph.add(vf.createStatement(s, p, o));
 		return RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
 
 	}
@@ -453,7 +451,8 @@ public class Modify extends RegalAction {
 		URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
 		RDFFormat inFormat = RDFFormat.TURTLE;
 		String accept = "text/turtle";
-		Graph graph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+		Collection<Statement> graph =
+				RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
 		Iterator<Statement> it = graph.iterator();
 		while (it.hasNext()) {
 			Statement s = it.next();
@@ -474,7 +473,8 @@ public class Modify extends RegalAction {
 		URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
 		RDFFormat inFormat = RDFFormat.TURTLE;
 		String accept = "text/turtle";
-		Graph graph = RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
+		Collection<Statement> graph =
+				RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
 		Iterator<Statement> it = graph.iterator();
 		while (it.hasNext()) {
 			Statement s = it.next();
@@ -496,12 +496,13 @@ public class Modify extends RegalAction {
 			URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
 			RDFFormat inFormat = RDFFormat.TURTLE;
 			String accept = "text/turtle";
-			Graph graph =
+			Collection<Statement> graph =
 					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
 			ValueFactory f = RdfUtils.valueFactory;
-			Statement parallelEditionStatement = f.createStatement(f.createURI(pid),
-					f.createURI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createURI(lobidUri));
+			;
+			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
+					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
+					f.createIRI(lobidUri));
 			graph.add(parallelEditionStatement);
 			tryToImportOrderingFromLobidData2(node, graph, f);
 			tryToGetTypeFromLobidData2(node, graph, f);
@@ -522,12 +523,13 @@ public class Modify extends RegalAction {
 			URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
 			RDFFormat inFormat = RDFFormat.TURTLE;
 			String accept = "text/turtle";
-			Graph graph =
+			Collection<Statement> graph =
 					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
 			ValueFactory f = RdfUtils.valueFactory;
-			Statement parallelEditionStatement = f.createStatement(f.createURI(pid),
-					f.createURI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createURI(lobidUri));
+			;
+			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
+					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
+					f.createIRI(lobidUri));
 			graph.add(parallelEditionStatement);
 			return RdfUtils.graphToString(
 					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
@@ -537,14 +539,14 @@ public class Modify extends RegalAction {
 
 	}
 
-	private void tryToImportOrderingFromLobidData2(Node node, Graph graph,
-			ValueFactory f) {
+	private void tryToImportOrderingFromLobidData2(Node node,
+			Collection<Statement> graph, ValueFactory f) {
 		try {
 			String ordering = getAuthorOrdering(node);
 			if (ordering != null) {
 				Statement contributorOrderStatement =
-						f.createStatement(f.createURI(node.getPid()),
-								f.createURI("http://purl.org/lobid/lv#contributorOrder"),
+						f.createStatement(f.createIRI(node.getPid()),
+								f.createIRI("http://purl.org/lobid/lv#contributorOrder"),
 								f.createLiteral(ordering));
 				graph.add(contributorOrderStatement);
 			}
@@ -553,17 +555,17 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private void tryToGetTypeFromLobidData2(Node node, Graph graph,
-			ValueFactory f) {
+	private void tryToGetTypeFromLobidData2(Node node,
+			Collection<Statement> graph, ValueFactory f) {
 		try {
 			List<String> type = getType(node);
 			if (!type.isEmpty()) {
 				for (String t : type) {
 					Statement typeStatement =
-							f.createStatement(f.createURI(node.getPid()),
-									f.createURI(
+							f.createStatement(f.createIRI(node.getPid()),
+									f.createIRI(
 											"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-									f.createURI(t));
+									f.createIRI(t));
 					graph.add(typeStatement);
 				}
 			}
@@ -971,9 +973,9 @@ public class Modify extends RegalAction {
 		List<String> parents = RdfUtils.findRdfObjects(node.getPid(), pred,
 				metadata, RDFFormat.NTRIPLES);
 		for (String p : parents) {
-			ValueFactory v = new ValueFactoryImpl();
+			ValueFactory v = RdfUtils.valueFactory;
 			String label = getEtikett(p);
-			Statement st = v.createStatement(v.createURI(p), v.createURI(PREF_LABEL),
+			Statement st = v.createStatement(v.createIRI(p), v.createIRI(PREF_LABEL),
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
 			catalogParents.add(st);
 		}
@@ -1010,10 +1012,10 @@ public class Modify extends RegalAction {
 						gndId = gndEndpoint + "2006655-7";
 					}
 					play.Logger.trace("Add data from " + gndId);
-					ValueFactory v = new ValueFactoryImpl();
-					Statement link = v.createStatement(v.createURI(node.getPid()),
-							v.createURI("http://dbpedia.org/ontology/institution"),
-							v.createURI(gndId));
+					ValueFactory v = RdfUtils.valueFactory;
+					Statement link = v.createStatement(v.createIRI(node.getPid()),
+							v.createIRI("http://dbpedia.org/ontology/institution"),
+							v.createIRI(gndId));
 					result.add(link);
 					result.addAll(getStatements(gndId));
 				}
@@ -1036,9 +1038,10 @@ public class Modify extends RegalAction {
 				boolean isLiteral = s.getObject() instanceof Literal;
 				if (!(s.getSubject() instanceof BNode)) {
 					if (isLiteral) {
-						ValueFactory v = new ValueFactoryImpl();
+						ValueFactory v = RdfUtils.valueFactory;
+						;
 						play.Logger.trace("Get data from " + uri);
-						Statement newS = v.createStatement(v.createURI(uri),
+						Statement newS = v.createStatement(v.createIRI(uri),
 								s.getPredicate(), v.createLiteral(Normalizer.normalize(
 										s.getObject().stringValue(), Normalizer.Form.NFKC)));
 						filteredStatements.add(newS);
@@ -1066,11 +1069,12 @@ public class Modify extends RegalAction {
 							+ hit
 									.at("/orcid-profile/orcid-bio/personal-details/given-names/value")
 									.asText();
-			ValueFactory v = new ValueFactoryImpl();
+			ValueFactory v = RdfUtils.valueFactory;
+			;
 			Literal object =
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
 			Statement newS =
-					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
+					v.createStatement(v.createIRI(uri), v.createIRI(PREF_LABEL), object);
 			play.Logger.trace("Get data from " + uri + " " + newS);
 			filteredStatements.add(newS);
 		} catch (Exception e) {
@@ -1092,11 +1096,11 @@ public class Modify extends RegalAction {
 				map.put(URLDecoder.decode(keyValue[0], "UTF-8"),
 						URLDecoder.decode(keyValue[1], "UTF-8"));
 			}
-			ValueFactory v = new ValueFactoryImpl();
+			ValueFactory v = RdfUtils.valueFactory;
 			Literal object = v.createLiteral(Normalizer.normalize(
 					map.get("mlat") + "," + map.get("mlon"), Normalizer.Form.NFKC));
 			Statement newS =
-					v.createStatement(v.createURI(uri), v.createURI(PREF_LABEL), object);
+					v.createStatement(v.createIRI(uri), v.createIRI(PREF_LABEL), object);
 			play.Logger.trace("Get data from " + uri + " " + newS);
 			filteredStatements.add(newS);
 		} catch (Exception e) {
@@ -1108,7 +1112,7 @@ public class Modify extends RegalAction {
 
 	private List<Statement> getGeonamesStatements(String uri) {
 		play.Logger.trace("GET " + uri);
-		ValueFactory v = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		List<Statement> filteredStatements = new ArrayList<Statement>();
 		List<Literal> alternateNames = new ArrayList<Literal>();
 		try {
@@ -1118,15 +1122,15 @@ public class Modify extends RegalAction {
 				if (!(s.getSubject() instanceof BNode)) {
 					if (isLiteral) {
 						Literal l = (Literal) s.getObject();
-						Literal object = v.createLiteral(Normalizer
+						Literal object = vf.createLiteral(Normalizer
 								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
-								l.getLanguage());
+								l.getLanguage().get());
 						Statement newS =
-								v.createStatement(v.createURI(uri), s.getPredicate(), object);
+								vf.createStatement(vf.createIRI(uri), s.getPredicate(), object);
 						play.Logger.trace("Get data from " + uri + " " + newS);
 
 						if (alternateName.equals(s.getPredicate().stringValue())) {
-							newS = v.createStatement(v.createURI(uri), v.createURI(
+							newS = vf.createStatement(vf.createIRI(uri), vf.createIRI(
 									s.getPredicate().stringValue() + "_" + object.getLanguage()),
 									object);
 						}
@@ -1143,7 +1147,7 @@ public class Modify extends RegalAction {
 
 	private List<Statement> getAgrovocStatements(String uri) {
 		play.Logger.trace("GET " + uri);
-		ValueFactory v = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		List<Statement> filteredStatements = new ArrayList<Statement>();
 		List<Literal> prefLabel = new ArrayList<Literal>();
 		try {
@@ -1153,20 +1157,20 @@ public class Modify extends RegalAction {
 				if (!(s.getSubject() instanceof BNode)) {
 					if (isLiteral) {
 						Literal l = (Literal) s.getObject();
-						Literal object = v.createLiteral(Normalizer
+						Literal object = vf.createLiteral(Normalizer
 								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
-								l.getLanguage());
+								l.getLanguage().get());
 						Statement newS =
-								v.createStatement(v.createURI(uri), s.getPredicate(), object);
+								vf.createStatement(vf.createIRI(uri), s.getPredicate(), object);
 						play.Logger.trace("Get data from " + uri + " " + newS);
 
 						if (PREF_LABEL.equals(s.getPredicate().stringValue())) {
 							if ("de".equals(object.getLanguage())) {
-								newS = v.createStatement(v.createURI(uri), s.getPredicate(),
+								newS = vf.createStatement(vf.createIRI(uri), s.getPredicate(),
 										object);
 								filteredStatements.add(newS);
 							}
-							newS = v.createStatement(v.createURI(uri), v.createURI(
+							newS = vf.createStatement(vf.createIRI(uri), vf.createIRI(
 									s.getPredicate().stringValue() + "_" + object.getLanguage()),
 									object);
 						}
@@ -1184,25 +1188,25 @@ public class Modify extends RegalAction {
 	private List<Statement> getListAsStatements(List<Literal> list, String uri,
 			String predicate) {
 		List<Statement> listStatements = new ArrayList<Statement>();
-		ValueFactory v = new ValueFactoryImpl();
-		BNode head = v.createBNode();
+		ValueFactory vf = SimpleValueFactory.getInstance();
+		BNode head = vf.createBNode();
 		Statement newS =
-				v.createStatement(v.createURI(uri), v.createURI(predicate), head);
+				vf.createStatement(vf.createIRI(uri), vf.createIRI(predicate), head);
 		listStatements.add(newS);
 
 		Resource cur = head;
 		for (Literal l : list) {
-			BNode r = v.createBNode();
-			Statement linkToRest = v.createStatement(cur, v.createURI(rest), r);
-			Statement linkToValue = v.createStatement(cur, v.createURI(first), l);
+			BNode r = vf.createBNode();
+			Statement linkToRest = vf.createStatement(cur, vf.createIRI(rest), r);
+			Statement linkToValue = vf.createStatement(cur, vf.createIRI(first), l);
 			cur = r;
 			listStatements.add(linkToRest);
 			listStatements.add(linkToValue);
 		}
 		Statement endOfList = listStatements.get(listStatements.size() - 1);
 		listStatements.remove(listStatements.size() - 1);
-		Statement linkToNill = v.createStatement(endOfList.getSubject(),
-				v.createURI(rest), v.createURI(nil));
+		Statement linkToNill = vf.createStatement(endOfList.getSubject(),
+				vf.createIRI(rest), vf.createIRI(nil));
 		listStatements.add(linkToNill);
 		return listStatements;
 	}
@@ -1518,7 +1522,8 @@ public class Modify extends RegalAction {
 	private static String getAuthorOrdering(Node node) {
 		try (InputStream in =
 				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
-			Graph myGraph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+			Collection<Statement> myGraph =
+					RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			Iterator<Statement> statements = myGraph.iterator();
 			while (statements.hasNext()) {
 				Statement curStatement = statements.next();
@@ -1538,7 +1543,8 @@ public class Modify extends RegalAction {
 		try (InputStream in =
 				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
 			List<String> result = new ArrayList<>();
-			Graph myGraph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+			Collection<Statement> myGraph =
+					RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			Iterator<Statement> statements = myGraph.iterator();
 			while (statements.hasNext()) {
 				Statement curStatement = statements.next();
