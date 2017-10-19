@@ -52,6 +52,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BasicAuth;
 import actions.BulkAction;
@@ -220,15 +221,18 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
 				String result = "";
+				Map<String, Object> rdf = node.getLd2();
+				rdf.put("@context", Globals.profile.getContext().get("@context"));
+				String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
 				if (request().accepts("application/rdf+xml")) {
 					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(node.toString2().getBytes("utf-8")),
+							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
 					response().setContentType("application/rdf+xml");
 					return ok(result);
 				} else if (request().accepts("text/plain")) {
 					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(node.toString2().getBytes("utf-8")),
+							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.NTRIPLES, node.getAggregationUri());
 					response().setContentType("text/plain");
 					return ok(result);
