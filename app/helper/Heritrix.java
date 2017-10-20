@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.regex.*;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -306,11 +307,62 @@ public class Heritrix {
 	 */
 	public String findLatestWarc(File latest) {
 		WebgatherLogger.debug(latest.getAbsolutePath() + "/warcs");
+		String msg = null;
 		File warcDir = new File(latest.getAbsolutePath() + "/warcs");
 		if (!warcDir.exists() || !warcDir.isDirectory()) {
-			String msg = "Zu " + latest.getAbsolutePath()
+			msg = "Zu " + latest.getAbsolutePath()
 					+ " wurde kein WARC-Verzeichnis gefunden!";
-			throw new RuntimeException(msg);
+			// throw new RuntimeException(msg);
+			WebgatherLogger.warn(msg);
+			WebgatherLogger.warn(
+					"Der Name der WARC-Datei wird jetzt geraten, um eine Runtime-Exception zu vermeiden und damit ein Objekt vim Typ \"Version\" angelegt werden kann (EDOWO-727).");
+			WebgatherLogger.debug(
+					"Der Name der wirklichen WARC-Datei ist so wie der hier geratene, nur dass der Zeitstempel in der wirklichen WARC-Datei um Sekundenbruchteile oder einige Sekunden von dem Zeitstempel in dem geratenen Dateinamen abweichen kann.");
+			WebgatherLogger.debug(
+					"Der geratene Name der WARC-Datei erscheint nur im Feld \"Datastream Location\" in <HOST-URL>/fedora/objects/<PID>/datastreams/data und sonst nirgendwo.");
+			String datetimestamp = null;
+			String datetimestamp17 = null;
+			try {
+				Pattern pattern = Pattern.compile("/([0-9]+)$");
+				Matcher matcher = pattern.matcher(latest.getAbsolutePath());
+				while (matcher.find()) {
+					datetimestamp = matcher.group(1);
+					break;
+				}
+				if (datetimestamp == null) {
+					msg = "Could not determine datetimestamp";
+					WebgatherLogger.error(msg);
+					throw new RuntimeException(msg);
+				}
+				// add eleven seconds (...just a guess)
+				int datetimeint = Integer.parseInt(datetimestamp);
+				datetimeint += 11;
+				datetimestamp = Integer.valueOf(datetimeint).toString();
+				// concat microseconds
+				datetimestamp17 = datetimestamp + "000";
+			} catch (Exception e) {
+				WebgatherLogger.error("Could not create WARC-Filename", e.toString());
+				throw new RuntimeException(e);
+			}
+			/*
+			 * create WARC filename according to WARC file naming conventions in
+			 * https://webarchive.jira.com/wiki/spaces/Heritrix/pages/13467786/Release
+			 * +Notes+-+Heritrix+3.2.0
+			 */
+			// the following parameters should be read from heritrix configuration, if
+			// possible
+			String prefix = "WEB"; // this is fix
+			String serialNo = "00000"; // this is always the first part of a
+																	// multi-gigabyte crawl
+			String heritrixPid = "12345"; // another guess; this pid should be
+																		// determined out of the system (how ?)
+			String heritrixHostname = "edoweb.hbz-nrw.de"; // this is used for all
+																											// crawls
+			String heritrixPort = "8443"; // the heritrix port
+			return latest.getAbsolutePath() + "/warcs/" + prefix + "-"
+					+ datetimestamp17 + "-" + serialNo + "-" + heritrixPid + "~"
+					+ heritrixHostname + "~" + heritrixPort + ".warc.gz";
+
 		}
 		return warcDir.listFiles()[0].getAbsolutePath();
 	}
