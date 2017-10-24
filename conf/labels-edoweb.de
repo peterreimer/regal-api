@@ -6818,7 +6818,7 @@
   "label" : "Verantwortlich",
   "icon" : "",
   "name" : "responsibilityStatement",
-  "referenceType" : "@id",
+  "referenceType" : "String",
   "container" : "@set",
   "weight" : "7",
   "type" : "CONTEXT",
@@ -8665,9 +8665,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/lv#ArchivedWebPage",
-  "label" : "Archivierte Webseite",
+  "comment" : "",
+  "label" : "Archivierte Website",
   "icon" : "fa fa-wifi",
   "name" : "archivedWebpage",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -9008,7 +9011,9 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/lv#webPageArchived",
-  "label" : "Archivierte Webseite",
+  "comment" : "",
+  "label" : "Archivierte Website",
+  "icon" : "",
   "name" : "webPageArchived",
   "referenceType" : "@id",
   "container" : "@set",
@@ -20230,7 +20235,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDACarrierType/1018 ",
+  "comment" : "",
   "label" : "Online-Ressource",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -20240,17 +20250,32 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDAMediaType/1003",
+  "comment" : "",
   "label" : "Datenträger",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDAMediaType/1008",
+  "comment" : "",
   "label" : "Video",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDAproductionMethod/1010",
+  "comment" : "",
   "label" : "Print",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -21166,6 +21191,39 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "info:regal/regal/publishLocation",
+  "comment" : "",
+  "label" : "",
+  "icon" : "",
+  "name" : "regal:publishLocation",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/regal/publishYear",
+  "comment" : "",
+  "label" : "",
+  "icon" : "",
+  "name" : "regal:publishYear",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/regal/publishedBy",
+  "comment" : "",
+  "label" : "",
+  "icon" : "",
+  "name" : "regal:publishedBy",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "info:regal/zettel/additionalMaterial",
   "comment" : "",
   "label" : "Ergänzendes Material",
@@ -21539,6 +21597,17 @@
   "container" : "",
   "weight" : "",
   "type" : "STORE",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/zettel/notification",
+  "comment" : "",
+  "label" : "Wichtiger Hinweis",
+  "icon" : "fa fa-bell",
+  "name" : "notification",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "1",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "info:regal/zettel/observationHeader",
