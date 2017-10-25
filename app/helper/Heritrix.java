@@ -16,8 +16,12 @@
  */
 package helper;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.FileReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.*;
 
 import com.sun.jersey.api.client.Client;
@@ -41,16 +46,29 @@ import play.Play;
  *
  */
 public class Heritrix {
+
 	public static String openwaybackLink = Play.application().configuration()
 			.getString("regal-api.heritrix.openwaybackLink");
 
+	final static String warcFilenamePrefix = "WEB"; // this is fix in heritrix
+
+	final int heritrixPort = Integer.parseInt(
+			Play.application().configuration().getString("regal-api.heritrix.port"));
+
+	final String heritrixHostname = Play.application().configuration()
+			.getString("regal-api.heritrix.hostname");
+
 	final String restUrl =
 			Play.application().configuration().getString("regal-api.heritrix.rest");
+
+	final String heritrixHome =
+			Play.application().configuration().getString("regal-api.heritrix.home");
 
 	final String jobDir =
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 
 	final static Client client = HeritrixWebclient.createWebclient();
+	private String msg = null; // Zwischenspeicher für Fehlermeldungstexte
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -307,8 +325,8 @@ public class Heritrix {
 	 */
 	public String findLatestWarc(File latest) {
 		WebgatherLogger.debug(latest.getAbsolutePath() + "/warcs");
-		String msg = null;
 		File warcDir = new File(latest.getAbsolutePath() + "/warcs");
+
 		if (!warcDir.exists() || !warcDir.isDirectory()) {
 			msg = "Zu " + latest.getAbsolutePath()
 					+ " wurde kein WARC-Verzeichnis gefunden!";
@@ -335,9 +353,9 @@ public class Heritrix {
 					throw new RuntimeException(msg);
 				}
 				// add eleven seconds (...just a guess)
-				int datetimeint = Integer.parseInt(datetimestamp);
+				long datetimeint = Long.parseLong(datetimestamp);
 				datetimeint += 11;
-				datetimestamp = Integer.valueOf(datetimeint).toString();
+				datetimestamp = Long.valueOf(datetimeint).toString();
 				// concat microseconds
 				datetimestamp17 = datetimestamp + "000";
 			} catch (Exception e) {
@@ -349,20 +367,14 @@ public class Heritrix {
 			 * https://webarchive.jira.com/wiki/spaces/Heritrix/pages/13467786/Release
 			 * +Notes+-+Heritrix+3.2.0
 			 */
-			// the following parameters should be read from heritrix configuration, if
-			// possible
-			String prefix = "WEB"; // this is fix
 			String serialNo = "00000"; // this is always the first part of a
 																	// multi-gigabyte crawl
-			String heritrixPid = "12345"; // another guess; this pid should be
-																		// determined out of the system (how ?)
-			String heritrixHostname = "edoweb.hbz-nrw.de"; // this is used for all
-																											// crawls
-			String heritrixPort = "8443"; // the heritrix port
-			return latest.getAbsolutePath() + "/warcs/" + prefix + "-"
-					+ datetimestamp17 + "-" + serialNo + "-" + heritrixPid + "~"
-					+ heritrixHostname + "~" + heritrixPort + ".warc.gz";
-
+			String warcFilename =
+					latest.getAbsolutePath() + "/warcs/" + warcFilenamePrefix + "-"
+							+ datetimestamp17 + "-" + serialNo + "-" + getHeritrixPid() + "~"
+							+ heritrixHostname + "~" + heritrixPort + ".warc.gz";
+			WebgatherLogger.info("warcFilename=" + warcFilename);
+			return warcFilename;
 		}
 		return warcDir.listFiles()[0].getAbsolutePath();
 	}
@@ -373,6 +385,32 @@ public class Heritrix {
 	 */
 	public String getUriPath(String str) {
 		return str.replace(jobDir, "").replace(".open", "");
+	}
+
+	@SuppressWarnings("resource")
+	private int getHeritrixPid() {
+		int heritrixPid = -1;
+		File pidFile = new File(heritrixHome + "/heritrix.pid");
+		FileReader fileStream = null;
+		try {
+			fileStream = new FileReader(pidFile);
+			BufferedReader bufferedReader = new BufferedReader(fileStream);
+			String line = null;
+			while ((line = bufferedReader.readLine()) != null) {
+				heritrixPid = Integer.parseInt(line);
+				break;
+			}
+		} catch (Exception e) {
+			WebgatherLogger.error("Cannot determine heritrix-PID!");
+			throw new RuntimeException(e);
+		}
+		try {
+			fileStream.close();
+		} catch (IOException e) {
+			WebgatherLogger.warn("heritrix-PID-Datei " + pidFile
+					+ " kann nicht wieder geschlossen werden.");
+		}
+		return heritrixPid;
 	}
 
 	private String unpauseJobToHeritrix(String name) {
