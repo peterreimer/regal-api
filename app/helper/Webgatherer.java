@@ -17,12 +17,16 @@
 package helper;
 
 import play.Logger;
+import play.Play;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.text.ParseException;
 
 import com.ibm.icu.util.Calendar;
 
@@ -40,6 +44,10 @@ import actions.Read;
  */
 public class Webgatherer implements Runnable {
 
+	final static String heritrixJobDir =
+			Play.application().configuration().getString("regal-api.heritrix.jobDir");
+	final static String wpullJobDir =
+			Play.application().configuration().getString("regal-api.wpull.jobDir");
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -115,7 +123,10 @@ public class Webgatherer implements Runnable {
 			return true;
 		}
 		try {
-			File latest = Globals.heritrix.getLatestCrawlDir(n.getPid());
+			File latest = getLatestCrawlDir(
+					Play.application().configuration()
+							.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir"),
+					n.getPid());
 			if (latest == null) {
 				return true;
 			}
@@ -177,4 +188,86 @@ public class Webgatherer implements Runnable {
 		}
 		return cal.getTime();
 	}
+
+	/**
+	 * @param name the jobs name e.g. the pid
+	 * @param jobDir Arbeitsverzeichnus für einen spezifischen Crawler
+	 * @return the servers directory where to store the data
+	 * 
+	 *         Im Unterschied zu getCurrentCrawlDir wird nicht der Pfad mit dem
+	 *         aktuellen Datum zurückgegeben, sondern der Pfad mit dem LETZTEN
+	 *         (=neuesten) Datum - oder NULL, falls noch gar nicht gecrawlt wurde.
+	 */
+	public static File getLatestCrawlDir(String jobDir, String name) {
+		File dir = new File(jobDir + "/" + name);
+		WebgatherLogger.debug("jobDir/name=" + dir.toString());
+		// gibt es das Verzeichnis überhaupt ?
+		if (!dir.exists() || !dir.isDirectory()) {
+			WebgatherLogger
+					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			return null;
+		}
+		File[] files = dir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File d) {
+				return (d.isDirectory() && d.getName().matches("^[0-9]+"));
+			}
+		});
+		if (files == null || files.length <= 0) {
+			WebgatherLogger
+					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			return null;
+		}
+		WebgatherLogger
+				.debug("Found crawl directories: " + java.util.Arrays.toString(files));
+		Arrays.sort(files, Collections.reverseOrder());
+		File latest = files[0];
+		return latest;
+	}
+
+	/*
+	 * @return die Anzahl bisher begonnener Sammelvorgänge (Summe über alle
+	 * möglichen Crawler)
+	 */
+	public static int getLaunchCount(Gatherconf conf) {
+		int launchCount = 0;
+		File launchDir = new File(heritrixJobDir + "/" + conf.getName());
+		if (launchDir.exists() && launchDir.isDirectory()) {
+			File[] crawlDirs = launchDir.listFiles(new FileFilter() {
+				@Override
+				public boolean accept(File d) {
+					return (d.isDirectory() && d.getName().matches("^[0-9]+"));
+				}
+			});
+			File warcDir = null;
+			for (int i = 0; i < crawlDirs.length; i++) {
+				warcDir = new File(crawlDirs[i].toString() + "/warcs");
+				if (warcDir.exists() && warcDir.isDirectory()) {
+					launchCount++;
+				}
+			}
+		}
+		launchDir = new File(wpullJobDir + "/" + conf.getName());
+		if (launchDir.exists() && launchDir.isDirectory()) {
+			WebgatherLogger.debug("Found launchDir " + launchDir.toString());
+			File[] crawlDirs = launchDir.listFiles(new FileFilter() {
+				@Override
+				public boolean accept(File d) {
+					return (d.isDirectory() && d.getName().matches("^[0-9]+"));
+				}
+			});
+			File crawlLog = null;
+			WebgatherLogger.debug("Found " + crawlDirs.length + " crawlDirs.");
+			for (int i = 0; i < crawlDirs.length; i++) {
+				crawlLog = new File(crawlDirs[i].toString() + "/crawl.log");
+				WebgatherLogger.debug("Testing crawlLog " + crawlLog.toString());
+				if (crawlLog.exists()) {
+					launchCount++;
+				}
+			}
+		}
+		WebgatherLogger.debug("Launch Count = " + launchCount);
+		return launchCount;
+	}
+
 }

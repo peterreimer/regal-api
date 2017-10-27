@@ -18,14 +18,18 @@ package helper;
 
 import models.Gatherconf;
 import models.Globals;
+import models.Node;
 import play.Logger;
 import play.Play;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * a class to implement a wpull crawl
@@ -44,9 +48,9 @@ public class WpullCrawl {
 	private int exitState = 0;
 	private String msg = null;
 
-	final String jobDir =
+	final static String jobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
-	final String crawler =
+	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 
 	private static final Logger.ALogger WebgatherLogger =
@@ -170,6 +174,33 @@ public class WpullCrawl {
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate --no-directories");
 		return sb.toString();
+	}
+
+	/**
+	 * @param conf die Gatherer-Konfiguration für die betreffende Webpage
+	 * @return der Zeitpunkt des Beginns des letzten Einsammelvorgangs
+	 */
+	public static Date getLastLaunch(Gatherconf conf) {
+		// größter Zeitstempel im wpull-Verzeichnis und crawl.log muss existieren
+		try {
+			File latestCrawlDir =
+					Webgatherer.getLatestCrawlDir(jobDir, conf.getName());
+			if (latestCrawlDir == null) {
+				return new Date(0);
+			}
+			File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
+			if (!crawlLog.exists()) {
+				WebgatherLogger.warn("Crawl-Verzeichnis " + latestCrawlDir.toString()
+						+ " existiert, aber darin kein crawl.log.");
+				return new Date(0);
+			}
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			return sdf.parse(latestCrawlDir.getName().substring(0, 14));
+		} catch (ParseException e) {
+			WebgatherLogger.warn(
+					"Datum des zuletzt gestarteten Crawls kann nicht ermittelt werden.");
+			return new Date(0);
+		}
 	}
 
 }

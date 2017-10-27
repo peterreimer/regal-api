@@ -24,6 +24,7 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.Webgatherer;
+import helper.WpullCrawl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -717,12 +718,22 @@ public class Read extends RegalAction {
 			// .as("text/plain");
 			// } else
 			if ("webpage".equals(node.getContentType())) {
-				String hertrixXmlResponse =
-						Globals.heritrix.getJobStatus(node.getPid());
-				XmlMapper xmlMapper = new XmlMapper();
-				entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
-				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
-			}
+				Gatherconf conf = Gatherconf.create(node.getConf());
+				if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.heritrix)) {
+					String hertrixXmlResponse =
+							Globals.heritrix.getJobStatus(node.getPid());
+					XmlMapper xmlMapper = new XmlMapper();
+					entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+					entries.put("nextLaunch", Webgatherer.nextLaunch(node));
+				} else if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.wpull)) {
+					entries = new HashMap<String, Object>();
+					entries.put("nextLaunch", Webgatherer.nextLaunch(node));
+					entries.put("lastLaunch", WpullCrawl.getLastLaunch(conf));
+					entries.put("launchCount", Webgatherer.getLaunchCount(conf));
+				}
+			} // end if webpage
 		} catch (Exception e) {
 			play.Logger.warn("", e);
 		}

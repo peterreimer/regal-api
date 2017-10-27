@@ -266,41 +266,6 @@ public class Heritrix {
 	}
 
 	/**
-	 * @param name the jobs name e.g. the pid
-	 * @return the servers directory where to store the data
-	 * 
-	 *         Im Unterschied zu getCurrentCrawlDir wird nicht der Pfad mit dem
-	 *         aktuellen Datum zurückgegeben, sondern der Pfad mit dem LETZTEN
-	 *         (=neuesten) Datum - oder NULL, falls noch gar nicht gecrawlt wurde.
-	 */
-	public File getLatestCrawlDir(String name) {
-		File dir = new File(this.jobDir + "/" + name);
-		WebgatherLogger.debug("jobDir/name=" + dir.toString());
-		// gibt es das Verzeichnis überhaupt ?
-		if (!dir.exists() || !dir.isDirectory()) {
-			WebgatherLogger
-					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
-			return null;
-		}
-		File[] files = dir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File d) {
-				return (d.isDirectory() && d.getName().matches("^[0-9]+"));
-			}
-		});
-		if (files == null || files.length <= 0) {
-			WebgatherLogger
-					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
-			return null;
-		}
-		WebgatherLogger
-				.debug("Found crawl directories: " + java.util.Arrays.toString(files));
-		Arrays.sort(files, Collections.reverseOrder());
-		File latest = files[0];
-		return latest;
-	}
-
-	/**
 	 * @param latest dir of the latest (most recent) job
 	 * @return local path of the latest harvested warc or NULL
 	 */
