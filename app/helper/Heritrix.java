@@ -16,8 +16,12 @@
  */
 package helper;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.FileReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.regex.*;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -40,16 +46,29 @@ import play.Play;
  *
  */
 public class Heritrix {
+
 	public static String openwaybackLink = Play.application().configuration()
 			.getString("regal-api.heritrix.openwaybackLink");
 
+	final static String warcFilenamePrefix = "WEB"; // this is fix in heritrix
+
+	final int heritrixPort = Integer.parseInt(
+			Play.application().configuration().getString("regal-api.heritrix.port"));
+
+	final String heritrixHostname = Play.application().configuration()
+			.getString("regal-api.heritrix.hostname");
+
 	final String restUrl =
 			Play.application().configuration().getString("regal-api.heritrix.rest");
+
+	final String heritrixHome =
+			Play.application().configuration().getString("regal-api.heritrix.home");
 
 	final String jobDir =
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 
 	final static Client client = HeritrixWebclient.createWebclient();
+	private String msg = null; // Zwischenspeicher für Fehlermeldungstexte
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -307,10 +326,55 @@ public class Heritrix {
 	public String findLatestWarc(File latest) {
 		WebgatherLogger.debug(latest.getAbsolutePath() + "/warcs");
 		File warcDir = new File(latest.getAbsolutePath() + "/warcs");
+
 		if (!warcDir.exists() || !warcDir.isDirectory()) {
-			String msg = "Zu " + latest.getAbsolutePath()
+			msg = "Zu " + latest.getAbsolutePath()
 					+ " wurde kein WARC-Verzeichnis gefunden!";
-			throw new RuntimeException(msg);
+			// throw new RuntimeException(msg);
+			WebgatherLogger.warn(msg);
+			WebgatherLogger.warn(
+					"Der Name der WARC-Datei wird jetzt geraten, um eine Runtime-Exception zu vermeiden und damit ein Objekt vim Typ \"Version\" angelegt werden kann (EDOWO-727).");
+			WebgatherLogger.debug(
+					"Der Name der wirklichen WARC-Datei ist so wie der hier geratene, nur dass der Zeitstempel in der wirklichen WARC-Datei um Sekundenbruchteile oder einige Sekunden von dem Zeitstempel in dem geratenen Dateinamen abweichen kann.");
+			WebgatherLogger.debug(
+					"Der geratene Name der WARC-Datei erscheint nur im Feld \"Datastream Location\" in <HOST-URL>/fedora/objects/<PID>/datastreams/data und sonst nirgendwo.");
+			String datetimestamp = null;
+			String datetimestamp17 = null;
+			try {
+				Pattern pattern = Pattern.compile("/([0-9]+)$");
+				Matcher matcher = pattern.matcher(latest.getAbsolutePath());
+				while (matcher.find()) {
+					datetimestamp = matcher.group(1);
+					break;
+				}
+				if (datetimestamp == null) {
+					msg = "Could not determine datetimestamp";
+					WebgatherLogger.error(msg);
+					throw new RuntimeException(msg);
+				}
+				// add eleven seconds (...just a guess)
+				long datetimeint = Long.parseLong(datetimestamp);
+				datetimeint += 11;
+				datetimestamp = Long.valueOf(datetimeint).toString();
+				// concat microseconds
+				datetimestamp17 = datetimestamp + "000";
+			} catch (Exception e) {
+				WebgatherLogger.error("Could not create WARC-Filename", e.toString());
+				throw new RuntimeException(e);
+			}
+			/*
+			 * create WARC filename according to WARC file naming conventions in
+			 * https://webarchive.jira.com/wiki/spaces/Heritrix/pages/13467786/Release
+			 * +Notes+-+Heritrix+3.2.0
+			 */
+			String serialNo = "00000"; // this is always the first part of a
+																	// multi-gigabyte crawl
+			String warcFilename =
+					latest.getAbsolutePath() + "/warcs/" + warcFilenamePrefix + "-"
+							+ datetimestamp17 + "-" + serialNo + "-" + getHeritrixPid() + "~"
+							+ heritrixHostname + "~" + heritrixPort + ".warc.gz";
+			WebgatherLogger.info("warcFilename=" + warcFilename);
+			return warcFilename;
 		}
 		return warcDir.listFiles()[0].getAbsolutePath();
 	}
@@ -321,6 +385,32 @@ public class Heritrix {
 	 */
 	public String getUriPath(String str) {
 		return str.replace(jobDir, "").replace(".open", "");
+	}
+
+	@SuppressWarnings("resource")
+	private int getHeritrixPid() {
+		int heritrixPid = -1;
+		File pidFile = new File(heritrixHome + "/heritrix.pid");
+		FileReader fileStream = null;
+		try {
+			fileStream = new FileReader(pidFile);
+			BufferedReader bufferedReader = new BufferedReader(fileStream);
+			String line = null;
+			while ((line = bufferedReader.readLine()) != null) {
+				heritrixPid = Integer.parseInt(line);
+				break;
+			}
+		} catch (Exception e) {
+			WebgatherLogger.error("Cannot determine heritrix-PID!");
+			throw new RuntimeException(e);
+		}
+		try {
+			fileStream.close();
+		} catch (IOException e) {
+			WebgatherLogger.warn("heritrix-PID-Datei " + pidFile
+					+ " kann nicht wieder geschlossen werden.");
+		}
+		return heritrixPid;
 	}
 
 	private String unpauseJobToHeritrix(String name) {
