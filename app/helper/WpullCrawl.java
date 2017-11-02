@@ -169,6 +169,7 @@ public class WpullCrawl {
 				" --no-host-directories --convert-links --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate --no-directories");
+		sb.append(" --delete-after");
 		return sb.toString();
 	}
 
