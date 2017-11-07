@@ -22,14 +22,15 @@ import models.Node;
 import play.Logger;
 import play.Play;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.ProcessBuilder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * a class to implement a wpull crawl
@@ -174,6 +175,58 @@ public class WpullCrawl {
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate --no-directories");
 		return sb.toString();
+	}
+
+	/**
+	 * Ermittelt Crawler Exit Status des letzten Crawls
+	 * 
+	 * @param node der Knoten einer Webpage
+	 * @return Crawler Exit Status des letzten wpull-Crawls
+	 */
+	public static int getCrawlExitStatus(Node node) {
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.jobDir"),
+				node.getPid());
+		if (latestCrawlDir == null) {
+			WebgatherLogger.warn("Letztes Crawl-Verzeichnis zu Webpage "
+					+ node.getName() + " kann nicht gefunden werden!");
+			return -3;
+		}
+		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
+		if (!crawlLog.exists()) {
+			WebgatherLogger.warn("Crawl-Verzeichnis " + latestCrawlDir.toString()
+					+ " existiert, aber darin kein crawl.log.");
+			return -2;
+		}
+		/* das Log wird geparst */
+		int exitStatus = -1;
+		BufferedReader buf = null;
+		String regExp = "^INFO Exiting with status ([0-9]+)";
+		Pattern pattern = Pattern.compile(regExp);
+		try {
+			buf = new BufferedReader(new FileReader(crawlLog));
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					exitStatus = Integer.parseInt(matcher.group(1));
+					break;
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger
+					.warn("Crawler Exit Status cannot be defered from crawlLog "
+							+ crawlLog.getAbsolutePath() + "!", e.toString());
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return exitStatus;
 	}
 
 }
