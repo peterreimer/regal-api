@@ -16,6 +16,7 @@
  */
 package helper;
 
+import static archive.fedora.FedoraVocabulary.HAS_PART;
 import play.Logger;
 import play.Play;
 
@@ -97,6 +98,15 @@ public class Webgatherer implements Runnable {
 			if (count >= limit)
 				break;
 		}
+	}
+
+	/**
+	 * @param n der Knoten für die Webpage
+	 * @return Datum+Zeit (Typ Date), als zuletzt ein Crawl angestoßen wurde
+	 * @throws Exception Ausnahme beim Lesen
+	 */
+	public static Date getLastLaunch(Node n) throws Exception {
+		return new Read().getLastModifiedChild(n).getLastModified();
 	}
 
 	/**
@@ -227,45 +237,18 @@ public class Webgatherer implements Runnable {
 
 	/*
 	 * @return die Anzahl bisher begonnener Sammelvorgänge (Summe über alle
-	 * möglichen Crawler)
+	 * möglichen Crawler) = die Anzahl angelegter Versionen
 	 */
-	public static int getLaunchCount(Gatherconf conf) {
+	public static int getLaunchCount(Node node) {
 		int launchCount = 0;
-		File launchDir = new File(heritrixJobDir + "/" + conf.getName());
-		if (launchDir.exists() && launchDir.isDirectory()) {
-			File[] crawlDirs = launchDir.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File d) {
-					return (d.isDirectory() && d.getName().matches("^[0-9]+"));
-				}
-			});
-			File warcDir = null;
-			for (int i = 0; i < crawlDirs.length; i++) {
-				warcDir = new File(crawlDirs[i].toString() + "/warcs");
-				if (warcDir.exists() && warcDir.isDirectory()) {
-					launchCount++;
-				}
-			}
+		if (!node.getContentType().equals("webpage")) {
+			WebgatherLogger.warn("Knoten " + node.getName()
+					+ " ist nicht vom Inhaltstyp \"webpage\" ! Anzahl begonnener Sammelvorgänge kann nicht ermittelt werden!");
+			return -1;
 		}
-		launchDir = new File(wpullJobDir + "/" + conf.getName());
-		if (launchDir.exists() && launchDir.isDirectory()) {
-			WebgatherLogger.debug("Found launchDir " + launchDir.toString());
-			File[] crawlDirs = launchDir.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File d) {
-					return (d.isDirectory() && d.getName().matches("^[0-9]+"));
-				}
-			});
-			File crawlLog = null;
-			WebgatherLogger.debug("Found " + crawlDirs.length + " crawlDirs.");
-			for (int i = 0; i < crawlDirs.length; i++) {
-				crawlLog = new File(crawlDirs[i].toString() + "/crawl.log");
-				WebgatherLogger.debug("Testing crawlLog " + crawlLog.toString());
-				if (crawlLog.exists()) {
-					launchCount++;
-				}
-			}
-		}
+		List<Link> children = node.getRelatives(HAS_PART);
+		launchCount = children.size(); // hopefully all children are versions - how
+																		// to verify that ?
 		WebgatherLogger.debug("Launch Count = " + launchCount);
 		return launchCount;
 	}

@@ -709,7 +709,7 @@ public class Read extends RegalAction {
 	}
 
 	private Map<String, Object> getGatherStatus(Node node) {
-		Map<String, Object> entries = null;
+		Map<String, Object> entries = new HashMap<String, Object>();
 		try {
 			// if ("version".equals(node.getContentType())) {
 			//
@@ -725,17 +725,26 @@ public class Read extends RegalAction {
 							Globals.heritrix.getJobStatus(node.getPid());
 					XmlMapper xmlMapper = new XmlMapper();
 					entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
-					entries.put("nextLaunch", Webgatherer.nextLaunch(node));
 				} else if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
-					entries = new HashMap<String, Object>();
-					entries.put("nextLaunch", Webgatherer.nextLaunch(node));
-					entries.put("lastLaunch", WpullCrawl.getLastLaunch(conf));
-					entries.put("launchCount", Webgatherer.getLaunchCount(conf));
+					// entries.put("crawlControllerState", ... );
+					// entries.put("crawlExitStatus", ...);
 				}
+				/*
+				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
+				 * überschreibt launchCount von Heritrix
+				 */
+				entries.put("launchCount", Webgatherer.getLaunchCount(node));
+				/*
+				 * call of getLastLaunch may be omitted for heritrix, as also determined
+				 * by heritrixXmlResponse
+				 */
+				entries.put("lastLaunch", Webgatherer.getLastLaunch(node));
+				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
 			} // end if webpage
 		} catch (Exception e) {
-			play.Logger.warn("", e);
+			play.Logger.warn(
+					"Gather-Status kann nicht oder nur teilweise ermittelt werden.", e);
 		}
 		return entries == null ? new HashMap<String, Object>() : entries;
 	}
