@@ -727,8 +727,10 @@ public class Read extends RegalAction {
 					entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
 				} else if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
-					// entries.put("crawlControllerState", ... );
-					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlControllerState",
+							WpullCrawl.getCrawlControllerState(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
