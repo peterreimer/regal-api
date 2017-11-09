@@ -106,7 +106,7 @@ public class Webgatherer implements Runnable {
 	 * @throws Exception Ausnahme beim Lesen
 	 */
 	public static Date getLastLaunch(Node n) throws Exception {
-		return new Read().getLastModifiedChild(n).getLastModified();
+		return new Read().getLastModifiedChild(n, (Node) null).getLastModified();
 	}
 
 	/**
@@ -116,8 +116,12 @@ public class Webgatherer implements Runnable {
 	 * @throws Exception can be IOException or Json related Exceptions
 	 */
 	public static Date nextLaunch(Node n) throws Exception {
-		Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
+		Date lastHarvest =
+				new Read().getLastModifiedChild(n, (Node) null).getLastModified();
 		Gatherconf conf = Gatherconf.create(n.getConf());
+		if (lastHarvest == null) {
+			return conf.getStartDate();
+		}
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(lastHarvest);
 		Date nextTimeHarvest = getSchedule(cal, conf);
@@ -133,16 +137,12 @@ public class Webgatherer implements Runnable {
 			return true;
 		}
 		try {
-			File latest = getLatestCrawlDir(
-					Play.application().configuration()
-							.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir"),
-					n.getPid());
-			if (latest == null) {
-				return true;
-			}
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
-			Date latestDate = sdf.parse(latest.getName().substring(0, 8));
+			Date latestDate = getLastLaunch(n);
+			if (latestDate == null) {
+				return true;
+			}
 			Calendar latestCalendar = Calendar.getInstance();
 			latestCalendar.setTime(latestDate);
 			if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
@@ -169,6 +169,9 @@ public class Webgatherer implements Runnable {
 			return true;
 		} catch (ParseException e) {
 			WebgatherLogger.error("Cannot parse date string.", e);
+			return false;
+		} catch (Exception e) {
+			WebgatherLogger.error("Kann letztes Crawl-Datum nicht bestimmen.", e);
 			return false;
 		}
 	}
