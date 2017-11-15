@@ -17,7 +17,9 @@
 package archive.search;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import play.Play;
 import actions.Transform;
 import archive.fedora.CopyUtils;
@@ -53,6 +57,8 @@ import archive.fedora.CopyUtils;
  * 
  */
 public class Search {
+
+	Map<String, Object> aggregations;
 
 	@SuppressWarnings("serial")
 	class InvalidRangeException extends RuntimeException {
@@ -74,6 +80,7 @@ public class Search {
 
 	Search(Client client) {
 		this.client = client;
+		initAggregations();
 	}
 
 	void init(String[] index, String config) {
@@ -185,18 +192,21 @@ public class Search {
 		return response.getHits();
 	}
 
-	SearchHits query(String[] index, String queryString, int from, int until) {
+	SearchResponse query(String[] index, String queryString, int from,
+			int until) {
 		refresh();
 		play.Logger.debug("Search for " + queryString);
 		QueryBuilder query = QueryBuilders.queryString(queryString);
 		return query(index, query, from, until);
 	}
 
-	SearchHits query(String[] index, QueryBuilder query, int from, int until) {
+	SearchResponse query(String[] index, QueryBuilder query, int from,
+			int until) {
 		refresh();
 		SearchResponse response = client.prepareSearch(index).setQuery(query)
-				.setFrom(from).setSize(until - from).execute().actionGet();
-		return response.getHits();
+				.setFrom(from).setSize(until - from).setAggregations(aggregations)
+				.execute().actionGet();
+		return response;
 	}
 
 	Map<String, Object> getSettings(String index, String type) {
@@ -302,4 +312,15 @@ public class Search {
 		client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 
+	private void initAggregations() {
+
+		ObjectMapper mapper = new ObjectMapper();
+		try (InputStream in =
+				play.Play.application().resourceAsStream("aggregations.conf")) {
+			Map map = mapper.readValue(in, Map.class);
+			aggregations = (Map<String, Object>) map.get("aggs");
+		} catch (Exception e) {
+			aggregations = new HashMap<>();
+		}
+	}
 }

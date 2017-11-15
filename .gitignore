@@ -19,4 +19,5 @@ data
 .project
 bin
 conf/application.conf
-
+scripts/variables.conf
+*~

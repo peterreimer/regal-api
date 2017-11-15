@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
 
@@ -1006,19 +1006,6 @@ public class Node implements java.io.Serializable {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		ObjectMapper mapper = JsonUtil.mapper();
-		StringWriter w = new StringWriter();
-		try {
-			mapper.writeValue(w, this);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return super.toString();
-		}
-		return w.toString();
-	}
-
 	/**
 	 * @return true if the metadata contains one of the following predicates or if
 	 *         a doi is present at RELS-EXT -http://purl.org/lobid/lv#urn
@@ -1236,6 +1223,17 @@ public class Node implements java.io.Serializable {
 		ObjectMapper mapper = JsonUtil.mapper();
 		try {
 			return mapper.writeValueAsString(new JsonMapper(this).getLd2());
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return super.toString();
+		}
+	}
+
+	@Override
+	public String toString() {
+		ObjectMapper mapper = JsonUtil.mapper();
+		try {
+			return mapper.writeValueAsString(new JsonMapper(this).getLd());
 		} catch (Exception e) {
 			play.Logger.error("", e);
 			return super.toString();

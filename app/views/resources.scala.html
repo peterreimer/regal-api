@@ -1,18 +1,17 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
 @import views.Helper
-@import org.elasticsearch.search.aggregations.Aggregations
 
-@(hit:Map[String,Object],aggregations:Aggregations,namespace: String)
+@(hits: List[Map[String,Object]],namespace: String)
 
 
-@main(hit.get("title").toString(),aggregations) {
+@main("",null) {
 
-		
+		@for( hit <- hits){
 			@tags.getTitle(hit,namespace)
 			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
 
-	
+	}
 }
 
 

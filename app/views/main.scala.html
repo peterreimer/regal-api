@@ -1,6 +1,11 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@(title: String)(content: Html)
+@import org.elasticsearch.search.aggregations.Aggregation
+@import org.elasticsearch.search.aggregations.Aggregations
+@import org.elasticsearch.search.aggregations.bucket.terms.Terms
+@import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket
+
+@(title: String,aggregations:Aggregations)(content: Html)
 
 <!DOCTYPE html>
 
@@ -9,7 +14,6 @@
         <title>@title</title>
 				<link rel="shortcut icon" href="/public/images/favicon.ico" type="image/x-icon" /> 
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
-        
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/main.css")">
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
         <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
@@ -26,22 +30,118 @@
 	 <script src="@controllers.routes.Assets.at("javascripts/jquery.dataTables.min.js")"></script>
 	  <script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
-				$('#example').dataTable( {
+				$('.resourceView').dataTable( {
     				"order": [0,'asc'],paging: false,searching: false
 				} );
 			} );
 		</script>
     </head>
 	<body onload="">
-			<p/>
-		<div class="container">	
-					<div class="container">
-						<div class="row">
-							<div class="col-md-4"><a href="/"><img src="/public/images/logo.png"/></a></div>
-							<div class="col-md-11">@tags.searchForm("*")</div>
-						</div>
+	
+    <img class="banner" src="/public/images/books.jpg" width="100%" alt="">
+	<nav class="navbar navbar-default" role="navigation">
+	<div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#nav1">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+      </div>
+	  <div class="collapse navbar-collapse" id="nav1">
+	  
+		    <ul class="nav navbar-nav">
+		    <li><a class="navbar-brand" href="/">Home</a>
+		      
+		    </ul>
+		    <div class="col-sm-4 col-md-4">
+		     	@tags.searchForm("*")
+		    </div>
+		    <ul class="nav navbar-nav navbar-right">
+		      <li><a href="#">Login</a></li>
+		      <li class="dropdown">
+		        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Add<b class="caret"></b></a>
+		        <ul class="dropdown-menu">
+		          <li><a href="/add/catalog">Catalog Object</a></li>
+		          <li><a href="/add/webpage">Webpage</a></li>
+		          <li><a href="/add/zettel">Article</a></li>
+		          <li class="divider"></li>
+		          <li><a href="/add/part">Part</a></li>
+		          <li class="divider"></li>
+		          <li><a href="/add/file">File</a></li>
+		        </ul>
+		      </li>
+		    </ul>
+	  	</div><!-- /.navbar-collapse -->
+	</nav>
+		<div class="container-fluid" style="min-height:400px">	
+		
+			<div class="row">
+			<div class="col-md-1">
 				</div>
-        @content
-		</div>
+				<div class="col-md-2">
+					<div class="row facets">
+					
+				@loadFacets(aggregations)	
+				
+                		
+                		
+					</div>
+				</div>
+				<div class="col-md-7">	
+					<ul class="nav nav-tabs">
+					 <li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
+					  <li><a href="#2a" data-toggle="tab">Download</a></li>
+					</ul> 
+					<div class="tab-content">
+				  		<div class="tab-pane active" id="1a">
+			        		@content
+			        	</div>
+		       
+				  		<div class="tab-pane" id="2a">
+		
+			        	</div>
+		        	</div>
+		        </div>
+		        <div class="col-md-2"></div>
+	       </div>
+	   </div>
+	
+	   <footer style="background-color:#f8f8f8;"/>
+		   <img src="/public/images/books.jpg"  width="100%" height="200%"/>
+		   <ul style="list-style:none;">
+		   <li>
+		   <a href="">About</a></li>
+		    <li>
+		   <a href="">Contact</a></li>
+		    <li>
+		    <li>
+		   <a href="">Software</a></li>
+		   <a href="/public/html/impressum.html">Impressum</a>
+		   </li></ul>
+	   </footer>
 	</body>
 </html>
+
+@loadFacets(aggs:Aggregations)={
+
+	@aggs match {
+		case a : Aggregations =>{
+			@for(agg  <- aggs.asList()) {
+							<h3 class="facets_header">@models.Globals.profile.getEtikettByName(agg.getName()).getLabel()</h1>
+							
+								<ol class="facets_nav" >
+					
+								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
+									<li> <a href="">@b.getKey() (@b.getDocCount())</a></li>
+								}
+							
+				                <a class="more_facets_link" href="#more_facets_subject_exact" data-for="facets_subject_exact">
+				                    <span class="more_facets_text">
+				                        All <span class="fa fa-caret-down"></i>
+				                    </span>
+		                		</a>
+			}
+		}
+		case _ =>{}	
+	}
+}

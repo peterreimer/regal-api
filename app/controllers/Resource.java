@@ -35,9 +35,15 @@ import java.util.stream.Collectors;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.openrdf.rio.RDFFormat;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -46,6 +52,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BasicAuth;
 import actions.BulkAction;
@@ -73,6 +80,7 @@ import views.html.mets;
 import views.html.oaidc;
 import views.html.wgl;
 import views.html.resource;
+import views.html.resources;
 import views.html.search;
 import views.html.status;
 import views.html.frlResource;
@@ -162,7 +170,7 @@ public class Resource extends MyController {
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				List<Node> nodes = read.listRepo(contentType, namespace, from, until);
 				return ok(
-						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
+						resources.render(nodes.stream().map(n -> new JsonMapper(n).getLd2())
 								.collect(Collectors.toList()), Globals.namespaces[0]));
 			} catch (HttpArchiveException e) {
 				return HtmlMessage(new Message(e, e.getCode()));
@@ -180,17 +188,25 @@ public class Resource extends MyController {
 
 		if (request().accepts("text/html")) {
 			Node node = readNodeOrNull(pid);
-			List<Map<String, Object>> result = new ArrayList<>();
+			if (node == null)
+				return Promise.promise(() -> notFound("404 - Not found " + pid));
+
 			if ("frl".equals(design)) {
 				Map<String, Object> item = read.getMapWithParts2(node);
-				result.add(item);
 				return Promise
 						.promise(() -> ok(frlResource.render(item, Globals.namespaces[0])));
 			} else {
-				Map<String, Object> item = read.getMapWithParts(node);
-				result.add(item);
-				return Promise
-						.promise(() -> ok(resource.render(result, Globals.namespaces[0])));
+				SearchResponse response = Globals.search.query(
+						new String[] {
+								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
+								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
+						"@id:\"" + pid + "\"", 0, 1);
+				SearchHits hits = response.getHits();
+
+				Aggregations aggs = response.getAggregations();
+				Map<String, Object> item = read.getMapWithParts2(node);
+				return Promise.promise(
+						() -> ok(resource.render(item, null, Globals.namespaces[0])));
 			}
 		}
 		if (request().accepts("application/rdf+xml"))
@@ -205,15 +221,18 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
 				String result = "";
+				Map<String, Object> rdf = node.getLd2();
+				rdf.put("@context", Globals.profile.getContext().get("@context"));
+				String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
 				if (request().accepts("application/rdf+xml")) {
 					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(node.toString().getBytes("utf-8")),
+							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
 					response().setContentType("application/rdf+xml");
 					return ok(result);
 				} else if (request().accepts("text/plain")) {
 					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(node.toString().getBytes("utf-8")),
+							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.NTRIPLES, node.getAggregationUri());
 					response().setContentType("text/plain");
 					return ok(result);
@@ -570,7 +589,7 @@ public class Resource extends MyController {
 				List<Map<String, Object>> list =
 						result.stream().map(n -> n.getLd2()).collect(Collectors.toList());
 				if (request().accepts("text/html")) {
-					return ok(resource.render(list, Globals.namespaces[0]));
+					return ok(resources.render(list, Globals.namespaces[0]));
 				} else {
 					return getJsonResult(list);
 				}
@@ -587,15 +606,19 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(null, node -> {
 			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
 			try {
-				SearchHits hits = Globals.search.query(
-						new String[] { Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0],
+				SearchResponse response = Globals.search.query(
+						new String[] {
+								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
 								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
 						queryString, from, until);
+				SearchHits hits = response.getHits();
+
+				Aggregations aggs = response.getAggregations();
 				List<SearchHit> list = Arrays.asList(hits.getHits());
 				hitMap = read.hitlistToMap(list);
 				if (request().accepts("text/html")) {
-					return ok(search.render(hitMap, queryString, hits.getTotalHits(),
-							from, until, Globals.namespaces[0]));
+					return ok(search.render(hitMap, aggs, queryString,
+							hits.getTotalHits(), from, until, Globals.namespaces[0]));
 				} else {
 					return getJsonResult(hitMap);
 				}
@@ -622,7 +645,7 @@ public class Resource extends MyController {
 						List<Map<String, Object>> result = new ArrayList();
 						Map<String, Object> item = read.getMapWithParts(node);
 						result.add(item);
-						return ok(resource.render(result, Globals.namespaces[0]));
+						return ok(resources.render(result, Globals.namespaces[0]));
 					}
 
 				} else if (request().accepts("application/json")) {
@@ -714,34 +737,13 @@ public class Resource extends MyController {
 			@QueryParam("design") String design) {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
-				List<Node> nodes = new ArrayList<Node>();
-				nodes.add(node);
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				if ("frl".equals(design)) {
-					return ok(frlResource.render(node.getLd2(), Globals.namespaces[0]));
+					return ok(frlResource.render(read.getMapWithParts2(node),
+							Globals.namespaces[0]));
 				}
-				return ok(
-						resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
-								.collect(Collectors.toList()), Globals.namespaces[0]));
-			} catch (Exception e) {
-				return JsonMessage(new Message(e, 500));
-			}
-		});
-	}
-
-	@ApiOperation(produces = "application/html", nickname = "asHtml2", value = "asHtml2", notes = "Returns a html2 display of the resource", response = Message.class, httpMethod = "GET")
-	public static Promise<Result> asHtml2(@PathParam("pid") String pid,
-			@QueryParam("design") String design) {
-		return new ReadMetadataAction().call(pid, node -> {
-			try {
-				List<Map<String, Object>> result = new ArrayList<>();
-				Map<String, Object> item = read.getMapWithParts2(node);
-				result.add(item);
-				response().setHeader("Content-Type", "text/html; charset=utf-8");
-				if ("frl".equals(design)) {
-					return ok(frlResource.render(item, Globals.namespaces[0]));
-				}
-				return ok(resource.render(result, Globals.namespaces[0]));
+				return ok(resource.render(read.getMapWithParts2(node), null,
+						Globals.namespaces[0]));
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
 			}
@@ -751,7 +753,7 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asJson(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
-			return getJsonResult(node);
+			return getJsonResult(node.getLd());
 		});
 	}
 
@@ -976,12 +978,9 @@ public class Resource extends MyController {
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				Node result = read.getLastModifiedChild(node, contentType);
 				if (request().accepts("text/html")) {
-					List<Node> nodes = new ArrayList<Node>();
-					nodes.add(result);
 					response().setHeader("Content-Type", "text/html; charset=utf-8");
 					return ok(
-							resource.render(nodes.stream().map(n -> new JsonMapper(n).getLd())
-									.collect(Collectors.toList()), Globals.namespaces[0]));
+							resource.render(result.getLd2(), null, Globals.namespaces[0]));
 				} else {
 					return getJsonResult(result);
 				}

@@ -1,31 +1,23 @@
-@* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@(hit: Map[String,Object],context:List[String],namespace:String)
 @import views.Title 
-@(hit:Map[String,Object],namespace:String)
 
 @displayCreators(id:String,label:String)={
 						@if(id != null && !id.isEmpty()){
-			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label
-	                       <a href=@analyseValue(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
-	                       </a>
 	                       }else{
-	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
 	                       	@label
-	                       	</a>
 	                       }
 }
 @displayAuthors(id:String,label:String,roleId:String,roleName:String)={
 						@if(id != null && !id.isEmpty()){
-			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label
-	                       <a href=@analyseValue(id)  target="_blank">
-	                               <span class="octicon-link-external"></span>
-	                       </a>
+	                      
 	                       }else{
-	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       
 	                       	@label
-	                       	</a>
 	                       }
 }
 @analyseValue(v: String)={
@@ -43,12 +35,12 @@
 }
 
 <div class="row">
+<a href="/resource/@hit.get("@id")">
 <div class="title">
 			<div class="col-md-8">
 					<div class="titlePre"></div>
 					
-					<a href="/resource/@hit.get("@id")">
-					<h1 class="title" id="page-title">
+					<h3 class="title" id="page-title">
 					<span class="titleMain">
 							@Html(Title.getTitle(hit))
 					</span>
@@ -62,9 +54,8 @@
 						: @hit.get("P60493").asInstanceOf[Collection[String]].toArray()
 						</span>
 					 }
-					</h1>
-					</a>
-					<h2 id="page-title-suffix" class="titlePost title-suffix">
+					</h3>
+					<h4 id="page-title-suffix" class="titlePost title-suffix">
 						@if(hit.contains("contribution")){
 							<ol class="author-title-list">
 								@for(c <-views.Helper.listAuthors(hit)){
@@ -81,12 +72,12 @@
 						}
 						
 						@Html(Title.getIssued(hit))
-					</h2>
+					</h4>
 					
 			</div>
 			
 		</div>
 
 
-	
+</a>
 </div>

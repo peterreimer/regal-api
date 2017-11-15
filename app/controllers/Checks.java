@@ -59,8 +59,8 @@ public class Checks extends MyController {
 			try {
 				QueryBuilder query = QueryBuilders.filteredQuery(
 						QueryBuilders.matchAllQuery(), FilterBuilders.missingFilter("urn"));
-				SearchHits sh =
-						Globals.search.query(Globals.namespaces, query, from, until);
+				SearchHits sh = Globals.search
+						.query(Globals.namespaces, query, from, until).getHits();
 				SearchHit[] hits = sh.getHits();
 				List<Map<String, Object>> objects = new ArrayList<>();
 				for (SearchHit hit : hits) {
@@ -81,8 +81,8 @@ public class Checks extends MyController {
 			try {
 				QueryBuilder query = QueryBuilders.filteredQuery(
 						QueryBuilders.matchAllQuery(), FilterBuilders.missingFilter("doi"));
-				SearchHits sh =
-						Globals.search.query(Globals.namespaces, query, from, until);
+				SearchHits sh = Globals.search
+						.query(Globals.namespaces, query, from, until).getHits();
 				SearchHit[] hits = sh.getHits();
 				List<Map<String, Object>> objects = new ArrayList<>();
 				for (SearchHit hit : hits) {
@@ -103,8 +103,8 @@ public class Checks extends MyController {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				QueryBuilder query = QueryBuilders.matchAllQuery();
-				SearchHits sh =
-						Globals.search.query(Globals.namespaces, query, from, until);
+				SearchHits sh = Globals.search
+						.query(Globals.namespaces, query, from, until).getHits();
 				SearchHit[] hits = sh.getHits();
 				List<Map<String, Object>> objects = new ArrayList<>();
 				for (SearchHit hit : hits) {
