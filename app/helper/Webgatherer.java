@@ -16,13 +16,18 @@
  */
 package helper;
 
+import static archive.fedora.FedoraVocabulary.HAS_PART;
 import play.Logger;
+import play.Play;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.text.ParseException;
 
 import com.ibm.icu.util.Calendar;
 
@@ -40,6 +45,10 @@ import actions.Read;
  */
 public class Webgatherer implements Runnable {
 
+	final static String heritrixJobDir =
+			Play.application().configuration().getString("regal-api.heritrix.jobDir");
+	final static String wpullJobDir =
+			Play.application().configuration().getString("regal-api.wpull.jobDir");
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -92,14 +101,27 @@ public class Webgatherer implements Runnable {
 	}
 
 	/**
+	 * @param n der Knoten für die Webpage
+	 * @return Datum+Zeit (Typ Date), als zuletzt ein Crawl angestoßen wurde
+	 * @throws Exception Ausnahme beim Lesen
+	 */
+	public static Date getLastLaunch(Node n) throws Exception {
+		return new Read().getLastModifiedChild(n, (Node) null).getLastModified();
+	}
+
+	/**
 	 * @param n a webpage
 	 * @param conf user definde config
 	 * @return nextLaunch
 	 * @throws Exception can be IOException or Json related Exceptions
 	 */
 	public static Date nextLaunch(Node n) throws Exception {
-		Date lastHarvest = new Read().getLastModifiedChild(n).getLastModified();
+		Date lastHarvest =
+				new Read().getLastModifiedChild(n, (Node) null).getLastModified();
 		Gatherconf conf = Gatherconf.create(n.getConf());
+		if (lastHarvest == null) {
+			return conf.getStartDate();
+		}
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(lastHarvest);
 		Date nextTimeHarvest = getSchedule(cal, conf);
@@ -115,13 +137,12 @@ public class Webgatherer implements Runnable {
 			return true;
 		}
 		try {
-			File latest = Globals.heritrix.getLatestCrawlDir(n.getPid());
-			if (latest == null) {
-				return true;
-			}
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
-			Date latestDate = sdf.parse(latest.getName().substring(0, 8));
+			Date latestDate = getLastLaunch(n);
+			if (latestDate == null) {
+				return true;
+			}
 			Calendar latestCalendar = Calendar.getInstance();
 			latestCalendar.setTime(latestDate);
 			if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
@@ -148,6 +169,9 @@ public class Webgatherer implements Runnable {
 			return true;
 		} catch (ParseException e) {
 			WebgatherLogger.error("Cannot parse date string.", e);
+			return false;
+		} catch (Exception e) {
+			WebgatherLogger.error("Kann letztes Crawl-Datum nicht bestimmen.", e);
 			return false;
 		}
 	}
@@ -177,4 +201,59 @@ public class Webgatherer implements Runnable {
 		}
 		return cal.getTime();
 	}
+
+	/**
+	 * @param name the jobs name e.g. the pid
+	 * @param jobDir Arbeitsverzeichnus für einen spezifischen Crawler
+	 * @return the servers directory where to store the data
+	 * 
+	 *         Im Unterschied zu getCurrentCrawlDir wird nicht der Pfad mit dem
+	 *         aktuellen Datum zurückgegeben, sondern der Pfad mit dem LETZTEN
+	 *         (=neuesten) Datum - oder NULL, falls noch gar nicht gecrawlt wurde.
+	 */
+	public static File getLatestCrawlDir(String jobDir, String name) {
+		File dir = new File(jobDir + "/" + name);
+		WebgatherLogger.debug("jobDir/name=" + dir.toString());
+		// gibt es das Verzeichnis überhaupt ?
+		if (!dir.exists() || !dir.isDirectory()) {
+			WebgatherLogger
+					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			return null;
+		}
+		File[] files = dir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File d) {
+				return (d.isDirectory() && d.getName().matches("^[0-9]+"));
+			}
+		});
+		if (files == null || files.length <= 0) {
+			WebgatherLogger
+					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			return null;
+		}
+		WebgatherLogger
+				.debug("Found crawl directories: " + java.util.Arrays.toString(files));
+		Arrays.sort(files, Collections.reverseOrder());
+		File latest = files[0];
+		return latest;
+	}
+
+	/*
+	 * @return die Anzahl bisher begonnener Sammelvorgänge (Summe über alle
+	 * möglichen Crawler) = die Anzahl angelegter Versionen
+	 */
+	public static int getLaunchCount(Node node) {
+		int launchCount = 0;
+		if (!node.getContentType().equals("webpage")) {
+			WebgatherLogger.warn("Knoten " + node.getName()
+					+ " ist nicht vom Inhaltstyp \"webpage\" ! Anzahl begonnener Sammelvorgänge kann nicht ermittelt werden!");
+			return -1;
+		}
+		List<Link> children = node.getRelatives(HAS_PART);
+		launchCount = children.size(); // hopefully all children are versions - how
+																		// to verify that ?
+		WebgatherLogger.debug("Launch Count = " + launchCount);
+		return launchCount;
+	}
+
 }
