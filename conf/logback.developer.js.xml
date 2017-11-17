@@ -62,7 +62,7 @@
   </appender>
 
   <!--logger name="play" level="INFO" /-->
-  <logger name="application" level="INFO">
+  <logger name="application" level="DEBUG">
     <appender-ref ref="FILE" />
   </logger>
   <logger name="webgatherer" level="INFO" additivity="false">
