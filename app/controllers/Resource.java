@@ -528,18 +528,30 @@ public class Resource extends MyController {
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "deleteMetadata", value = "deleteMetadata", notes = "Deletes a resources metadata", response = Message.class, httpMethod = "DELETE")
-	public static Promise<Result> deleteMetadata(@PathParam("pid") String pid) {
+	public static Promise<Result> deleteMetadata(@PathParam("pid") String pid,
+			@QueryParam("field") String field) {
 		return new ModifyAction().call(pid, node -> {
-			String result = delete.deleteMetadata(pid);
-			return JsonMessage(new Message(result));
+			if (field != null && !field.isEmpty()) {
+				String result = delete.deleteMetadataField(pid, field);
+				return JsonMessage(new Message(result));
+			} else {
+				String result = delete.deleteMetadata(pid);
+				return JsonMessage(new Message(result));
+			}
 		});
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "deleteMetadata", value = "deleteMetadata", notes = "Deletes a resources metadata", response = Message.class, httpMethod = "DELETE")
-	public static Promise<Result> deleteMetadata2(@PathParam("pid") String pid) {
+	public static Promise<Result> deleteMetadata2(@PathParam("pid") String pid,
+			@QueryParam("field") String field) {
 		return new ModifyAction().call(pid, node -> {
-			String result = delete.deleteMetadata2(pid);
-			return JsonMessage(new Message(result));
+			if (field != null && !field.isEmpty()) {
+				String result = delete.deleteMetadata2Field(pid, field);
+				return JsonMessage(new Message(result));
+			} else {
+				String result = delete.deleteMetadata2(pid);
+				return JsonMessage(new Message(result));
+			}
 		});
 	}
 

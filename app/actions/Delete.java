@@ -19,8 +19,15 @@ package actions;
 import helper.HttpArchiveError;
 import helper.HttpArchiveException;
 
+import java.io.ByteArrayInputStream;
+import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFFormat;
+
+import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Node;
 
@@ -166,5 +173,29 @@ public class Delete extends RegalAction {
 		Globals.fedora.deleteDatastream(pid, "data");
 		updateIndex(pid);
 		return pid + ": data - datastream successfully deleted! ";
+	}
+
+	public String deleteMetadataField(String pid, String field) {
+		Node node = new Read().readNode(pid);
+		String pred = getUriFromJsonName(field);
+		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
+				new ByteArrayInputStream(node.getMetadata().getBytes()),
+				RDFFormat.NTRIPLES);
+		Collection<Statement> myGraph =
+				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
+		return new Modify().updateMetadata(node,
+				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
+	}
+
+	public String deleteMetadata2Field(String pid, String field) {
+		Node node = new Read().readNode(pid);
+		String pred = getUriFromJsonName(field);
+		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
+				new ByteArrayInputStream(node.getMetadata2().getBytes()),
+				RDFFormat.NTRIPLES);
+		Collection<Statement> myGraph =
+				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
+		return new Modify().updateMetadata2(node,
+				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 }
