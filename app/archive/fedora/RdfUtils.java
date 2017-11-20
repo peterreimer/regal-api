@@ -27,6 +27,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import models.Link;
 import models.RdfResource;
 
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Graph;
 import org.eclipse.rdf4j.model.IRI;
@@ -455,7 +457,7 @@ public class RdfUtils {
 		}
 	}
 
-	private static RepositoryConnection readRdfInputStreamToRepository(
+	public static RepositoryConnection readRdfInputStreamToRepository(
 			InputStream is, RDFFormat inf) {
 		RepositoryConnection con = null;
 		try {
@@ -721,4 +723,11 @@ public class RdfUtils {
 		}
 	}
 
+	public static Collection<Statement> deletePredicateFromRepo(
+			RepositoryConnection con, String pred) {
+		String queryString = "DELETE WHERE{?s <" + pred + "> ?o .} ";
+		play.Logger.debug(queryString);
+		con.prepareUpdate(QueryLanguage.SPARQL, queryString).execute();
+		return Iterations.asList(con.getStatements(null, null, null, true));
+	}
 }
