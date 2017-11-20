@@ -183,13 +183,14 @@ public class Helper {
 						continue;
 					String sourceId = c.at("/source/0/@id").asText();
 					String source = c.at("/source/0/label").asText();
+					String notation = c.at("/notation").asText();
 
 					Map<String, Object> subject = new HashMap<>();
 					subject.put("id", uri);
 					subject.put("label", name);
 					subject.put("source", source);
 					subject.put("sourceId", sourceId);
-					subject.put("sourceName", getSubjectSource(sourceId, uri));
+					subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
 					result2.add(subject);
 				}
 			}
@@ -202,6 +203,7 @@ public class Helper {
 		if (result1.isEmpty()) {
 			for (JsonNode c : hit.at("/subject")) {
 
+				String notation = c.at("/notation").asText();
 				String name = c.at("/prefLabel").asText();
 				String uri = c.at("/@id").asText();
 				if (uri.contains("rpb#nr"))
@@ -214,21 +216,26 @@ public class Helper {
 				subject.put("label", name);
 				subject.put("source", source);
 				subject.put("sourceId", sourceId);
-				subject.put("sourceName", getSubjectSource(sourceId, uri));
+				subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
 				result1.add(subject);
 			}
 		}
 		return result1;
 	}
 
-	public static String getSubjectSource(String sourceId, String uri) {
+	public static String getSubjectSource(String sourceId, String uri,
+			String notation) {
 		String source = "";
 		if ("https://w3id.org/lobid/rpb2".equals(sourceId)) {
 			source = "lbz " + getLbzId(uri);
 		} else if ("https://w3id.org/lobid/rpb".equals(sourceId)) {
 			source = "rpb " + getRPbId(uri);
 		} else if ("http://d-nb.info/gnd/4149423-4".equals(sourceId)) {
-			source = "ddc " + getDdcId(uri);
+			if (notation != null && !notation.isEmpty()) {
+				source = "ddc " + notation;
+			} else {
+				source = "ddc " + getDdcId(uri);
+			}
 		} else if ("http://d-nb.info/gnd/7749153-1".equals(sourceId)) {
 			source = "gnd " + getGndId(uri);
 		} else if ("http://purl.org/lobid/nwbib".equals(sourceId)) {
@@ -293,12 +300,13 @@ public class Helper {
 			String source = c.at("/source/0/label").asText();
 			String sourceId = c.at("/source/0/@id").asText();
 
+			String notation = c.at("/notation").asText();
 			Map<String, Object> subject = new HashMap<>();
 			subject.put("id", uri);
 			subject.put("label", name);
 			subject.put("source", source);
 			subject.put("sourceId", sourceId);
-			subject.put("sourceName", getSubjectSource(sourceId, uri));
+			subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
 
 			result.add(subject);
 		}
