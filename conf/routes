@@ -123,3 +123,11 @@ POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pi
 
 GET /authors/:authorname controllers.AuthorsController.getAuthorsRdf(authorname)
 GET /context.json controllers.Context.getContext()
+
+GET /add/catalog					controllers.Forms.getCatalogForm()
+GET /add/article					controllers.Forms.getArticleForm()
+GET /add/webpage					controllers.Forms.getWebpageForm()
+GET /add/file						controllers.Forms.getFileForm()
+GET /add/part						controllers.Forms.getPartForm()
+GET /login							controllers.Forms.getLoginForm()
+	
