@@ -132,10 +132,10 @@
 								<ol class="facets_nav" >
 					
 								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
-									<li> <a href="">@b.getKey() (@b.getDocCount())</a></li>
+									<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
 								}
 							
-				                <a class="more_facets_link" href="#more_facets_subject_exact" data-for="facets_subject_exact">
+				                <a class="more_facets_link" href="/facets/more_facets_subject_exact" data-for="facets_subject_exact">
 				                    <span class="more_facets_text">
 				                        All <span class="fa fa-caret-down"></i>
 				                    </span>
