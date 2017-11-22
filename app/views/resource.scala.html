@@ -5,8 +5,8 @@
 
 @(hit:Map[String,Object],aggregations:Aggregations,namespace: String)
 
-
-@main(hit.get("title").toString(),aggregations) {
+@main(hit.get("title").toString(),aggregations,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 
 		<ul class="nav nav-tabs">
 					 <li class="active"><a href="#1a" data-toggle="tab">Object</a></li>

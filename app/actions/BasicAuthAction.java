@@ -16,12 +16,16 @@
  */
 package actions;
 
-import models.User;
+import authenticate.Role;
+import authenticate.User;
+import models.Globals;
+import authenticate.User;
 import play.Play;
 import play.libs.F;
 import play.Logger;
 import play.mvc.Action;
 import play.mvc.Http;
+import play.mvc.Http.Session;
 import play.mvc.Result;
 
 /**
@@ -40,11 +44,22 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 	@Override
 	public F.Promise<Result> call(Http.Context context) throws Throwable {
+		Session session = context.session();
+		if (session.get("username") != null) {
+			// User is already logged in
+			User user = models.Globals.users.getUser(session.get("username"));
+			context.args.put("role", user.getRole());
+			return delegate.call(context);
+		} else {
+			return basicAuth(context);
+		}
+	}
 
+	public F.Promise<Result> basicAuth(Http.Context context) throws Throwable {
 		String authHeader = context.request().getHeader(AUTHORIZATION);
 		if (authHeader == null) {
 			if (context.request().method().equals("GET")) {
-				context.args.put("role", "edoweb-anonymous");
+				context.args.put("role", Role.GUEST);
 				return delegate.call(context);
 			} else {
 				return unauthorized(context);
@@ -72,18 +87,11 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	}
 
 	private User getAuthenticatedUser(String username, String password) {
-		try {
-			String userImpl =
-					Play.application().configuration().getString("regal-api.userImpl");
-			Class<?> cl = null;
-			cl = Class.forName(userImpl);
-			return ((User) cl.newInstance()).authenticate(username, password);
-		} catch (Throwable e) {
-			play.Logger.info(e.getMessage(), e);
-			play.Logger.debug("", e);
-			return null;
+		User user = Globals.users.getUser(username);
+		if (user != null && user.getPassword().equals(password)) {
+			return user;
 		}
-
+		return null;
 	}
 
 	private play.libs.F.Promise<Result> unauthorized(Http.Context context) {

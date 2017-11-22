@@ -130,4 +130,7 @@ GET /add/webpage					controllers.Forms.getWebpageForm()
 GET /add/file						controllers.Forms.getFileForm()
 GET /add/part						controllers.Forms.getPartForm()
 GET /login							controllers.Forms.getLoginForm()
-	
+GET /logout							controllers.Forms.getLogoutForm()
+
+POST /login  				        controllers.Forms.postLogin()
+POST /logout  				        controllers.Forms.postLogout()
