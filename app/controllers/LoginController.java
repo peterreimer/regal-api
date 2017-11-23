@@ -13,7 +13,7 @@ public class LoginController extends MyController {
 			Form<User> userForm = Form.form(User.class).bindFromRequest();
 			if (userForm.hasErrors()) {
 				play.Logger.debug("Login credentials not valid.");
-				flash("error", "Login credentials not valid.");
+				flash("message", "Login credentials not valid.");
 				return badRequest(views.html.login.render(userForm));
 			} else {
 				UserDB users = models.Globals.users;
@@ -24,10 +24,11 @@ public class LoginController extends MyController {
 					session().clear();
 					session("username", user.getUsername());
 					session("role", user.getRole().toString());
+					flash("message",
+							"Hello " + user.getUsername() + "! You are logged in.");
 					return redirect(routes.Application.index());
 				}
 				return badRequest(views.html.login.render(userForm));
-
 			}
 		});
 	}

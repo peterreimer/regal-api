@@ -43,7 +43,7 @@ import com.google.common.net.InetAddresses;
  */
 public class Globals {
 
-	public static UserDB users = new UserDB();
+	public static UserDB users = UserDB.getInstance();
 
 	/**
 	 * the server that hosts this app

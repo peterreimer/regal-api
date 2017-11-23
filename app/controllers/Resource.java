@@ -68,6 +68,8 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
+import play.data.DynamicForm;
+import play.data.Form;
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
@@ -141,9 +143,11 @@ public class Resource extends MyController {
 			});
 		} catch (Exception e) {
 			return Promise.promise(new Function0<Result>() {
+
 				public Result apply() {
 					return JsonMessage(new Message(e, 500));
 				}
+
 			});
 		}
 	}
@@ -1157,4 +1161,21 @@ public class Resource extends MyController {
 		});
 	}
 
+	public static Promise<Result> createObjectWithMetadata() {
+		return new CreateAction().call(userId -> {
+			try {
+				DynamicForm form = Form.form().bindFromRequest();
+				String alephId = form.get("alephId");
+				String namespace = form.get("namespace");
+				RegalObject object = new RegalObject();
+				object.setContentType("monograph");
+				Node node = create.createResource(namespace, object);
+				String message = modify.lobidify(node, alephId);
+				flash("message", message);
+				return redirect(routes.Resource.listResource(node.getPid(), null));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
 }

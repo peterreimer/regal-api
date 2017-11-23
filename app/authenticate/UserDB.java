@@ -8,9 +8,18 @@ import play.mvc.Http.Context;
 
 public class UserDB {
 
+	private static UserDB db = null;
+
 	Map<String, User> users;
 
-	public UserDB() {
+	public static UserDB getInstance() {
+		if (UserDB.db == null) {
+			UserDB.db = new UserDB();
+		}
+		return UserDB.db;
+	}
+
+	private UserDB() {
 		users = new HashMap<>();
 		User admin = new User();
 		/*
