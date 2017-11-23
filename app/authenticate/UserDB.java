@@ -29,6 +29,8 @@ public class UserDB {
 	}
 
 	public boolean isLoggedIn(Context ctx) {
+		play.Logger.debug("Look up context " + ctx);
+		play.Logger.debug("Look up context " + ctx.session());
 		return (getUser(ctx) != null);
 	}
 

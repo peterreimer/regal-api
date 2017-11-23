@@ -82,9 +82,23 @@
 	  	</div><!-- /.navbar-collapse -->
 	</nav>
 		<div class="container-fluid" style="min-height:400px">	
-		
+			@if(flash.containsKey("message")) {
+				<div class="row">	
+					<div class=" col-md-1">
+				
+					</div>
+					<div class="col-md-2">
+					</div>
+					<div class="message alert alert-info col-md-7">	
+						
+							@flash.get("message")
+					
+					</div>
+					 <div class="col-md-2"></div>
+				</div>
+			}
 			<div class="row">
-			<div class="col-md-1">
+				<div class="col-md-1">
 				</div>
 				<div class="col-md-2">
 					<div class="row facets">
@@ -95,6 +109,7 @@
                 		
 					</div>
 				</div>
+		
 				<div class="col-md-7">	
 					@content
 		        </div>

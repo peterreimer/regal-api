@@ -1,12 +1,7 @@
 package controllers;
 
-import java.io.IOException;
-
-import javax.ws.rs.PathParam;
-
 import actions.BasicAuth;
 import authenticate.User;
-import controllers.MyController.ModifyAction;
 import helper.HttpArchiveException;
 import models.Message;
 import play.data.Form;
@@ -75,38 +70,19 @@ public class Forms extends MyController {
 	}
 
 	public static Promise<Result> getLoginForm() {
-		try {
-			Form<User> userForm = Form.form(User.class);
+		return Promise.promise(() -> {
+			try {
+				if (models.Globals.users.isLoggedIn(ctx())) {
+					return redirect(routes.Forms.getLogoutForm());
+				}
+				Form<User> userForm = Form.form(User.class);
 
-			return Promise.promise(() -> {
 				return ok(views.html.login.render(userForm));
-			});
-		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
-		}
-	}
 
-	public static Promise<Result> postLogin() {
-		Form<User> userForm = Form.form(User.class).bindFromRequest();
-
-		if (userForm.hasErrors()) {
-			flash("error", "Login credentials not valid.");
-
-			return Promise.promise(() -> {
-				return badRequest(views.html.login.render(userForm));
-			});
-		} else {
-
-			// email/password OK, so now we set the session variable and only go to
-			// authenticated pages.
-			play.Logger.debug(userForm.get().getUsername() + "");
-			session().clear();
-			session("username", userForm.get().getUsername());
-			return Promise.promise(() -> {
-				return getJsonResult(userForm.get());
-			});
-		}
-
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
 	}
 
 	public static Promise<Result> getLogoutForm() {

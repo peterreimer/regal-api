@@ -44,13 +44,11 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 	@Override
 	public F.Promise<Result> call(Http.Context context) throws Throwable {
-		Session session = context.session();
-		if (session.get("username") != null) {
+		if (models.Globals.users.isLoggedIn(context)) {
 			// User is already logged in
-			User user = models.Globals.users.getUser(session.get("username"));
-			context.args.put("role", user.getRole());
 			return delegate.call(context);
 		} else {
+			// Look for basic auth header for api calls
 			return basicAuth(context);
 		}
 	}
@@ -59,7 +57,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 		String authHeader = context.request().getHeader(AUTHORIZATION);
 		if (authHeader == null) {
 			if (context.request().method().equals("GET")) {
-				context.args.put("role", Role.GUEST);
+				context.session().put("role", Role.GUEST.toString());
 				return delegate.call(context);
 			} else {
 				return unauthorized(context);
@@ -79,7 +77,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 		User authUser = getAuthenticatedUser(username, password);
 		if (authUser != null) {
-			context.args.put("role", authUser.getRole());
+			context.session().put("role", authUser.getRole().toString());
 			return delegate.call(context);
 		}
 		play.Logger.info("Authentifizierung fehlgeschlagen !");
@@ -94,6 +92,11 @@ public class BasicAuthAction extends Action<BasicAuth> {
 		return null;
 	}
 
+	/**
+	 * 
+	 * @param context
+	 * @return
+	 */
 	private play.libs.F.Promise<Result> unauthorized(Http.Context context) {
 		context.response().setHeader(WWW_AUTHENTICATE, REALM);
 		return F.Promise.promise(new F.Function0<Result>() {

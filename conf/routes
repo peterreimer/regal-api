@@ -132,5 +132,5 @@ GET /add/part						controllers.Forms.getPartForm()
 GET /login							controllers.Forms.getLoginForm()
 GET /logout							controllers.Forms.getLogoutForm()
 
-POST /login  				        controllers.Forms.postLogin()
+POST /login  				        controllers.LoginController.postLogin()
 POST /logout  				        controllers.Forms.postLogout()

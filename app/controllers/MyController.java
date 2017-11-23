@@ -36,7 +36,6 @@ import models.Node;
 import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 import views.html.message;
 import actions.Create;
@@ -108,7 +107,8 @@ public class MyController extends Controller {
 		Message msg = new Message("Access Denied!", 401);
 		play.Logger.debug("\nResponse: " + msg.toString());
 		if (request().accepts("text/html")) {
-			return HtmlMessage(msg);
+			flash("message", "You must be logged in to perform this action!");
+			return redirect(routes.Forms.getLoginForm());
 		} else {
 			return JsonMessage(msg);
 		}
@@ -282,7 +282,7 @@ public class MyController extends Controller {
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
-						Role role = (Role) Http.Context.current().args.get("role");
+						Role role = Role.valueOf(ctx().session().get("role"));
 						String publishScheme = node.getPublishScheme();
 						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
 							return AccessDenied();
@@ -317,10 +317,11 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, NodeAction ca) {
 			return Promise.promise(() -> {
 				try {
+					Role role = findRole();
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
-						Role role = (Role) Http.Context.current().args.get("role");
+
 						String accessScheme = node.getAccessScheme();
 						if (!readData_accessIsAllowed(accessScheme, role)) {
 							return AccessDenied();
@@ -336,7 +337,15 @@ public class MyController extends Controller {
 				}
 			});
 		}
+	}
 
+	private static Role findRole() {
+		String roleString = session().get("role");
+		if (roleString == null || roleString.isEmpty()) {
+			roleString = Role.GUEST.toString();
+		}
+		play.Logger.debug("Access with role " + roleString);
+		return Role.valueOf(roleString);
 	}
 
 	/**
@@ -347,7 +356,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					Role role = (Role) Http.Context.current().args.get("role");
+					Role role = findRole();
 					if (!readMetadata_accessIsAllowed("private", role)) {
 						return AccessDenied();
 					}
@@ -371,7 +380,7 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, Action ca) {
 			return Promise.promise(() -> {
 				try {
-					Role role = (Role) Http.Context.current().args.get("role");
+					Role role = findRole();
 					String userId = request().getHeader("UserId");
 					play.Logger.debug(
 							"Try to access with role: " + role + " and userId " + userId);
@@ -403,7 +412,7 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, NodeAction ca) {
 			return Promise.promise(() -> {
 				try {
-					Role role = (Role) Http.Context.current().args.get("role");
+					Role role = findRole();
 					play.Logger.debug("Try to access with role: " + role + ".");
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
@@ -433,7 +442,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					Role role = (Role) Http.Context.current().args.get("role");
+					Role role = findRole();
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
 					}
@@ -457,7 +466,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					Role role = (Role) Http.Context.current().args.get("role");
+					Role role = findRole();
 					play.Logger.debug("role={}", role);
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
