@@ -1138,6 +1138,7 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			try {
 				Node node = readNodeOrNull(pid);
+
 				String rdf = RdfUtils.readRdfToString(
 						new ByteArrayInputStream(node.toString().getBytes("utf-8")),
 						RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
