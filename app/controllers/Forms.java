@@ -3,8 +3,8 @@ package controllers;
 import java.util.HashMap;
 import java.util.Map;
 
-import actions.BasicAuth;
 import actions.Modify;
+import authenticate.BasicAuth;
 import authenticate.User;
 import authenticate.UserDB;
 import helper.HttpArchiveException;

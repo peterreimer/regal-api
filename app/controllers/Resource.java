@@ -54,9 +54,9 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.core.util.JsonUtil;
 
-import actions.BasicAuth;
 import actions.BulkAction;
 import archive.fedora.RdfUtils;
+import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.oai.OaiDispatcher;

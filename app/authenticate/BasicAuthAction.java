@@ -14,12 +14,9 @@
  * limitations under the License.
  *
  */
-package actions;
+package authenticate;
 
-import authenticate.Role;
-import authenticate.User;
 import models.Globals;
-import authenticate.User;
 import play.Play;
 import play.libs.F;
 import play.Logger;
