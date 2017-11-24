@@ -502,4 +502,29 @@ public class Helper {
 		result.put("title", getTitle(n.getLd2()));
 		return result;
 	}
+
+	public static Map<String, String> getThumbnail(Map<String, Object> node) {
+		try {
+			Map<String, String> result = new HashMap<>();
+			if (node.get("hasData") == null) {
+				if (node.get("hasPart") != null) {
+					return getThumbnail(new Read().internalReadNode(
+							((List<Map<String, Object>>) node.get("hasPart")).get(0)
+									.get("@id").toString())
+							.getLd2());
+				}
+				return null;
+			}
+			String thumbyCall = null;
+			String dataLink = "/resource/" + node.get("@id").toString() + "/data";
+			String size = "&size=250";
+			thumbyCall = Globals.thumbyUrl + "?url=" + Globals.protocol
+					+ Globals.server + dataLink + size;
+			result.put("thumbyCall", thumbyCall);
+			result.put("dataLink", dataLink);
+			return result;
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }
