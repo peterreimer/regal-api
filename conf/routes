@@ -136,3 +136,6 @@ POST /login  				        controllers.LoginController.postLogin()
 POST /logout  				        controllers.Forms.postLogout()
 POST /add/catalog					controllers.Forms.postCatalogForm()
 POST /add/catalogObject				controllers.Resource.createObjectWithMetadata()
+
+GET /viewers/:type/:id/data			controllers.Viewers.getViewer(type,id)
+

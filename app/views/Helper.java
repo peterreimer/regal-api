@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.MediaType;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
@@ -516,7 +517,8 @@ public class Helper {
 				return null;
 			}
 			String thumbyCall = null;
-			String dataLink = "/resource/" + node.get("@id").toString() + "/data";
+			String dataLink =
+					createDataLink((Map<String, Object>) node.get("hasData"));
 			String size = "&size=250";
 			thumbyCall = Globals.thumbyUrl + "?url=" + Globals.protocol
 					+ Globals.server + dataLink + size;
@@ -526,5 +528,24 @@ public class Helper {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	private static String createDataLink(Map<String, Object> hasData) {
+		String result = null;
+		String format = hasData.get("format").toString();
+		MediaType mt = MediaType.parse(format);
+
+		// Addviewers here
+		if (mt.is(MediaType.ANY_IMAGE_TYPE)) {
+			return "/viewers/deepzoom/" + hasData.get("@id").toString();
+		}
+		if (mt.is(MediaType.ANY_VIDEO_TYPE)) {
+			return "/viewers/video/" + hasData.get("@id").toString();
+		}
+		if (mt.is(MediaType.ANY_AUDIO_TYPE)) {
+			return "/viewers/audio/" + hasData.get("@id").toString();
+		}
+		// default
+		return result = "/resource/" + hasData.get("@id").toString();
 	}
 }

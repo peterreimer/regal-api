@@ -8,7 +8,7 @@ var thumbnailUrl:Map[String,String] = Helper.getThumbnail(hit)
 
 if(thumbnailUrl!=null){
 <div id="thumbnail">
-	<a href={thumbnailUrl.get("dataLink")}><img src={thumbnailUrl.get("thumbyCall")} width="150"/></a>
+	<a href={thumbnailUrl.get("dataLink")} target="_blank"><img src={thumbnailUrl.get("thumbyCall")} width="150"/></a>
 </div>
 }
 }
