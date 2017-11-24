@@ -50,7 +50,6 @@ public class WpullCrawl {
 
 	private Gatherconf conf = null;
 	private String urlAscii = null;
-	private URI uri = null;
 	private String date = null;
 	private String datetime = null;
 	private File crawlDir = null;
@@ -91,8 +90,8 @@ public class WpullCrawl {
 			WebgatherLogger.debug("URL=" + conf.getUrl());
 			this.urlAscii = convertUnicodeURLToAscii(conf.getUrl());
 			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.uri = new URI(urlAscii);
-			this.host = uri.getHost();
+			this.host = urlAscii.replaceAll("^http://", "")
+					.replaceAll("^https://", "").replaceAll("/.*$", "");
 			WebgatherLogger.debug("host=" + host);
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
 			this.datetime =
