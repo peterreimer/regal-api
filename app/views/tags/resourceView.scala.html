@@ -388,6 +388,7 @@
 	}
 }
 @createPublicationFields(fields:Map[String,String])={
+@if(fields.get("regal:publishLocation")!=null){
 <tr class="regal:publishLocation">
 <td style="display:none;">@getWeight("regal:publishLocation")</td>
 <td class="field-label regal-publishLocation">@getLabel("regal:publishLocation")</td>
@@ -395,6 +396,8 @@
 		@fields.get("regal:publishLocation")
 </td>
 </tr>		
+}
+@if(fields.get("regal:publishedBy")!=null){
 <tr class="regal:publishedBy">
 <td style="display:none;">@getWeight("regal:publishedBy")</td>
 <td class="field-label regal-publishedBy">@getLabel("regal:publishedBy")</td>
@@ -402,13 +405,16 @@
 		@fields.get("regal:publishedBy")
 </td>
 </tr>	
+}
+@if(fields.get("regal:publishYear")!=null){
 <tr class="regal:publishYear">
 <td style="display:none;">@getWeight("regal:publishYear")</td>
 <td class="field-label regal-publishYear">@getLabel("regal:publishYear")</td>
 <td class="field-item" property="@models.Globals.profile.getEtikettByName("regal:publishYear").getUri()">
 		@fields.get("regal:publishYear")
 </td>
-</tr>							
+</tr>		
+}					
 }
 @displayContributions(id:String,label:String,roleId:String,roleName:String)={
 		<tr class=@roleId>

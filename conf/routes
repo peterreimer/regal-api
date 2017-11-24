@@ -80,8 +80,8 @@ POST /resource/:pid/doi/update      controllers.Resource.updateDoi(pid)
 POST /resource/:pid/doi/replace    controllers.Resource.replaceDoi(pid)
 
 DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
-DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid)
-DELETE /resource/:pid/metadata2		controllers.Resource.deleteMetadata2(pid)
+DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid,field)
+DELETE /resource/:pid/metadata2		controllers.Resource.deleteMetadata2(pid,field)
 DELETE /resource/:pid/data			controllers.Resource.deleteData(pid)
 DELETE /resource/:pid/dc			controllers.Resource.deleteDc(pid)
 DELETE /resource/:pid/all			controllers.Resource.deleteDescendent(pid,contentType?="")
@@ -123,3 +123,16 @@ POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pi
 
 GET /authors/:authorname controllers.AuthorsController.getAuthorsRdf(authorname)
 GET /context.json controllers.Context.getContext()
+
+GET /add/catalog					controllers.Forms.getCatalogForm()
+GET /add/article					controllers.Forms.getArticleForm()
+GET /add/webpage					controllers.Forms.getWebpageForm()
+GET /add/file						controllers.Forms.getFileForm()
+GET /add/part						controllers.Forms.getPartForm()
+GET /login							controllers.Forms.getLoginForm()
+GET /logout							controllers.Forms.getLogoutForm()
+
+POST /login  				        controllers.LoginController.postLogin()
+POST /logout  				        controllers.Forms.postLogout()
+POST /add/catalog					controllers.Forms.postCatalogForm()
+POST /add/catalogObject				controllers.Resource.createObjectWithMetadata()

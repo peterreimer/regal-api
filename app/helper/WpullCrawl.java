@@ -17,15 +17,22 @@
 package helper;
 
 import models.Gatherconf;
+import models.Gatherconf.QuotaUnitSelection;
 import models.Globals;
+import models.Node;
 import play.Logger;
 import play.Play;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.ProcessBuilder;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * a class to implement a wpull crawl
@@ -34,6 +41,11 @@ import java.util.ArrayList;
  *
  */
 public class WpullCrawl {
+
+	@SuppressWarnings("javadoc")
+	public enum CrawlControllerState {
+		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
+	}
 
 	private Gatherconf conf = null;
 	private String date = null;
@@ -44,9 +56,9 @@ public class WpullCrawl {
 	private int exitState = 0;
 	private String msg = null;
 
-	final String jobDir =
+	final static String jobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
-	final String crawler =
+	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 
 	private static final Logger.ALogger WebgatherLogger =
@@ -136,7 +148,12 @@ public class WpullCrawl {
 	/**
 	 * Builds a shell executable command which starts a wpull crawl
 	 * 
-	 * @return the shell executable command as a String
+	 * For wpull parameters in use see:
+	 * http://wpull.readthedocs.io/en/master/options.html If marked as mandatory,
+	 * parameter is needed for running smoothly in edoweb context. So only remove
+	 * them if reasonable.
+	 * 
+	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
 		String urlRaw = conf.getUrl().replaceAll("^http://", "")
@@ -161,6 +178,25 @@ public class WpullCrawl {
 			}
 			sb.append(".*");
 		}
+
+		int level = conf.getDeepness();
+		if (level != 0) {
+			sb.append(" --level=" + Integer.toString(level)); // number of recursions
+		}
+
+		long maxByte = conf.getMaxCrawlSize();
+		if (maxByte > 0) {
+			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
+			// TODO implement select factor
+			Hashtable<QuotaUnitSelection, Integer> sizeFactor = new Hashtable<>();
+			sizeFactor.put(QuotaUnitSelection.KB, 1024);
+			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
+			sizeFactor.put(QuotaUnitSelection.GB, 1073741824);
+
+			long size = maxByte * sizeFactor.get(qFactor).longValue();
+			sb.append(" --quota=" + Long.toString(size));
+		}
+
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
 		sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
@@ -168,9 +204,175 @@ public class WpullCrawl {
 		sb.append(
 				" --no-host-directories --convert-links --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
-		sb.append(" --no-check-certificate --no-directories");
-		sb.append(" --delete-after");
+		sb.append(" --no-check-certificate");
+		sb.append(" --no-directories"); // mandatory to prevent runtime errors
+		sb.append(" --delete-after"); // mandatory for reducing required disc space
+		sb.append(" --convert-links"); // mandatory to rewrite relative urls
 		return sb.toString();
+	}
+
+	/**
+	 * Ermittelt Crawler Exit Status des letzten Crawls
+	 * 
+	 * @param node der Knoten einer Webpage
+	 * @return Crawler Exit Status des letzten wpull-Crawls
+	 */
+	public static int getCrawlExitStatus(Node node) {
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.jobDir"),
+				node.getPid());
+		if (latestCrawlDir == null) {
+			WebgatherLogger.warn("Letztes Crawl-Verzeichnis zu Webpage "
+					+ node.getName() + " kann nicht gefunden werden!");
+			return -3;
+		}
+		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
+		if (!crawlLog.exists()) {
+			WebgatherLogger.warn("Crawl-Verzeichnis " + latestCrawlDir.toString()
+					+ " existiert, aber darin kein crawl.log.");
+			return -2;
+		}
+		/* das Log wird geparst */
+		int exitStatus = -1;
+		BufferedReader buf = null;
+		String regExp = "^INFO Exiting with status ([0-9]+)";
+		Pattern pattern = Pattern.compile(regExp);
+		try {
+			buf = new BufferedReader(new FileReader(crawlLog));
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					exitStatus = Integer.parseInt(matcher.group(1));
+					break;
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger
+					.warn("Crawler Exit Status cannot be defered from crawlLog "
+							+ crawlLog.getAbsolutePath() + "!", e.toString());
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return exitStatus;
+	}
+
+	/**
+	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls
+	 * 
+	 * @param node der Knoten einer Webpage
+	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls; mögliche
+	 *         Werte: NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
+	 *         Operator) - CRASHED - FINISHED
+	 */
+	public static CrawlControllerState getCrawlControllerState(Node node) {
+		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.jobDir"),
+				node.getPid());
+		if (latestCrawlDir == null) {
+			WebgatherLogger.info("Letztes Crawl-Verzeichnis zu Webpage "
+					+ node.getName() + " kann nicht gefunden werden!");
+			return CrawlControllerState.NEW;
+		}
+		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
+		if (!crawlLog.exists()) {
+			WebgatherLogger.info("Crawl-Verzeichnis " + latestCrawlDir.toString()
+					+ " existiert, aber darin kein crawl.log.");
+			return CrawlControllerState.NEW;
+		}
+		// 2. Läuft noch => Status = RUNNING
+		if (isWpullCrawlRunning(node)) {
+			return CrawlControllerState.RUNNING;
+		}
+		// 3. Läuft nicht mehr.
+		/* das Log wird geparst */
+		BufferedReader buf = null;
+		String regExp = "^INFO FINISHED.";
+		Pattern pattern = Pattern.compile(regExp);
+		try {
+			buf = new BufferedReader(new FileReader(crawlLog));
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					return CrawlControllerState.FINISHED;
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger.warn(
+					"Crawl Controller State cannot be defered from crawlLog "
+							+ crawlLog.getAbsolutePath() + "! Assuming CRASHED.",
+					e.toString());
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return CrawlControllerState.CRASHED;
+	}
+
+	/**
+	 * Prüfung, ob ein Crawl zu einer gegebenen URL aktuell läuft
+	 * 
+	 * @param node der Knoten zu der Webpage mit der URL
+	 * @return boolean Crawl läuft
+	 */
+	public static boolean isWpullCrawlRunning(Node node) {
+		BufferedReader buf = null;
+		String cmd = "ps -eaf";
+		String regExp1 =
+				Play.application().configuration().getString("regal-api.wpull.crawler");
+		Pattern pattern1 = Pattern.compile(regExp1);
+		Matcher matcher1 = null;
+		try {
+			String urlRaw =
+					Gatherconf.create(node.getConf()).getUrl().replaceAll("^http://", "")
+							.replaceAll("^https://", "").replaceAll("/$", "");
+			String regExp2 = "domains=" + urlRaw;
+			Pattern pattern2 = Pattern.compile(regExp2);
+			Matcher matcher2 = null;
+			WebgatherLogger.debug("Setze Systemkommando ab: " + cmd);
+			WebgatherLogger.debug("Suche nach URL_RAW in wpull-Aufrufen: " + urlRaw);
+			String line;
+			Process proc = Runtime.getRuntime().exec(cmd);
+			buf = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			while ((line = buf.readLine()) != null) {
+				matcher1 = pattern1.matcher(line);
+				if (matcher1.find()) {
+					matcher2 = pattern2.matcher(line);
+					if (matcher2.find()) {
+						WebgatherLogger
+								.debug("Found wpull Crawl process for this url=" + line);
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			WebgatherLogger.warn("Fehler beim Aufruf des Systenkommandos: " + cmd,
+					e.toString());
+			throw new RuntimeException(
+					"Crawl Job Zustand kann nicht bestimmt werden !", e);
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return false;
 	}
 
 }

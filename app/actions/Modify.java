@@ -329,7 +329,7 @@ public class Modify extends RegalAction {
 
 	}
 
-	private String updateMetadata(Node node, String content) {
+	String updateMetadata(Node node, String content) {
 		try {
 			String pid = node.getPid();
 			if (content == null) {
@@ -363,7 +363,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private String rewriteContent(String content, String pid) {
+	public String rewriteContent(String content, String pid) {
 		Collection<Statement> graph = RdfUtils.readRdfToGraph(
 				new ByteArrayInputStream(content.getBytes()), RDFFormat.NTRIPLES, "");
 		Iterator<Statement> it = graph.iterator();
@@ -514,8 +514,7 @@ public class Modify extends RegalAction {
 
 	}
 
-	private static String getLobid2DataAsNtripleString(Node node,
-			String alephid) {
+	public static String getLobid2DataAsNtripleString(Node node, String alephid) {
 		String pid = node.getPid();
 		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
 		play.Logger.info("GET " + lobidUri);
@@ -1493,7 +1492,7 @@ public class Modify extends RegalAction {
 		return enrichMessage;
 	}
 
-	private String updateMetadata2(Node node, String content) {
+	String updateMetadata2(Node node, String content) {
 		try {
 			String pid = node.getPid();
 			if (content == null) {

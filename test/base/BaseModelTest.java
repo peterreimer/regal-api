@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 import play.libs.F;
 import play.mvc.Http;
@@ -13,6 +14,9 @@ import play.test.FakeApplication;
 import play.test.Helpers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import archive.fedora.FedoraFacade;
+import models.Globals;
 
 @SuppressWarnings("javadoc")
 public class BaseModelTest {
@@ -50,5 +54,10 @@ public class BaseModelTest {
 		String str = Helpers.contentAsString(result);
 		play.Logger.debug(str);
 		return result;
+	}
+
+	@Test
+	void testGlobals() {
+		FedoraFacade f = Globals.fedora;
 	}
 }

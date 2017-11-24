@@ -24,6 +24,7 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.Webgatherer;
+import helper.WpullCrawl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,15 +133,30 @@ public class Read extends RegalAction {
 
 	/**
 	 * @param node
-	 * @return returns the recently modified node of list containing the passed
-	 *         node itself and all of it's children nodes.
+	 * @param defaultNode
+	 * @return returns the recently modified node of list containing all of the
+	 *         nodes' children nodes and a defaultNode. The defaultNode might be
+	 *         the node itself or null.
 	 */
-	public Node getLastModifiedChild(Node node) {
-		Node oldestNode = node;
-		for (Node n : getParts(node)) {
-			oldestNode = compareDates(n, oldestNode);
+	public Node getLastModifiedChild(Node node, Node defaultNode) {
+		Node oldestNode = defaultNode;
+		for (Node n : getParts(node, defaultNode)) {
+			if (oldestNode == null) {
+				oldestNode = n;
+			} else {
+				oldestNode = compareDates(n, oldestNode);
+			}
 		}
 		return oldestNode;
+	}
+
+	/**
+	 * @param node
+	 * @return returns the recently modified node of list containing the passed
+	 *         node and all of it's children nodes.
+	 */
+	public Node getLastModifiedChild(Node node) {
+		return getLastModifiedChild(node, node);
 	}
 
 	/**
@@ -193,17 +209,29 @@ public class Read extends RegalAction {
 
 	/**
 	 * @param node
-	 * @return all parts and their parts recursively
+	 * @param defaultNode
+	 * @return all parts and their parts recursively and a default node. The
+	 *         default node might be the node itself.
 	 */
-	public List<Node> getParts(Node node) {
+	public List<Node> getParts(Node node, Node defaultNode) {
 		List<Node> result = new ArrayList<Node>();
-		result.add(node);
+		if (defaultNode != null) {
+			result.add(defaultNode);
+		}
 		List<Node> parts = getNodes(node.getPartsSorted().stream()
 				.map((Link l) -> l.getObject()).collect(Collectors.toList()));
 		for (Node p : parts) {
 			result.addAll(getParts(p));
 		}
 		return result;
+	}
+
+	/**
+	 * @param node
+	 * @return all parts and their parts recursively and the node itself.
+	 */
+	public List<Node> getParts(Node node) {
+		return getParts(node, node);
 	}
 
 	/**
@@ -708,7 +736,7 @@ public class Read extends RegalAction {
 	}
 
 	private Map<String, Object> getGatherStatus(Node node) {
-		Map<String, Object> entries = null;
+		Map<String, Object> entries = new HashMap<String, Object>();
 		try {
 			// if ("version".equals(node.getContentType())) {
 			//
@@ -717,14 +745,36 @@ public class Read extends RegalAction {
 			// .as("text/plain");
 			// } else
 			if ("webpage".equals(node.getContentType())) {
-				String hertrixXmlResponse =
-						Globals.heritrix.getJobStatus(node.getPid());
-				XmlMapper xmlMapper = new XmlMapper();
-				entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+				Gatherconf conf = Gatherconf.create(node.getConf());
+				if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.heritrix)) {
+					String hertrixXmlResponse =
+							Globals.heritrix.getJobStatus(node.getPid());
+					XmlMapper xmlMapper = new XmlMapper();
+					entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+				} else if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.wpull)) {
+					entries.put("crawlControllerState",
+							WpullCrawl.getCrawlControllerState(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
+				}
+				/*
+				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
+				 * überschreibt launchCount von Heritrix
+				 */
+				entries.put("launchCount", Webgatherer.getLaunchCount(node));
+				/*
+				 * call of getLastLaunch may be omitted for heritrix, as also determined
+				 * by heritrixXmlResponse
+				 */
+				entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
+						: Webgatherer.getLastLaunch(node));
 				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
-			}
+			} // end if webpage
 		} catch (Exception e) {
-			play.Logger.warn("", e);
+			play.Logger.warn(
+					"Gather-Status kann nicht oder nur teilweise ermittelt werden.", e);
 		}
 		return entries == null ? new HashMap<String, Object>() : entries;
 	}
