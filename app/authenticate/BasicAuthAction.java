@@ -82,8 +82,8 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	}
 
 	private User getAuthenticatedUser(String username, String password) {
-		User user = Globals.users.getUser(username);
-		if (user != null && user.getPassword().equals(password)) {
+		if (Globals.users.isValid(username, password)) {
+			User user = Globals.users.getUser(username);
 			return user;
 		}
 		return null;
