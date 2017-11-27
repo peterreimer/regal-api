@@ -15,13 +15,13 @@ public class Viewers extends MyController {
 		return new ReadDataAction().call(pid, node -> {
 			try {
 				if ("video".equals(type)) {
-					return ok(views.html.standardViewer.render("video"));
+					return ok(views.html.mediaViewers.standardViewer.render("video"));
 				}
 				if ("audio".equals(type)) {
-					return ok(views.html.standardViewer.render("audio"));
+					return ok(views.html.mediaViewers.standardViewer.render("audio"));
 				}
 				if ("deepzoom".equals(type)) {
-					return ok(views.html.deepzoomViewer.render());
+					return ok(views.html.mediaViewers.deepzoomViewer.render());
 				}
 				return redirect(routes.Resource.listData(pid));
 			} catch (Exception e) {
