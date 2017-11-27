@@ -326,4 +326,11 @@ public class Globals {
 			.getString("regal-api.rechercheUrl.suffix");
 
 	public static WglContributor wglContributor = new WglContributor();
+
+	public static String thumbyUrl =
+			Play.application().configuration().getString("regal-api.thumby.url");
+	public static String zettelUrl =
+			Play.application().configuration().getString("regal-api.zettel.url");
+	public static String deepzoomeUrl =
+			Play.application().configuration().getString("regal-api.deepzoom.url");
 }
