@@ -1,1 +1,5 @@
-@(viewerType: String)
+@(viewerType: String,url:String,mimetype:String)
+
+<div>
+<@viewerType width="500" controls><source src="@url" type="@mimetype"/>
+</div>'

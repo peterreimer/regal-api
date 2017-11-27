@@ -504,48 +504,22 @@ public class Helper {
 		return result;
 	}
 
-	public static Map<String, String> getThumbnail(Map<String, Object> node) {
+	public static ViewerInfo getViewerInfo(Node node) {
+
 		try {
-			Map<String, String> result = new HashMap<>();
-			if (node.get("hasData") == null) {
-				if (node.get("hasPart") != null) {
-					return getThumbnail(new Read().internalReadNode(
-							((List<Map<String, Object>>) node.get("hasPart")).get(0)
-									.get("@id").toString())
-							.getLd2());
+			if (node.getFileChecksum() == null) {
+				if (node.getPartsSorted() != null) {
+					return getViewerInfo(new Read()
+							.internalReadNode(node.getPartsSorted().get(0).getObject()));
 				}
 				return null;
 			}
-			String thumbyCall = null;
-			String dataLink =
-					createDataLink((Map<String, Object>) node.get("hasData"));
-			String size = "&size=250";
-			thumbyCall = Globals.thumbyUrl + "?url=" + Globals.protocol
-					+ Globals.server + dataLink + size;
-			result.put("thumbyCall", thumbyCall);
-			result.put("dataLink", dataLink);
-			return result;
+			ViewerInfo info = new ViewerInfo(node);
+			return info;
 		} catch (Exception e) {
+			play.Logger.debug("", e);
 			return null;
 		}
 	}
 
-	private static String createDataLink(Map<String, Object> hasData) {
-		String result = null;
-		String format = hasData.get("format").toString();
-		MediaType mt = MediaType.parse(format);
-
-		// Addviewers here
-		if (mt.is(MediaType.ANY_IMAGE_TYPE)) {
-			return "/viewers/deepzoom/" + hasData.get("@id").toString();
-		}
-		if (mt.is(MediaType.ANY_VIDEO_TYPE)) {
-			return "/viewers/video/" + hasData.get("@id").toString();
-		}
-		if (mt.is(MediaType.ANY_AUDIO_TYPE)) {
-			return "/viewers/audio/" + hasData.get("@id").toString();
-		}
-		// default
-		return result = "/resource/" + hasData.get("@id").toString();
-	}
 }
