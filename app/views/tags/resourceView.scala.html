@@ -4,16 +4,17 @@
 @(hit: Map[String,Object],context:List[String],namespace:String)
 
 @{
-	var viewerInfo:ViewerInfo = Helper.getViewerInfo(new actions.Read().internalReadNode(hit.get("@id").toString()))
-	if(viewerInfo!=null){
-		
-		if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
-		   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
-		   }		
-		else{
-			<div id="thumbnail">
-				<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
-			</div>
+	if(!hit.get("contentType").toString().equals("webpage") && !hit.get("contentType").toString().equals("version")){
+		var viewerInfo:ViewerInfo = Helper.getViewerInfo(new actions.Read().internalReadNode(hit.get("@id").toString()))
+		if(viewerInfo!=null){
+			if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
+			   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
+			}		
+			else{
+				<div id="thumbnail">
+					<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
+				</div>
+			}
 		}
 	}
 }
