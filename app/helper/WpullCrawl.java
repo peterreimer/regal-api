@@ -50,7 +50,6 @@ public class WpullCrawl {
 
 	private Gatherconf conf = null;
 	private String urlAscii = null;
-	private URI uri = null;
 	private String date = null;
 	private String datetime = null;
 	private File crawlDir = null;
@@ -91,8 +90,8 @@ public class WpullCrawl {
 			WebgatherLogger.debug("URL=" + conf.getUrl());
 			this.urlAscii = convertUnicodeURLToAscii(conf.getUrl());
 			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.uri = new URI(urlAscii);
-			this.host = uri.getHost();
+			this.host = urlAscii.replaceAll("^http://", "")
+					.replaceAll("^https://", "").replaceAll("/.*$", "");
 			WebgatherLogger.debug("host=" + host);
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
 			this.datetime =
@@ -182,6 +181,7 @@ public class WpullCrawl {
 				sb.append("," + domains.get(i));
 			}
 		}
+
 		sb.append(" --recursive");
 		ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
 		if (urlsExcluded.size() > 0) {
@@ -210,12 +210,36 @@ public class WpullCrawl {
 			sb.append(" --quota=" + Long.toString(size));
 		}
 
+		int waitSec = conf.getWaitSecBtRequests();
+		if (waitSec != 0) {
+			sb.append(" --wait=" + Integer.toString(waitSec)); // number of second
+																													// wpull waits between
+																													// requests
+		}
+
+		int tries = conf.getTries();
+		if (tries != 0) {
+			sb.append(" --tries=" + Integer.toString(tries)); // number of requests
+																												// wpull performs on
+																												// transient errors
+		}
+
+		int waitRetry = conf.getWaitRetry();
+		if (waitRetry != 0) {
+			sb.append(" --waitretry=" + Integer.toString(waitRetry)); // wait between
+																																// re-tries
+		}
+
+		boolean random = conf.isRandomWait();
+		if (random == true) {
+			sb.append(" --random-wait"); // randomize wait times
+		}
+
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
 		sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
 		sb.append(" --escaped-fragment --strip-session-id");
-		sb.append(
-				" --no-host-directories --convert-links --page-requisites --no-parent");
+		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate");
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors

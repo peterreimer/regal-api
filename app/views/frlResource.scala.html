@@ -2,5 +2,4 @@
 @import views.Helper 
 @(hit: Map[String,Object],namespace: String)
 
-
 @tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
