@@ -28,7 +28,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.ibm.icu.util.Calendar;
 
 import models.Gatherconf;
@@ -81,6 +83,10 @@ public class Webgatherer implements Runnable {
 					continue;
 				}
 				WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
+				/*
+				 * ToDo: Suche im letzten Crawl-Log nach Umzugsnotiz (HTTP Response 301)
+				 */
+				findMovingNotice(n, conf);
 				// find open jobs
 				if (isOutstanding(n, conf)) {
 					WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
@@ -173,6 +179,23 @@ public class Webgatherer implements Runnable {
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann letztes Crawl-Datum nicht bestimmen.", e);
 			return false;
+		}
+	}
+
+	/**
+	 * sucht im letzten Crawl-Log nach einer Umzugsmeldung (HTTP Responce 301 -
+	 * Moved Permamently). Schreibt Ergebnis in die Gatherconf der Webpage.
+	 * 
+	 * @param n der Knoten der Webpage
+	 * @param conf die Gatherconf der Webpage
+	 */
+	private static void findMovingNotice(Node n, Gatherconf conf) {
+		if (conf.getCrawlerSelection()
+				.equals(Gatherconf.CrawlerSelection.heritrix)) {
+			// ToDo Mach was; parse Heritrix crawl.log
+		} else if (conf.getCrawlerSelection()
+				.equals(Gatherconf.CrawlerSelection.wpull)) {
+			WpullCrawl.findMovingNotice(n, conf);
 		}
 	}
 

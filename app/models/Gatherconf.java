@@ -58,6 +58,7 @@ public class Gatherconf {
 	String name;
 	boolean active;
 	String url;
+	String urlHist; // a former URL for this webpage.
 	ArrayList<String> domains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
@@ -66,6 +67,7 @@ public class Gatherconf {
 	QuotaUnitSelection quotaUnitSelection;
 	ArrayList<String> urlsExcluded;
 	Date startDate;
+	Date urlChangeDate; // the date the URL changed from urlHist to url
 	String localDir;
 	String openWaybackLink;
 	String id;
@@ -79,7 +81,8 @@ public class Gatherconf {
 	 * Create a new configuration for the webgatherer
 	 */
 	public Gatherconf() {
-		url = null;
+		url = "www.vfl.de";
+		urlHist = null;
 		domains = new ArrayList<String>();
 		active = true;
 		deepness = -1;
@@ -89,6 +92,7 @@ public class Gatherconf {
 		quotaUnitSelection = null;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
+		urlChangeDate = null;
 		localDir = null;
 		name = null;
 		openWaybackLink = null;
@@ -97,7 +101,7 @@ public class Gatherconf {
 		waitSecBtRequests = 0;
 		randomWait = true;
 		tries = 5;
-		int waitRetry = 20;
+		waitRetry = 20;
 	}
 
 	public boolean isActive() {
@@ -120,6 +124,20 @@ public class Gatherconf {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	/**
+	 * @return the former url of the website
+	 */
+	public String getUrlHist() {
+		return urlHist;
+	}
+
+	/**
+	 * @param urlHist the former url of the website
+	 */
+	public void setUrlHist(String urlHist) {
+		this.urlHist = urlHist;
 	}
 
 	/**
@@ -242,10 +260,24 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @param startDate
+	 * @param startDate the time the url is to be first harvested
 	 */
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
+	}
+
+	/**
+	 * @return the time the url was last changed
+	 */
+	public Date getUrlChangeDate() {
+		return urlChangeDate;
+	}
+
+	/**
+	 * @param urlChangeDate the time the url has last changed
+	 */
+	public void setUrlChangeDate(Date urlChangeDate) {
+		this.urlChangeDate = urlChangeDate;
 	}
 
 	/**
