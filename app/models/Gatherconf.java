@@ -81,7 +81,7 @@ public class Gatherconf {
 	 * Create a new configuration for the webgatherer
 	 */
 	public Gatherconf() {
-		url = "www.vfl.de";
+		url = null;
 		urlHist = null;
 		domains = new ArrayList<String>();
 		active = true;
