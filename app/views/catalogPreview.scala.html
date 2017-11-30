@@ -1,17 +1,17 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@ 
 @import views.Helper
 @import org.elasticsearch.search.aggregations.Aggregations
-
-@(hit:Map[String,Object],aggregations:Aggregations,namespace:
+@import models.Node
+@(hit:Node,aggregations:Aggregations,namespace:
 String,alephId:String)
 
-@main(hit.get("title").toString(),aggregations,models.Globals.users.isLoggedIn(ctx()),
+@main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
 models.Globals.users.getUser(ctx())){
 
 
 	<div class="tab-pane active" id="1a">
-		@tags.getTitle(hit,namespace)
-		@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
+		@tags.getTitle(hit.getLd2(),namespace)
+		@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
 	</div>
 	<div class="tab-pane" id="2a"></div>
 

@@ -393,6 +393,7 @@ public class JsonMapper {
 			postProcess(rdf, "successor");
 			postProcess(rdf, "primaryForm");
 			postProcess(rdf, "natureOfContent");
+			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);

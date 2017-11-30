@@ -508,7 +508,7 @@ public class Helper {
 
 		try {
 			if (node.getFileChecksum() == null) {
-				if (node.getPartsSorted() != null) {
+				if (node.getPartsSorted() != null && !node.getPartsSorted().isEmpty()) {
 					return getViewerInfo(new Read()
 							.internalReadNode(node.getPartsSorted().get(0).getObject()));
 				}

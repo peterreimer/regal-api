@@ -3,17 +3,17 @@
 @import views.Helper
 @import org.elasticsearch.search.aggregations.Aggregations
 
-@(hit:Map[String,Object],aggregations:Aggregations,namespace: String)
-@pid={@hit.get("@id")}
-@main(hit.get("title").toString(),aggregations,models.Globals.users.isLoggedIn(ctx()),
+@(hit:Node,aggregations:Aggregations,namespace: String)
+@pid={@hit.getPid()}
+@main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){
 
-			        		@tags.getTitle(hit,namespace)
+			        		@tags.getTitle(hit.getLd2(),namespace)
 					<ul class="nav nav-tabs">
 					 	<li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
 					  	<li><a href="#2a" data-toggle="tab">Download</a></li>
 					  	@if(models.Globals.users.isLoggedIn(ctx())){
-					  	<li><a href="#3a" data-toggle="tab">Upload</a></li>
+					  	<li><a href="./@pid/upload"">Upload</a></li>
 					  	<li><a href="./@pid/edit">Edit</a></li>
 					  	}
 					</ul> 
@@ -21,7 +21,7 @@
 					<div class="tab-content">
 				  		<div class="tab-pane active" id="1a">
 				  	
-			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
+			@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
 			        	</div>
 				  		<div class="tab-pane" id="2a">
 		

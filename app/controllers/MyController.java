@@ -104,8 +104,10 @@ public class MyController extends Controller {
 	 * @return Html or Json Output
 	 */
 	public static Result AccessDenied() {
+		ctx().session().put("CURRENT_PAGE", request().uri());
 		Message msg = new Message("Access Denied!", 401);
-		play.Logger.debug("\nResponse: " + msg.toString());
+		play.Logger.debug(
+				"\nResponse: " + msg.toString() + "\nSession " + ctx().session());
 		if (request().accepts("text/html")) {
 			flash("message", "You must be logged in to perform this action!");
 			return redirect(routes.Forms.getLoginForm());
