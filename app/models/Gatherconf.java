@@ -55,6 +55,11 @@ public class Gatherconf {
 		KB, MB, GB;
 	}
 
+	@SuppressWarnings("javadoc")
+	public enum AgentIdSelection {
+		Undefined, Edge, IE, Firefox, Safari;
+	}
+
 	String name;
 	boolean active;
 	String url;
@@ -64,6 +69,7 @@ public class Gatherconf {
 	Interval interval;
 	CrawlerSelection crawlerSelection;
 	QuotaUnitSelection quotaUnitSelection;
+	AgentIdSelection agentIdSelection;
 	ArrayList<String> urlsExcluded;
 	Date startDate;
 	String localDir;
@@ -87,6 +93,7 @@ public class Gatherconf {
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
 		quotaUnitSelection = null;
+		agentIdSelection = null;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
@@ -97,7 +104,7 @@ public class Gatherconf {
 		waitSecBtRequests = 0;
 		randomWait = true;
 		tries = 5;
-		int waitRetry = 20;
+		waitRetry = 20;
 	}
 
 	public boolean isActive() {
@@ -218,6 +225,20 @@ public class Gatherconf {
 	 */
 	public void setQuotaUnitSelection(QuotaUnitSelection quotaUnitSelection) {
 		this.quotaUnitSelection = quotaUnitSelection;
+	}
+
+	/**
+	 * @return the agentIdSelection
+	 */
+	public AgentIdSelection getAgentIdSelection() {
+		return agentIdSelection;
+	}
+
+	/**
+	 * @param agentIdSelection the agentIdSelection to set
+	 */
+	public void setAgentIdSelection(AgentIdSelection agentIdSelection) {
+		this.agentIdSelection = agentIdSelection;
 	}
 
 	/**

@@ -17,6 +17,7 @@
 package helper;
 
 import models.Gatherconf;
+import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.QuotaUnitSelection;
 import models.Globals;
 import models.Node;
@@ -200,7 +201,6 @@ public class WpullCrawl {
 		long maxByte = conf.getMaxCrawlSize();
 		if (maxByte > 0) {
 			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
-			// TODO implement select factor
 			Hashtable<QuotaUnitSelection, Integer> sizeFactor = new Hashtable<>();
 			sizeFactor.put(QuotaUnitSelection.KB, 1024);
 			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
@@ -234,6 +234,20 @@ public class WpullCrawl {
 		if (random == true) {
 			sb.append(" --random-wait"); // randomize wait times
 		}
+
+		// select agent-string for http-request
+		AgentIdSelection agentId = conf.getAgentIdSelection();
+		Hashtable<AgentIdSelection, String> agentTable = new Hashtable<>();
+		agentTable.put(AgentIdSelection.Undefined, "InconspiciousWebBrowser/1.0");
+		agentTable.put(AgentIdSelection.Edge,
+				"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36");
+		agentTable.put(AgentIdSelection.IE,
+				"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; BOIE9;ENUSMSE; rv:11.0) like Gecko");
+		agentTable.put(AgentIdSelection.Firefox,
+				"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0");
+		agentTable.put(AgentIdSelection.Safari,
+				"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+		sb.append(" --user-agent=" + agentTable.get(agentId));
 
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
