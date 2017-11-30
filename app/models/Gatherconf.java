@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -59,6 +60,22 @@ public class Gatherconf {
 	public enum AgentIdSelection {
 		Undefined, Edge, IE, Firefox, Safari;
 	}
+
+	@SuppressWarnings("javadoc")
+	public static Hashtable<AgentIdSelection, String> agentTable =
+			new Hashtable<AgentIdSelection, String>() {
+				{
+					put(AgentIdSelection.Undefined, "\"InconspiciousWebBrowser/1.0\"");
+					put(AgentIdSelection.Edge,
+							"\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36\"");
+					put(AgentIdSelection.IE,
+							"\"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; BOIE9;ENUSMSE; rv:11.0) like Gecko\"");
+					put(AgentIdSelection.Firefox,
+							"\"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0\"");
+					put(AgentIdSelection.Safari,
+							"\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36\"");
+				}
+			};
 
 	String name;
 	boolean active;
