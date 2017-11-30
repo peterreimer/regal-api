@@ -21,11 +21,15 @@ public class LoginController extends MyController {
 						userForm.get().getPassword())) {
 					User user = users.getUser(userForm.get().getUsername());
 					play.Logger.debug(userForm.get().getUsername() + "");
+					String uri = ctx().session().get("CURRENT_PAGE");
 					session().clear();
 					session("username", user.getUsername());
 					session("role", user.getRole().toString());
 					flash("message",
 							"Hello " + user.getUsername() + "! You are logged in.");
+					if (uri != null)
+						return redirect(uri);
+
 					return redirect(routes.Application.index());
 				}
 				return badRequest(views.html.login.render(userForm));
