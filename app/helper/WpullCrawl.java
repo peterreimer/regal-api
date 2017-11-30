@@ -92,7 +92,7 @@ public class WpullCrawl {
 		this.conf = conf;
 		try {
 			WebgatherLogger.debug("URL=" + conf.getUrl());
-			this.urlAscii = convertUnicodeURLToAscii(conf.getUrl());
+			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
 			WebgatherLogger.debug("urlAscii=" + urlAscii);
 			this.host = urlAscii.replaceAll("^http://", "")
 					.replaceAll("^https://", "").replaceAll("/.*$", "");
