@@ -4,19 +4,20 @@
 @(hit: Map[String,Object],context:List[String],namespace:String)
 
 @{
-	if(!hit.get("contentType").toString().equals("webpage") && !hit.get("contentType").toString().equals("version")){
+	
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(new actions.Read().internalReadNode(hit.get("@id").toString()))
 		if(viewerInfo!=null){
-			if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
-			   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
-			}		
-			else{
-				<div id="thumbnail">
-					<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
-				</div>
+			if(!viewerInfo.contentType.equals("version")){
+				if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
+				   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
+				}		
+				else{
+					<div id="thumbnail">
+						<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
+					</div>
+				}
 			}
 		}
-	}
 }
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
