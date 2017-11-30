@@ -22,42 +22,29 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import models.Link;
-import models.RdfResource;
 
 import org.eclipse.rdf4j.common.iteration.Iterations;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.Graph;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.TreeModel;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -77,6 +64,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import helper.HttpArchiveException;
+import models.Link;
+import models.RdfResource;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -196,23 +185,6 @@ public class RdfUtils {
 			con.setReadTimeout(15000);
 			con.setRequestProperty("Accept", accept);
 			con.connect();
-			inputStream = con.getInputStream();
-		} catch (IOException e) {
-			throw new UrlConnectionException(e);
-		}
-		return inputStream;
-	}
-
-	private static InputStream urlToInputStreamWithRedirects(URL url,
-			String accept) throws IOException {
-		HttpURLConnection con = null;
-		InputStream inputStream = null;
-		try {
-			con = (HttpURLConnection) url.openConnection();
-			con.setConnectTimeout(15000);
-			con.setReadTimeout(15000);
-			con.setRequestProperty("Accept", accept);
-			con.connect();
 			int responseCode = con.getResponseCode();
 			play.Logger
 					.debug("Request for " + accept + " from " + url.toExternalForm());
@@ -222,8 +194,16 @@ public class RdfUtils {
 					|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
 					|| responseCode == 307 || responseCode == 303) {
 				String redirectUrl = con.getHeaderField("Location");
-				play.Logger.debug("Redirect to Location: " + redirectUrl);
-				return urlToInputStreamWithRedirects(new URL(redirectUrl), accept);
+				try {
+					URL newUrl = new URL(redirectUrl);
+					play.Logger.debug("Redirect to Location: " + newUrl);
+					return urlToInputStream(newUrl, accept);
+				} catch (MalformedURLException e) {
+					URL newUrl =
+							new URL(url.getProtocol() + "://" + url.getHost() + redirectUrl);
+					play.Logger.debug("Redirect to Location: " + newUrl);
+					return urlToInputStream(newUrl, accept);
+				}
 			}
 			inputStream = con.getInputStream();
 			return inputStream;

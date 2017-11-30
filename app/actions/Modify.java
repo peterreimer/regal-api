@@ -1038,7 +1038,7 @@ public class Modify extends RegalAction {
 				if (!(s.getSubject() instanceof BNode)) {
 					if (isLiteral) {
 						ValueFactory v = RdfUtils.valueFactory;
-						;
+
 						play.Logger.trace("Get data from " + uri);
 						Statement newS = v.createStatement(v.createIRI(uri),
 								s.getPredicate(), v.createLiteral(Normalizer.normalize(
@@ -1048,7 +1048,7 @@ public class Modify extends RegalAction {
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.warn("Not able to get data from" + uri);
+			play.Logger.warn("Not able to get data from" + uri, e);
 		}
 		return filteredStatements;
 	}
