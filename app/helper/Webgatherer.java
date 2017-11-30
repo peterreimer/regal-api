@@ -86,7 +86,7 @@ public class Webgatherer implements Runnable {
 				/*
 				 * ToDo: Suche im letzten Crawl-Log nach Umzugsnotiz (HTTP Response 301)
 				 */
-				findMovingNotice(n, conf);
+				findeUmzugsmeldung(n, conf);
 				// find open jobs
 				if (isOutstanding(n, conf)) {
 					WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
@@ -189,13 +189,13 @@ public class Webgatherer implements Runnable {
 	 * @param n der Knoten der Webpage
 	 * @param conf die Gatherconf der Webpage
 	 */
-	private static void findMovingNotice(Node n, Gatherconf conf) {
+	private static void findeUmzugsmeldung(Node n, Gatherconf conf) {
 		if (conf.getCrawlerSelection()
 				.equals(Gatherconf.CrawlerSelection.heritrix)) {
-			// ToDo Mach was; parse Heritrix crawl.log
+			Heritrix.findeUmzugsmeldung(n, conf);
 		} else if (conf.getCrawlerSelection()
 				.equals(Gatherconf.CrawlerSelection.wpull)) {
-			WpullCrawl.findMovingNotice(n, conf);
+			WpullCrawl.findeUmzugsmeldung(n, conf);
 		}
 	}
 

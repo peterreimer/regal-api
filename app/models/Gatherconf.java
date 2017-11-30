@@ -68,6 +68,7 @@ public class Gatherconf {
 	ArrayList<String> urlsExcluded;
 	Date startDate;
 	Date urlChangeDate; // the date the URL changed from urlHist to url
+	boolean urlUnbekanntVerzogen;
 	String localDir;
 	String openWaybackLink;
 	String id;
@@ -93,6 +94,7 @@ public class Gatherconf {
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		urlChangeDate = null;
+		urlUnbekanntVerzogen = false;
 		localDir = null;
 		name = null;
 		openWaybackLink = null;
@@ -278,6 +280,20 @@ public class Gatherconf {
 	 */
 	public void setUrlChangeDate(Date urlChangeDate) {
 		this.urlChangeDate = urlChangeDate;
+	}
+
+	/**
+	 * @return ob die URL unbekannt verzogen ist
+	 */
+	public boolean getUrlUnbekanntVerzogen() {
+		return urlUnbekanntVerzogen;
+	}
+
+	/**
+	 * @param urlUnbekanntVerzogen ob die URL unbekannt verzogen ist
+	 */
+	public void setUrlUnbekanntVerzogen(boolean urlUnbekanntVerzogen) {
+		this.urlUnbekanntVerzogen = urlUnbekanntVerzogen;
 	}
 
 	/**

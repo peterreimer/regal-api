@@ -312,7 +312,7 @@ public class WpullCrawl {
 	 * @param node der Knoten der Webpage
 	 * @param conf die Gatherconf der Webpage
 	 */
-	public static void findMovingNotice(Node node, Gatherconf conf) {
+	public static void findeUmzugsmeldung(Node node, Gatherconf conf) {
 		WebgatherLogger.debug("Suche Umzugsmeldung für " + conf.getName());
 		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
 				Play.application().configuration().getString("regal-api.wpull.jobDir"),
@@ -327,11 +327,10 @@ public class WpullCrawl {
 
 		/* das Log wird geparst */
 		WebgatherLogger.debug("Parse das Log " + crawlLog.toString());
-		/*
-		 * Suche nach so etwas: INFO Fetched ‘http://www.xn--gttingen-n4a.de/’: 301
-		 * Moved Permanently. Length: 234 [text/html; charset=iso-8859-1]. INFO
-		 * Fetching ‘https://www.goettingen.de/’.
-		 */
+
+		// Suche nach so etwas:
+		// INFO Fetched ‘http://www.xn--gttingen-n4a.de/’: 301 Moved Permanently.
+		// INFO Fetching ‘https://www.goettingen.de/’.
 		/*
 		 * URL in "INFO Fetched" muss gleich sein wie in Crawler Settings, evtl. bis
 		 * auf Schema und abschließenden Schrägstrich. Pfade müssen übereinstimmen !
@@ -344,7 +343,8 @@ public class WpullCrawl {
 		String regExp2 = "^INFO Fetching ‘(.*)’.";
 		Pattern pattern2 = Pattern.compile(regExp2);
 		try {
-			String urlPunycode = convertUnicodeURLToAscii(conf.getUrl(), false);
+			String urlPunycode =
+					WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl(), false);
 			urlPunycode = urlPunycode.replaceAll("/$", "");
 			WebgatherLogger.debug("Suche im Log nach urlPunycode = " + urlPunycode);
 			/*
@@ -366,7 +366,14 @@ public class WpullCrawl {
 					matcher2 = pattern2.matcher(line);
 					if (!matcher2.find()) {
 						WebgatherLogger.warn(
-								"Meldung \"301 Moved Permanently\" im Log gefunden, aber keine neue URL! Umzugsnotiz kann nicht generiert werden.");
+								"Meldung \"301 Moved Permanently\" im Log gefunden, aber keine neue URL! => Unbekannt verzogen.");
+						if (conf.getUrlUnbekanntVerzogen()) {
+							break;
+						} // nichts zu tun
+						conf.setUrlUnbekanntVerzogen(true);
+						conf.setUrlChangeDate(new Date());
+						String msg = new Modify().updateConf(node, conf.toString());
+						WebgatherLogger.info(msg);
 						break;
 					}
 					String newURL = matcher2.group(1);
@@ -381,6 +388,7 @@ public class WpullCrawl {
 					conf.setUrlHist(conf.getUrl());
 					conf.setUrl(newURL);
 					conf.setUrlChangeDate(new Date());
+					conf.setUrlUnbekanntVerzogen(false);
 					String msg = new Modify().updateConf(node, conf.toString());
 					WebgatherLogger.info(msg);
 					WebgatherLogger.info(
@@ -393,7 +401,8 @@ public class WpullCrawl {
 					WebgatherLogger.debug("\"INFO Fetched ‘" + urlMoved
 							+ "’: 301 Moved Permanently.\" gefunden in Zeile " + lineno);
 					urlMoved = urlMoved.replaceAll("/$", "");
-					urlMoved = validateURL(urlMoved, false, false); // Schema entfernen
+					urlMoved = WebgatherUtils.validateURL(urlMoved, false, false); // Schema
+																																					// entfernen
 					// Jetzt muss Gleichheit herrschen, um sagen zu können, dass diese
 					// Site umgezogen ist:
 					if (urlMoved.equals(urlPunycode)) {
@@ -494,8 +503,8 @@ public class WpullCrawl {
 		Pattern pattern1 = Pattern.compile(regExp1);
 		Matcher matcher1 = null;
 		try {
-			String urlAscii =
-					convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
+			String urlAscii = WebgatherUtils
+					.convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
 			String regExp2 = urlAscii;
 			Pattern pattern2 = Pattern.compile(regExp2);
 			Matcher matcher2 = null;
@@ -532,70 +541,6 @@ public class WpullCrawl {
 			}
 		}
 		return false;
-	}
-
-	public static String convertUnicodeURLToAscii(String url)
-			throws URISyntaxException {
-		return convertUnicodeURLToAscii(url, true);
-	}
-
-	public static String convertUnicodeURLToAscii(String url,
-			boolean includeScheme) throws URISyntaxException {
-		return validateURL(url, includeScheme, true);
-	}
-
-	/**
-	 * von hier kopiert:
-	 * https://nealvs.wordpress.com/2016/01/18/how-to-convert-unicode-url-to-ascii
-	 * -in-java/
-	 * 
-	 * @param url ein Uniform Resource Locator
-	 * @return ein URL in ASCII
-	 * @throws URISyntaxException
-	 */
-	public static String validateURL(String url, boolean includeScheme,
-			boolean convertToAscii) throws URISyntaxException {
-		if (url == null) {
-			return url;
-		}
-		String urlRet = url;
-		urlRet = url.trim();
-		// Handle international domains by detecting non-ascii and converting them
-		// to punycode
-		boolean isAscii = CharMatcher.ASCII.matchesAllOf(urlRet);
-		URI uri = new URI(urlRet);
-
-		boolean hasScheme = true;
-		// URI needs a scheme to work properly with authority parsing
-		if (uri.getScheme() == null) {
-			uri = new URI("http://" + urlRet);
-			hasScheme = false;
-		}
-
-		String scheme = uri.getScheme() != null ? uri.getScheme() + "://" : null;
-		/* authority includes domain and port */
-		String authority =
-				uri.getRawAuthority() != null ? uri.getRawAuthority() : "";
-		// WebgatherLogger.debug("authority=" + authority);
-		// Must convert domain to punycode separately from the path
-		if (convertToAscii) {
-			authority = IDN.toASCII(authority);
-		}
-		String path = uri.getRawPath() != null ? uri.getRawPath() : "";
-		String queryString =
-				uri.getRawQuery() != null ? "?" + uri.getRawQuery() : "";
-
-		urlRet = ((hasScheme && includeScheme) ? scheme : "") + authority + path
-				+ queryString;
-		// WebgatherLogger.debug("urlRet=" + urlRet);
-
-		// Convert path from unicode to ascii encoding
-		if (!isAscii) {
-			urlRet = new URI(urlRet).toASCIIString();
-		}
-		WebgatherLogger.debug("url validated = " + urlRet);
-
-		return urlRet;
 	}
 
 }
