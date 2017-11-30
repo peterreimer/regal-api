@@ -133,9 +133,14 @@ public class WpullCrawl {
 	public void startJob() {
 		try {
 			String executeCommand = buildExecCommand();
+			String[] execArr = executeCommand.split(" ");
+			// unmask spaces in exec command
+			for (int i = 0; i < execArr.length; i++) {
+				execArr[i] = execArr[i].replaceAll("%20", " ");
+			}
+			executeCommand = executeCommand.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
-			String[] execArr = executeCommand.split(" ");
 			ProcessBuilder pb = new ProcessBuilder(execArr);
 			assert crawlDir.isDirectory();
 			pb.directory(crawlDir);

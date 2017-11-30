@@ -67,13 +67,13 @@ public class Gatherconf {
 				{
 					put(AgentIdSelection.Undefined, "\"InconspiciousWebBrowser/1.0\"");
 					put(AgentIdSelection.Edge,
-							"\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36\"");
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/62.0.3202.94%20Safari/537.36\"");
 					put(AgentIdSelection.IE,
-							"\"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; BOIE9;ENUSMSE; rv:11.0) like Gecko\"");
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20Trident/7.0;%20BOIE9;ENUSMSE;%20rv:11.0)%20like%20Gecko\"");
 					put(AgentIdSelection.Firefox,
-							"\"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0\"");
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:43.0)%20Gecko/20100101%20Firefox/43.0\"");
 					put(AgentIdSelection.Safari,
-							"\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36\"");
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/61.0.3163.100%20Safari/537.36\"");
 				}
 			};
 
