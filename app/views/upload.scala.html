@@ -1,0 +1,29 @@
+@(node: Node)
+@main(node.getPid()+" Upload",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
+<div id="container"></div>
+ <!--<ul>
+    <li>https://github.com/vakata/jstree#plugins
+
+      <ul>
+        <li>https://github.com/blueimp/jQuery-File-Upload
+</li>
+        <li>Child node 2</li>
+      </ul>
+    </li>
+  </ul>  --> 
+<script>
+$(function() {
+	  $('#container').jstree({
+	    'core' : {
+	    	 'data' : {
+	    	        "url" : "./parts?style=short",
+	    	        "dataType" : "json" ,
+	    	        
+	    	      }
+
+	    }
+	  });
+	});
+</script>
+}

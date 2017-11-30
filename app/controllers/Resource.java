@@ -1179,4 +1179,15 @@ public class Resource extends MyController {
 			}
 		});
 	}
+
+	public static Promise<Result> getUploadForm(String pid) {
+		return new CreateAction().call(userId -> {
+			try {
+				Node node = read.internalReadNode(pid);
+				return ok(views.html.upload.render(node));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
 }

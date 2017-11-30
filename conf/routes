@@ -139,3 +139,5 @@ POST /add/catalogObject				controllers.Resource.createObjectWithMetadata()
 
 GET /viewers/:type/:id/data			controllers.Viewers.getViewer(type,id)
 
+GET /resource/:pid/upload			controllers.Resource.getUploadForm(pid)
+
