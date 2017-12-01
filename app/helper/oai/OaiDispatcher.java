@@ -80,31 +80,29 @@ public class OaiDispatcher {
 	public static String initContentModels(String namespace) {
 		int port = Globals.getPort();
 		play.Logger.info("Reinit fedora content models to listen on port: " + port);
-		List<Transformer> transformers = new Vector<Transformer>();
-		transformers.add(new Transformer(namespace + "epicur", "epicur",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "epicur"));
-		transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "oaidc"));
-		transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "pdfa"));
-		transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "pdfbox"));
-		transformers.add(new Transformer(namespace + "aleph", "aleph",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "aleph"));
-		transformers.add(new Transformer(namespace + "mets", "mets",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "mets"));
-		transformers.add(new Transformer(namespace + "rdf", "rdf",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "rdf"));
-		transformers.add(new Transformer(namespace + "wgl", "wgl",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "wgl"));
+		List<Transformer> transformers = new Vector<>();
+		transformers
+				.add(new Transformer(namespace + "epicur", "epicur", Globals.protocol
+						+ Globals.server + "/resource/(pid)." + namespace + "epicur"));
+		transformers
+				.add(new Transformer(namespace + "oaidc", "oaidc", Globals.protocol
+						+ Globals.server + "/resource/(pid)." + namespace + "oaidc"));
+		transformers
+				.add(new Transformer(namespace + "pdfa", "pdfa", Globals.protocol
+						+ Globals.server + "/resource/(pid)." + namespace + "pdfa"));
+		transformers
+				.add(new Transformer(namespace + "pdfbox", "pdfbox", Globals.protocol
+						+ Globals.server + "/resource/(pid)." + namespace + "pdfbox"));
+		transformers
+				.add(new Transformer(namespace + "aleph", "aleph", Globals.protocol
+						+ Globals.server + "/resource/(pid)." + namespace + "aleph"));
+		transformers
+				.add(new Transformer(namespace + "mets", "mets", Globals.protocol
+						+ Globals.server + "/resource/(pid)." + namespace + "mets"));
+		transformers.add(new Transformer(namespace + "rdf", "rdf", Globals.protocol
+				+ Globals.server + "/resource/(pid)." + namespace + "rdf"));
+		transformers.add(new Transformer(namespace + "wgl", "wgl", Globals.protocol
+				+ Globals.server + "/resource/(pid)." + namespace + "wgl"));
 		OaiDispatcher.contentModelsInit(transformers);
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace

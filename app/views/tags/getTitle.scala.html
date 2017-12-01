@@ -1,12 +1,13 @@
 @* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
 @import views.Title 
-@(hit:Map[String,Object],namespace:String)
+@import views.Helper
+@(hit:Map[String,Object])
 
 @displayCreators(id:String,label:String)={
 						@if(id != null && !id.isEmpty()){
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label
-	                       <a href=@analyseValue(id)  target="_blank">
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
 	                       }else{
@@ -19,7 +20,7 @@
 						@if(id != null && !id.isEmpty()){
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label
-	                       <a href=@analyseValue(id)  target="_blank">
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
 	                       }else{
@@ -27,19 +28,6 @@
 	                       	@label
 	                       	</a>
 	                       }
-}
-@analyseValue(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			@v
-		}
-		case a if v.startsWith(namespace) => { 
-			/resource/@v
-		}
-		case _ => {
-			@v
-		}
-	}
 }
 
 <div class="row">

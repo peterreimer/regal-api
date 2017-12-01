@@ -4,15 +4,15 @@
 @import models.Node
 @import authenticate.User
 
-@(hits: List[Node],namespace: String)
+@(hits: List[Node])
 
 
 @main("",null,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){ 
 
 		@for( hit <- hits){
-			@tags.getTitle(hit.getLd2(),namespace)
-			@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
+			@tags.getTitle(hit.getLd2())
+			@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 
 	}
 }

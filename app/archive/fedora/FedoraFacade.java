@@ -481,6 +481,14 @@ public class FedoraFacade {
 		}
 	}
 
+	public void activateNode(String rootPID) {
+		try {
+			new ModifyObject(rootPID).state("A").execute();
+		} catch (FedoraClientException e) {
+			throw new DeleteException(e.getStatus(), e);
+		}
+	}
+
 	public void purgeNode(String rootPID) {
 		try {
 			unlinkParent(rootPID);

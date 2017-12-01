@@ -42,8 +42,7 @@ public class Forms extends MyController {
 				previewNode.setMetadata2(metadata);
 				flash("message",
 						"Preview! Press 'Create' on the page bottom to create new object.");
-				return ok(views.html.catalogPreview.render(previewNode, null, "edoweb",
-						alephId));
+				return ok(views.html.catalogPreview.render(previewNode, null, alephId));
 
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
