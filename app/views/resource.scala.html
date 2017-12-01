@@ -3,12 +3,12 @@
 @import views.Helper
 @import org.elasticsearch.search.aggregations.Aggregations
 
-@(hit:Node,aggregations:Aggregations,namespace: String)
+@(hit:Node,aggregations:Aggregations)
 @pid={@hit.getPid()}
 @main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){
 
-			        		@tags.getTitle(hit.getLd2(),namespace)
+			        		@tags.getTitle(hit.getLd2())
 					<ul class="nav nav-tabs">
 					 	<li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
 					  	<li><a href="#2a" data-toggle="tab">Download</a></li>
@@ -21,7 +21,7 @@
 					<div class="tab-content">
 				  		<div class="tab-pane active" id="1a">
 				  	
-			@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
+			@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 			        	</div>
 				  		<div class="tab-pane" id="2a">
 		

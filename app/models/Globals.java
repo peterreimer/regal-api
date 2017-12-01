@@ -75,6 +75,8 @@ public class Globals {
 	public static String[] namespaces = Play.application().configuration()
 			.getString("regal-api.namespace").split("\\s*,[,\\s]*");
 
+	public static String defaultNamespace = namespaces[0];
+
 	/**
 	 * defines how objects will be referenced internally
 	 */

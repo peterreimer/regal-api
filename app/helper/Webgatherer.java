@@ -57,11 +57,11 @@ public class Webgatherer implements Runnable {
 		// get all webpages
 
 		WebgatherLogger.info("List 50000 resources of type webpage from namespace "
-				+ Globals.namespaces[0] + ".");
+				+ Globals.defaultNamespace + ".");
 		play.Logger.info("List 50000 resources of type webpage from namespace "
-				+ Globals.namespaces[0] + ".");
+				+ Globals.defaultNamespace + ".");
 		List<Node> webpages =
-				new Read().listRepo("webpage", Globals.namespaces[0], 0, 50000);
+				new Read().listRepo("webpage", Globals.defaultNamespace, 0, 50000);
 		WebgatherLogger.info("Found " + webpages.size() + " webpages.");
 		int count = 0;
 		int precount = 0;

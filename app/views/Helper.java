@@ -522,4 +522,14 @@ public class Helper {
 		}
 	}
 
+	public static String getLinkAdressOrNull(String value) {
+		for (String n : Globals.namespaces) {
+			if (value.startsWith(n)) {
+				return "/resource/" + value;
+			}
+		}
+		if (value.startsWith("http"))
+			return value;
+		return null;
+	}
 }

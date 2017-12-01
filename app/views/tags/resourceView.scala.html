@@ -2,7 +2,7 @@
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
-@(node: Node,hit:Map[String,Object],context:List[String],namespace:String)
+@(node: Node,hit:Map[String,Object],context:List[String])
 
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
@@ -82,7 +82,7 @@
 					
 						@values match {
 								case d:  Map[String,Object] => {
-									@getFileInfo(views.Helper.getFile(d),namespace)
+									@getFileInfo(views.Helper.getFile(d))
 								}
 								case _ => {
 									@values
@@ -439,7 +439,7 @@
 			 			<td>    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label <span style="font-size:smaller;">(@roleName)</span>
 	                       </a> <span class="separator">|</span>
-	                       <a href=@analyseValue(id)  target="_blank">
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
 	                       <br/>	</td> 
@@ -494,38 +494,15 @@
 	</li>	                      
 }
 
-@analyseString(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			<a href=@v>@v</a>
-		}
-		case a if v.startsWith(namespace) => {
-			<a href=/resource/@v>@v</a>
-		}
-		case _ => {
-			@v
-		}
-	}
-}
-
-@analyseValue(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			@v
-		}
-		case a if v.startsWith(namespace) => {
-			/resource/@v
-		}
-		case _ => {
-			@v
-		}
-	}
-}
 
 @value(value: Any,key:String)= {
 			@value match {
 				case a: String => {
-					@analyseString(value.asInstanceOf[String])
+					@if(Helper.getLinkAdressOrNull(a)!=null){
+						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
+					}else{
+						@a
+					}
 				}
 				case c : Map[String,Object] => {
 							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
@@ -543,7 +520,7 @@
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(a)@models.Globals.rechercheUrlSuffix">
 	                       @(map.get(Globals.profile.getLabelKey()))
 	                       </a> <span class="separator">|</span>
-	                       <a href=@analyseValue(a)  target="_blank">
+	                       <a href=@Helper.getLinkAdressOrNull(a)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
 	                       <br/>
