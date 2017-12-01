@@ -519,6 +519,15 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "activateResource", value = "activateResource", notes = "Activates a deleted resource", response = Message.class, httpMethod = "POST")
+	public static Promise<Result> activateResource(@PathParam("pid") String pid) {
+		return new BulkActionAccessor().call((userId) -> {
+			Globals.fedora.activateNode(pid);
+			modify.lobidify(read.readNode(pid));
+			return ok(json(read.readNode(pid)));
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "deleteSeq", value = "deleteSeq", notes = "Deletes a resources ordering definition for it's children objects", response = Message.class, httpMethod = "DELETE")
 	public static Promise<Result> deleteSeq(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
