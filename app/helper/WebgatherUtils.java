@@ -23,11 +23,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
 import com.google.common.base.CharMatcher;
 
+import actions.Modify;
+import models.Gatherconf;
+import models.Node;
 import play.Logger;
 
 /**
@@ -108,7 +112,7 @@ public class WebgatherUtils {
 	 * wird beibehalten (falls vorhanden).
 	 * 
 	 * @param url
-	 * @return
+	 * @return die konvertierte URL
 	 * @throws URISyntaxException
 	 */
 	public static String convertUnicodeURLToAscii(String url)
@@ -122,7 +126,7 @@ public class WebgatherUtils {
 	 * 
 	 * @param url
 	 * @param includeScheme
-	 * @return
+	 * @return die konvertierte URL
 	 * @throws URISyntaxException
 	 */
 	public static String convertUnicodeURLToAscii(String url,
@@ -131,29 +135,22 @@ public class WebgatherUtils {
 	}
 
 	/**
-	 * Testet die HTTP-Verbindung einer URL; liest Response-Code und Header-Felder
-	 * bei Anfrage an diese HTTP-Verbindung aus. Z.B. für Umzugsservice
-	 * interessant.
+	 * URL-Umzugsservice
 	 * 
-	 * @param url eine URL als Zeichenkette
+	 * @param node der Knoten einer umzuziehenden Webpage
+	 * @param conf die Gatherconf einer umzuziehenden Webpage
 	 */
-	public static void getHttpUrlConnectionHeaderFields(String url) {
-		try {
-			HttpURLConnection httpConnection =
-					(HttpURLConnection) new URL(url).openConnection();
-			httpConnection.setRequestMethod("GET");
-			int status = httpConnection.getResponseCode();
-			WebgatherLogger.debug("HTTP Response Code: " + status);
-			for (Entry<String, List<String>> header : httpConnection.getHeaderFields()
-					.entrySet()) {
-				WebgatherLogger.debug(header.getKey() + "=" + header.getValue());
-			}
-			httpConnection.disconnect();
-		} catch (MalformedURLException e) {
-			WebgatherLogger.warn("Fehlgeformte URL :" + url);
-		} catch (IOException e) {
-			WebgatherLogger.warn("Fehlgeformte URL :" + url);
-		}
+	public static void prepareWebpageMoving(Node node, Gatherconf conf) {
+		if (conf.getInvalidUrl() == true) {
+			return;
+		} // nichts zu tun, ist alles schon geschehen
+		conf.setInvalidUrl(true);
+		String msg = new Modify().updateConf(node, conf.toString());
+		WebgatherLogger.info(msg);
+		WebgatherLogger.info("URL wurde auf ungültig gesetzt. Neue URL "
+				+ conf.getUrlNew() + " muss manuell übernommen werden.");
+		// ToDo: E-Mail verschicken, One-Click-Service zum Übernehmen der neuen URL
+		// anbieten
 	}
 
 }
