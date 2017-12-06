@@ -117,6 +117,7 @@ public class Webgatherer implements Runnable {
 			} catch (WebgathererTooBusyException e) {
 				WebgatherLogger.error("Webgatherer stopped! Heritrix is too busy.");
 			} catch (MalformedURLException | URISyntaxException e) {
+				setUnknownHost(node, conf);
 				WebgatherLogger.error("Fehlgeformte URL !");
 			} catch (UnknownHostException e) {
 				setUnknownHost(node, conf);
@@ -135,6 +136,7 @@ public class Webgatherer implements Runnable {
 			conf.setInvalidUrl(true);
 			conf.setUrlNew((String) null);
 			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info("URL wurde auf ungültig gesetzt.");
 			WebgatherLogger.info(msg);
 		}
 	}
