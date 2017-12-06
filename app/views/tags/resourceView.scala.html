@@ -7,14 +7,16 @@
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
 		if(viewerInfo!=null){
-			if(!viewerInfo.contentType.equals("version")){
+			if(!viewerInfo.contentType.equals("version")) {
 				if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
 				   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
 				}		
 				else{
-					<div id="thumbnail">
-						<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
-					</div>
+					if(viewerInfo.accessScheme.equals("public")){
+						<div id="thumbnail">
+							<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
+						</div>
+					}
 				}
 			}
 		} 

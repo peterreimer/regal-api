@@ -194,7 +194,6 @@ public class Resource extends MyController {
 				return Promise.promise(() -> notFound("404 - Not found " + pid));
 
 			if ("frl".equals(design)) {
-				// Map<String, Object> item = read.getMapWithParts2(node);
 				return Promise.promise(() -> ok(frlResource.render(node)));
 			} else {
 				SearchResponse response = Globals.search.query(
