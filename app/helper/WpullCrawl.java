@@ -17,6 +17,7 @@
 package helper;
 
 import models.Gatherconf;
+import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.QuotaUnitSelection;
 import models.Globals;
 import models.Node;
@@ -132,9 +133,14 @@ public class WpullCrawl {
 	public void startJob() {
 		try {
 			String executeCommand = buildExecCommand();
+			String[] execArr = executeCommand.split(" ");
+			// unmask spaces in exec command
+			for (int i = 0; i < execArr.length; i++) {
+				execArr[i] = execArr[i].replaceAll("%20", " ");
+			}
+			executeCommand = executeCommand.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
-			String[] execArr = executeCommand.split(" ");
 			ProcessBuilder pb = new ProcessBuilder(execArr);
 			assert crawlDir.isDirectory();
 			pb.directory(crawlDir);
@@ -200,7 +206,6 @@ public class WpullCrawl {
 		long maxByte = conf.getMaxCrawlSize();
 		if (maxByte > 0) {
 			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
-			// TODO implement select factor
 			Hashtable<QuotaUnitSelection, Integer> sizeFactor = new Hashtable<>();
 			sizeFactor.put(QuotaUnitSelection.KB, 1024);
 			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
@@ -235,9 +240,13 @@ public class WpullCrawl {
 			sb.append(" --random-wait"); // randomize wait times
 		}
 
+		// select agent-string for http-request
+		AgentIdSelection agentId = conf.getAgentIdSelection();
+		sb.append(" --user-agent=" + Gatherconf.agentTable.get(agentId));
+
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
-		sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
+		// sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
 		sb.append(" --escaped-fragment --strip-session-id");
 		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
