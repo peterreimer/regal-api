@@ -24,12 +24,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-<<<<<<< HEAD
+
 import java.util.List;
 import java.util.Map.Entry;
-=======
+
 import java.util.Hashtable;
->>>>>>> ac965acb417d41343308880bacc237326c2d6ed5
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -494,6 +493,13 @@ public class Gatherconf {
 	 */
 	public int getHttpResponseCode() {
 		return this.httpResponseCode;
+	}
+
+	/**
+	 * @param httpResponseCode the new httpResponseCode
+	 */
+	public void setHttpResponseCode(int httpResponseCode) {
+		this.httpResponseCode = httpResponseCode;
 	}
 
 	/**

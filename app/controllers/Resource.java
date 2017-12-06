@@ -55,6 +55,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
+import actions.Modify;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
@@ -1182,6 +1183,36 @@ public class Resource extends MyController {
 			try {
 				Node node = read.internalReadNode(pid);
 				return ok(views.html.upload.render(node));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
+
+	public static Promise<Result> confirmNewUrl(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, userId -> {
+			try {
+				Node node = readNodeOrNull(pid);
+				Gatherconf conf = Gatherconf.create(node.getConf());
+				String urlNew = conf.getUrlNew();
+				if (urlNew == null) {
+					throw new RuntimeException("Keine neue URL bekannt!");
+				}
+				String urlHist = conf.getUrl();
+				conf.setUrlHist(conf.getUrl()); // ToDo hier stattdessen Umzugshistorie
+																				// mit Zeitstempeln anlegen bzw.
+																				// weiterführen
+				conf.setUrl(urlNew);
+				conf.setInvalidUrl(false);
+				conf.setHttpResponseCode(0);
+				conf.setUrlNew((String) null);
+				String msg = new Modify().updateConf(node, conf.toString());
+				play.Logger.info(msg);
+				// return getJsonResult(conf); für Aufruf von Kommandozeile OK, aber
+				// nicht für Aufruf über API - muss code und text haben
+				return JsonMessage(new Message(
+						"URL wurde umgezogen von " + urlHist + " nach " + conf.getUrl(),
+						200));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}
