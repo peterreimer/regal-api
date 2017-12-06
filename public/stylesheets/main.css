@@ -1,257 +1,268 @@
-h1{
-	font-size:2em;
+h1 {
+	font-size: 2em;
 }
 
-h2{
-	font-size:1.2em;
+h2 {
+	font-size: 1.2em;
 }
 
 body {
-  background: #fff;
+	background: #fff;
 }
+
 .resourceTable_info {
-	display:none;
+	display: none;
 }
+
 .resourceTable tr td, tr {
-	background-color:#ffffff !important;
+	background-color: #ffffff !important;
 	border-spacing: 0;
-    border-collapse: collapse;
-    padding-top: 0px;
-    padding-right: 20px;
-    padding-bottom: 2px;
-    padding-left: 0px;
-    margin:0;
+	border-collapse: collapse;
+	padding-top: 0px;
+	padding-right: 20px;
+	padding-bottom: 2px;
+	padding-left: 0px;
+	margin: 0;
 }
 
-.resourceTable th{
-	display:none;
-	
+.resourceTable th {
+	display: none;
 }
+
 .resourceTable td {
-    vertical-align:top;
+	vertical-align: top;
 }
 
-.resourceTable .isDescribedBy ,
-.resourceTable .primaryTopic ,
-.resourceTable .itemID ,
-.resourceTable .title,
-.resourceTable .hbzId,
-.resourceTable .contributorOrder,
-.resourceTable .fulltextOnline,
-.resourceTable .contributingCorporateBodyLabel,
-.resourceTable .isPrimaryTopicOf,
-.resourceTable .hasVersion,
-.resourceTable .isLike,
-.resourceTable .exemplar,
-.resourceTable .subjectOrder,
-.resourceTable .seeAlso,
-.resourceTable .subjectLabel,
-.resourceTable .creator,
-.resourceTable .contributor,
-.resourceTable .volume,
-.resourceTable .externalParent,
-.resourceTable .collectionOne,
-.resourceTable .accessScheme,
-.resourceTable .publishScheme,
-.resourceTable .contentType,
-.resourceTable .sameAs,
-.resourceTable .describedby,
-.resourceTable .parallelEdition,                                                                                                                                                                                           
-.resourceTable .hasItem,                                                                                                                                                                                                   
-.resourceTable .predecessor,                                                                                                                                                                                               
-.resourceTable .successor,
-.resourceTable .corporateBodyForTitle  {
-   // display:none;
+.resourceTable .isDescribedBy, .resourceTable .primaryTopic,
+	.resourceTable .itemID, .resourceTable .title, .resourceTable .hbzId,
+	.resourceTable .contributorOrder, .resourceTable .fulltextOnline,
+	.resourceTable .contributingCorporateBodyLabel, .resourceTable .isPrimaryTopicOf,
+	.resourceTable .hasVersion, .resourceTable .isLike, .resourceTable .exemplar,
+	.resourceTable .subjectOrder, .resourceTable .seeAlso, .resourceTable .subjectLabel,
+	.resourceTable .creator, .resourceTable .contributor, .resourceTable .volume,
+	.resourceTable .externalParent, .resourceTable .collectionOne,
+	.resourceTable .accessScheme, .resourceTable .publishScheme,
+	.resourceTable .contentType, .resourceTable .sameAs, .resourceTable .describedby,
+	.resourceTable .parallelEdition, .resourceTable .hasItem,
+	.resourceTable .predecessor, .resourceTable .successor, .resourceTable .corporateBodyForTitle
+	{ //
+	display: none;
 }
 
-.resourceTable .title  {
-   display:none;
+.resourceTable .title {
+	display: none;
 }
 
 .public-access {
-    position:relative;
-} 
-.public-access:before{
-	color:green;
+	position: relative;
+}
+
+.public-access:before {
+	color: green;
 	content: "\f13e";
-    font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
+	font-family: FontAwesome;
+	top: 0;
+	left: -5px;
+	padding-right: 10px;
 }
 
 .private-access {
-    position:relative;
-} 
-.private-access:before{
-	color:red;
-	content: "\f023";
-   font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
+	position: relative;
 }
+
+.private-access:before {
+	color: red;
+	content: "\f023";
+	font-family: FontAwesome;
+	top: 0;
+	left: -5px;
+	padding-right: 10px;
+}
+
 .restricted-access {
-    position:relative;
-} 
-.restricted-access:before{
-	color:orange;
-    font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
+	position: relative;
+}
+
+.restricted-access:before {
+	color: orange;
+	font-family: FontAwesome;
+	top: 0;
+	left: -5px;
+	padding-right: 10px;
 	content: "\f023";
 }
 
-
-.downloadIcon img{
-	width:20px;
+.downloadIcon img {
+	width: 20px;
 }
 
-.downloadIcon a,.downloadIcon div,.downloadIcon span,.downloadIcon img {
-	display:inline-block;
+.downloadIcon a, .downloadIcon div, .downloadIcon span, .downloadIcon img
+	{
+	display: inline-block;
 }
+
 td:empty {
-  display:none;
+	display: none;
 }
 
-tr.inSeries tr.rdftype, tr.inSeries td.numbering,tr.inSeries td.series {
-	display:none;
+tr.inSeries tr.rdftype, tr.inSeries td.numbering, tr.inSeries td.series
+	{
+	display: none;
 }
 
-tr.volumeIn tr.rdftype,tr.volumeIn td.numbering,tr.volumeIn td.multiVolumeWork {
-	display:none;
-}
-.resourceTable .catalogLink a[title], .resourceTable .parallelEdition a[title]{
-   pointer-events: none;
-   cursor: default;
-   color:rgb(75, 75, 77);
-}
-.resourceTable .medium  a:not([title]), .resourceTable .subject a:not([title]), .resourceTable .rdftype a:not([title]), .resourceTable .nwbibsubject a:not([title]), .resourceTable .nwbibspatial a:not([title]), .resourceTable .language a:not([title]), .resourceTable .ddc a:not([title]), .resourceTable .reviewStatus a:not([title]), .resourceTable .publicationStatus a:not([title]){ 
-  display:none;                                                                                                                                                                             
-}                                                                                                                                                                                                                                                                                 
-.resourceTable .medium .separator, .resourceTable .subject .separator, .resourceTable .rdftype .separator, .resourceTable .nwbibsubject .separator, .resourceTable .nwbibspatial .separator, .resourceTable .language .separator, .resourceTable .ddc .separator, .resourceTable .reviewStatus .separator, .resourceTable .publicationStatus .separator{
-  display:none;
+tr.volumeIn tr.rdftype, tr.volumeIn td.numbering, tr.volumeIn td.multiVolumeWork
+	{
+	display: none;
 }
 
-.resourceTable ul, .resourceTable ol, .searchResults , .searchResults{
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+.resourceTable .catalogLink a[title], .resourceTable .parallelEdition a[title]
+	{
+	pointer-events: none;
+	cursor: default;
+	color: rgb(75, 75, 77);
 }
+
+.resourceTable .medium  a:not ([title] ), .resourceTable .subject a:not
+	([title] ), .resourceTable .rdftype a:not ([title] ), .resourceTable .nwbibsubject a:not
+	([title] ), .resourceTable .nwbibspatial a:not ([title] ),
+	.resourceTable .language a:not ([title] ), .resourceTable .ddc a:not ([title]
+	), .resourceTable .reviewStatus a:not ([title] ), .resourceTable .publicationStatus a:not
+	([title] ){
+	display: none;
+}
+
+.resourceTable .medium .separator, .resourceTable .subject .separator,
+	.resourceTable .rdftype .separator, .resourceTable .nwbibsubject .separator,
+	.resourceTable .nwbibspatial .separator, .resourceTable .language .separator,
+	.resourceTable .ddc .separator, .resourceTable .reviewStatus .separator,
+	.resourceTable .publicationStatus .separator {
+	display: none;
+}
+
+.resourceTable ul, .resourceTable ol, .searchResults, .searchResults {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
 .subjectAltLabelList {
-  display: inline;
-  list-style: none;
-  list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-.componentList , .subjectAltLabelList {
-  display: inline;
-  list-style: none;
-  list-style-type: none;
-    margin: 0;
-    padding: 0;
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
 
-.componentList li , .subjectAltLabelList li {
-  display: inline;
+.componentList, .subjectAltLabelList {
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.componentList li, .subjectAltLabelList li {
+	display: inline;
 }
 
 .componentList li:after, .subjectAltLabelList li:after {
-  content: ", ";
+	content: ", ";
 }
 
-.componentList li:last-child:after, .subjectAltLabelList li:last-child:after{
-    content: "";
+.componentList li:last-child:after, .subjectAltLabelList li:last-child:after
+	{
+	content: "";
 }
 
-.author-title-list{
-  display: inline;
-  list-style: none;
-  list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
 .author-title-list {
-  display: inline;
-  list-style: none;
-  list-style-type: none;
-    margin: 0;
-    padding: 0;
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
 
-.author-title-list li{
-  display: inline;
+.author-title-list {
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
 
-.author-title-list li:after{
-  content: "| ";
+.author-title-list li {
+	display: inline;
+}
+
+.author-title-list li:after {
+	content: "| ";
 }
 
 .author-title-list li:last-child:after {
-    content: "";
+	content: "";
 }
 
 .contribution tr td, .contribution tr th {
 	margin: 0;
-    padding: 0;
-}
-.lastModifiedLabel{
-   display:none;
-}
-.hasPart, .hasPart table, .hasPart tr, .hasPart td {
-    background-color: #efefef !important;
-    border: none;
+	padding: 0;
 }
 
-.hasPart img{
-	width:40px;
+.lastModifiedLabel {
+	display: none;
+}
+
+.hasPart, .hasPart table, .hasPart tr, .hasPart td {
+	background-color: #efefef !important;
+	border: none;
+}
+
+.hasPart img {
+	width: 40px;
 }
 
 .facets_header {
-    margin: 14px 0 4.6666666667px;
-        margin-top: 14px;
-        margin-right: 0px;
-        margin-bottom: 4.66667px;
-        margin-left: 0px;
+	margin: 14px 0 4.6666666667px;
+	margin-top: 14px;
+	margin-right: 0px;
+	margin-bottom: 4.66667px;
+	margin-left: 0px;
 }
 
 .facets_nav a {
-    line-height: 1em;
-    display: block;
-    margin: 0;
-    padding: 6px 6px 6px 0;
-    position: relative;
-    z-index: 1;
-    border-radius: 2px;
+	line-height: 1em;
+	display: block;
+	margin: 0;
+	padding: 6px 6px 6px 0;
+	position: relative;
+	z-index: 1;
+	border-radius: 2px;
 }
 
 .facets_nav {
-    margin: 0;
-        margin-top: 0px;
-        margin-bottom: 0px;
-    padding: 0;
-    list-style: none;
-
+	margin: 0;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding: 0;
+	list-style: none;
 }
 
 .more_facets_link {
-
-    line-height: 1em;
-    display: block;
-    margin: 0;
-    padding: 6px 6px 6px 0;
-    position: relative;
-    z-index: 1;
-    border-radius: 2px;
-
+	line-height: 1em;
+	display: block;
+	margin: 0;
+	padding: 6px 6px 6px 0;
+	position: relative;
+	z-index: 1;
+	border-radius: 2px;
 }
 
+#thumbnail {
+	box-shadow: 3px 3px 7px #666;
+	width: 150px;
+}
 /**
 For development uncomment, but do not show to enduser yet
 **/
 .banner, nav, .nav, footer{
 	display:none;
 }
-
