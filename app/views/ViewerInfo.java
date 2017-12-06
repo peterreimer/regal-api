@@ -24,6 +24,7 @@ public class ViewerInfo {
 	public BigInteger filesize = null;
 	public String viewerAdress = null;
 	public String contentType = null;
+	public String accessScheme = null;
 
 	public ViewerInfo(Node n) {
 		dataLink = "/resource/" + n.getPid() + "/data";
@@ -33,6 +34,7 @@ public class ViewerInfo {
 		mimetype = n.getMimeType();
 		thumbnail = createThumbnailAndSetStyle(n);
 		contentType = n.getContentType();
+		accessScheme = n.getAccessScheme();
 	}
 
 	private ViewerType createViewerType(Node n) {

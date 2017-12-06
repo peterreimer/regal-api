@@ -7,7 +7,7 @@
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
 		if(viewerInfo!=null){
-			if(!viewerInfo.contentType.equals("version")){
+			if(!viewerInfo.contentType.equals("version") && viewerInfo.accessScheme.equals("public")){
 				if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
 				   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
 				}		
