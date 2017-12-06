@@ -82,33 +82,11 @@ public class Delete extends RegalAction {
 	 * @return a message
 	 */
 	public String delete(List<Node> nodes) {
-		/*- 
-		 * Special case: if a single node should be deleted.
-		 *	- check whether the node has urn or doi
-		 *	- if not: purge!
-		 *	- if : mark as deleted!
-		 */
-		if (nodes.size() == 1) {
-			Node n = nodes.get(0);
-			if (!nodesArePersistent(nodes)) {
-				return purge(n);
-			} else {
-				return delete(n);
-			}
-		} else {
-			/*- 
-			 * Normal case: complexe object should be deleted.
-			 * 	- check whether all nodes have doi or urn
-			 * 	- if not: purge all!
-			 *  - if: throw exception!
-			 */
-			if (!nodesArePersistent(nodes)) {
-				return purge(nodes);
-			}
+		StringBuffer message = new StringBuffer();
+		for (Node n : nodes) {
+			message.append(delete(n) + " \n");
 		}
-
-		throw new HttpArchiveError(405,
-				"At least one of the child objects has a urn or doi. Deletion aborted!");
+		return message.toString();
 	}
 
 	/**

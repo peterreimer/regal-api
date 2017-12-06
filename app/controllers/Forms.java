@@ -41,9 +41,8 @@ public class Forms extends MyController {
 						new Modify().getLobid2DataAsNtripleString(previewNode, alephId);
 				previewNode.setMetadata2(metadata);
 				flash("message",
-						"Preview! Press 'Create' buttom on the page bottom to create new object.");
-				return ok(views.html.catalogPreview.render(previewNode.getLd2(), null,
-						"edoweb", alephId));
+						"Preview! Press 'Create' on the page bottom to create new object.");
+				return ok(views.html.catalogPreview.render(previewNode, null, alephId));
 
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);

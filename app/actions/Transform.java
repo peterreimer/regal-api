@@ -212,10 +212,7 @@ public class Transform {
 
 		try {
 			URL url = new URL(getInternalDataUri(node));
-			String authStr = "edoweb-anonymous:nopwd";
-			String authEncoded = Base64.encodeBase64String(authStr.getBytes());
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestProperty("Authorization", "Basic " + authEncoded);
 			PdfText pdf = new PdfText();
 			result.addFulltext(pdf.toString(connection.getInputStream()));
 		} catch (MalformedURLException e) {

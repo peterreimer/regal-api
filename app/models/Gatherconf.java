@@ -24,8 +24,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+<<<<<<< HEAD
 import java.util.List;
 import java.util.Map.Entry;
+=======
+import java.util.Hashtable;
+>>>>>>> ac965acb417d41343308880bacc237326c2d6ed5
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -63,6 +67,27 @@ public class Gatherconf {
 		KB, MB, GB;
 	}
 
+	@SuppressWarnings("javadoc")
+	public enum AgentIdSelection {
+		Undefined, Edge, IE, Firefox, Safari;
+	}
+
+	@SuppressWarnings("javadoc")
+	public static Hashtable<AgentIdSelection, String> agentTable =
+			new Hashtable<AgentIdSelection, String>() {
+				{
+					put(AgentIdSelection.Undefined, "\"InconspiciousWebBrowser/1.0\"");
+					put(AgentIdSelection.Edge,
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/62.0.3202.94%20Safari/537.36\"");
+					put(AgentIdSelection.IE,
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20Trident/7.0;%20BOIE9;ENUSMSE;%20rv:11.0)%20like%20Gecko\"");
+					put(AgentIdSelection.Firefox,
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:43.0)%20Gecko/20100101%20Firefox/43.0\"");
+					put(AgentIdSelection.Safari,
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/61.0.3163.100%20Safari/537.36\"");
+				}
+			};
+
 	String name;
 	boolean active;
 	String url;
@@ -78,6 +103,7 @@ public class Gatherconf {
 	Interval interval;
 	CrawlerSelection crawlerSelection;
 	QuotaUnitSelection quotaUnitSelection;
+	AgentIdSelection agentIdSelection;
 	ArrayList<String> urlsExcluded;
 	Date startDate;
 	String localDir;
@@ -105,6 +131,7 @@ public class Gatherconf {
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
 		quotaUnitSelection = null;
+		agentIdSelection = null;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
@@ -250,6 +277,20 @@ public class Gatherconf {
 	 */
 	public void setQuotaUnitSelection(QuotaUnitSelection quotaUnitSelection) {
 		this.quotaUnitSelection = quotaUnitSelection;
+	}
+
+	/**
+	 * @return the agentIdSelection
+	 */
+	public AgentIdSelection getAgentIdSelection() {
+		return agentIdSelection;
+	}
+
+	/**
+	 * @param agentIdSelection the agentIdSelection to set
+	 */
+	public void setAgentIdSelection(AgentIdSelection agentIdSelection) {
+		this.agentIdSelection = agentIdSelection;
 	}
 
 	/**

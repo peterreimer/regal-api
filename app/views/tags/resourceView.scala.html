@@ -1,7 +1,26 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+@import views.Helper
+@import views.ViewerInfo
+@import models.Node
+@(node: Node,hit:Map[String,Object],context:List[String])
 
-@(hit: Map[String,Object],context:List[String],namespace:String)
-
+@{
+		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
+		if(viewerInfo!=null){
+			if(!viewerInfo.contentType.equals("version")) {
+				if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
+				   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
+				}		
+				else{
+					if(viewerInfo.accessScheme.equals("public")){
+						<div id="thumbnail" class="thumb">
+							<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
+						</div>
+					}
+				}
+			}
+		} 
+}
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
 	@context match{
@@ -65,7 +84,7 @@
 					
 						@values match {
 								case d:  Map[String,Object] => {
-									@getFileInfo(views.Helper.getFile(d),namespace)
+									@getFileInfo(views.Helper.getFile(d))
 								}
 								case _ => {
 									@values
@@ -422,7 +441,7 @@
 			 			<td>    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label <span style="font-size:smaller;">(@roleName)</span>
 	                       </a> <span class="separator">|</span>
-	                       <a href=@analyseValue(id)  target="_blank">
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
 	                       <br/>	</td> 
@@ -477,38 +496,15 @@
 	</li>	                      
 }
 
-@analyseString(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			<a href=@v>@v</a>
-		}
-		case a if v.startsWith(namespace) => {
-			<a href=/resource/@v>@v</a>
-		}
-		case _ => {
-			@v
-		}
-	}
-}
-
-@analyseValue(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			@v
-		}
-		case a if v.startsWith(namespace) => {
-			/resource/@v
-		}
-		case _ => {
-			@v
-		}
-	}
-}
 
 @value(value: Any,key:String)= {
 			@value match {
 				case a: String => {
-					@analyseString(value.asInstanceOf[String])
+					@if(Helper.getLinkAdressOrNull(a)!=null){
+						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
+					}else{
+						@a
+					}
 				}
 				case c : Map[String,Object] => {
 							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
@@ -526,7 +522,7 @@
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(a)@models.Globals.rechercheUrlSuffix">
 	                       @(map.get(Globals.profile.getLabelKey()))
 	                       </a> <span class="separator">|</span>
-	                       <a href=@analyseValue(a)  target="_blank">
+	                       <a href=@Helper.getLinkAdressOrNull(a)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
 	                       <br/>

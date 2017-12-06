@@ -75,6 +75,8 @@ public class Globals {
 	public static String[] namespaces = Play.application().configuration()
 			.getString("regal-api.namespace").split("\\s*,[,\\s]*");
 
+	public static String defaultNamespace = namespaces[0];
+
 	/**
 	 * defines how objects will be referenced internally
 	 */
@@ -326,4 +328,11 @@ public class Globals {
 			.getString("regal-api.rechercheUrl.suffix");
 
 	public static WglContributor wglContributor = new WglContributor();
+
+	public static String thumbyUrl =
+			Play.application().configuration().getString("regal-api.thumby.url");
+	public static String zettelUrl =
+			Play.application().configuration().getString("regal-api.zettel.url");
+	public static String deepzoomeUrl =
+			Play.application().configuration().getString("regal-api.deepzoom.url");
 }

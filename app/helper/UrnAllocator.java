@@ -56,7 +56,8 @@ public class UrnAllocator implements Runnable {
 		addUrnLogger.info(
 				"-XPOST /utils/addUrnToAll?namespace=edoweb&snid=hbz:929:02&dateBefore="
 						+ d);
-		List<SearchHit> hits = new Read().list(Globals.namespaces[0], from, until);
+		List<SearchHit> hits =
+				new Read().list(Globals.defaultNamespace, from, until);
 		List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
 				.collect(Collectors.toList());
 		List<Node> nodes = new Read().getNodes(ids);

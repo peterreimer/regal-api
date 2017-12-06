@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.MediaType;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
@@ -501,5 +502,34 @@ public class Helper {
 		result.put("id", n.getPid());
 		result.put("title", getTitle(n.getLd2()));
 		return result;
+	}
+
+	public static ViewerInfo getViewerInfo(Node node) {
+
+		try {
+			if (node.getFileChecksum() == null) {
+				if (node.getPartsSorted() != null && !node.getPartsSorted().isEmpty()) {
+					return getViewerInfo(new Read()
+							.internalReadNode(node.getPartsSorted().get(0).getObject()));
+				}
+				return null;
+			}
+			ViewerInfo info = new ViewerInfo(node);
+			return info;
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+			return null;
+		}
+	}
+
+	public static String getLinkAdressOrNull(String value) {
+		for (String n : Globals.namespaces) {
+			if (value.startsWith(n)) {
+				return "/resource/" + value;
+			}
+		}
+		if (value.startsWith("http"))
+			return value;
+		return null;
 	}
 }

@@ -77,10 +77,10 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import views.html.edit;
-import views.html.mab;
-import views.html.mets;
-import views.html.oaidc;
-import views.html.wgl;
+import views.html.oai.mab;
+import views.html.oai.mets;
+import views.html.oai.oaidc;
+import views.html.oai.wgl;
 import views.html.resource;
 import views.html.resources;
 import views.html.search;
@@ -173,9 +173,7 @@ public class Resource extends MyController {
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				List<Node> nodes = read.listRepo(contentType, namespace, from, until);
-				return ok(
-						resources.render(nodes.stream().map(n -> new JsonMapper(n).getLd2())
-								.collect(Collectors.toList()), Globals.namespaces[0]));
+				return ok(resources.render(nodes));
 			} catch (HttpArchiveException e) {
 				return HtmlMessage(new Message(e, e.getCode()));
 			} catch (Exception e) {
@@ -196,21 +194,18 @@ public class Resource extends MyController {
 				return Promise.promise(() -> notFound("404 - Not found " + pid));
 
 			if ("frl".equals(design)) {
-				Map<String, Object> item = read.getMapWithParts2(node);
-				return Promise
-						.promise(() -> ok(frlResource.render(item, Globals.namespaces[0])));
+				return Promise.promise(() -> ok(frlResource.render(node)));
 			} else {
 				SearchResponse response = Globals.search.query(
 						new String[] {
-								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
-								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
+								Globals.PUBLIC_INDEX_PREF + Globals.defaultNamespace + "2",
+								Globals.PDFBOX_OCR_INDEX_PREF + Globals.defaultNamespace },
 						"@id:\"" + pid + "\"", 0, 1);
 				SearchHits hits = response.getHits();
 
 				Aggregations aggs = response.getAggregations();
-				Map<String, Object> item = read.getMapWithParts2(node);
-				return Promise.promise(
-						() -> ok(resource.render(item, null, Globals.namespaces[0])));
+				// Map<String, Object> item = read.getMapWithParts2(node);
+				return Promise.promise(() -> ok(resource.render(node, null)));
 			}
 		}
 		if (request().accepts("application/rdf+xml"))
@@ -523,6 +518,15 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "activateResource", value = "activateResource", notes = "Activates a deleted resource", response = Message.class, httpMethod = "POST")
+	public static Promise<Result> activateResource(@PathParam("pid") String pid) {
+		return new BulkActionAccessor().call((userId) -> {
+			Globals.fedora.activateNode(pid);
+			modify.lobidify(read.readNode(pid));
+			return ok(json(read.readNode(pid)));
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "deleteSeq", value = "deleteSeq", notes = "Deletes a resources ordering definition for it's children objects", response = Message.class, httpMethod = "DELETE")
 	public static Promise<Result> deleteSeq(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
@@ -602,12 +606,11 @@ public class Resource extends MyController {
 					return getJsonResult(nodeIds);
 				}
 				List<Node> result = read.getNodes(nodeIds);
-				List<Map<String, Object>> list =
-						result.stream().map(n -> n.getLd2()).collect(Collectors.toList());
+
 				if (request().accepts("text/html")) {
-					return ok(resources.render(list, Globals.namespaces[0]));
+					return ok(resources.render(result));
 				} else {
-					return getJsonResult(list);
+					return getJsonResult(result);
 				}
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
@@ -624,8 +627,8 @@ public class Resource extends MyController {
 			try {
 				SearchResponse response = Globals.search.query(
 						new String[] {
-								Globals.PUBLIC_INDEX_PREF + Globals.namespaces[0] + "2",
-								Globals.PDFBOX_OCR_INDEX_PREF + Globals.namespaces[0] },
+								Globals.PUBLIC_INDEX_PREF + Globals.defaultNamespace + "2",
+								Globals.PDFBOX_OCR_INDEX_PREF + Globals.defaultNamespace },
 						queryString, from, until);
 				SearchHits hits = response.getHits();
 
@@ -634,7 +637,7 @@ public class Resource extends MyController {
 				hitMap = read.hitlistToMap(list);
 				if (request().accepts("text/html")) {
 					return ok(search.render(hitMap, aggs, queryString,
-							hits.getTotalHits(), from, until, Globals.namespaces[0]));
+							hits.getTotalHits(), from, until, Globals.defaultNamespace));
 				} else {
 					return getJsonResult(hitMap);
 				}
@@ -655,15 +658,11 @@ public class Resource extends MyController {
 				}
 				if (request().accepts("text/html")) {
 					if ("frl".equals(design)) {
-						return ok(frlResource.render(read.getMapWithParts2(node),
-								Globals.namespaces[0]));
-					} else {
-						List<Map<String, Object>> result = new ArrayList();
-						Map<String, Object> item = read.getMapWithParts(node);
-						result.add(item);
-						return ok(resources.render(result, Globals.namespaces[0]));
+						return ok(frlResource.render(node));
 					}
-
+					List<Node> result = new ArrayList<>();
+					result.add(node);
+					return ok(resources.render(result));
 				} else if (request().accepts("application/json")) {
 					return getJsonResult(read.getPartsAsTree(node, style));
 				} else {
@@ -674,6 +673,7 @@ public class Resource extends MyController {
 				return JsonMessage(new Message(e, 500));
 			}
 		});
+
 	}
 
 	private static Result asRdf(List<Node> result) {
@@ -755,11 +755,9 @@ public class Resource extends MyController {
 			try {
 				response().setHeader("Content-Type", "text/html; charset=utf-8");
 				if ("frl".equals(design)) {
-					return ok(frlResource.render(read.getMapWithParts2(node),
-							Globals.namespaces[0]));
+					return ok(frlResource.render(node));
 				}
-				return ok(resource.render(read.getMapWithParts2(node), null,
-						Globals.namespaces[0]));
+				return ok(resource.render(node, null));
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
 			}
@@ -995,8 +993,7 @@ public class Resource extends MyController {
 				Node result = read.getLastModifiedChild(node, contentType);
 				if (request().accepts("text/html")) {
 					response().setHeader("Content-Type", "text/html; charset=utf-8");
-					return ok(
-							resource.render(result.getLd2(), null, Globals.namespaces[0]));
+					return ok(resource.render(result, null));
 				} else {
 					return getJsonResult(result);
 				}
@@ -1075,7 +1072,7 @@ public class Resource extends MyController {
 			try {
 				String ns = namespace;
 				if (ns.isEmpty()) {
-					ns = Globals.namespaces[0];
+					ns = Globals.defaultNamespace;
 				}
 				List<Node> nodes = read.listRepo(contentType, ns, from, until);
 				List<Map<String, Object>> stati = read.getStatus(nodes);
@@ -1155,7 +1152,7 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, userId -> {
 			try {
 				Node node = readNodeOrNull(pid);
-				return ok(getTitle.render(node.getLd2(), Globals.namespaces[0]));
+				return ok(getTitle.render(node.getLd2()));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}
@@ -1174,6 +1171,17 @@ public class Resource extends MyController {
 				String message = modify.lobidify(node, alephId);
 				flash("message", message);
 				return redirect(routes.Resource.listResource(node.getPid(), null));
+			} catch (Exception e) {
+				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
+
+	public static Promise<Result> getUploadForm(String pid) {
+		return new CreateAction().call(userId -> {
+			try {
+				Node node = read.internalReadNode(pid);
+				return ok(views.html.upload.render(node));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}
