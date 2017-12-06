@@ -36,6 +36,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import actions.Read;
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
@@ -395,8 +396,24 @@ public class JsonMapper {
 			postProcess(rdf, "natureOfContent");
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
+			addParts(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
+		}
+	}
+
+	private void addParts(Map<String, Object> rdf) {
+		Read read = new Read();
+		List<Map<String, Object>> parts =
+				(List<Map<String, Object>>) rdf.get("hasPart");
+		List<Map<String, Object>> children = new ArrayList();
+		if (parts != null) {
+			for (Map<String, Object> part : parts) {
+				String id = (String) part.get("@id");
+				children.add(
+						new JsonMapper(read.internalReadNode(id)).getLd2WithoutContext());
+			}
+			rdf.put("hasPart", children);
 		}
 	}
 
