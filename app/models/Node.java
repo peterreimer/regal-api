@@ -1248,4 +1248,11 @@ public class Node implements java.io.Serializable {
 		return result;
 	}
 
+	public Map<String, Object> getLd2WithParts() {
+		Map<String, Object> result = new JsonMapper(this).getLd2WithParts();
+		if ("D".equals(getState())) {
+			result.put("notification", "Dieses Objekt wurde gelöscht");
+		}
+		return result;
+	}
 }

@@ -396,7 +396,7 @@ public class JsonMapper {
 			postProcess(rdf, "natureOfContent");
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
-			addParts(rdf);
+
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -737,6 +737,12 @@ public class JsonMapper {
 		}
 
 		return result;
+	}
+
+	public Map<String, Object> getLd2WithParts() {
+		Map<String, Object> rdf = getLd2();
+		addParts(rdf);
+		return rdf;
 	}
 
 	public Map<String, Object> getLd2() {
