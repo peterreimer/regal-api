@@ -80,10 +80,9 @@ public class OaiDispatcher {
 	public static String initContentModels(String namespace) {
 		int port = Globals.getPort();
 		play.Logger.info("Reinit fedora content models to listen on port: " + port);
-
 		List<Transformer> transformers = new Vector<>();
 		String internalAccessRoute =
-				Globals.protocol + Globals.server + "/resource/(pid)." + namespace;
+				"http://localhost:" + port + "/resource/(pid).";
 		transformers.add(new Transformer(namespace + "epicur", "epicur",
 				internalAccessRoute + "epicur"));
 		transformers.add(new Transformer(namespace + "oaidc", "oaidc",
