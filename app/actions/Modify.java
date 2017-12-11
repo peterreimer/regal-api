@@ -1212,7 +1212,7 @@ public class Modify extends RegalAction {
 
 	private List<String> findAllGndIds(String metadata) {
 		HashMap<String, String> result = new HashMap<String, String>();
-		Matcher m = Pattern.compile("http://d-nb.info/gnd/[1234567890-]*")
+		Matcher m = Pattern.compile("http://d-nb.info/gnd/[1234567890-]*[A-Z]*")
 				.matcher(metadata);
 		while (m.find()) {
 			String id = m.group();
