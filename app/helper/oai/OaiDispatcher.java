@@ -80,29 +80,26 @@ public class OaiDispatcher {
 	public static String initContentModels(String namespace) {
 		int port = Globals.getPort();
 		play.Logger.info("Reinit fedora content models to listen on port: " + port);
+
 		List<Transformer> transformers = new Vector<>();
-		transformers
-				.add(new Transformer(namespace + "epicur", "epicur", Globals.protocol
-						+ Globals.server + "/resource/(pid)." + namespace + "epicur"));
-		transformers
-				.add(new Transformer(namespace + "oaidc", "oaidc", Globals.protocol
-						+ Globals.server + "/resource/(pid)." + namespace + "oaidc"));
-		transformers
-				.add(new Transformer(namespace + "pdfa", "pdfa", Globals.protocol
-						+ Globals.server + "/resource/(pid)." + namespace + "pdfa"));
-		transformers
-				.add(new Transformer(namespace + "pdfbox", "pdfbox", Globals.protocol
-						+ Globals.server + "/resource/(pid)." + namespace + "pdfbox"));
-		transformers
-				.add(new Transformer(namespace + "aleph", "aleph", Globals.protocol
-						+ Globals.server + "/resource/(pid)." + namespace + "aleph"));
-		transformers
-				.add(new Transformer(namespace + "mets", "mets", Globals.protocol
-						+ Globals.server + "/resource/(pid)." + namespace + "mets"));
-		transformers.add(new Transformer(namespace + "rdf", "rdf", Globals.protocol
-				+ Globals.server + "/resource/(pid)." + namespace + "rdf"));
-		transformers.add(new Transformer(namespace + "wgl", "wgl", Globals.protocol
-				+ Globals.server + "/resource/(pid)." + namespace + "wgl"));
+		String internalAccessRoute =
+				Globals.protocol + Globals.server + "/resource/(pid)." + namespace;
+		transformers.add(new Transformer(namespace + "epicur", "epicur",
+				internalAccessRoute + "epicur"));
+		transformers.add(new Transformer(namespace + "oaidc", "oaidc",
+				internalAccessRoute + "oaidc"));
+		transformers.add(new Transformer(namespace + "pdfa", "pdfa",
+				internalAccessRoute + "pdfa"));
+		transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
+				internalAccessRoute + "pdfbox"));
+		transformers.add(new Transformer(namespace + "aleph", "aleph",
+				internalAccessRoute + "aleph"));
+		transformers.add(new Transformer(namespace + "mets", "mets",
+				internalAccessRoute + "mets"));
+		transformers.add(
+				new Transformer(namespace + "rdf", "rdf", internalAccessRoute + "rdf"));
+		transformers.add(
+				new Transformer(namespace + "wgl", "wgl", internalAccessRoute + "wgl"));
 		OaiDispatcher.contentModelsInit(transformers);
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
