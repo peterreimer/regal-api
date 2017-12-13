@@ -38,6 +38,7 @@ import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.message;
+import actions.Activate;
 import actions.Create;
 import actions.Delete;
 import actions.Index;
@@ -98,6 +99,7 @@ public class MyController extends Controller {
 	static Index index = new Index();
 	static Modify modify = new Modify();
 	static Delete delete = new Delete();
+	static Activate activate = new Activate();
 	static Transform transform = new Transform();
 
 	/**

@@ -521,9 +521,13 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "activateResource", value = "activateResource", notes = "Activates a deleted resource", response = Message.class, httpMethod = "POST")
 	public static Promise<Result> activateResource(@PathParam("pid") String pid) {
 		return new BulkActionAccessor().call((userId) -> {
-			Globals.fedora.activateNode(pid);
-			modify.lobidify(read.readNode(pid));
-			return ok(json(read.readNode(pid)));
+			List<Node> list = Globals.fedora.listComplexObject(pid);
+			BulkAction bulk = new BulkAction();
+			bulk.executeOnNodes(list, userId, nodes -> {
+				return activate.activate(nodes);
+			});
+			response().setHeader("Transfer-Encoding", "Chunked");
+			return ok(bulk.getChunks());
 		});
 	}
 
