@@ -410,10 +410,14 @@ public class JsonMapper {
 		if (parts != null) {
 			for (Map<String, Object> part : parts) {
 				String id = (String) part.get("@id");
-				children.add(
-						new JsonMapper(read.internalReadNode(id)).getLd2WithoutContext());
+				Node cn = read.internalReadNode(id);
+				if (!"D".equals(cn.getState())) {
+					children.add(new JsonMapper(cn).getLd2WithoutContext());
+				}
 			}
-			rdf.put("hasPart", children);
+			if (!children.isEmpty()) {
+				rdf.put("hasPart", children);
+			}
 		}
 	}
 
