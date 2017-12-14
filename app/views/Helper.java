@@ -24,6 +24,7 @@ import actions.Read;
 import helper.MyEtikettMaker;
 import models.Gatherconf;
 import models.Globals;
+import models.Link;
 import models.Node;
 
 public class Helper {
@@ -509,11 +510,16 @@ public class Helper {
 		try {
 			if (node.getFileChecksum() == null) {
 				if (node.getPartsSorted() != null && !node.getPartsSorted().isEmpty()) {
-					return getViewerInfo(new Read()
-							.internalReadNode(node.getPartsSorted().get(0).getObject()));
+					for (Link l : node.getPartsSorted()) {
+						Node cn = new Read().internalReadNode(l.getObject());
+						if (!"D".equals(cn.getState())) {
+							return getViewerInfo(cn);
+						}
+					}
 				}
 				return null;
 			}
+
 			ViewerInfo info = new ViewerInfo(node);
 			return info;
 		} catch (Exception e) {
