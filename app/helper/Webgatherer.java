@@ -136,8 +136,11 @@ public class Webgatherer implements Runnable {
 			conf.setInvalidUrl(true);
 			conf.setUrlNew((String) null);
 			String msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info("URL wurde auf ungültig gesetzt.");
 			WebgatherLogger.info(msg);
+			WebgatherLogger
+					.info("URL wurde auf ungültig gesetzt. Neue URL unbekannt.");
+			// ToDo: E-Mail verschicken, One-Click-Service zum Übernehmen der neuen
+			// URL anbieten
 		}
 	}
 

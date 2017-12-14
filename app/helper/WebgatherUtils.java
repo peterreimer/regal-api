@@ -16,6 +16,8 @@
  */
 package helper;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.IDN;
@@ -30,9 +32,12 @@ import java.util.Map.Entry;
 import com.google.common.base.CharMatcher;
 
 import actions.Modify;
+import actions.RegalAction;
+import helper.mail.Mail;
 import models.Gatherconf;
 import models.Node;
 import play.Logger;
+import play.Play;
 
 /**
  * Eine Klasse mit nützlichen Methoden im Umfeld des Webgatherings
@@ -149,8 +154,36 @@ public class WebgatherUtils {
 		WebgatherLogger.info(msg);
 		WebgatherLogger.info("URL wurde auf ungültig gesetzt. Neue URL "
 				+ conf.getUrlNew() + " muss manuell übernommen werden.");
-		// ToDo: E-Mail verschicken, One-Click-Service zum Übernehmen der neuen URL
-		// anbieten
+		sendInvalidUrlEmail(node, conf);
+	}
+
+	/**
+	 * Schickt E-Mail mit einer Umzugsnotiz und Aufforderung, die neue URL zu
+	 * bestätigen.
+	 * 
+	 * @param node der Knoten der Website
+	 * @param conf die Gatherconf der umgezogenen Website
+	 */
+	public static void sendInvalidUrlEmail(Node node, Gatherconf conf) {
+		WebgatherLogger.info("Schicke E-Mail mit Umzugsnotiz.");
+		try {
+			Mail mail = new Mail();
+			mail.setTo(Play.application().configuration().getString("javax.mail.to"));
+			mail.setFrom(
+					Play.application().configuration().getString("javax.mail.from"));
+			RegalAction action = new RegalAction();
+			// Achtung: generierter Link verweis auf api.<HOST> (nicht: <HOST>).
+			mail.setMessage("Die Website " + conf.getName() + " ist umgezogen.\n"
+					+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden): "
+					+ action.getHttpUriOfResource(node) + "/crawler\n"
+					+ "Oder lassen sie die URL direkt von " + conf.getUrl() + " nach "
+					+ conf.getUrlNew() + " umziehen, indem Sie die API aufrufen: "
+					+ action.getHttpUriOfResource(node) + "/confirmNewUrl");
+			mail.setSubject("De Sick is umjetrocke ! " + conf.getName());
+			assertEquals(mail.sendMail(), 0);
+		} catch (Exception e) {
+			WebgatherLogger.warn("Email could not be sent successfully!", e);
+		}
 	}
 
 }
