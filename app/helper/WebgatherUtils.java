@@ -35,6 +35,7 @@ import actions.Modify;
 import actions.RegalAction;
 import helper.mail.Mail;
 import models.Gatherconf;
+import models.Globals;
 import models.Node;
 import play.Logger;
 import play.Play;
@@ -171,14 +172,16 @@ public class WebgatherUtils {
 			mail.setTo(Play.application().configuration().getString("javax.mail.to"));
 			mail.setFrom(
 					Play.application().configuration().getString("javax.mail.from"));
-			RegalAction action = new RegalAction();
-			// Achtung: generierter Link verweis auf api.<HOST> (nicht: <HOST>).
-			mail.setMessage("Die Website " + conf.getName() + " ist umgezogen.\n"
-					+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden): "
-					+ action.getHttpUriOfResource(node) + "/crawler\n"
-					+ "Oder lassen sie die URL direkt von " + conf.getUrl() + " nach "
-					+ conf.getUrlNew() + " umziehen, indem Sie die API aufrufen: "
-					+ action.getHttpUriOfResource(node) + "/confirmNewUrl");
+			String mailMsg = "Die Website " + conf.getName() + " ist ";
+			if (conf.getUrlNew() == null) {
+				mailMsg += "unbekannt verzogen.\n"
+						+ "Bitte geben Sie auf diesem Webformular eine neue, gültige URL ein. Solange wird die Website nicht erneut eingesammelt: ";
+			} else {
+				mailMsg += "umgezogen.\n"
+						+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden): ";
+			}
+			mailMsg += Globals.urnbase + node.getAggregationUri() + "/crawler .";
+			mail.setMessage(mailMsg);
 			mail.setSubject("De Sick is umjetrocke ! " + conf.getName());
 			assertEquals(mail.sendMail(), 0);
 		} catch (Exception e) {

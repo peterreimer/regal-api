@@ -139,8 +139,7 @@ public class Webgatherer implements Runnable {
 			WebgatherLogger.info(msg);
 			WebgatherLogger
 					.info("URL wurde auf ungültig gesetzt. Neue URL unbekannt.");
-			// ToDo: E-Mail verschicken, One-Click-Service zum Übernehmen der neuen
-			// URL anbieten
+			WebgatherUtils.sendInvalidUrlEmail(node, conf);
 		}
 	}
 
