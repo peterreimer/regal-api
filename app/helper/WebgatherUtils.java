@@ -182,7 +182,7 @@ public class WebgatherUtils {
 			}
 			mailMsg += Globals.urnbase + node.getAggregationUri() + "/crawler .";
 			mail.setMessage(mailMsg);
-			mail.setSubject("De Sick is umjetrocke ! " + conf.getName());
+			mail.setSubject("Eine Website ist umgezogen ! " + conf.getName());
 			assertEquals(mail.sendMail(), 0);
 		} catch (Exception e) {
 			WebgatherLogger.warn("Email could not be sent successfully!", e);

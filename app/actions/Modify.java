@@ -1434,6 +1434,35 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * @param node the node to add an urlHist to
+	 * @param content json representation of conf
+	 * @return a message
+	 */
+	public String updateUrlHist(Node node, String content) {
+		try {
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						node.getPid() + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			play.Logger.info("Write to urlHist: " + content);
+			File file = CopyUtils.copyStringToFile(content);
+			if (node != null) {
+				node.setUrlHistFile(file.getAbsolutePath());
+				play.Logger.info("Update node" + file.getAbsolutePath());
+				Globals.fedora.updateNode(node);
+			}
+			updateIndex(node.getPid());
+			return node.getPid() + " url history updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * the node
 	 * 
 	 * @param pred Rdf-Predicate will be added to /metadata of node

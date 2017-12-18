@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,6 +70,7 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
+import models.UrlHist;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.libs.F.Function0;
@@ -1018,14 +1020,19 @@ public class Resource extends MyController {
 					conf.setName(pid);
 					play.Logger.debug("conf.toString=" + conf.toString());
 					String result = modify.updateConf(node, conf.toString());
+					// Neue urlHist anlegen, falls es noch keine gibt (nur dann)
+					if (node.getUrlHist() == null) {
+						UrlHist urlHist = new UrlHist(conf.getUrl());
+						String urlHistResult =
+								modify.updateUrlHist(node, urlHist.toString());
+						play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
+					}
 					Globals.heritrix.createJobDir(conf);
 					return JsonMessage(new Message(result, 200));
 				} else {
-
 					throw new HttpArchiveException(409,
 							"Please provide JSON config in request body.");
 				}
-
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -1036,6 +1043,14 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readConf(node);
+			return ok(result);
+		});
+	}
+
+	public static Promise<Result> listUrlHist(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			String result = read.readUrlHist(node);
 			return ok(result);
 		});
 	}
@@ -1198,15 +1213,34 @@ public class Resource extends MyController {
 				if (urlNew == null) {
 					throw new RuntimeException("Keine neue URL bekannt!");
 				}
-				String urlHist = conf.getUrl();
-				conf.setUrlHist(conf.getUrl()); // ToDo hier stattdessen Umzugshistorie
-																				// mit Zeitstempeln anlegen bzw.
-																				// weiterführen
+				String urlOld = conf.getUrl();
 				conf.setUrl(urlNew);
 				conf.setInvalidUrl(false);
 				conf.setHttpResponseCode(0);
 				conf.setUrlNew((String) null);
-				String msg = new Modify().updateConf(node, conf.toString());
+				// Die URL-Historie weiterschreiben
+				String msg = null;
+				UrlHist urlHist = UrlHist.create(node.getUrlHist());
+				if (urlHist == null) {
+					msg = "Keine URL-Historie vorhanden !";
+					throw new RuntimeException(msg);
+				}
+				// double-check, ob man auch wirklich den richtigen Eintrag erwischt
+				String urlLatest =
+						urlHist.getUrlHistEntry(urlHist.getSize() - 1).getUrl();
+				play.Logger.debug("neueste URL in URL-Historie gefunden: " + urlLatest);
+				if (!urlLatest.equals(urlOld)) {
+					msg =
+							"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
+									+ urlLatest + " vs. bisherige URL: " + urlOld;
+					throw new RuntimeException(msg);
+				}
+				urlHist.updateLatestUrlHistEntry(new Date());
+				urlHist.addUrlHistEntry(urlNew);
+				String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
+				play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
+				// Jetzt Update der Gatherconf
+				msg = modify.updateConf(node, conf.toString());
 				play.Logger.info(msg);
 				// return getJsonResult(conf); für Aufruf von Kommandozeile OK, aber
 				// nicht für Aufruf über API - muss code und text haben

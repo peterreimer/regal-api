@@ -93,9 +93,6 @@ public class Gatherconf {
 	int httpResponseCode;
 	boolean invalidUrl;
 	String urlNew; // the new URL, yet to be confirmed
-	String urlHist; // a former URL for this webpage. ToDo to be replaced by a
-									// List<urlHist, ChangeDate>; ChangeDate = the date the
-									// urlHist was replaced
 	ArrayList<String> domains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
@@ -122,7 +119,6 @@ public class Gatherconf {
 		httpResponseCode = 0;
 		invalidUrl = false;
 		urlNew = null;
-		urlHist = null;
 		domains = new ArrayList<String>();
 		active = true;
 		deepness = -1;
@@ -164,20 +160,6 @@ public class Gatherconf {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	/**
-	 * @return the former url of the website
-	 */
-	public String getUrlHist() {
-		return urlHist;
-	}
-
-	/**
-	 * @param urlHist the former url of the website
-	 */
-	public void setUrlHist(String urlHist) {
-		this.urlHist = urlHist;
 	}
 
 	/**
