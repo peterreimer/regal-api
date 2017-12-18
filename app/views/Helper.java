@@ -324,12 +324,16 @@ public class Helper {
 			String dateOfBirth, String dateOfDeath) {
 		StringBuffer result = new StringBuffer();
 		if (dateOfBirthAndDeath != null && !dateOfBirthAndDeath.isEmpty())
-			return dateOfBirthAndDeath;
+			return ", " + dateOfBirthAndDeath;
 
 		if (dateOfBirth != null && !dateOfBirth.isEmpty()) {
+			result.append(", ");
 			result.append(dateOfBirth);
 		}
 		if (dateOfDeath != null && !dateOfDeath.isEmpty()) {
+			if (result.length() == 0) {
+				result.append(", ");
+			}
 			result.append("-" + dateOfDeath);
 		}
 		return result.toString();
