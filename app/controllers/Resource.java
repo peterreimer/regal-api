@@ -1222,23 +1222,29 @@ public class Resource extends MyController {
 				String msg = null;
 				UrlHist urlHist = UrlHist.create(node.getUrlHist());
 				if (urlHist == null) {
-					msg = "Keine URL-Historie vorhanden !";
-					throw new RuntimeException(msg);
+					play.Logger.warn(
+							"Keine URL-Historie vorhanden ! Lege eine neue URL-Umzugshistorie an!");
+					urlHist = new UrlHist(urlOld, new Date());
+					urlHist.addUrlHistEntry(urlNew);
+					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
+					play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
+				} else {
+					// double-check, ob man auch wirklich den richtigen Eintrag erwischt
+					String urlLatest =
+							urlHist.getUrlHistEntry(urlHist.getSize() - 1).getUrl();
+					play.Logger
+							.debug("neueste URL in URL-Historie gefunden: " + urlLatest);
+					if (!urlLatest.equals(urlOld)) {
+						msg =
+								"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
+										+ urlLatest + " vs. bisherige URL: " + urlOld;
+						throw new RuntimeException(msg);
+					}
+					urlHist.updateLatestUrlHistEntry(new Date());
+					urlHist.addUrlHistEntry(urlNew);
+					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
+					play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
 				}
-				// double-check, ob man auch wirklich den richtigen Eintrag erwischt
-				String urlLatest =
-						urlHist.getUrlHistEntry(urlHist.getSize() - 1).getUrl();
-				play.Logger.debug("neueste URL in URL-Historie gefunden: " + urlLatest);
-				if (!urlLatest.equals(urlOld)) {
-					msg =
-							"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
-									+ urlLatest + " vs. bisherige URL: " + urlOld;
-					throw new RuntimeException(msg);
-				}
-				urlHist.updateLatestUrlHistEntry(new Date());
-				urlHist.addUrlHistEntry(urlNew);
-				String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
-				play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
 				// Jetzt Update der Gatherconf
 				msg = modify.updateConf(node, conf.toString());
 				play.Logger.info(msg);

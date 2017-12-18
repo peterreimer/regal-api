@@ -58,6 +58,20 @@ public class UrlHist {
 	}
 
 	/**
+	 * Konstruktor. Legt eine neue URL-Umzugshistorie mit der ersten URL an, die
+	 * sofort auf ungültig gesetzt wird. Das braucht man, wenn es noch keine
+	 * URL-Historie gab, aber die URL geändert wurde.
+	 * 
+	 * @param urlFirst die zuletzt gültige URL für die Webpage
+	 * @param endDate das Datum, bis zudem diese URL gültig war
+	 */
+	public UrlHist(String urlFirst, Date endDate) {
+		urlHistEntries = new ArrayList<>();
+		UrlHistEntry urlHistEntry = new UrlHistEntry(urlFirst, endDate);
+		urlHistEntries.add(urlHistEntry);
+	}
+
+	/**
 	 * Legt einen neuen URL-Historieneintrag mit nur einer URL an. Datum = initial
 	 * (null).
 	 * 
