@@ -301,11 +301,16 @@ public class Helper {
 			String uri = c.at("/@id").asText();
 			String source = c.at("/source/0/label").asText();
 			String sourceId = c.at("/source/0/@id").asText();
+			String dateOfBirthAndDeath = c.at("/dateOfBirthAndDeath").asText();
+			String dateOfDeath = c.at("/dateOfDeath").asText();
+			String dateOfBirth = c.at("/dateOfBirth").asText();
 
+			String biographicalDetails = createBiographicalDetails(
+					dateOfBirthAndDeath, dateOfBirth, dateOfDeath);
 			String notation = c.at("/notation").asText();
 			Map<String, Object> subject = new HashMap<>();
 			subject.put("id", uri);
-			subject.put("label", name);
+			subject.put("label", name + biographicalDetails);
 			subject.put("source", source);
 			subject.put("sourceId", sourceId);
 			subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
@@ -313,6 +318,25 @@ public class Helper {
 			result.add(subject);
 		}
 		return result;
+	}
+
+	private static String createBiographicalDetails(String dateOfBirthAndDeath,
+			String dateOfBirth, String dateOfDeath) {
+		StringBuffer result = new StringBuffer();
+		if (dateOfBirthAndDeath != null && !dateOfBirthAndDeath.isEmpty())
+			return ", " + dateOfBirthAndDeath;
+
+		if (dateOfBirth != null && !dateOfBirth.isEmpty()) {
+			result.append(", ");
+			result.append(dateOfBirth);
+		}
+		if (dateOfDeath != null && !dateOfDeath.isEmpty()) {
+			if (result.length() == 0) {
+				result.append(", ");
+			}
+			result.append("-" + dateOfDeath);
+		}
+		return result.toString();
 	}
 
 	public static String getRechercheUrl(String uri) {
