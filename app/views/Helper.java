@@ -310,7 +310,7 @@ public class Helper {
 			String notation = c.at("/notation").asText();
 			Map<String, Object> subject = new HashMap<>();
 			subject.put("id", uri);
-			subject.put("label", name + " " + biographicalDetails);
+			subject.put("label", name + biographicalDetails);
 			subject.put("source", source);
 			subject.put("sourceId", sourceId);
 			subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
