@@ -18,6 +18,7 @@
 package models;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
@@ -133,6 +135,18 @@ public class UrlHist {
 	public static UrlHist create(String json)
 			throws JsonParseException, JsonMappingException, IOException {
 		return JsonUtil.mapper().readValue(json, UrlHist.class);
+	}
+
+	@Override
+	public String toString() {
+		ObjectMapper mapper = JsonUtil.mapper();
+		StringWriter w = new StringWriter();
+		try {
+			mapper.writeValue(w, this);
+		} catch (Exception e) {
+			return super.toString();
+		}
+		return w.toString();
 	}
 
 	/**

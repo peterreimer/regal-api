@@ -62,7 +62,7 @@
   </appender>
 
   <!--logger name="play" level="INFO" /-->
-  <logger name="application" level="INFO">
+  <logger name="application" level="DEBUG" additivity="false">
     <appender-ref ref="FILE" />
   </logger>
   <logger name="webgatherer" level="DEBUG" additivity="false">
@@ -80,8 +80,8 @@
 
   <root level="DEBUG">
     <appender-ref ref="FILE" />
-    <appender-ref ref="ASYNCFILE" />
-    <appender-ref ref="ASYNCSTDOUT" />
+    <!--appender-ref ref="ASYNCFILE" /-->
+    <!--appender-ref ref="ASYNCSTDOUT" /-->
   </root>
   
 </configuration>
