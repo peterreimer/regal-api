@@ -25,6 +25,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -49,6 +51,9 @@ public class WebgatherUtils {
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+	/** Datumsformat für String-Repräsentation von Datümern */
+	public static final DateFormat dateFormat =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Eine Methode zum Validieren und Umwandeln einer URL. Die URL wird nach

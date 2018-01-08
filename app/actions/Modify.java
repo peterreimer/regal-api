@@ -1446,7 +1446,7 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
-			play.Logger.info("Write to urlHist: " + content);
+			play.Logger.debug("Schreibe nach URL-Historie: " + content);
 			File file = CopyUtils.copyStringToFile(content);
 			if (node != null) {
 				node.setUrlHistFile(file.getAbsolutePath());

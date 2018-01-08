@@ -61,6 +61,7 @@ import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.WebgatherUtils;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
 import models.Gatherconf;
@@ -1207,8 +1208,11 @@ public class Resource extends MyController {
 	public static Promise<Result> confirmNewUrl(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			try {
+				play.Logger.debug("Beginne Methode \"confirmNewUrl\"");
 				Node node = readNodeOrNull(pid);
+				play.Logger.debug("Read node.");
 				Gatherconf conf = Gatherconf.create(node.getConf());
+				play.Logger.debug("Got Gatherconf.");
 				String urlNew = conf.getUrlNew();
 				if (urlNew == null) {
 					throw new RuntimeException("Keine neue URL bekannt!");
@@ -1219,27 +1223,36 @@ public class Resource extends MyController {
 				conf.setHttpResponseCode(0);
 				conf.setUrlNew((String) null);
 				// Die URL-Historie weiterschreiben
+				play.Logger.debug("About to continue URL-History.");
 				String msg = null;
-				UrlHist urlHist = UrlHist.create(node.getUrlHist());
-				if (urlHist == null) {
+				UrlHist urlHist = null;
+				if (true) {
+					// if (node.getUrlHist() == null) { # für erste Tests erstmal auf
+					// Updates der Historie verzichten
 					play.Logger.warn(
-							"Keine URL-Historie vorhanden ! Lege eine neue URL-Umzugshistorie an!");
+							"Keine URL-Historie vorhanden ! Lege eine neue URL-Umzugshistorie an !");
 					urlHist = new UrlHist(urlOld, new Date());
 					urlHist.addUrlHistEntry(urlNew);
+					play.Logger.debug(
+							"First urlHistEntry has endDate: " + WebgatherUtils.dateFormat
+									.format(urlHist.getUrlHistEntry(0).getEndDate()));
 					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
 					play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
 				} else {
+					play.Logger.debug("Creating urlHist.");
+					play.Logger.debug("Former urlHist: " + node.getUrlHist());
+					urlHist = UrlHist.create(node.getUrlHist());
 					// double-check, ob man auch wirklich den richtigen Eintrag erwischt
-					String urlLatest =
-							urlHist.getUrlHistEntry(urlHist.getSize() - 1).getUrl();
-					play.Logger
-							.debug("neueste URL in URL-Historie gefunden: " + urlLatest);
-					if (!urlLatest.equals(urlOld)) {
-						msg =
-								"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
-										+ urlLatest + " vs. bisherige URL: " + urlOld;
-						throw new RuntimeException(msg);
-					}
+					/*
+					 * den Check erstmal weglassen String urlLatest =
+					 * urlHist.getUrlHistEntry(urlHist.getSize() - 1).getUrl();
+					 * play.Logger .debug("neueste URL in URL-Historie gefunden: " +
+					 * urlLatest); if (!urlLatest.equals(urlOld)) { msg =
+					 * "Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
+					 * + urlLatest + " vs. bisherige URL: " + urlOld; throw new
+					 * RuntimeException(msg); } play.Logger.debug("urlHist checked.");
+					 */
+					play.Logger.debug("Former urlHist recreated.");
 					urlHist.updateLatestUrlHistEntry(new Date());
 					urlHist.addUrlHistEntry(urlNew);
 					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
@@ -1251,7 +1264,7 @@ public class Resource extends MyController {
 				// return getJsonResult(conf); für Aufruf von Kommandozeile OK, aber
 				// nicht für Aufruf über API - muss code und text haben
 				return JsonMessage(new Message(
-						"URL wurde umgezogen von " + urlHist + " nach " + conf.getUrl(),
+						"URL wurde umgezogen von " + urlOld + " nach " + conf.getUrl(),
 						200));
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));

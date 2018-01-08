@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
+import helper.WebgatherUtils;
+
 /**
  * Das Datenmodell für eine URL-Umzugshistorie bei Webpages. Inhalt wird als
  * datastream an den jeweiligen Node (webpage) angehängt.
@@ -125,6 +127,8 @@ public class UrlHist {
 	}
 
 	/**
+	 * Legt aus einem JSON-String ein neues UrlHist-Objekt an
+	 * 
 	 * @param json a json representation
 	 * @return a new UrlHist build from json
 	 * @throws JsonParseException
@@ -140,13 +144,13 @@ public class UrlHist {
 	@Override
 	public String toString() {
 		ObjectMapper mapper = JsonUtil.mapper();
-		StringWriter w = new StringWriter();
+		StringWriter writer = new StringWriter();
 		try {
-			mapper.writeValue(w, this);
+			mapper.writeValue(writer, this);
 		} catch (Exception e) {
 			return super.toString();
 		}
-		return w.toString();
+		return writer.toString();
 	}
 
 	/**
@@ -179,6 +183,10 @@ public class UrlHist {
 
 		public String getUrl() {
 			return url;
+		}
+
+		public Date getEndDate() {
+			return endDate;
 		}
 	}
 
