@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import helper.WebgatherUtils;
+import models.UrlHistEntry;
 
 /**
  * Das Datenmodell für eine URL-Umzugshistorie bei Webpages. Inhalt wird als
@@ -41,7 +43,7 @@ import helper.WebgatherUtils;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UrlHist {
 
-	private ArrayList<UrlHistEntry> urlHistEntries;
+	private List<UrlHistEntry> urlHistEntries;
 
 	/**
 	 * Konstruktor. Legt eine neue, leere URL-Umzugshistorie an.
@@ -100,16 +102,6 @@ public class UrlHist {
 	}
 
 	/**
-	 * Liefert die Größe (=Anzahl Elemente) der Liste von URL-Historieneinträgen
-	 * zurück.
-	 * 
-	 * @return die Anzahl Einträge in der URL-Historienliste.
-	 */
-	public int getSize() {
-		return urlHistEntries.size();
-	}
-
-	/**
 	 * Liest einen bestimmtern URL-Historieneintrag anhand des Index
 	 * 
 	 * @param index der Index des URL-Historieneintrages (0=ältester)
@@ -122,7 +114,7 @@ public class UrlHist {
 	/**
 	 * @return die Liste der URL-Historien-Einträge
 	 */
-	public ArrayList<UrlHistEntry> getUrlHistEntries() {
+	public List<UrlHistEntry> getUrlHistEntries() {
 		return urlHistEntries;
 	}
 
@@ -141,6 +133,10 @@ public class UrlHist {
 		return JsonUtil.mapper().readValue(json, UrlHist.class);
 	}
 
+	public void setUrlHistEntries(ArrayList<UrlHistEntry> urlHistEntries) {
+		this.urlHistEntries = urlHistEntries;
+	}
+
 	@Override
 	public String toString() {
 		ObjectMapper mapper = JsonUtil.mapper();
@@ -151,43 +147,6 @@ public class UrlHist {
 			return super.toString();
 		}
 		return writer.toString();
-	}
-
-	/**
-	 * Klasse, die einen URL-Historien-Eintrag implementiert.
-	 */
-	public class UrlHistEntry {
-		String url;
-		Date endDate;
-
-		/**
-		 * Konstruktor nur mit url
-		 * 
-		 * @param url
-		 */
-		public UrlHistEntry(String url) {
-			this.url = url;
-			this.endDate = null;
-		}
-
-		/**
-		 * Konstruktor mit URL und Datum
-		 * 
-		 * @param url
-		 * @param endDate
-		 */
-		public UrlHistEntry(String url, Date endDate) {
-			this.url = url;
-			this.endDate = endDate;
-		}
-
-		public String getUrl() {
-			return url;
-		}
-
-		public Date getEndDate() {
-			return endDate;
-		}
 	}
 
 }

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -1226,9 +1227,7 @@ public class Resource extends MyController {
 				play.Logger.debug("About to continue URL-History.");
 				String msg = null;
 				UrlHist urlHist = null;
-				if (true) {
-					// if (node.getUrlHist() == null) { # für erste Tests erstmal auf
-					// Updates der Historie verzichten
+				if (node.getUrlHist() == null) {
 					play.Logger.warn(
 							"Keine URL-Historie vorhanden ! Lege eine neue URL-Umzugshistorie an !");
 					urlHist = new UrlHist(urlOld, new Date());
@@ -1242,17 +1241,20 @@ public class Resource extends MyController {
 					play.Logger.debug("Creating urlHist.");
 					play.Logger.debug("Former urlHist: " + node.getUrlHist());
 					urlHist = UrlHist.create(node.getUrlHist());
-					// double-check, ob man auch wirklich den richtigen Eintrag erwischt
-					/*
-					 * den Check erstmal weglassen String urlLatest =
-					 * urlHist.getUrlHistEntry(urlHist.getSize() - 1).getUrl();
-					 * play.Logger .debug("neueste URL in URL-Historie gefunden: " +
-					 * urlLatest); if (!urlLatest.equals(urlOld)) { msg =
-					 * "Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
-					 * + urlLatest + " vs. bisherige URL: " + urlOld; throw new
-					 * RuntimeException(msg); } play.Logger.debug("urlHist checked.");
-					 */
-					play.Logger.debug("Former urlHist recreated.");
+					play.Logger.debug("Former urlHist recreated, urlHist.toString()="
+							+ urlHist.toString());
+					// Prüfung, ob man auch wirklich den richtigen Eintrag erwischt
+					String urlLatest = urlHist
+							.getUrlHistEntry(urlHist.getUrlHistEntries().size() - 1).getUrl();
+					play.Logger
+							.debug("Neueste URL in URL-Historie gefunden: " + urlLatest);
+					if (!urlLatest.equals(urlOld)) {
+						msg =
+								"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
+										+ urlLatest + " vs. bisherige URL: " + urlOld;
+						play.Logger.warn(msg);
+					}
+					play.Logger.debug("urlHist überprüft.");
 					urlHist.updateLatestUrlHistEntry(new Date());
 					urlHist.addUrlHistEntry(urlNew);
 					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
@@ -1267,6 +1269,7 @@ public class Resource extends MyController {
 						"URL wurde umgezogen von " + urlOld + " nach " + conf.getUrl(),
 						200));
 			} catch (Exception e) {
+				play.Logger.error(e.toString());
 				return JsonMessage(new Message(json(e)));
 			}
 		});

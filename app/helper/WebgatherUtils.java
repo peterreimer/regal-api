@@ -53,7 +53,7 @@ public class WebgatherUtils {
 			Logger.of("webgatherer");
 	/** Datumsformat für String-Repräsentation von Datümern */
 	public static final DateFormat dateFormat =
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
 
 	/**
 	 * Eine Methode zum Validieren und Umwandeln einer URL. Die URL wird nach
