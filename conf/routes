@@ -50,6 +50,7 @@ GET /resource/:pid/all.json			controllers.Resource.listAllPartsAsJson(pid,style?
 GET /resource/:pid/about			controllers.Resource.asRdf(pid)
 GET /resource/:pid/status			controllers.Resource.getStatus(pid)
 GET /resource/:pid/conf			    controllers.Resource.listConf(pid)
+GET /resource/:pid/urlHist			controllers.Resource.listUrlHist(pid)
 GET /resource/:pid/title		    controllers.Resource.listTitle(pid)
 
 PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
