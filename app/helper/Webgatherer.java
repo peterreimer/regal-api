@@ -101,8 +101,12 @@ public class Webgatherer implements Runnable {
 				if (isOutstanding(n, conf)) {
 					WebgatherLogger.info("Die Website soll jetzt eingesammelt werden.");
 					if (conf.hasUrlMoved()) {
-						WebgatherLogger
-								.info("De Sick is umjetrocke noh " + conf.getUrlNew());
+						if (conf.getUrlNew() == null) {
+							WebgatherLogger.info("De Sick is unbekannt vertrocke !");
+						} else {
+							WebgatherLogger
+									.info("De Sick is umjetrocke noh " + conf.getUrlNew() + " .");
+						}
 						WebgatherUtils.prepareWebpageMoving(n, conf);
 					} else {
 						WebgatherLogger
