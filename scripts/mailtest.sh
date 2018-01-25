@@ -1,13 +1,16 @@
 #! /bin/bash
 
-cd /opt/regal/cronjobs
 
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $scriptdir
 source variables.conf
 
-curlog=$ARCHIVE_HOME/logs/lobidify-20160404.log
+curlog=$REGAL_LOGS/lobidify-20160404.log
 recipients="edoweb-admin@hbz-nrw.de";
 subject="FRL - Fehlerhafte Updates";
 mailfile="updateAll.mailbody.txt"
 grep "Exception" $curlog|grep -o "frl\:[^\ ]*"|sort -u | sed s,"\(.*\)","https://$SERVER/resource/\1", > $mailfile
 mailx -s "$subject" $recipients < $mailfile 
 rm $mailfile
+
+cd -
