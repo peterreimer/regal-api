@@ -776,7 +776,7 @@ public class Resource extends MyController {
 			Html result = oaidc.render(transform.oaidc(pid));
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/oai_dc.xsd");
+				validate(xml, "public/schemas/oai_dc.xsd", null, "public/schemas");
 			}
 			return ok(result);
 		});
@@ -790,7 +790,7 @@ public class Resource extends MyController {
 			Html result = wgl.render(transform.wgl(pid), node.getLd2());
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/oai_wgl.xsd");
+				validate(xml, "public/schemas/oai_wgl.xsd", null, "public/schemas");
 			}
 			return ok(result);
 		});
@@ -822,7 +822,9 @@ public class Resource extends MyController {
 			String result = transform.datacite(node, node.getDoi());
 			if (validate) {
 				try {
-					validate(result, "public/schemas/datacite/kernel-4.1/metadata.xsd");
+					validate(result, "public/schemas/datacite/kernel-4.1/metadata.xsd",
+							"https://schema.datacite.org/meta/kernel-4.1/",
+							"public/schemas/datacite/kernel-4.1/");
 				} catch (Exception e) {
 					return JsonMessage(new Message(e, 400));
 				}
@@ -841,7 +843,7 @@ public class Resource extends MyController {
 					mets.render(read.getPartsAsTree(node, "long"), transform.oaidc(pid));
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/mets.xsd");
+				validate(xml, "public/schemas/mets.xsd", null, "public/schemas/");
 			}
 			return ok(result);
 		});
