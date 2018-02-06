@@ -1061,15 +1061,9 @@ public class Modify extends RegalAction {
 			String str =
 					CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
 			JsonNode hit = new ObjectMapper().readValue(str, JsonNode.class);
-			String label =
-					hit.at("/orcid-profile/orcid-bio/personal-details/family-name/value")
-							.asText()
-							+ ", "
-							+ hit
-									.at("/orcid-profile/orcid-bio/personal-details/given-names/value")
-									.asText();
+			String label = hit.at("/person/name/family-name/value").asText() + ", "
+					+ hit.at("/person/name/given-names/value").asText();
 			ValueFactory v = RdfUtils.valueFactory;
-			;
 			Literal object =
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
 			Statement newS =
