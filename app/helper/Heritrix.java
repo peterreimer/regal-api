@@ -18,11 +18,8 @@ package helper;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,17 +28,13 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 
-import actions.Modify;
 import models.Gatherconf;
-import models.Node;
 import play.Logger;
 import play.Play;
 
