@@ -186,28 +186,8 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> listResource(@PathParam("pid") String pid,
 			@QueryParam("design") String design) {
-		response().setHeader("Access-Control-Allow-Origin", "*");
-
-		if (request().accepts("text/html")) {
-			Node node = readNodeOrNull(pid);
-			if (node == null)
-				return Promise.promise(() -> notFound("404 - Not found " + pid));
-
-			if ("frl".equals(design)) {
-				return Promise.promise(() -> ok(frlResource.render(node)));
-			} else {
-				SearchResponse response = Globals.search.query(
-						new String[] {
-								Globals.PUBLIC_INDEX_PREF + Globals.defaultNamespace + "2",
-								Globals.PDFBOX_OCR_INDEX_PREF + Globals.defaultNamespace },
-						"@id:\"" + pid + "\"", 0, 1);
-				SearchHits hits = response.getHits();
-
-				Aggregations aggs = response.getAggregations();
-				// Map<String, Object> item = read.getMapWithParts2(node);
-				return Promise.promise(() -> ok(resource.render(node, null)));
-			}
-		}
+		if (request().accepts("text/html"))
+			return asHtml(pid, design);
 		if (request().accepts("application/rdf+xml"))
 			return asRdf(pid);
 		if (request().accepts("text/plain"))
