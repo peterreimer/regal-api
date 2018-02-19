@@ -178,18 +178,30 @@ public class Helper {
 			if (c.has("componentList")) {
 				result1.add(getComponentList(c));
 			} else {
-				String name = c.at("/label").asText();
-				if (name != null && !name.isEmpty()) {
+				String label = c.at("/label").asText();
+				if (label != null && !label.isEmpty()) {
 					String uri = c.at("/@id").asText();
-					if (uri.contains("rpb#nr"))
+					if (uri.contains("rpb#nr")) {
+						/**
+						 * Schlagworte mit diesem prefix kommen nicht zur Anzeige
+						 */
 						continue;
+					}
 					String sourceId = c.at("/source/0/@id").asText();
 					String source = c.at("/source/0/label").asText();
 					String notation = c.at("/notation").asText();
 
+					if (uri == null || uri.isEmpty()) {
+						/**
+						 * Wenn keine URI vorhanden ist, kann das label zur Suche benutzt
+						 * werden. Der Suchstring wird unter
+						 * views/tags/resourceView#displaySubject gebildet.
+						 */
+						uri = label;
+					}
 					Map<String, Object> subject = new HashMap<>();
 					subject.put("id", uri);
-					subject.put("label", name);
+					subject.put("label", label);
 					subject.put("source", source);
 					subject.put("sourceId", sourceId);
 					subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
