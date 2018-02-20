@@ -121,7 +121,8 @@ DELETE /resource/:pid/removeFromIndex controllers.MyUtils.removeFromIndex(pid)
 POST /resource/:pid/metadata/lobidify	controllers.MyUtils.lobidify(pid,alephid?="")
 POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pid)
 
-GET /authors/:authorname controllers.AuthorsController.getAuthorsRdf(authorname)
+GET /authors/:authorname controllers.AdhocController.getAuthorsRdf(authorname)
+GET /adhoc/:type/:name   controllers.AdhocController.getAdhocRdf(type,name)
 GET /context.json controllers.Context.getContext()
 
 GET /add/catalog					controllers.Forms.getCatalogForm()
