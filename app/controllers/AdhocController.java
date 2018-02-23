@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.Base64;
 import java.util.Collection;
 
 import javax.ws.rs.PathParam;
@@ -59,14 +60,15 @@ public class AdhocController extends MyController {
 	}
 
 	public static Promise<Result> getAdhocRdf(@PathParam("type") String type,
-			@PathParam("name") String name) {
+			@PathParam("name") String base64EncodedName) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		Collection<Statement> g = new TreeModel();
 		ValueFactory f = RdfUtils.valueFactory;
 		IRI subj = f.createIRI(Globals.protocol + Globals.server + "/adhoc/"
-				+ RdfUtils.urlEncode(type) + "/" + RdfUtils.urlEncode(name));
+				+ RdfUtils.urlEncode(type) + "/" + base64EncodedName);
 		IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
-		Literal obj = f.createLiteral(RdfUtils.urlDecode(name));
+		Literal obj = f.createLiteral(
+				new String(Base64.getDecoder().decode(base64EncodedName)));
 		g.add(f.createStatement(subj, pred, obj));
 		return Promise.promise(() -> {
 			String body = "";
