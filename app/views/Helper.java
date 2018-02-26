@@ -396,6 +396,15 @@ public class Helper {
 			contribution.put("label", name);
 			result.add(contribution);
 		}
+		for (JsonNode c : hit.at("/contributor")) {
+			String name = c.at("/prefLabel").asText();
+			String uri = c.at("/@id").asText();
+
+			Map<String, Object> contribution = new HashMap<>();
+			contribution.put("id", uri);
+			contribution.put("label", name);
+			result.add(contribution);
+		}
 		return result;
 	}
 
