@@ -387,21 +387,24 @@ public class Helper {
 	public static List<Map<String, Object>> listCreators(Map<String, Object> h) {
 		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
+		String doNotLinkToAdhocUris = Globals.protocol + Globals.server + "/adhoc";
 		for (JsonNode c : hit.at("/creator")) {
 			String name = c.at("/prefLabel").asText();
 			String uri = c.at("/@id").asText();
-
 			Map<String, Object> contribution = new HashMap<>();
-			contribution.put("id", uri);
+			if (!uri.startsWith(doNotLinkToAdhocUris)) {
+				contribution.put("id", uri);
+			}
 			contribution.put("label", name);
 			result.add(contribution);
 		}
 		for (JsonNode c : hit.at("/contributor")) {
 			String name = c.at("/prefLabel").asText();
 			String uri = c.at("/@id").asText();
-
 			Map<String, Object> contribution = new HashMap<>();
-			contribution.put("id", uri);
+			if (!uri.startsWith(doNotLinkToAdhocUris)) {
+				contribution.put("id", uri);
+			}
 			contribution.put("label", name);
 			result.add(contribution);
 		}
