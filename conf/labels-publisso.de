@@ -7918,7 +7918,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://id.loc.gov/vocabulary/relators/red",
+  "comment" : "",
   "label" : "Redaktion",
+  "icon" : "",
+  "name" : "loc:red",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
