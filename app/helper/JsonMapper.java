@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -125,7 +126,8 @@ public class JsonMapper {
 			"http://purl.org/ontology/bibo/Document",
 			"http://purl.org/vocab/frbr/core#Manifestation",
 			"http://purl.org/lobid/lv#Miscellaneous",
-			"http://purl.org/dc/terms/BibliographicResource" };
+			"http://purl.org/dc/terms/BibliographicResource",
+			"info:regal/zettel/File" };
 
 	Node node = null;
 	EtikettMakerInterface profile = Globals.profile;
@@ -151,6 +153,7 @@ public class JsonMapper {
 			play.Logger.warn("", e.getMessage());
 			play.Logger.debug("", e);
 		}
+
 	}
 
 	/**
@@ -160,7 +163,6 @@ public class JsonMapper {
 		Map<String, Object> map = getLd();
 		map.remove("@context");
 		return map;
-
 	}
 
 	/**
@@ -354,13 +356,13 @@ public class JsonMapper {
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
-			if (!"file".equals(rdf.get("contentType"))) {
-				Collection<Map<String, Object>> t = getType(rdf);
-				if (t != null && t.size() != 0)
-					rdf.put(type, t);
-			} else {
-				rdf.remove(type);
+			if ("file".equals(rdf.get("contentType"))) {
+				rdf.put(type, Arrays.asList(new String[] { "File" }));
 			}
+
+			Collection<Map<String, Object>> t = getType(rdf);
+			if (t != null && t.size() != 0)
+				rdf.put(type, t);
 
 			sortCreatorAndContributors(rdf);
 			postProcess(rdf, "subject");

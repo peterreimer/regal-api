@@ -21215,6 +21215,16 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
+  "uri" : "info:regal/zettel/File",
+  "comment" : "",
+  "label" : "Datei",
+  "icon" : "",
+  "name" : "File",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
   "uri" : "info:regal/zettel/additionalMaterial",
   "comment" : "",
   "label" : "Ergänzendes Material",
