@@ -16,6 +16,7 @@
  */
 package de.hbz.lobid.helper;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
@@ -70,5 +71,11 @@ public interface EtikettMakerInterface {
 	 * @return returns a json key that is used to store label info
 	 */
 	public String getLabelKey();
+
+	/**
+	 * 
+	 * @param labelIn stream with array of Etikett objects
+	 */
+	void updateLabels(InputStream labelIn);
 
 }
