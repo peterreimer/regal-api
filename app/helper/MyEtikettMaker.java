@@ -23,8 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
@@ -50,6 +48,20 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	EtikettMaker maker;
 
 	public MyEtikettMaker() {
+		initMaker();
+	}
+
+	@Override
+	public void updateLabels(InputStream labelIn) {
+		if (labelIn != null) {
+			maker.updateLabels(labelIn);
+		} else {
+			initMaker();
+		}
+
+	}
+
+	private void initMaker() {
 		String url = null;
 		try {
 			url = Globals.etikettUrl + "/labels.json";
