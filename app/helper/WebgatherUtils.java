@@ -67,14 +67,10 @@ public class WebgatherUtils {
 	 * -in-java/
 	 * 
 	 * @param url ein Uniform Resource Locator als Zeichenkette
-	 * @param includeScheme das Schema wird mit zurückgegeben (J/N)
-	 * @param convertToPunycode falls wahr, wird nach Punycode konvertiert (und
-	 *          dann erst nach ASCII)
 	 * @return eine URL als Zeichenkette
 	 * @throws URISyntaxException eine Ausnahme, wenn die URL ungültig ist
 	 */
-	public static String validateURL(String url, boolean convertToPunycode)
-			throws URISyntaxException {
+	public static String validateURL(String url) throws URISyntaxException {
 		if (url == null) {
 			return url;
 		}
@@ -98,9 +94,9 @@ public class WebgatherUtils {
 				uri.getRawAuthority() != null ? uri.getRawAuthority() : "";
 		// WebgatherLogger.debug("authority=" + authority);
 		// Must convert domain to punycode separately from the path
-		if (convertToPunycode) {
-			authority = IDN.toASCII(authority);
-		}
+
+		authority = IDN.toASCII(authority);
+
 		String path = uri.getRawPath() != null ? uri.getRawPath() : "";
 		String queryString =
 				uri.getRawQuery() != null ? "?" + uri.getRawQuery() : "";
@@ -119,7 +115,7 @@ public class WebgatherUtils {
 
 	public static String convertUnicodeURLToAscii(String url)
 			throws URISyntaxException {
-		return validateURL(url, true);
+		return validateURL(url);
 	}
 
 	/**
