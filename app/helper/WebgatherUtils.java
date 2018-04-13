@@ -73,8 +73,8 @@ public class WebgatherUtils {
 	 * @return eine URL als Zeichenkette
 	 * @throws URISyntaxException eine Ausnahme, wenn die URL ungültig ist
 	 */
-	public static String validateURL(String url, boolean includeScheme,
-			boolean convertToPunycode) throws URISyntaxException {
+	public static String validateURL(String url, boolean convertToPunycode)
+			throws URISyntaxException {
 		if (url == null) {
 			return url;
 		}
@@ -105,8 +105,7 @@ public class WebgatherUtils {
 		String queryString =
 				uri.getRawQuery() != null ? "?" + uri.getRawQuery() : "";
 
-		urlRet = ((hasScheme && includeScheme) ? scheme : "") + authority + path
-				+ queryString;
+		urlRet = ((hasScheme) ? scheme : "") + authority + path + queryString;
 		// WebgatherLogger.debug("urlRet=" + urlRet);
 
 		// Convert path from unicode to ascii encoding
@@ -118,31 +117,9 @@ public class WebgatherUtils {
 		return urlRet;
 	}
 
-	/**
-	 * konvertiert eine URL nach ASCII und konvertiert nach Punycode. Das Schema
-	 * wird beibehalten (falls vorhanden).
-	 * 
-	 * @param url
-	 * @return die konvertierte URL
-	 * @throws URISyntaxException
-	 */
 	public static String convertUnicodeURLToAscii(String url)
 			throws URISyntaxException {
-		return convertUnicodeURLToAscii(url, true);
-	}
-
-	/**
-	 * konvertiert eine URL nach ASCII und konvertiert nach Punycode. Das Schema
-	 * kann wahlweise entfernt werden.
-	 * 
-	 * @param url
-	 * @param includeScheme
-	 * @return die konvertierte URL
-	 * @throws URISyntaxException
-	 */
-	public static String convertUnicodeURLToAscii(String url,
-			boolean includeScheme) throws URISyntaxException {
-		return validateURL(url, includeScheme, true);
+		return validateURL(url, true);
 	}
 
 	/**
