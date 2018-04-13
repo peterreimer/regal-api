@@ -42,7 +42,7 @@ public class WebgatherUtilsTest {
 	}
 
 	private String encodeUrlOld(String url) throws URISyntaxException {
-		return WebgatherUtils.validateURL(url);
+		return WebgatherUtils.convertUnicodeURLToAscii(url);
 	}
 
 	@Test

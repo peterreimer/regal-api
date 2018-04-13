@@ -103,7 +103,7 @@ public class WpullCrawl {
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.warcFilename = "WEB-" + host + "-" + date;
-		} catch (URISyntaxException e) {
+		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
 			throw new RuntimeException(e);
 		}
