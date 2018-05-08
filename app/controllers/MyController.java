@@ -118,7 +118,7 @@ public class MyController extends Controller {
 		}
 	}
 
-	private static void setJsonHeader() {
+	protected static void setJsonHeader() {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response().setContentType("application/json");
 	}

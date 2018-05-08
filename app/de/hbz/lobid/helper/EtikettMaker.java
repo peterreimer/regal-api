@@ -225,4 +225,10 @@ public class EtikettMaker implements EtikettMakerInterface {
 		return "label";
 	}
 
+	@Override
+	public void updateLabels(InputStream labelIn) {
+		initMaps(labelIn);
+		initContext();
+	}
+
 }

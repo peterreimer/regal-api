@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -125,7 +126,8 @@ public class JsonMapper {
 			"http://purl.org/ontology/bibo/Document",
 			"http://purl.org/vocab/frbr/core#Manifestation",
 			"http://purl.org/lobid/lv#Miscellaneous",
-			"http://purl.org/dc/terms/BibliographicResource" };
+			"http://purl.org/dc/terms/BibliographicResource",
+			"info:regal/zettel/File" };
 
 	Node node = null;
 	EtikettMakerInterface profile = Globals.profile;
@@ -151,6 +153,7 @@ public class JsonMapper {
 			play.Logger.warn("", e.getMessage());
 			play.Logger.debug("", e);
 		}
+
 	}
 
 	/**
@@ -160,7 +163,6 @@ public class JsonMapper {
 		Map<String, Object> map = getLd();
 		map.remove("@context");
 		return map;
-
 	}
 
 	/**
@@ -354,17 +356,15 @@ public class JsonMapper {
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
-			if (!"file".equals(rdf.get("contentType"))) {
-				Collection<Map<String, Object>> t = getType(rdf);
-				if (t != null && t.size() != 0)
-					rdf.put(type, t);
-			} else {
-				rdf.remove(type);
+			if ("file".equals(rdf.get("contentType"))) {
+				rdf.put(type, Arrays.asList(new String[] { "File" }));
 			}
 
+			Collection<Map<String, Object>> t = getType(rdf);
+			if (t != null && t.size() != 0)
+				rdf.put(type, t);
+
 			sortCreatorAndContributors(rdf);
-			postProcess(rdf, "institution");
-			postProcess(rdf, "creator");
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
@@ -396,6 +396,7 @@ public class JsonMapper {
 			postProcess(rdf, "natureOfContent");
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
+			postProcess(rdf, "creator");
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -423,19 +424,31 @@ public class JsonMapper {
 
 	private void postProcessContribution(Map<String, Object> rdf) {
 		try {
+			List<Map<String, Object>> creator = new ArrayList<>();
 			Collection<Map<String, Object>> contributions =
 					(Collection<Map<String, Object>>) rdf.get("contribution");
 			for (Map<String, Object> contribution : contributions) {
-				Collection<Map<String, Object>> agents =
-						(Collection<Map<String, Object>>) contribution.get("agent");
-				if (agents != null) {
-					for (Map<String, Object> agent : agents) {
-						String prefLabel = findLabel(agent);
-						agent.put(PREF_LABEL, prefLabel);
+				Map<String, Object> agent =
+						((Collection<Map<String, Object>>) contribution.get("agent"))
+								.iterator().next();
+				if (agent != null) {
+					String prefLabel = findLabel(agent);
+					agent.put(PREF_LABEL, prefLabel);
+					String id = null;
+					if (agent.containsKey("@id")) {
+						id = agent.get("@id").toString();
 					}
+					if (id == null) {
+						id = Globals.protocol + Globals.server + "/adhoc/author/"
+								+ prefLabel;
+					}
+					Map<String, Object> cmap = new HashMap<>();
+					cmap.put(PREF_LABEL, prefLabel);
+					cmap.put("@id", id);
+					creator.add(cmap);
 				}
 			}
-
+			rdf.put("creator", creator);
 		} catch (Exception e) {
 			play.Logger.debug("Problem processing key contribution.agent", e);
 		}

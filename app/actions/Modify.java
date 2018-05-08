@@ -217,7 +217,8 @@ public class Modify extends RegalAction {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
-			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+			String alephid =
+					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
 			content = getLobidDataAsNtripleString(node, alephid);
@@ -255,7 +256,8 @@ public class Modify extends RegalAction {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
-			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+			String alephid =
+					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
 			content = getLobidDataAsNtripleString(node, alephid);
@@ -298,7 +300,8 @@ public class Modify extends RegalAction {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
-			String alephid = lobidUri.replaceFirst("http://lobid.org/resource/", "");
+			String alephid =
+					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			try {
 				content = getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);

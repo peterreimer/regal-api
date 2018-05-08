@@ -6716,7 +6716,7 @@
   "name" : "volumeIn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "54",
+  "weight" : "53",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8569,7 +8569,7 @@
   "name" : "medium",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "62",
+  "weight" : "61",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8666,7 +8666,7 @@
 }, {
   "uri" : "http://purl.org/lobid/lv#ArchivedWebPage",
   "comment" : "",
-  "label" : "Archivierte Website",
+  "label" : "Archivierter Webauftritt",
   "icon" : "fa fa-wifi",
   "name" : "archivedWebpage",
   "container" : "",
@@ -8770,7 +8770,7 @@
   "name" : "containedIn",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "58",
+  "weight" : "57",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8836,7 +8836,7 @@
   "name" : "inSeries",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "55",
+  "weight" : "54",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8847,7 +8847,7 @@
   "name" : "lv:isPartOf",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "60",
+  "weight" : "59",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -9006,13 +9006,13 @@
   "name" : "lv:volumeIn",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "57",
+  "weight" : "55",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/lv#webPageArchived",
   "comment" : "",
-  "label" : "Archivierte Website",
+  "label" : "Archivierter Webauftritt",
   "icon" : "",
   "name" : "webPageArchived",
   "referenceType" : "@id",
@@ -20234,38 +20234,28 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://rdaregistry.info/termList/RDACarrierType/1018 ",
+  "label" : "Online-Ressource",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://rdaregistry.info/termList/RDAMediaType/1002",
   "label" : "Mikroformat",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDAMediaType/1003",
-  "comment" : "",
   "label" : "Datenträger",
-  "icon" : "",
-  "name" : "",
-  "container" : "",
-  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDAMediaType/1008",
-  "comment" : "",
   "label" : "Video",
-  "icon" : "",
-  "name" : "",
-  "container" : "",
-  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdaregistry.info/termList/RDAproductionMethod/1010",
-  "comment" : "",
   "label" : "Print",
-  "icon" : "",
-  "name" : "",
-  "container" : "",
-  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -20327,7 +20317,7 @@
   "name" : "statementOfResponsibility",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "52",
+  "weight" : "51",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20350,12 +20340,9 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://rdvocab.info/termList/RDACarrierType/1018",
-  "comment" : "",
   "label" : "Online-Ressource",
   "icon" : "fa fa-wifi",
   "name" : "1018",
-  "container" : "",
-  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -20739,7 +20726,7 @@
   "name" : "note",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "61",
+  "weight" : "62",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21191,7 +21178,7 @@
   "name" : "regal:publishLocation",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "51",
+  "weight" : "52",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21202,7 +21189,7 @@
   "name" : "regal:publishYear",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "56",
+  "weight" : "60",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21213,8 +21200,18 @@
   "name" : "regal:publishedBy",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "53",
+  "weight" : "56",
   "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/zettel/File",
+  "comment" : "",
+  "label" : "Datei",
+  "icon" : "",
+  "name" : "File",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "info:regal/zettel/additionalMaterial",
@@ -21251,7 +21248,7 @@
   "name" : "collectionOne",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "59",
+  "weight" : "58",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
