@@ -67,82 +67,20 @@ public class WebgatherUtils {
 	 * -in-java/
 	 * 
 	 * @param url ein Uniform Resource Locator als Zeichenkette
-	 * @param includeScheme das Schema wird mit zurückgegeben (J/N)
-	 * @param convertToPunycode falls wahr, wird nach Punycode konvertiert (und
-	 *          dann erst nach ASCII)
 	 * @return eine URL als Zeichenkette
 	 * @throws URISyntaxException eine Ausnahme, wenn die URL ungültig ist
 	 */
-	public static String validateURL(String url, boolean includeScheme,
-			boolean convertToPunycode) throws URISyntaxException {
-		if (url == null) {
-			return url;
+	public static String convertUnicodeURLToAscii(String url) {
+		try {
+			URL u = new URL(url);
+			URI uri =
+					new URI(u.getProtocol(), u.getUserInfo(), IDN.toASCII(u.getHost()),
+							u.getPort(), u.getPath(), u.getQuery(), u.getRef());
+			String correctEncodedURL = uri.toASCIIString();
+			return correctEncodedURL;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-		String urlRet = url;
-		urlRet = url.trim();
-		// Handle international domains by detecting non-ascii and converting them
-		// to punycode
-		boolean isAscii = CharMatcher.ASCII.matchesAllOf(urlRet);
-		URI uri = new URI(urlRet);
-
-		boolean hasScheme = true;
-		// URI needs a scheme to work properly with authority parsing
-		if (uri.getScheme() == null) {
-			uri = new URI("http://" + urlRet);
-			hasScheme = false;
-		}
-
-		String scheme = uri.getScheme() != null ? uri.getScheme() + "://" : null;
-		/* authority includes domain and port */
-		String authority =
-				uri.getRawAuthority() != null ? uri.getRawAuthority() : "";
-		// WebgatherLogger.debug("authority=" + authority);
-		// Must convert domain to punycode separately from the path
-		if (convertToPunycode) {
-			authority = IDN.toASCII(authority);
-		}
-		String path = uri.getRawPath() != null ? uri.getRawPath() : "";
-		String queryString =
-				uri.getRawQuery() != null ? "?" + uri.getRawQuery() : "";
-
-		urlRet = ((hasScheme && includeScheme) ? scheme : "") + authority + path
-				+ queryString;
-		// WebgatherLogger.debug("urlRet=" + urlRet);
-
-		// Convert path from unicode to ascii encoding
-		if (!isAscii) {
-			urlRet = new URI(urlRet).toASCIIString();
-		}
-		WebgatherLogger.debug("url validated = " + urlRet);
-
-		return urlRet;
-	}
-
-	/**
-	 * konvertiert eine URL nach ASCII und konvertiert nach Punycode. Das Schema
-	 * wird beibehalten (falls vorhanden).
-	 * 
-	 * @param url
-	 * @return die konvertierte URL
-	 * @throws URISyntaxException
-	 */
-	public static String convertUnicodeURLToAscii(String url)
-			throws URISyntaxException {
-		return convertUnicodeURLToAscii(url, true);
-	}
-
-	/**
-	 * konvertiert eine URL nach ASCII und konvertiert nach Punycode. Das Schema
-	 * kann wahlweise entfernt werden.
-	 * 
-	 * @param url
-	 * @param includeScheme
-	 * @return die konvertierte URL
-	 * @throws URISyntaxException
-	 */
-	public static String convertUnicodeURLToAscii(String url,
-			boolean includeScheme) throws URISyntaxException {
-		return validateURL(url, includeScheme, true);
 	}
 
 	/**
