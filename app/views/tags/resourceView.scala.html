@@ -486,7 +486,12 @@
 @displayContributions(id:String,label:String,roleId:String,roleName:String)={
 		<tr class=@roleId>
 			
-			 			<td>    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+			 			<td> 
+			 			   @if(id!=null && !id.isEmpty()){
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       }else{
+	                       <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       }
 	                       @label <span style="font-size:smaller;">(@roleName)</span>
 	                       </a> <span class="separator">|</span>
 	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
