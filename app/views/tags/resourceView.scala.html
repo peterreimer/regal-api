@@ -16,11 +16,14 @@
 						<div id="thumbnail" class="thumb">
 							<a href={viewerInfo.viewerAdress} target="_blank"><img src={viewerInfo.thumbnail} width="150"/></a>
 						</div>
+						
 					}
 				}
 			}
+			<a href={viewerInfo.dataLink}><b>Download <i class="fa fa-download"></i></b><br/> {viewerInfo.label} {views.Helper.getPrettySize(viewerInfo.filesize+"")}</a>
 		} 
 }
+
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
 	@context match{
