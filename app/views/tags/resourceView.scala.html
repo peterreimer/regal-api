@@ -120,8 +120,10 @@
 				<td class="field-label @key">@getLabel(key)</td>
 				<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
 				@values match {
-						case d: Set[ Map[String,Object]] => {
-							@Html(views.Helper.getLobidIsPartOf(d))
+						case isPartOf: Set[ Map[String,Object]] => {
+							@for(item<-isPartOf){
+								@Html(views.Helper.getLobidIsPartOf(item))<br/>
+							}
 						}
 						case _ => {
 							@values
