@@ -442,17 +442,17 @@ public class Helper {
 		return "<a href=\"" + uri + "\">" + label + "</a>";
 	}
 
-	public static String getLobidIsPartOf(Set<Map<String, Object>> isPartOf) {
+	public static String getLobidIsPartOf(Map<String, Object> isPartOf) {
 		String label = "http://lobid.org";
 		String uri = "http://lobid.org";
 		try {
 			JsonNode hit = new ObjectMapper().valueToTree(isPartOf);
-			uri = hit.at("/0/hasSuperordinate/0/@id").asText();
-			label = hit.at("/0/hasSuperordinate/0/label").asText();
+			uri = hit.at("/hasSuperordinate/0/@id").asText();
+			label = hit.at("/hasSuperordinate/0/label").asText();
 			if (uri != null && !uri.isEmpty()) {
 				label = MyEtikettMaker.getLabelFromEtikettWs(uri);
 			}
-			String numbering = hit.at("/0/numbering").asText();
+			String numbering = hit.at("/numbering").asText();
 			if (numbering != null && !numbering.isEmpty()) {
 
 				String prefix = models.Globals.rechercheUrlPrefix.substring(0,
@@ -463,7 +463,7 @@ public class Helper {
 						"<a title=\"Ähnliche Objekte suchen\" href=\"%s\"> %s</a>",
 						internLink, label);
 				String externLink = String.format(
-						"<a href=\"%s\"><span class=\"glyphicon glyphicon-link\"></span></a>, Band %s",
+						"<a href=\"%s\"><span class=\"glyphicon glyphicon-link\"></span></a>, %s",
 						uri, numbering);
 
 				return link + " " + externLink;
