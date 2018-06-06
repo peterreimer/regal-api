@@ -16,12 +16,10 @@
  */
 package helper;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import models.DataciteRecord;
 import models.Globals;
@@ -40,7 +38,8 @@ public class DataciteMapper {
 	 * @return an object containing data for datacite
 	 */
 	public static DataciteRecord getDataciteRecord(String doi,
-			Map<String, Object> ld) {
+			Map<String, Object> map) {
+		JsonNode ld = new ObjectMapper().convertValue(map, JsonNode.class);
 		DataciteRecord rec = new DataciteRecord(doi);
 		addSubjects(ld, rec);
 		addCreators(ld, rec);
@@ -56,12 +55,11 @@ public class DataciteMapper {
 		return rec;
 	}
 
-	private static void addResourceType(Map<String, Object> ld,
-			DataciteRecord rec) {
+	private static void addResourceType(JsonNode ld, DataciteRecord rec) {
 		rec.type = "Text";
 	}
 
-	private static void addFormats(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addFormats(JsonNode ld, DataciteRecord rec) {
 		try {
 			rec.formats.add(new Pair<String, String>("application/pdf", "mime"));
 		} catch (NullPointerException e) {
@@ -69,10 +67,9 @@ public class DataciteMapper {
 		}
 	}
 
-	private static void addSizes(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addSizes(JsonNode ld, DataciteRecord rec) {
 		try {
-			String bibDetails = ((HashSet<String>) ld.get("bibliographicCitation"))
-					.iterator().next().toString();
+			String bibDetails = ld.at("/bibliographicCitation").textValue();
 			if (bibDetails != null) {
 				rec.sizes.add(new Pair<String, String>(bibDetails, null));
 			}
@@ -81,16 +78,19 @@ public class DataciteMapper {
 		}
 	}
 
-	private static void addAlternativeIdentifiers(Map<String, Object> ld,
+	private static void addAlternativeIdentifiers(JsonNode ld,
 			DataciteRecord rec) {
 		try {
 			// Lobid
-			String lobidUrl =
-					((HashSet<Map<String, Object>>) ld.get("parallelEdition")).iterator()
-							.next().get("prefLabel").toString();
+			JsonNode lurl =
+					ld.at("/parallelEdition").iterator().next().at("/prefLabel");
+			String lobidUrl = lurl.asText();
+
+			play.Logger.debug("HTNUMMER " + lobidUrl);
 			if (lobidUrl != null) {
 				// HT
-				String ht = lobidUrl.substring(lobidUrl.lastIndexOf("/") + 1);
+				String ht = lobidUrl.substring(lobidUrl.lastIndexOf("/") + 1,
+						lobidUrl.length() - 2);
 				// HBZ-HT
 				String hbzht = "HBZ" + ht;
 				rec.alternateIdentifiers
@@ -106,47 +106,43 @@ public class DataciteMapper {
 				rec.alternateIdentifiers.add(new Pair<String, String>(urn, "URN"));
 			}
 			// URL
-			String pid = (String) ld.get("@id");
+			String pid = ld.at("/@id").textValue();
 			String url = Globals.urnbase + pid;
 			rec.alternateIdentifiers.add(new Pair<String, String>(url, "URL"));
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
 	}
 
-	private static void addDates(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addDates(JsonNode ld, DataciteRecord rec) {
 		try {
-
-			Date creationDate =
-					(Date) ((Map<String, Object>) ld.get("isDescribedBy")).get("created");
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			rec.dates.add(new Pair<String, String>(dateFormat.format(creationDate),
-					"Submitted"));
-		} catch (NullPointerException e) {
-			play.Logger.debug("DataciteMapper: Metadatafield 'Submitted' not found!");
+			String date = ld.at("/isDescribedBy/created").asText();
+			rec.dates
+					.add(new Pair<String, String>(date.substring(0, 10), "Submitted"));
+		} catch (Exception e) {
+			play.Logger.debug("DataciteMapper: Metadatafield 'Submitted' not found!",
+					e);
 		}
 	}
 
-	private static void addLanguage(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addLanguage(JsonNode ld, DataciteRecord rec) {
 		try {
-			Collection<Map<String, Object>> languages =
-					(Collection<Map<String, Object>>) ld.get("language");
+			JsonNode languages = ld.at("/language");
 			if (languages != null) {
-				for (Map<String, Object> item : languages) {
-					String langid = (String) item.get("@id");
+				for (JsonNode item : languages) {
+					String langid = item.at("/@id").asText();
 					rec.language = langid.substring(langid.length() - 3);
 				}
 			}
 		} catch (NullPointerException e) {
-			play.Logger.debug("DataciteMapper: Metadatafield 'Language' not found!");
+			play.Logger.debug("DataciteMapper: Metadatafield 'Language' not found!",
+					e);
 		}
 	}
 
-	private static void addPublicationYear(Map<String, Object> ld,
-			DataciteRecord rec) {
+	private static void addPublicationYear(JsonNode ld, DataciteRecord rec) {
 		try {
-			rec.publicationYear =
-					((HashSet<String>) ld.get("issued")).iterator().next();
+			rec.publicationYear = ld.at("/issued").asText();
 		} catch (NullPointerException e) {
 			play.Logger
 					.debug("DataciteMapper: Metadatafield 'PublicationYear' not found!");
@@ -160,18 +156,18 @@ public class DataciteMapper {
 		return java.time.Year.now().toString();
 	}
 
-	private static void addPublisher(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addPublisher(JsonNode ld, DataciteRecord rec) {
 		try {
 			play.Logger.debug(ld.get("publisher").getClass() + "");
 			play.Logger.debug(ld.get("publisher") + "");
-			rec.publisher = ((HashSet<String>) ld.get("publisher")).iterator().next();
+			rec.publisher = ld.at("/publisher").asText();
 
 		} catch (NullPointerException e) {
 			play.Logger.debug("DataciteMapper: Metadatafield 'Publisher' not found!");
 		}
 		try {
 			if (rec.publisher == null || rec.publisher.isEmpty()) {
-				rec.publisher = ((HashSet<String>) ld.get("P60489")).iterator().next();
+				rec.publisher = ld.at("/P60489").asText();
 			}
 		} catch (NullPointerException e) {
 
@@ -180,11 +176,10 @@ public class DataciteMapper {
 		}
 		try {
 			if (rec.publisher == null || rec.publisher.isEmpty()) {
-				Collection<Map<String, Object>> institutions =
-						(Collection<Map<String, Object>>) ld.get("institution");
+				JsonNode institutions = ld.at("/institution");
 				if (institutions != null) {
-					for (Map<String, Object> item : institutions) {
-						String subject = item.get("prefLabel").toString();
+					for (JsonNode item : institutions) {
+						String subject = item.at("/prefLabel").asText();
 						rec.publisher = subject;
 					}
 				}
@@ -201,37 +196,38 @@ public class DataciteMapper {
 
 	}
 
-	private static void addTitles(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addTitles(JsonNode ld, DataciteRecord rec) {
 		try {
-			Collection<String> list = (Collection<String>) ld.get("title");
+			JsonNode list = ld.at("/title");
 			if (list != null) {
-				for (String item : list) {
-					rec.titles.add(new Pair<String, String>(item, ""));
+				for (JsonNode item : list) {
+					rec.titles.add(new Pair<String, String>(item.asText(), ""));
 				}
 			}
-			list = (Collection<String>) ld.get("alternativeTitle");
+			list = ld.at("/alternativeTitle");
 			if (list != null) {
-				for (String item : list) {
-					rec.titles.add(new Pair<String, String>(item, "alternativeTitle"));
-				}
-			}
-			list = (Collection<String>) ld.get("otherTitleInformation");
-			if (list != null) {
-				for (String item : list) {
+				for (JsonNode item : list) {
 					rec.titles
-							.add(new Pair<String, String>(item, "otherTitleInformation"));
+							.add(new Pair<String, String>(item.asText(), "alternativeTitle"));
 				}
 			}
-			list = (Collection<String>) ld.get("fullTitle");
+			list = ld.at("/otherTitleInformation");
 			if (list != null) {
-				for (String item : list) {
-					rec.titles.add(new Pair<String, String>(item, "fullTitle"));
+				for (JsonNode item : list) {
+					rec.titles.add(
+							new Pair<String, String>(item.asText(), "otherTitleInformation"));
 				}
 			}
-			list = (Collection<String>) ld.get("shortTitle");
+			list = ld.at("/fullTitle");
 			if (list != null) {
-				for (String item : list) {
-					rec.titles.add(new Pair<String, String>(item, "shortTitle"));
+				for (JsonNode item : list) {
+					rec.titles.add(new Pair<String, String>(item.asText(), "fullTitle"));
+				}
+			}
+			list = ld.at("/shortTitle");
+			if (list != null) {
+				for (JsonNode item : list) {
+					rec.titles.add(new Pair<String, String>(item.asText(), "shortTitle"));
 				}
 			}
 		} catch (NullPointerException e) {
@@ -239,46 +235,41 @@ public class DataciteMapper {
 		}
 	}
 
-	private static void addCreators(Map<String, Object> ld, DataciteRecord rec) {
+	private static void addCreators(JsonNode ld, DataciteRecord rec) {
 		try {
-			Collection<Map<String, Object>> creators =
-					(Collection<Map<String, Object>>) ld.get("creator");
+			JsonNode creators = ld.at("/creator");
 			if (creators != null) {
-				for (Map<String, Object> item : creators) {
-					String subject = item.get("prefLabel").toString();
+				for (JsonNode item : creators) {
+					String subject = item.at("/prefLabel").asText();
 					rec.creators.add(new Pair<String, String>(subject, null));
 				}
 			}
-			Collection<String> creatorNames =
-					(Collection<String>) ld.get("creatorName");
+			JsonNode creatorNames = ld.at("/creatorName");
 			if (creatorNames != null) {
-				for (String item : creatorNames) {
-					rec.creators.add(new Pair<String, String>(item, null));
+				for (JsonNode item : creatorNames) {
+					rec.creators.add(new Pair<String, String>(item.asText(), null));
 				}
 			}
 
-			Collection<Map<String, Object>> contributors =
-					(Collection<Map<String, Object>>) ld.get("contributor");
+			JsonNode contributors = ld.at("/contributor");
 			if (contributors != null) {
-				for (Map<String, Object> item : contributors) {
-					String subject = item.get("prefLabel").toString();
+				for (JsonNode item : contributors) {
+					String subject = item.at("/prefLabel").asText();
 					rec.creators.add(new Pair<String, String>(subject, null));
 				}
 			}
-			Collection<String> contributorNames =
-					(Collection<String>) ld.get("contributorName");
+			JsonNode contributorNames = ld.at("/contributorName");
 			if (contributorNames != null) {
-				for (String item : contributorNames) {
-					rec.creators.add(new Pair<String, String>(item, null));
+				for (JsonNode item : contributorNames) {
+					rec.creators.add(new Pair<String, String>(item.asText(), null));
 				}
 			}
 
 			if (rec.creators.isEmpty()) {
-				Collection<Map<String, Object>> editors =
-						(Collection<Map<String, Object>>) ld.get("editor");
+				JsonNode editors = ld.at("/editor");
 				if (editors != null) {
-					for (Map<String, Object> item : editors) {
-						String subject = item.get("prefLabel").toString();
+					for (JsonNode item : editors) {
+						String subject = item.at("/prefLabel").asText();
 						rec.creators.add(new Pair<String, String>(subject, null));
 					}
 				}
@@ -293,13 +284,12 @@ public class DataciteMapper {
 		}
 	}
 
-	private static void addSubjects(Map<String, Object> ld, DataciteRecord rec) {
-		Collection<Map<String, Object>> subjects =
-				(Collection<Map<String, Object>>) ld.get("subject");
+	private static void addSubjects(JsonNode ld, DataciteRecord rec) {
+		JsonNode subjects = ld.at("/subject");
 		if (subjects != null) {
-			for (Map<String, Object> item : subjects) {
-				String subject = item.get("prefLabel").toString();
-				String id = (String) item.get("@id");
+			for (JsonNode item : subjects) {
+				String subject = item.at("/prefLabel").asText();
+				String id = item.at("/@id").asText();
 				String type = "GND";
 				if (id.startsWith("http://d-nb.info/gnd/")) {
 					type = "GND";
