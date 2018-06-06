@@ -23,6 +23,7 @@ import static archive.fedora.Vocabulary.REL_HBZ_ID;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -813,7 +814,8 @@ public class JsonMapper {
 		} else {
 			aboutMap.put(objectTimestamp, node.getLastModified());
 		}
-		aboutMap.put(created, node.getCreationDate());
+		aboutMap.put(created, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+				.format(node.getCreationDate()));
 		aboutMap.put(describes, node.getAggregationUri());
 
 		rdf.put(isDescribedBy, aboutMap);

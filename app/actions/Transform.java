@@ -263,7 +263,7 @@ public class Transform {
 	 */
 	public String datacite(Node node, String doi) {
 		DataciteRecord dc =
-				DataciteMapper.getDataciteRecord(doi, new JsonMapper(node).getLd());
+				DataciteMapper.getDataciteRecord(doi, new JsonMapper(node).getLd2());
 		return dc.toString();
 	}
 

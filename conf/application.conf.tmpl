@@ -94,7 +94,9 @@ api.version="0.7.0"
 swagger.api.basepath="https://api.localhost"
 swagger.filter="security.AuthorisationFilter"
 http.port=9000
-play.http.parser.maxDiskBuffer=200M
+play.http.parser.maxMemoryBuffer= 2MB
+play.http.parser.maxDiskBuffer = 20MB
+parsers.anyContent.maxLength = 20MB
 
 #--------javax-Mail---------------------
 javax.mail.smtpServ="localhost"
