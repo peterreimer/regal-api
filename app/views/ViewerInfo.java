@@ -16,6 +16,7 @@ public class ViewerInfo {
 		VIDEO, AUDIO, DEEPZOOM, IMAGE, UNDEFINED
 	}
 
+	public String label = null;
 	public String dataLink = null;
 	public Style style = null;
 	public String thumbnail = "";
@@ -35,6 +36,7 @@ public class ViewerInfo {
 		thumbnail = createThumbnailAndSetStyle(n);
 		contentType = n.getContentType();
 		accessScheme = n.getAccessScheme();
+		label = n.getFileLabel();
 	}
 
 	private ViewerType createViewerType(Node n) {

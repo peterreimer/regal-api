@@ -1,8 +1,6 @@
 package views;
 
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,7 +15,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.MediaType;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
@@ -525,7 +522,7 @@ public class Helper {
 		return result;
 	}
 
-	private static String getPrettySize(String fileSize) {
+	public static String getPrettySize(String fileSize) {
 		String hrSize = "";
 		DecimalFormat dec = new DecimalFormat("0.00");
 		Long size = Long.parseLong(fileSize);

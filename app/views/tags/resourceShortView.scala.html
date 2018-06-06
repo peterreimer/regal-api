@@ -5,8 +5,8 @@
 @(hit: Map[String,Object],context:List[String],namespace:String)
 @import views.Title 
 
-@displayCreators(id:String,label:String)={
-						@if(id != null && !id.isEmpty()){
+@displayCreators(id:Object,label:Object)={
+						@if(id != null){
 	                       @label
 	                       }else{
 	                       	@label
@@ -70,7 +70,7 @@
 						}else{
 							<ol class="author-title-list">
 							@for(c <-views.Helper.listCreators(hit)){
-									<li>@displayCreators(c.get("id").toString(),c.get("label").toString())</li>
+									<li>@displayCreators(c.get("id"),c.get("label"))</li>
 								}
 								</ol>
 						}
