@@ -19,6 +19,7 @@ package models;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -52,7 +53,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return wgl:wglcontributor
 	 */
 	public List<String> getWglSubject() {
-		return wglSubject;
+		return removeDuplicateEntries(wglSubject);
 	}
 
 	/**
@@ -581,7 +582,11 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return dc:subject
 	 */
 	public List<String> getSubject() {
-		return subject;
+		return removeDuplicateEntries(subject);
+	}
+
+	private List<String> removeDuplicateEntries(List<String> list) {
+		return list.stream().distinct().collect(Collectors.toList());
 	}
 
 	/**
