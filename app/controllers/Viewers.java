@@ -1,13 +1,9 @@
 package controllers;
 
-import java.io.FileNotFoundException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import helper.HttpArchiveException;
-import models.Globals;
 import play.libs.F.Promise;
 import play.mvc.Result;
+import views.Helper;
 
 public class Viewers extends MyController {
 
@@ -17,12 +13,12 @@ public class Viewers extends MyController {
 				String url = "/resource/" + pid + "/data";
 				String mimetype = node.getMimeType();
 				if ("video".equals(type)) {
-					return ok(views.html.mediaViewers.standardViewer.render("video", url,
-							mimetype));
+					return ok(views.html.mediaViewers.standardViewer
+							.render(Helper.getViewerInfo(node)));
 				}
 				if ("audio".equals(type)) {
-					return ok(views.html.mediaViewers.standardViewer.render("audio", url,
-							mimetype));
+					return ok(views.html.mediaViewers.standardViewer
+							.render(Helper.getViewerInfo(node)));
 				}
 				if ("deepzoom".equals(type)) {
 

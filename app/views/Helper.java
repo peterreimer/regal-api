@@ -439,7 +439,7 @@ public class Helper {
 		return "<a href=\"" + uri + "\">" + label + "</a>";
 	}
 
-	public static String getLobidIsPartOf(Map<String, Object> isPartOf) {
+	public static String getLobidIsPartOf(Object isPartOf) {
 		String label = "http://lobid.org";
 		String uri = "http://lobid.org";
 		try {
