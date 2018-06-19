@@ -9,9 +9,8 @@
 		if(viewerInfo!=null){
 			if(!viewerInfo.contentType.equals("version")) {
 				if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
-				   mediaViewers.standardViewer(viewerInfo.getHtml5Element(),viewerInfo.dataLink,viewerInfo.mimetype)
-				   <a href={viewerInfo.dataLink}><b>Download <i class="fa fa-download"></i></b><br/> {viewerInfo.label} {views.Helper.getPrettySize(viewerInfo.filesize+"")}</a>
-				}		
+				   mediaViewers.standardViewer(viewerInfo)
+				 }		
 				else{
 					if(viewerInfo.accessScheme.equals("public")){
 						<div id="thumbnail" class="thumb">
