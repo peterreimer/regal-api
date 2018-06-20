@@ -334,6 +334,7 @@ public class Resource extends MyController {
 		return new BulkActionAccessor().call((userId) -> {
 			RegalObject object = getRegalObject(request().body().asJson());
 			List<Node> list = Globals.fedora.listComplexObject(pid);
+			list.removeIf(n -> "D".equals(n.getState()));
 			BulkAction bulk = new BulkAction();
 			bulk.executeOnNodes(list, userId, nodes -> {
 				return create.patchResources(nodes, object);
