@@ -19,6 +19,7 @@
 								<img src={viewerInfo.thumbnail} width="150"/>
 							</a>
 							</div>
+							<a href={viewerInfo.getViewerLink()} target="_blank"><b>View<i class="fa fa-eye"></i></b><br/></a>
 							<a href={viewerInfo.dataLink}><b>Download <i class="fa fa-download"></i></b><br/> {viewerInfo.label} {views.Helper.getPrettySize(viewerInfo.filesize+"")}</a>
 						}else{
 							<div id="thumbnail" class="thumb">
