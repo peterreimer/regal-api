@@ -140,20 +140,22 @@ public class Create extends RegalAction {
 			node.setPublishScheme(object.getPublishScheme());
 		if (object.getParentPid() != null)
 			linkWithParent(object.getParentPid(), node);
-		if (object.getIsDescribedBy().getCreatedBy() != null)
-			node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
-		if (object.getIsDescribedBy().getImportedFrom() != null)
-			node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
-		if (object.getIsDescribedBy().getLegacyId() != null)
-			node.setLegacyId(object.getIsDescribedBy().getLegacyId());
-		if (object.getIsDescribedBy().getName() != null)
-			node.setName(object.getIsDescribedBy().getName());
-		if (object.getTransformer() != null)
-			OaiDispatcher.updateTransformer(object.getTransformer(), node);
-		if (object.getIsDescribedBy().getDoi() != null)
-			node.setDoi(object.getIsDescribedBy().getDoi());
-		if (object.getIsDescribedBy().getUrn() != null)
-			node.setUrn(object.getIsDescribedBy().getUrn());
+		if (object.getIsDescribedBy() != null) {
+			if (object.getIsDescribedBy().getCreatedBy() != null)
+				node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+			if (object.getIsDescribedBy().getImportedFrom() != null)
+				node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
+			if (object.getIsDescribedBy().getLegacyId() != null)
+				node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+			if (object.getIsDescribedBy().getName() != null)
+				node.setName(object.getIsDescribedBy().getName());
+			if (object.getTransformer() != null)
+				OaiDispatcher.updateTransformer(object.getTransformer(), node);
+			if (object.getIsDescribedBy().getDoi() != null)
+				node.setDoi(object.getIsDescribedBy().getDoi());
+			if (object.getIsDescribedBy().getUrn() != null)
+				node.setUrn(object.getIsDescribedBy().getUrn());
+		}
 		OaiDispatcher.makeOAISet(node);
 	}
 
@@ -161,13 +163,17 @@ public class Create extends RegalAction {
 		setNodeType(object.getContentType(), node);
 		node.setAccessScheme(object.getAccessScheme());
 		node.setPublishScheme(object.getPublishScheme());
-		linkWithParent(object.getParentPid(), node);
-		node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
-		node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
-		node.setLegacyId(object.getIsDescribedBy().getLegacyId());
-		node.setName(object.getIsDescribedBy().getName());
-		node.setDoi(object.getIsDescribedBy().getDoi());
-		node.setUrn(object.getIsDescribedBy().getUrn());
+		if (object.getParentPid() != null) {
+			linkWithParent(object.getParentPid(), node);
+		}
+		if (object.getIsDescribedBy() != null) {
+			node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+			node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
+			node.setLegacyId(object.getIsDescribedBy().getLegacyId());
+			node.setName(object.getIsDescribedBy().getName());
+			node.setDoi(object.getIsDescribedBy().getDoi());
+			node.setUrn(object.getIsDescribedBy().getUrn());
+		}
 		OaiDispatcher.makeOAISet(node);
 	}
 
