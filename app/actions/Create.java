@@ -19,9 +19,11 @@ package actions;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
 import helper.HttpArchiveException;
 import helper.mail.WebgatherExceptionMail;
 import helper.oai.OaiDispatcher;
@@ -43,6 +45,7 @@ public class Create extends RegalAction {
 			Logger.of("application");
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+	private static final BigInteger bigInt1024 = new BigInteger("1024");
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public class WebgathererTooBusyException extends HttpArchiveException {
@@ -403,6 +406,82 @@ public class Create extends RegalAction {
 			ApplicationLogger.error(
 					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
 					versionPid, n.getPid());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * @param n must be of type web page
+	 * @param jsn Json node
+	 * @return a new version pointing to a linked, unpacked crawl
+	 */
+	public Node linkWebpageVersion(Node n, JsonNode jsn) {
+		Gatherconf conf = null;
+		String versionPid = "";
+		try {
+			if (!"webpage".equals(n.getContentType())) {
+				throw new HttpArchiveException(400, n.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			ApplicationLogger.debug("Link webpageVersion to PID" + n.getPid());
+			conf = Gatherconf.create(n.getConf());
+			ApplicationLogger.debug("Link webpageVersion Conf" + conf.toString());
+			conf.setName(n.getPid());
+			versionPid =
+					jsn.findValue("versionPid").toString().replaceAll("^\"|\"$", "");
+			ApplicationLogger.debug("versionPid: " + versionPid);
+			conf.setId(versionPid);
+			String dateTimestamp =
+					jsn.findValue("dateTimestamp").toString().replaceAll("^\"|\"$", "");
+			ApplicationLogger.debug("dateTimestamp: " + dateTimestamp);
+			Date startDate = new SimpleDateFormat("yyyyMMdd HH:mm:ss")
+					.parse(dateTimestamp + " 12:00:00");
+			conf.setStartDate(startDate);
+			String label = dateTimestamp.substring(0, 4) + "-"
+					+ dateTimestamp.substring(4, 6) + "-" + dateTimestamp.substring(6, 8);
+			ApplicationLogger.debug("label: " + label);
+			String zipSizeStr =
+					jsn.findValue("zipSize").toString().replaceAll("^\"|\"$", "");
+			BigInteger zipSize = new BigInteger(zipSizeStr).multiply(bigInt1024);
+			ApplicationLogger.debug("zipSize (bytes): " + zipSize.toString());
+			String relUri = n.getPid() + "/" + n.getNamespace() + ":" + versionPid;
+			File crawlDir = new File(Globals.webharvestsDataDir + "/" + relUri);
+			conf.setLocalDir(crawlDir.getAbsolutePath());
+
+			String localpath =
+					Globals.webharvestsDataUrl + "/" + relUri + "/webschnitt.xml";
+			ApplicationLogger.debug("URI-Path to archive: " + localpath);
+			conf.setOpenWaybackLink(localpath);
+
+			// create Regal object
+			RegalObject regalObject = new RegalObject();
+			regalObject.setContentType("version");
+			Provenience prov = regalObject.getIsDescribedBy();
+			prov.setCreatedBy("webgatherer");
+			prov.setName(conf.getName());
+			prov.setImportedFrom(conf.getUrl());
+			regalObject.setIsDescribedBy(prov);
+			regalObject.setParentPid(n.getPid());
+			Node webpageVersion =
+					createResource(versionPid, n.getNamespace(), regalObject);
+			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
+					"<" + webpageVersion.getPid()
+							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
+			webpageVersion.setLocalData(localpath);
+			webpageVersion.setMimeType("application/xml");
+			webpageVersion.setFileSize(zipSize);
+			webpageVersion.setFileLabel(label);
+			webpageVersion.setAccessScheme(n.getAccessScheme());
+			webpageVersion.setPublishScheme(n.getPublishScheme());
+			webpageVersion = updateResource(webpageVersion);
+			String msg = new Modify().updateConf(webpageVersion, conf.toString());
+			ApplicationLogger.info(msg);
+
+			return webpageVersion;
+		} catch (Exception e) {
+			ApplicationLogger.error(
+					"Link unpacked website version {} to webpage {} failed !", versionPid,
+					n.getPid());
 			throw new RuntimeException(e);
 		}
 	}
