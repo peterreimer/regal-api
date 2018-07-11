@@ -8732,13 +8732,12 @@
 }, {
   "uri" : "http://purl.org/lobid/lv#OfficialPublication",
   "comment" : "",
-  "label" : "",
+  "label" : "Amtsschrift",
   "icon" : "",
   "name" : "OfficialPublication",
-  "referenceType" : "@id",
-  "container" : "@set",
-  "weight" : "190",
-  "type" : "CONTEXT",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/lv#Schoolbook",
@@ -20221,6 +20220,17 @@
   "referenceType" : "String",
   "container" : "@set",
   "weight" : "152",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://rdaregistry.info/Elements/u/P60493",
+  "comment" : "",
+  "label" : "Titelzusatz weitere",
+  "icon" : "",
+  "name" : "P6049",
+  "referenceType" : "String",
+  "container" : "@set",
+  "weight" : "4",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
