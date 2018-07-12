@@ -8762,6 +8762,16 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://purl.org/lobid/lv#Statistics",
+  "comment" : "",
+  "label" : "Statistiken",
+  "icon" : "fa fa-bar-chart ",
+  "name" : "Statistics",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://purl.org/lobid/lv#containedIn",
   "comment" : "",
   "label" : "Erschienen in",
@@ -19912,6 +19922,16 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://purl.org/ontology/bibo/Standard",
+  "comment" : "",
+  "label" : "Leitlinien / Normschriften",
+  "icon" : "fa fa-university ",
+  "name" : "Standard",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://purl.org/ontology/bibo/Thesis",
   "label" : "Abschlussarbeit",
   "icon" : "octicon octicon-mortar-board",
@@ -20227,7 +20247,7 @@
   "comment" : "",
   "label" : "Titelzusatz weitere",
   "icon" : "",
-  "name" : "P6049",
+  "name" : "otherTitleInformation",
   "referenceType" : "String",
   "container" : "@set",
   "weight" : "4",
@@ -20295,17 +20315,6 @@
   "referenceType" : "String",
   "container" : "@set",
   "weight" : "155",
-  "type" : "CONTEXT",
-  "multilangLabel" : { }
-}, {
-  "uri" : "http://rdvocab.info/Elements/otherTitleInformation",
-  "comment" : "",
-  "label" : "Titelzusatz weitere",
-  "icon" : "",
-  "name" : "otherTitleInformation",
-  "referenceType" : "String",
-  "container" : "@set",
-  "weight" : "4",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {

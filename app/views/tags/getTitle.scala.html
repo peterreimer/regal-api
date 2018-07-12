@@ -45,9 +45,9 @@
 						/ @hit.get("corporateBodyForTitle").asInstanceOf[Collection[String]].toArray()
 						</span>
 					 }
-					@if(hit.contains("P60493")){
-						<span class="otherTitle">
-						: @hit.get("P60493").asInstanceOf[Collection[String]].toArray()
+					@if(hit.contains("otherTitleInformation")){
+						<span class="otherTitleInformation">
+						: @hit.get("otherTitleInformation").asInstanceOf[Collection[String]].toArray()
 						</span>
 					 }
 					 @if(hit.contains("publication")){
