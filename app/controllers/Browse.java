@@ -32,7 +32,7 @@ public class Browse extends MyController {
 			Map<String, Object> aggregationConf = initAggregations();
 			Map<String, Object> facet =
 					(Map<String, Object>) aggregationConf.get(facetName);
-			((Map<String, Object>) facet.get("terms")).put("size", 100);
+			((Map<String, Object>) facet.get("terms")).put("size", 0);
 			SearchResponse response = Globals.search.query(
 					new String[] {
 							Globals.PUBLIC_INDEX_PREF + Globals.defaultNamespace + "2",
