@@ -126,7 +126,7 @@ public class Gatherconf {
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
 		quotaUnitSelection = null;
-		agentIdSelection = null;
+		agentIdSelection = AgentIdSelection.Firefox;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
