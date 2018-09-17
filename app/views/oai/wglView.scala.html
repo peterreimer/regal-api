@@ -9,7 +9,7 @@
 	xsi:schemaLocation="http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/ http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/oai_wgl.xsd">
 
 @field(list: Seq[String],fieldname: String)() = {
-@for(i <- list){<@fieldname>@i</@fieldname>}
+@for(i <- list){<@fieldname>@archive.fedora.XmlUtils.escapeContent(i)</@fieldname>}
 }
 
 @fieldCombined(list: Seq[String],fieldname: String)() = {
@@ -31,7 +31,7 @@
 }
 
 <wgl:title>
-@Html(Title.getTitle(hit))
+@archive.fedora.XmlUtils.escapeContent(Title.getTitle(hit))
 @if(hit.contains("corporateBodyForTitle")){
 	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
 }

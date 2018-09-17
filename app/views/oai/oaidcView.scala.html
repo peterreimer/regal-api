@@ -7,7 +7,7 @@
 	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd 
 	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd">
 @field(list: Seq[String],fieldname: String)() = {
-@for(i <- list){<@fieldname>@i</@fieldname>}
+@for(i <- list){<@fieldname>@archive.fedora.XmlUtils.escapeContent(i)</@fieldname>}
 }
 @import models.Pair
 @typedField(list: Seq[Pair[String,String]],fieldname: String)() = {
