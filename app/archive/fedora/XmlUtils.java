@@ -57,6 +57,8 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.google.common.xml.XmlEscapers;
+
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
@@ -362,5 +364,11 @@ public class XmlUtils {
 			NamespaceContext nscontext) {
 		return XmlUtils.getElements(xPathStr, XmlUtils.getDocument(in), nscontext);
 
+	}
+
+	public static String escapeContent(String text) {
+		if (text == null)
+			return "";
+		return XmlEscapers.xmlContentEscaper().escape(text);
 	}
 }

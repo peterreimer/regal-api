@@ -22,6 +22,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
