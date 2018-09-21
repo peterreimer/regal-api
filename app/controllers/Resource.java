@@ -1052,8 +1052,13 @@ public class Resource extends MyController {
 	}
 
 	public static Promise<Result> createVersion(@PathParam("pid") String pid) {
+		Node node = readNodeOrNull(pid);
+		Gatherconf conf = Gatherconf.create(node.getConf());
+		if (conf.hasUrlMoved(node)) {
+			return (Promise<Result>) JsonMessage(
+					WebgatherUtils.createInvalidUrlMessage(conf));
+		}
 		return new ModifyAction().call(pid, userId -> {
-			Node node = readNodeOrNull(pid);
 			Node result = create.createWebpageVersion(node);
 			return getJsonResult(result);
 		});

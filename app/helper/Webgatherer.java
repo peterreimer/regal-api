@@ -100,14 +100,14 @@ public class Webgatherer implements Runnable {
 				// find open jobs
 				if (isOutstanding(n, conf)) {
 					WebgatherLogger.info("Die Website soll jetzt eingesammelt werden.");
-					if (conf.hasUrlMoved()) {
+					if (conf.hasUrlMoved(n)) {
 						if (conf.getUrlNew() == null) {
 							WebgatherLogger.info("De Sick is unbekannt vertrocke !");
 						} else {
 							WebgatherLogger
 									.info("De Sick is umjetrocke noh " + conf.getUrlNew() + " .");
 						}
-						WebgatherUtils.prepareWebpageMoving(n, conf);
+						WebgatherUtils.sendInvalidUrlEmail(n, conf);
 					} else {
 						WebgatherLogger
 								.info("HTTP Response Code = " + conf.getHttpResponseCode());
@@ -133,6 +133,7 @@ public class Webgatherer implements Runnable {
 			if (count >= limit)
 				break;
 		}
+
 	}
 
 	private static void setUnknownHost(Node node, Gatherconf conf) {
