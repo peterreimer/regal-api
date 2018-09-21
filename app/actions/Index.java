@@ -143,7 +143,8 @@ public class Index {
 			if ("monograph".equals(n.getContentType())
 					|| "journal".equals(n.getContentType())
 					|| "webpage".equals(n.getContentType())
-					|| "article".equals(n.getContentType()))
+					|| "article".equals(n.getContentType())
+					|| "researchData".equals(n.getContentType()))
 				return indexToPublicIndex(pid, type, index, n);
 		} else {
 			return removeFromPublicIndex(pid, type, index);
