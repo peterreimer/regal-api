@@ -508,7 +508,6 @@ public class Gatherconf {
 			return false;
 		}
 		setInvalidUrl(true);
-		new Modify().updateConf(node, this.toString());
 		// ermiitelt die neue URL (falls bekannt)
 		urlNew = null;
 		for (Entry<String, List<String>> header : httpConnection.getHeaderFields()
@@ -518,6 +517,7 @@ public class Gatherconf {
 			}
 		}
 		httpConnection.disconnect();
+		new Modify().updateConf(node, this.toString());
 		return true;
 	}
 

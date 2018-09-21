@@ -95,11 +95,11 @@ public class WebgatherUtils {
 		Message msg = null;
 		if (conf.getUrlNew() == null) {
 			msg = new Message("Die Website ist unbekannt verzogen.\n"
-					+ "Bitte geben Sie auf diesem Webformular eine neue, gültige URL ein. Solange wird die Website nicht erneut eingesammelt.");
+					+ "Bitte geben Sie auf dem Tab \"Crawler settings\" eine neue, gültige URL ein. Solange wird die Website nicht erneut eingesammelt.");
 		} else {
 			msg = new Message("Die Website ist umgezogen nach " + conf.getUrlNew()
 					+ ".\n"
-					+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden).");
+					+ "Bitte bestätigen Sie den Umzug auf dem Tab \"Crawler settings\" (URL kann dort vorher editiert werden).");
 		}
 		return msg;
 	}
