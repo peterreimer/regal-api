@@ -557,7 +557,8 @@ public class Helper {
 				if (node.getPartsSorted() != null && !node.getPartsSorted().isEmpty()) {
 					for (Link l : node.getPartsSorted()) {
 						Node cn = new Read().internalReadNode(l.getObject());
-						if (!"D".equals(cn.getState())) {
+						if (!"D".equals(cn.getState())
+								&& "file".equals(cn.getContentType())) {
 							return getViewerInfo(cn);
 						}
 					}
