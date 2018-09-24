@@ -20236,6 +20236,17 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://rdaregistry.info/Elements/u/P60493",
+  "comment" : "",
+  "label" : "Titelzusatz weitere",
+  "icon" : "",
+  "name" : "otherTitleInformation",
+  "referenceType" : "String",
+  "container" : "@set",
+  "weight" : "4",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://rdaregistry.info/Elements/u/P60584",
   "comment" : "",
   "label" : "Formschlagwörter",
@@ -20287,17 +20298,6 @@
   "referenceType" : "String",
   "container" : "@set",
   "weight" : "158",
-  "type" : "CONTEXT",
-  "multilangLabel" : { }
-}, {
-  "uri" : "http://rdvocab.info/Elements/otherTitleInformation",
-  "comment" : "",
-  "label" : "Titelzusatz weitere",
-  "icon" : "",
-  "name" : "otherTitleInformation",
-  "referenceType" : "String",
-  "container" : "@set",
-  "weight" : "4",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21219,7 +21219,7 @@
   "comment" : "",
   "label" : "Datei",
   "icon" : "",
-  "name" : "File",
+  "name" : "",
   "container" : "",
   "weight" : "",
   "type" : "STORE",

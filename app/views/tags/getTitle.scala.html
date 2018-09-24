@@ -50,14 +50,7 @@
 						: @hit.get("otherTitleInformation").asInstanceOf[Collection[String]].toArray()
 						</span>
 					 }
-					 @if(hit.contains("publication")){
-					 @hit.get("publication") match {
-					    	case publication:Set[ Map[String,Object]] => {
-					    		@Html(Title.getIssued(publication)) 
-					    	}
-					    	case _ => {}
-					    }
-					 }
+					
 					</h1>
 					</a>
 					<h2 id="page-title-suffix" class="titlePost title-suffix">
@@ -75,7 +68,25 @@
 								}
 								</ol>
 						}
+					<p>
+					@if(hit.contains("edition")){
 						
+						<span class="edition">
+						@hit.get("edition").asInstanceOf[Collection[String]].toArray() .
+						</span>
+						
+					 }
+					 @if(hit.contains("publication")){
+					
+					 @hit.get("publication") match {
+					    	case publication:Set[ Map[String,Object]] => {
+					    		@Html(Title.getIssued(publication)) 
+					    	}
+					    	case _ => {}
+					    }
+					 
+					 }
+					 </p>
 					</h2>
 					
 			</div>
