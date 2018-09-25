@@ -1,6 +1,6 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@(myForm: DynamicForm)
+@(pid:String,myForm: DynamicForm)
 
 @main("Regal",null,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){
@@ -8,6 +8,7 @@
 @helper.form(action = routes.Forms.postCatalogForm()){
 <label class="form-control-label" for="alephId">Aleph Id</label>
 <br/>
+<input name="pid" value="@pid" hidden>
 <input size="30" class="input-widget alephId-field" 
 					name="alephId" tabindex="0">
 <br/>	

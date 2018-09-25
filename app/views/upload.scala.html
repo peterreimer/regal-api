@@ -15,17 +15,22 @@
 					
 					<div class="tab-content">
 				  		<div class="tab-pane active" id="1a">
-				  	<div id="container"></div>
- <!--<ul>
-    <li>https://github.com/vakata/jstree#plugins
+						  	<div class="form-group">
+						  	
+						  		<form method="post" enctype="multipart/form-data" action="./data">
+								
+								  <input name="data" type="file" size="50"> 
+						 		  <label>
+						 		  MD5
+						 		  <input name="md5" type="text" size="50"> 
+						 		  </label>
+								  
+								  <br/>
+								  <button class="btn btn-primary" type="submit">Upload</button>
+								</form>
+						  	
+						  	</div>
 
-      <ul>
-        <li>https://github.com/blueimp/jQuery-File-Upload
-</li>
-        <li>Child node 2</li>
-      </ul>
-    </li>
-  </ul>  --> 
 			        	</div>
 				  		<div class="tab-pane" id="2a">
 		
@@ -33,7 +38,7 @@
 			        	
 		       			@if(models.Globals.users.isLoggedIn(ctx())){
 			        	<div class="tab-pane" id="3a">
-		
+
 			        	</div>
 			        	<div class="tab-pane" id="4a">
 		
@@ -42,17 +47,6 @@
 		        	</div>
 
 <script>
-$(function() {
-	  $('#container').jstree({
-	    'core' : {
-	    	 'data' : {
-	    	        "url" : "./parts?style=short",
-	    	        "dataType" : "json" ,
-	    	        
-	    	      }
 
-	    }
-	  });
-	});
 </script>
 }

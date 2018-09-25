@@ -1157,12 +1157,17 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			try {
 				Node node = readNodeOrNull(pid);
-
-				String rdf = RdfUtils.readRdfToString(
-						new ByteArrayInputStream(node.toString().getBytes("utf-8")),
-						RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
-				// rdf = java.net.URLEncoder.encode(rdf, "utf-8");
-				return ok(edit.render("HELLO", "ntriples", pid, pid + ".rdf", rdf));
+				if ("monograph".equals(node.getContentType())) {
+					return redirect(routes.Forms.getCatalogForm(node.getPid()));
+				} else {
+					String zettelType = node.getContentType();
+					String rdf = RdfUtils.readRdfToString(
+							new ByteArrayInputStream(node.toString().getBytes("utf-8")),
+							RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
+					// rdf = java.net.URLEncoder.encode(rdf, "utf-8");
+					return ok(
+							edit.render(zettelType, "ntriples", pid, pid + ".rdf", rdf));
+				}
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}
@@ -1187,9 +1192,15 @@ public class Resource extends MyController {
 				DynamicForm form = Form.form().bindFromRequest();
 				String alephId = form.get("alephId");
 				String namespace = form.get("namespace");
+				String pid = form.get("pid");
 				RegalObject object = new RegalObject();
 				object.setContentType("monograph");
-				Node node = create.createResource(namespace, object);
+				Node node = null;
+				if (pid != null && !pid.isEmpty()) {
+					node = read.readNode(pid);
+				} else {
+					node = create.createResource(namespace, object);
+				}
 				String message = modify.lobidify(node, alephId);
 				flash("message", message);
 				return redirect(routes.Resource.listResource(node.getPid(), null));
@@ -1198,6 +1209,41 @@ public class Resource extends MyController {
 			}
 		});
 	}
+
+	// public static Promise<Result> createFileObjectWithMetadata() {
+	// return new CreateAction().call(userId -> {
+	// try {
+	// MultipartFormData body = request().body().asMultipartFormData();
+	// FilePart d = body.getFile("data");
+	// Map<String, String[]> form = body.asFormUrlEncoded();
+	// String title = form.get("title")[0];
+	// String pid = form.get("pid")[0];
+	// String namespace = form.get("namespace")[0];
+	// String md5 = form.get("md5")[0];
+	// RegalObject object = new RegalObject();
+	// object.setContentType("file");
+	// Node node = null;
+	// if (pid != null && !pid.isEmpty()) {
+	// node = read.readNode(pid);
+	// } else {
+	// node = create.createResource(namespace, object);
+	// }
+	// if (d == null) {
+	// return JsonMessage(new Message("Missing File.", 400));
+	// }
+	// String mimeType = d.getContentType();
+	// String name = d.getFilename();
+	// try (FileInputStream content = new FileInputStream(d.getFile())) {
+	// modify.updateData(pid, content, mimeType, name, md5);
+	// flash("message",
+	// "File uploaded! Type: " + mimeType + ", Name: " + name);
+	// return redirect(routes.Resource.listResource(node.getPid(), null));
+	// }
+	// } catch (Exception e) {
+	// return JsonMessage(new Message(json(e)));
+	// }
+	// });
+	// }
 
 	public static Promise<Result> getUploadForm(String pid) {
 		return new CreateAction().call(userId -> {

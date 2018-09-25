@@ -814,8 +814,12 @@ public class JsonMapper {
 		} else {
 			aboutMap.put(objectTimestamp, node.getLastModified());
 		}
-		aboutMap.put(created, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-				.format(node.getCreationDate()));
+		try {
+			aboutMap.put(created, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+					.format(node.getCreationDate()));
+		} catch (Exception e) {
+			aboutMap.put(created, node.getCreationDate());
+		}
 		aboutMap.put(describes, node.getAggregationUri());
 
 		rdf.put(isDescribedBy, aboutMap);

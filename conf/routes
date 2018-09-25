@@ -128,7 +128,7 @@ GET /authors/:authorname controllers.AdhocController.getAuthorsRdf(authorname)
 GET /adhoc/:type/:name   controllers.AdhocController.getAdhocRdf(type,name)
 GET /context.json controllers.Context.getContext()
 
-GET /add/catalog					controllers.Forms.getCatalogForm()
+GET /add/catalog					controllers.Forms.getCatalogForm(pid?="")
 GET /add/article					controllers.Forms.getArticleForm()
 GET /add/webpage					controllers.Forms.getWebpageForm()
 GET /add/file						controllers.Forms.getFileForm()
