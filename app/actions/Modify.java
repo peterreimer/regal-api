@@ -192,7 +192,7 @@ public class Modify extends RegalAction {
 	public String updateLobidify2AndEnrichMetadata(String pid, String content) {
 		try {
 			Node node = new Read().readNode(pid);
-			return updateLobidify2AndEnrichMetadata(node, content);
+			return updateLobidifyAndEnrichMetadata(node, content);
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
 		}
@@ -219,58 +219,17 @@ public class Modify extends RegalAction {
 					.get(0);
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
-			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
 			content = getLobidDataAsNtripleString(node, alephid);
-			updateMetadata(node, content);
+			updateMetadata2(node, content);
 
-			String enrichMessage = enrichMetadata(node);
-			String enrichMessage2 = enrichMetadata2(node);
+			String enrichMessage2 = enrichMetadata(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ enrichMessage + " " + enrichMessage2;
+					+ enrichMessage2;
 		} else {
 			updateMetadata(node, content);
-			String enrichMessage = enrichMetadata(node);
-			String enrichMessage2 = enrichMetadata2(node);
+			String enrichMessage2 = enrichMetadata(node);
 			return pid + " metadata successfully updated, and enriched! "
-					+ enrichMessage + " " + enrichMessage2;
-		}
-	}
-
-	/**
-	 * @param node The node that must be updated
-	 * @param content The metadata as rdf string
-	 * @return a short message
-	 */
-	public String updateLobidify2AndEnrichMetadata(Node node, String content) {
-
-		String pid = node.getPid();
-		if (content == null) {
-			throw new HttpArchiveException(406,
-					pid + " You've tried to upload an empty string."
-							+ " This action is not supported."
-							+ " Use HTTP DELETE instead.\n");
-		}
-
-		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
-			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
-					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
-					.get(0);
-			String alephid =
-					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
-			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
-			content = getLobidDataAsNtripleString(node, alephid);
-			updateMetadata(node, content);
-
-			String enrichMessage = enrichMetadata2(node);
-			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ enrichMessage;
-		} else {
-			updateMetadata(node, content);
-			String enrichMessage = enrichMetadata2(node);
-			return pid + " metadata successfully updated, and enriched! "
-					+ enrichMessage;
+					+ enrichMessage2;
 		}
 	}
 
@@ -302,22 +261,12 @@ public class Modify extends RegalAction {
 					.get(0);
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
-			try {
-				content = getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(node,
-						alephid, date);
-				updateMetadata(node, content);
-				msg.append(enrichMetadata(node));
-			} catch (NotUpdatedException e) {
-				play.Logger.debug("", e);
-				play.Logger.info(pid + " Not updated. " + e.getMessage());
-				msg.append(pid + " Not updated. " + e.getMessage());
-			}
 
 			try {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
 				updateMetadata2(node, content);
-				msg.append(enrichMetadata2(node));
+				msg.append(enrichMetadata(node));
 			} catch (NotUpdatedException e) {
 				play.Logger.debug("", e);
 				play.Logger.info(pid + " Not updated. " + e.getMessage());
@@ -405,27 +354,6 @@ public class Modify extends RegalAction {
 
 	}
 
-	private String getLobidDataAsNtripleStringIfResourceHasRecentlyChanged(
-			Node node, String alephid, LocalDate date) {
-		try {
-			LocalDate resourceDate = getLastModifiedFromLobid(alephid);
-			play.Logger.info("Lobid resource has been modified on "
-					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-			play.Logger.info("I will only update if local date "
-					+ date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-					+ " is before remote date "
-					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-			if (date.isBefore(resourceDate)) {
-				return getLobidDataAsNtripleString(node, alephid);
-			}
-		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
-		}
-
-		throw new NotUpdatedException("No updates since " + date.toString());
-
-	}
-
 	private String getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(
 			Node node, String alephid, LocalDate date) {
 		try {
@@ -437,7 +365,7 @@ public class Modify extends RegalAction {
 					+ " is before remote date "
 					+ resourceDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
 			if (date.isBefore(resourceDate)) {
-				return getLobid2DataAsNtripleString(node, alephid);
+				return getLobidDataAsNtripleString(node, alephid);
 			}
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
@@ -469,55 +397,7 @@ public class Modify extends RegalAction {
 		return LocalDate.now();
 	}
 
-	private LocalDate getLastModifiedFromLobid(String alephid)
-			throws IOException {
-		String lobidUri = "http://lobid.org/resource/" + alephid;
-		play.Logger.info("GET " + lobidUri + " and analyse date");
-		URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
-		RDFFormat inFormat = RDFFormat.TURTLE;
-		String accept = "text/turtle";
-		Collection<Statement> graph =
-				RdfUtils.readRdfToGraph(lobidUrl, inFormat, accept);
-		Iterator<Statement> it = graph.iterator();
-		while (it.hasNext()) {
-			Statement s = it.next();
-			String predicate = s.getPredicate().stringValue();
-			if (predicate.equals("http://purl.org/dc/terms/modified")) {
-				LocalDate date = LocalDate.parse(s.getObject().stringValue(),
-						DateTimeFormatter.ofPattern("yyyyMMdd"));
-				return date;
-			}
-		}
-		return LocalDate.now();
-	}
-
-	private String getLobidDataAsNtripleString(Node node, String alephid) {
-		String pid = node.getPid();
-		String lobidUri = "http://lobid.org/resource/" + alephid;
-		play.Logger.info("GET " + lobidUri);
-		try {
-			URL lobidUrl = new URL("http://lobid.org/resource/" + alephid + "/about");
-			RDFFormat inFormat = RDFFormat.TURTLE;
-			String accept = "text/turtle";
-			Collection<Statement> graph =
-					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
-			ValueFactory f = RdfUtils.valueFactory;
-			;
-			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
-					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createIRI(lobidUri));
-			graph.add(parallelEditionStatement);
-			tryToImportOrderingFromLobidData2(node, graph, f);
-			tryToGetTypeFromLobidData2(node, graph, f);
-			return RdfUtils.graphToString(
-					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
-		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
-		}
-
-	}
-
-	public static String getLobid2DataAsNtripleString(Node node, String alephid) {
+	public static String getLobidDataAsNtripleString(Node node, String alephid) {
 		String pid = node.getPid();
 		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
 		play.Logger.info("GET " + lobidUri);
@@ -777,8 +657,8 @@ public class Modify extends RegalAction {
 				+ parent.getPid() + " . Looking for field " + field);
 		String pred = getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(subject, pred,
-				parent.getMetadata(), RDFFormat.NTRIPLES);
-		String metadata = node.getMetadata();
+				parent.getMetadata2(), RDFFormat.NTRIPLES);
+		String metadata = node.getMetadata2();
 		if (metadata == null)
 			metadata = "";
 		if (value != null && !value.isEmpty()) {
@@ -793,101 +673,6 @@ public class Modify extends RegalAction {
 	}
 
 	public String enrichMetadata(Node node) {
-		try {
-			play.Logger.info("Enrich " + node.getPid());
-			String metadata = node.getMetadata();
-			if (metadata == null || metadata.isEmpty()) {
-				play.Logger.info("Not metadata to enrich " + node.getPid());
-				return "Not metadata to enrich " + node.getPid();
-			}
-			play.Logger.info("Enrich " + node.getPid() + " with gnd.");
-			List<String> gndIds = findAllGndIds(metadata);
-			List<Statement> enrichStatements = new ArrayList<Statement>();
-			for (String uri : gndIds) {
-				enrichStatements.addAll(getStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with geonames.");
-			List<String> geoNameIds = findAllGeonameIds(metadata);
-			for (String uri : geoNameIds) {
-				enrichStatements.addAll(getGeonamesStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with openstreetmap.");
-			List<String> osmIds = findAllOsmIds(metadata);
-			for (String uri : osmIds) {
-				enrichStatements.addAll(getOsmStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with orcid.");
-			List<String> orcidIds = findAllOrcidIds(metadata);
-			for (String uri : orcidIds) {
-				enrichStatements.addAll(getOrcidStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with adhoc keys.");
-			List<String> adhocIds = findAllAdhocIds(metadata);
-			for (String uri : adhocIds) {
-				enrichStatements.addAll(getAdhocStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
-			List<String> agrovocIds = findAllAgrovocIds(metadata);
-			for (String uri : agrovocIds) {
-				enrichStatements.addAll(getAgrovocStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with institution.");
-			List<Statement> institutions = findInstitution(node);
-			enrichStatements.addAll(institutions);
-
-			play.Logger.info("Enrich " + node.getPid() + " with parent.");
-			List<Statement> catalogParents =
-					find(node, metadata, "http://purl.org/dc/terms/isPartOf");
-			enrichStatements.addAll(catalogParents);
-
-			play.Logger.info("Enrich " + node.getPid() + " with inSeries.");
-			List<Statement> series =
-					find(node, metadata, "http://purl.org/lobid/lv#series");
-			enrichStatements.addAll(series);
-
-			play.Logger.info("Enrich " + node.getPid() + " with multiVolumeWork.");
-			List<Statement> multiVolumeWork =
-					find(node, metadata, "http://purl.org/lobid/lv#multiVolumeWork");
-			enrichStatements.addAll(multiVolumeWork);
-
-			play.Logger.info("Enrich " + node.getPid() + " with language.");
-			List<Statement> language =
-					find(node, metadata, "http://purl.org/dc/terms/language");
-			enrichStatements.addAll(language);
-
-			play.Logger.info("Enrich " + node.getPid() + " with recordingLocation.");
-			List<Statement> recordingLocation =
-					find(node, metadata, "http://hbz-nrw.de/regal#recordingLocation");
-			enrichStatements.addAll(recordingLocation);
-
-			List<Statement> collectionOne =
-					find(node, metadata, "info:regal/zettel/collectionOne");
-			enrichStatements.addAll(collectionOne);
-
-			List<Statement> containedIn =
-					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
-			enrichStatements.addAll(containedIn);
-
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-
-			updateMetadata(node, metadata);
-
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-			play.Logger.debug("", e);
-			return "Enrichment of " + node.getPid() + " partially failed !\n"
-					+ e.getMessage();
-		}
-		return "Enrichment of " + node.getPid() + " succeeded!";
-	}
-
-	public String enrichMetadata2(Node node) {
 		try {
 			play.Logger.info("Enrich 2 " + node.getPid());
 			String metadata = node.getMetadata2();
@@ -1556,14 +1341,8 @@ public class Modify extends RegalAction {
 	}
 
 	public String lobidify(Node node, String alephid) {
-		updateMetadata(node, getLobidDataAsNtripleString(node, alephid));
+		updateMetadata2(node, getLobidDataAsNtripleString(node, alephid));
 		String enrichMessage = enrichMetadata(node);
-		return enrichMessage;
-	}
-
-	public String lobidify2(Node node, String alephid) {
-		updateMetadata2(node, getLobid2DataAsNtripleString(node, alephid));
-		String enrichMessage = enrichMetadata2(node);
 		return enrichMessage;
 	}
 

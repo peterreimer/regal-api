@@ -920,15 +920,6 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/json", nickname = "enrichMetadata", value = "enrichMetadata", notes = "Includes linked resources into metadata", response = String.class, httpMethod = "POST")
-	public static Promise<Result> enrichMetadata2(@PathParam("pid") String pid) {
-		return new ModifyAction().call(pid, userId -> {
-			Node node = readNodeOrNull(pid);
-			String result = modify.enrichMetadata(node);
-			return JsonMessage(new Message(json(result)));
-		});
-	}
-
 	@ApiOperation(produces = "application/json", nickname = "flatten", value = "flatten", notes = "Copy the title of your parent and move up one level.", response = String.class, httpMethod = "POST")
 	public static Promise<Result> flatten(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {

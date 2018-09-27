@@ -121,7 +121,7 @@ public class OaiDispatcher {
 
 	private static void createDDCSets(Node node) throws RepositoryException {
 		OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-		String metadata = node.getMetadata();
+		String metadata = node.getMetadata2();
 		if (metadata == null)
 			return;
 		RepositoryResult<Statement> statements =

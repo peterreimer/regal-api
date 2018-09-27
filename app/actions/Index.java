@@ -156,17 +156,6 @@ public class Index {
 			Node data) {
 		StringBuffer msg = new StringBuffer();
 		try {
-			Globals.search.index(Globals.PUBLIC_INDEX_PREF + index, type, pid,
-					data.toString());
-			msg.append(
-					pid + " indexed in " + Globals.PUBLIC_INDEX_PREF + index + "\n");
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-			play.Logger.debug("", e);
-			msg.append(
-					pid + " not indexed in " + Globals.PUBLIC_INDEX_PREF + index + "\n");
-		}
-		try {
 			Globals.search.index(Globals.PUBLIC_INDEX_PREF + index + "2", type, pid,
 					data.toString2());
 			msg.append(
@@ -198,14 +187,6 @@ public class Index {
 	private String indexToPrivateIndex(String pid, String type, String index,
 			Node data) {
 		StringBuffer msg = new StringBuffer();
-		try {
-			Globals.search.index(index, type, pid, data.toString());
-			msg.append(pid + " indexed in " + index + "\n");
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-			play.Logger.debug("", e);
-			msg.append(pid + " not indexed in " + index + "\n");
-		}
 		try {
 			Globals.search.index(index + "2", type, pid, data.toString2());
 			msg.append(pid + " indexed in " + index + "2\n");

@@ -142,10 +142,9 @@ public class MyUtils extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			if (alephid != null && !alephid.isEmpty()) {
-				String result = modify.lobidify(node, alephid);
-				String result2 = modify.lobidify2(node, alephid);
-				return JsonMessage(new Message("Load " + alephid + " to " + pid + ".\n"
-						+ result + "\n" + result2));
+				String result2 = modify.lobidify(node, alephid);
+				return JsonMessage(
+						new Message("Load " + alephid + " to " + pid + ".\n" + result2));
 			} else {
 				String result = modify.lobidify(node);
 				return JsonMessage(new Message(result));

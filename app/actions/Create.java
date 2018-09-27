@@ -200,8 +200,8 @@ public class Create extends RegalAction {
 	}
 
 	private void inheritTitle(Node from, Node to) {
-		String title = new Read().readMetadata(to, "title");
-		String parentTitle = new Read().readMetadata(from, "title");
+		String title = new Read().readMetadata2(to, "title");
+		String parentTitle = new Read().readMetadata2(from, "title");
 		if (title == null && parentTitle != null) {
 			new Modify().addMetadataField(to, getUriFromJsonName("title"),
 					parentTitle);

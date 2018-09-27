@@ -38,7 +38,7 @@ public class Forms extends MyController {
 				Node previewNode = new Node();
 				previewNode.setPid("preview:1");
 				String metadata =
-						new Modify().getLobid2DataAsNtripleString(previewNode, alephId);
+						new Modify().getLobidDataAsNtripleString(previewNode, alephId);
 				previewNode.setMetadata2(metadata);
 				flash("message",
 						"Preview! Press 'Create' on the page bottom to create new object.");

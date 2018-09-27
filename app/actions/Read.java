@@ -191,7 +191,7 @@ public class Read extends RegalAction {
 
 	private void addLabel(Node n, Link l) {
 		try {
-			String label = readMetadata(l.getObject(), "title");
+			String label = readMetadata2(l.getObject(), "title");
 			l.setObjectLabel(label);
 			n.removeRelation(l.getPredicate(), l.getObject());
 			n.addRelation(l);
@@ -484,6 +484,18 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * @param pid the pid of the object
+	 * @param field if field is specified, only the value of a certain field will
+	 *          be returned
+	 * @return n-triple metadata
+	 */
+	public String readMetadata2(String pid, String field) {
+		Node node = internalReadNode(pid);
+		String result = readMetadata2(node, field);
+		return result == null ? "No " + field : result;
+	}
+
+	/**
 	 * @param node
 	 * @param field the shortname of metadata field
 	 * @return the ntriples or just one field
@@ -630,7 +642,7 @@ public class Read extends RegalAction {
 	 */
 	public List<String> getNodeLdProperty(Node node, String predicate) {
 		List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
-				predicate, node.getMetadata(), RDFFormat.NTRIPLES);
+				predicate, node.getMetadata2(), RDFFormat.NTRIPLES);
 		return linkedObjects;
 	}
 
@@ -715,7 +727,7 @@ public class Read extends RegalAction {
 
 	private String getTitle(Node node) {
 		try {
-			return readMetadata(node, "title");
+			return readMetadata2(node, "title");
 		} catch (Exception e) {
 			return "No Title";
 		}
@@ -742,8 +754,9 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
-							? "" : WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus",
+							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
+									: WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
@@ -881,7 +894,7 @@ public class Read extends RegalAction {
 
 	String getIdOfParallelEdition(Node node) {
 		String alephid;
-		alephid = new Read().readMetadata(node, "parallelEdition");
+		alephid = new Read().readMetadata2(node, "parallelEdition");
 		alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
 		return alephid;
 	}

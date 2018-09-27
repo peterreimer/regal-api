@@ -36,7 +36,7 @@ public class LobidVocabular {
 	public final static String urnUrl = "http://nbn-resolving.de/";
 	public final static String lobidOrganisationUrl =
 			"http://lobid.org/organisation/";
-	public final static String lobidResourceUrl = "http://lobid.org/resource/";
+
 	public final static String lobidItemUrl = "http://lobid.org/item/";
 	public final static String lobidDatasetUrl = "http://lobid.org/dataset";
 	public final static String zdbUrl = "http://ld.zdb-services.de/resource/";

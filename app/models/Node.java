@@ -1048,11 +1048,11 @@ public class Node implements java.io.Serializable {
 	 * 
 	 */
 	public boolean hasPersistentIdentifier() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata)
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2)
 				|| RdfUtils.hasTriple(pid,
-						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata)
+						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata2)
 				|| RdfUtils.hasTriple(pid, "http: // purl.org/ontology/bibo/doi",
-						metadata)
+						metadata2)
 				|| hasDoi() || hasUrn();
 	}
 
@@ -1060,14 +1060,14 @@ public class Node implements java.io.Serializable {
 	 * @return true if the metadata contains urn
 	 */
 	public boolean hasUrnInMetadata() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata);
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2);
 	}
 
 	/**
 	 * @return true if metadata contains catalog id
 	 */
 	public boolean hasLinkToCatalogId() {
-		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata);
+		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata2);
 		return result;
 	}
 
@@ -1077,7 +1077,7 @@ public class Node implements java.io.Serializable {
 	public String getUrnFromMetadata() {
 		try {
 			String hasUrn = "http://purl.org/lobid/lv#urn";
-			return RdfUtils.findRdfObjects(pid, hasUrn, metadata, RDFFormat.NTRIPLES)
+			return RdfUtils.findRdfObjects(pid, hasUrn, metadata2, RDFFormat.NTRIPLES)
 					.get(0);
 		} catch (Exception e) {
 			return null;
