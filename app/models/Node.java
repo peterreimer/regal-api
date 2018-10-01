@@ -22,6 +22,7 @@ import helper.HttpArchiveException;
 import helper.JsonMapper;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -72,7 +73,7 @@ public class Node implements java.io.Serializable {
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
 
-	private String metadata = null;
+	private String metadata1 = null;
 	private String metadata2 = null;
 	private String seq = null;
 
@@ -606,16 +607,16 @@ public class Node implements java.io.Serializable {
 	 * @return n-triple metadata as string
 	 */
 	@JsonIgnore()
-	public String getMetadata() {
-		return metadata;
+	public String getMetadata1() {
+		return metadata1;
 	}
 
 	/**
 	 * @param metadata n-triple metadata as string
 	 * @return this
 	 */
-	public Node setMetadata(String metadata) {
-		this.metadata = metadata;
+	public Node setMetadata1(String metadata) {
+		this.metadata1 = metadata;
 		return this;
 	}
 
@@ -902,16 +903,15 @@ public class Node implements java.io.Serializable {
 	 */
 	@JsonIgnore()
 	public List<Link> getLinks() {
-		try {
-			InputStream stream =
-					new ByteArrayInputStream(metadata.getBytes(StandardCharsets.UTF_8));
+		try (InputStream stream =
+				new ByteArrayInputStream(metadata2.getBytes(StandardCharsets.UTF_8));) {
 			RdfResource rdf =
 					RdfUtils.createRdfResource(stream, RDFFormat.NTRIPLES, pid);
 			rdf = rdf.resolve();
 			rdf.addLinks(getRelsExt());
 			return rdf.getLinks();
-		} catch (NullPointerException e) {
-			return new ArrayList<Link>();
+		} catch (Exception e) {
+			return new ArrayList<>();
 		}
 	}
 
@@ -924,7 +924,7 @@ public class Node implements java.io.Serializable {
 	 * @return list of pids of related objects
 	 */
 	public List<Link> getRelatives(String relation) {
-		List<Link> result = new Vector<Link>();
+		List<Link> result = new Vector<>();
 		for (Link l : links) {
 			if (l.getPredicate().equals(relation))
 				result.add(l);
@@ -1048,11 +1048,11 @@ public class Node implements java.io.Serializable {
 	 * 
 	 */
 	public boolean hasPersistentIdentifier() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata)
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2)
 				|| RdfUtils.hasTriple(pid,
-						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata)
+						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata2)
 				|| RdfUtils.hasTriple(pid, "http: // purl.org/ontology/bibo/doi",
-						metadata)
+						metadata2)
 				|| hasDoi() || hasUrn();
 	}
 
@@ -1060,14 +1060,14 @@ public class Node implements java.io.Serializable {
 	 * @return true if the metadata contains urn
 	 */
 	public boolean hasUrnInMetadata() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata);
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2);
 	}
 
 	/**
 	 * @return true if metadata contains catalog id
 	 */
 	public boolean hasLinkToCatalogId() {
-		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata);
+		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata2);
 		return result;
 	}
 
@@ -1077,7 +1077,7 @@ public class Node implements java.io.Serializable {
 	public String getUrnFromMetadata() {
 		try {
 			String hasUrn = "http://purl.org/lobid/lv#urn";
-			return RdfUtils.findRdfObjects(pid, hasUrn, metadata, RDFFormat.NTRIPLES)
+			return RdfUtils.findRdfObjects(pid, hasUrn, metadata2, RDFFormat.NTRIPLES)
 					.get(0);
 		} catch (Exception e) {
 			return null;

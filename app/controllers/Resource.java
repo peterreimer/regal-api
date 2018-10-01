@@ -417,7 +417,7 @@ public class Resource extends MyController {
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
-				String result = modify.updateLobidifyAndEnrichMetadata(pid,
+				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {

@@ -260,14 +260,12 @@ public class Modify extends RegalAction {
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
-			content = getLobidDataAsNtripleString(node, alephid);
-			updateMetadata(node, content);
 
 			String enrichMessage = enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
 		} else {
-			updateMetadata(node, content);
+			updateMetadata2(node, content);
 			String enrichMessage = enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;

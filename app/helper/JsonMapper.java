@@ -144,7 +144,7 @@ public class JsonMapper {
 			if (node == null)
 				throw new NullPointerException(
 						"JsonMapper can not work on node with value NULL!");
-			if (node.getMetadata() == null)
+			if (node.getMetadata1() == null)
 				throw new NullPointerException(
 						node.getPid() + " metadata stream is NULL!");
 			if (node.getMetadata2() == null)
@@ -190,7 +190,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata();
+		Map<String, Object> m = getDescriptiveMetadata1();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
 		changeDcIsPartOfToRegalIsPartOf(rdf);
@@ -285,10 +285,10 @@ public class JsonMapper {
 		}
 	}
 
-	private Map<String, Object> getDescriptiveMetadata() {
+	private Map<String, Object> getDescriptiveMetadata1() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata().getBytes(StandardCharsets.UTF_8));
+					node.getMetadata1().getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -312,7 +312,7 @@ public class JsonMapper {
 					+ " has no descriptive Metadata2! Try to return metadata instead.");
 			play.Logger.debug("", e);
 		}
-		return getDescriptiveMetadata();
+		return getDescriptiveMetadata1();
 	}
 
 	/**
@@ -321,7 +321,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLdShortStyle() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata();
+		Map<String, Object> m = getDescriptiveMetadata1();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		rdf.put(ID2, node.getPid());
 		for (Link l : ls) {
