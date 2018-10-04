@@ -234,7 +234,7 @@ public class Resource extends MyController {
 			@QueryParam("field") String field) {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
-			String result = read.readMetadata(node, field);
+			String result = read.readMetadata1(node, field);
 			RDFFormat format = null;
 			if (request().accepts("application/rdf+xml")) {
 				format = RDFFormat.RDFXML;

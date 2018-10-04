@@ -157,11 +157,11 @@ public class Delete extends RegalAction {
 		Node node = new Read().readNode(pid);
 		String pred = getUriFromJsonName(field);
 		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
-				new ByteArrayInputStream(node.getMetadata().getBytes()),
+				new ByteArrayInputStream(node.getMetadata1().getBytes()),
 				RDFFormat.NTRIPLES);
 		Collection<Statement> myGraph =
 				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
-		return new Modify().updateMetadata(node,
+		return new Modify().updateMetadata1(node,
 				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 
