@@ -46,7 +46,7 @@ public class WglMapper {
 		if (node == null)
 			return data;
 
-		JsonNode n = new ObjectMapper().valueToTree(node.getLd());
+		JsonNode n = new ObjectMapper().valueToTree(node.getLd2());
 		data.setWglContributor(getWglContributor(n));
 		data.setWglSubject(getWglSubject(n));
 		data.setCreator(getCreator(n));
