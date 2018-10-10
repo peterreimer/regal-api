@@ -766,7 +766,7 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "asJson", value = "asJson", notes = "Returns a json display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asJson(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
-			return getJsonResult(node.getLd());
+			return getJsonResult(node.getLd1());
 		});
 	}
 

@@ -1241,7 +1241,7 @@ public class Node implements java.io.Serializable {
 	 * @return a map representing the rdf data on this object
 	 */
 	@JsonValue
-	public Map<String, Object> getLd() {
+	public Map<String, Object> getLd1() {
 		Map<String, Object> result = new JsonMapper(this).getLd();
 		if ("D".equals(getState())) {
 			result.put("notification", "Dieses Objekt wurde gelöscht");
