@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
+import actions.Modify;
 import helper.WebgatherUtils;
 
 /**
@@ -487,11 +488,13 @@ public class Gatherconf {
 	/**
 	 * Stellt fest, ob die URL umgezogen ist.
 	 * 
+	 * @param node der Knoten für die Pid (resource, Website), an der die
+	 *          Gatherconf hängt
 	 * @return ob die URL der Webpage umgezogen ist
 	 * @exception MalformedURLException
 	 * @exception IOException
 	 */
-	public boolean hasUrlMoved()
+	public boolean hasUrlMoved(Node node)
 			throws URISyntaxException, MalformedURLException, IOException {
 
 		if (invalidUrl) {
@@ -504,6 +507,7 @@ public class Gatherconf {
 		if (httpResponseCode != 301) {
 			return false;
 		}
+		setInvalidUrl(true);
 		// ermiitelt die neue URL (falls bekannt)
 		urlNew = null;
 		for (Entry<String, List<String>> header : httpConnection.getHeaderFields()
@@ -513,6 +517,7 @@ public class Gatherconf {
 			}
 		}
 		httpConnection.disconnect();
+		new Modify().updateConf(node, this.toString());
 		return true;
 	}
 

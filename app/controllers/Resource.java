@@ -1052,11 +1052,24 @@ public class Resource extends MyController {
 	}
 
 	public static Promise<Result> createVersion(@PathParam("pid") String pid) {
-		return new ModifyAction().call(pid, userId -> {
+		try {
 			Node node = readNodeOrNull(pid);
-			Node result = create.createWebpageVersion(node);
-			return getJsonResult(result);
-		});
+			Gatherconf conf = Gatherconf.create(node.getConf());
+			if (conf.hasUrlMoved(node)) {
+				return Promise.promise(() -> {
+					return JsonMessage(WebgatherUtils.createInvalidUrlMessage(conf));
+				});
+			}
+			return new ModifyAction().call(pid, userId -> {
+				Node result = create.createWebpageVersion(node);
+				return getJsonResult(result);
+			});
+		} catch (Exception e) {
+			play.Logger.error(e.toString());
+			return Promise.promise(() -> {
+				return JsonMessage(new Message(json(e)));
+			});
+		}
 	}
 
 	public static Promise<Result> importVersion(@PathParam("pid") String pid,

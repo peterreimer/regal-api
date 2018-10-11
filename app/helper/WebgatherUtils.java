@@ -33,11 +33,13 @@ import java.util.Map.Entry;
 
 import com.google.common.base.CharMatcher;
 
+import actions.Create;
 import actions.Modify;
 import actions.RegalAction;
 import helper.mail.Mail;
 import models.Gatherconf;
 import models.Globals;
+import models.Message;
 import models.Node;
 import play.Logger;
 import play.Play;
@@ -84,21 +86,22 @@ public class WebgatherUtils {
 	}
 
 	/**
-	 * URL-Umzugsservice
+	 * Erzeugt eine Nachricht für den Fall, dass eine URL umgezogen ist.
 	 * 
-	 * @param node der Knoten einer umzuziehenden Webpage
-	 * @param conf die Gatherconf einer umzuziehenden Webpage
+	 * @param conf die Crawler-Settings (Gatherconf)
+	 * @return die Nachricht
 	 */
-	public static void prepareWebpageMoving(Node node, Gatherconf conf) {
-		if (conf.getInvalidUrl() == true) {
-			return;
-		} // nichts zu tun, ist alles schon geschehen
-		conf.setInvalidUrl(true);
-		String msg = new Modify().updateConf(node, conf.toString());
-		WebgatherLogger.info(msg);
-		WebgatherLogger.info("URL wurde auf ungültig gesetzt. Neue URL "
-				+ conf.getUrlNew() + " muss manuell übernommen werden.");
-		sendInvalidUrlEmail(node, conf);
+	public static Message createInvalidUrlMessage(Gatherconf conf) {
+		Message msg = null;
+		if (conf.getUrlNew() == null) {
+			msg = new Message("Die Website ist unbekannt verzogen.\n"
+					+ "Bitte geben Sie auf dem Tab \"Crawler settings\" eine neue, gültige URL ein. Solange wird die Website nicht erneut eingesammelt.");
+		} else {
+			msg = new Message("Die Website ist umgezogen nach " + conf.getUrlNew()
+					+ ".\n"
+					+ "Bitte bestätigen Sie den Umzug auf dem Tab \"Crawler settings\" (URL kann dort vorher editiert werden).");
+		}
+		return msg;
 	}
 
 	/**
