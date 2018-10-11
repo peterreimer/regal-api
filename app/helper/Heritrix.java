@@ -157,8 +157,9 @@ public class Heritrix {
 			content = content.replaceAll("\\$\\{DESCRIPTION\\}",
 					"Edoweb crawl of" + conf.getUrl());
 			content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
-			content = content.replaceAll("\\$\\{URL_NO_WWW\\}", "http://"
-					+ conf.getUrl().replaceAll("^http://", "").replaceAll("^www\\.", ""));
+			content =
+					content.replaceAll("\\$\\{URL_NO_WWW\\}", "http://" + conf.getUrl()
+							.replaceAll("^http://|https://", "").replaceAll("^www\\.", ""));
 			content = content.replaceAll("\\$\\{URL_SURT_FORM\\}",
 					urlSurtForm(conf.getUrl()));
 			ArrayList<String> domains = conf.getDomains();
@@ -190,8 +191,8 @@ public class Heritrix {
 	 * @return the SURT form of the url
 	 */
 	private static String urlSurtForm(String url) {
-		String urlRaw = url.replaceAll("^http://", "").replaceAll("^www\\.", "")
-				.replaceAll("/$", "");
+		String urlRaw = url.replaceAll("^http://|https://", "")
+				.replaceAll("^www\\.", "").replaceAll("/$", "");
 		String[] urlParts = urlRaw.split("\\.");
 		String urlSurtForm = "+http://(";
 		for (int i = urlParts.length - 1; i >= 0; i--) {
