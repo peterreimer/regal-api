@@ -121,11 +121,11 @@ public class OaiDispatcher {
 
 	private static void createDDCSets(Node node) throws RepositoryException {
 		OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-		String metadata = node.getMetadata();
-		if (metadata == null)
+		String metadata2 = node.getMetadata2();
+		if (metadata2 == null)
 			return;
 		RepositoryResult<Statement> statements =
-				RdfUtils.getStatements(metadata, "fedora:info/");
+				RdfUtils.getStatements(metadata2, "fedora:info/");
 		while (statements.hasNext()) {
 			Statement st = statements.next();
 			String subject = st.getSubject().stringValue();
@@ -303,7 +303,8 @@ public class OaiDispatcher {
 	private static void addWglTransformer(Node node) {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
-			if ("article".equals(type) && node.getLd().containsKey("collectionOne")) {
+			if ("article".equals(type)
+					&& node.getLd2().containsKey("collectionOne")) {
 				node.addTransformer(new Transformer("wgl"));
 			}
 		}

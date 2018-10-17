@@ -173,8 +173,7 @@ public class Read extends RegalAction {
 		n.setAggregationUri(createAggregationUri(n.getPid()));
 		n.setRemUri(n.getAggregationUri() + ".rdf");
 		n.setDataUri(n.getAggregationUri() + "/data");
-		n.setContextDocumentUri(
-				"http://" + Globals.server + "/public/edoweb-resources.json");
+		n.setContextDocumentUri("http://" + Globals.server + "/context.json");
 		writeNodeToCache(n);
 		return n;
 	}
@@ -191,7 +190,7 @@ public class Read extends RegalAction {
 
 	private void addLabel(Node n, Link l) {
 		try {
-			String label = readMetadata(l.getObject(), "title");
+			String label = readMetadata2(l.getObject(), "title");
 			l.setObjectLabel(label);
 			n.removeRelation(l.getPredicate(), l.getObject());
 			n.addRelation(l);
@@ -245,13 +244,8 @@ public class Read extends RegalAction {
 		if ("D".equals(node.getState())) {
 			return null;
 		}
-		Map<String, Object> nm = null;
-		if ("short".equals(style)) {
-			nm = node.getLd2();
-		} else {
-			nm = node.getLd2();
-		}
-		nm.remove("@context");
+		Map<String, Object> nm = node.getLd2();
+
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> parts =
 				(List<Map<String, Object>>) nm.get("hasPart");
@@ -452,9 +446,9 @@ public class Read extends RegalAction {
 	 *          be returned
 	 * @return n-triple metadata
 	 */
-	public String readMetadata(String pid, String field) {
+	public String readMetadata1(String pid, String field) {
 		Node node = internalReadNode(pid);
-		String result = readMetadata(node, field);
+		String result = readMetadata1(node, field);
 		return result == null ? "No " + field : result;
 	}
 
@@ -463,9 +457,9 @@ public class Read extends RegalAction {
 	 * @param field the shortname of metadata field
 	 * @return the ntriples or just one field
 	 */
-	public String readMetadata(Node node, String field) {
+	public String readMetadata1(Node node, String field) {
 		try {
-			String metadata = node.getMetadata();
+			String metadata = node.getMetadata1();
 			if (metadata == null)
 				return null;
 			if (field == null || field.isEmpty()) {
@@ -481,6 +475,18 @@ public class Read extends RegalAction {
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}
+	}
+
+	/**
+	 * @param pid the pid of the object
+	 * @param field if field is specified, only the value of a certain field will
+	 *          be returned
+	 * @return n-triple metadata
+	 */
+	public String readMetadata2(String pid, String field) {
+		Node node = internalReadNode(pid);
+		String result = readMetadata2(node, field);
+		return result == null ? "No " + field : result;
 	}
 
 	/**
@@ -561,10 +567,10 @@ public class Read extends RegalAction {
 	 *          metadata will be returned
 	 * @return n-triple metadata
 	 */
-	public String readMetadataFromCache(String pid, String field) {
+	public String readMetadata1FromCache(String pid, String field) {
 		try {
 			Node node = readNode(pid);
-			String metadata = node.getMetadata();
+			String metadata = node.getMetadata1();
 			if (metadata == null || metadata.isEmpty())
 				throw new HttpArchiveException(404,
 						"No Metadata on " + pid + " available!");
@@ -628,9 +634,9 @@ public class Read extends RegalAction {
 	 * @param predicate the property in its long form
 	 * @return all objects that are referenced using the predicate
 	 */
-	public List<String> getNodeLdProperty(Node node, String predicate) {
+	public List<String> getNodeLdProperty1(Node node, String predicate) {
 		List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
-				predicate, node.getMetadata(), RDFFormat.NTRIPLES);
+				predicate, node.getMetadata1(), RDFFormat.NTRIPLES);
 		return linkedObjects;
 	}
 
@@ -715,7 +721,7 @@ public class Read extends RegalAction {
 
 	private String getTitle(Node node) {
 		try {
-			return readMetadata(node, "title");
+			return readMetadata2(node, "title");
 		} catch (Exception e) {
 			return "No Title";
 		}
@@ -881,7 +887,7 @@ public class Read extends RegalAction {
 
 	String getIdOfParallelEdition(Node node) {
 		String alephid;
-		alephid = new Read().readMetadata(node, "parallelEdition");
+		alephid = new Read().readMetadata2(node, "parallelEdition");
 		alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
 		return alephid;
 	}

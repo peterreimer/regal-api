@@ -19,11 +19,11 @@ import play.mvc.Result;
 @BasicAuth
 public class Forms extends MyController {
 
-	public static Promise<Result> getCatalogForm() {
+	public static Promise<Result> getCatalogForm(String pid) {
 		return new CreateAction().call((userId) -> {
 			try {
 				DynamicForm form = Form.form();
-				return ok(views.html.catalogForm.render(form));
+				return ok(views.html.catalogForm.render(pid, form));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -35,6 +35,7 @@ public class Forms extends MyController {
 			try {
 				DynamicForm form = Form.form().bindFromRequest();
 				String alephId = form.get("alephId");
+				String pid = form.get("pid");
 				Node previewNode = new Node();
 				previewNode.setPid("preview:1");
 				String metadata =
@@ -42,7 +43,8 @@ public class Forms extends MyController {
 				previewNode.setMetadata2(metadata);
 				flash("message",
 						"Preview! Press 'Create' on the page bottom to create new object.");
-				return ok(views.html.catalogPreview.render(previewNode, null, alephId));
+				return ok(
+						views.html.catalogPreview.render(pid, previewNode, null, alephId));
 
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);

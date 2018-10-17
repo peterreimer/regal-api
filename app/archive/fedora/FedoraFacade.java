@@ -326,7 +326,7 @@ public class FedoraFacade {
 		try {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "metadata").execute();
-			node.setMetadata(
+			node.setMetadata1(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional

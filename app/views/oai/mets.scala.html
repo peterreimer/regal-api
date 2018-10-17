@@ -4,7 +4,7 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd"
  OBJID="@data.get("@id")"
- LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
+ LABEL="@data.get("title")">
 
 
 @addFile(objects:Any)={
@@ -63,6 +63,7 @@
 								<mets:fptr FILEID="@map.get("@id").asInstanceOf[String].replace(":","-")"/>
 								</mets:div>
 								}
+							case _ => {}
 						}
 				}
 		}
@@ -79,7 +80,7 @@
 	<mets:mdRef xlink:href="@models.Globals.urnbase@data.get("@id")" LOCTYPE="URL" MDTYPE="OTHER" LABEL="Publisso Entity"/>
 </mets:dmdSec>
 <mets:dmdSec ID="DM1">
-	<mets:mdWrap MDTYPE="DC" LABEL="@data.get("title").asInstanceOf[List[String]].get(0)">
+	<mets:mdWrap MDTYPE="DC" LABEL="@data.get("title")">
 		<mets:xmlData>
 		@oaidcView(dcData)
 		</mets:xmlData>

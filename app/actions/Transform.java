@@ -62,7 +62,7 @@ public class Transform {
 			RegalToMabMapper mapper = new RegalToMabMapper();
 			MabRecord record;
 			record = mapper.map(
-					new ByteArrayInputStream(node.getMetadata().getBytes("utf-8")),
+					new ByteArrayInputStream(node.getMetadata2().getBytes("utf-8")),
 					node.getPid());
 			record.httpAdresse = Globals.urnbase + node.getPid();
 			record.doi = node.getDoi();

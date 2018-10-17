@@ -3,7 +3,7 @@
 @import models.Globals
 @import org.elasticsearch.search.aggregations.Aggregations
 @import models.Node
-@(hit:Node,aggregations:Aggregations,alephId:String)
+@(pid:String,hit:Node,aggregations:Aggregations,alephId:String)
 @namespace={@Globals.defaultNamespace}
 @main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
 models.Globals.users.getUser(ctx())){
@@ -20,10 +20,13 @@ models.Globals.users.getUser(ctx())){
 	tabindex="0" style="display: none;" value=@namespace>
 <input size="30" class="input-widget alephId-field" name="alephId"
 	tabindex="0" style="display: none;" value=@alephId>
-	
+<input name="pid" value="@pid" hidden>	
 <a href="/add" class="btn btn-default">Cancel</a>
-
+@if(pid!=""){
+<input type="submit" value="Update @pid" class="btn btn-success" tabindex="2" />
+}else{
 <input type="submit" value="Create" class="btn btn-success" tabindex="2" />
+}
 <br />
 } }
 
