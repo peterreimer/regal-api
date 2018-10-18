@@ -142,12 +142,11 @@ public class MyUtils extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			if (alephid != null && !alephid.isEmpty()) {
-				String result = modify.lobidify(node, alephid);
 				String result2 = modify.lobidify2(node, alephid);
-				return JsonMessage(new Message("Load " + alephid + " to " + pid + ".\n"
-						+ result + "\n" + result2));
+				return JsonMessage(
+						new Message("Load " + alephid + " to " + pid + ".\n" + result2));
 			} else {
-				String result = modify.lobidify(node);
+				String result = modify.lobidify2(node);
 				return JsonMessage(new Message(result));
 			}
 		});
@@ -159,12 +158,12 @@ public class MyUtils extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			if (date != null && !date.isEmpty()) {
-				String result = modify.lobidify(node,
+				String result = modify.lobidify2(node,
 						LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")));
 				return JsonMessage(new Message(result));
 			} else {
 				LocalDate lastUpdate = getUpdateTimeStamp(node);
-				String result = modify.lobidify(node, lastUpdate);
+				String result = modify.lobidify2(node, lastUpdate);
 				return JsonMessage(new Message(result));
 			}
 

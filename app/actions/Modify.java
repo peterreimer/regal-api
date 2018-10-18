@@ -269,18 +269,18 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	public String updateLobidifyAndEnrichMetadataIfRecentlyUpdated(String pid,
+	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,
 			String content, LocalDate date) {
 		try {
 			Node node = new Read().readNode(pid);
-			return updateLobidifyAndEnrichMetadataIfRecentlyUpdated(node, content,
+			return updateLobidify2AndEnrichMetadataIfRecentlyUpdated(node, content,
 					date);
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
 		}
 	}
 
-	public String updateLobidifyAndEnrichMetadataIfRecentlyUpdated(Node node,
+	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(Node node,
 			String content, LocalDate date) {
 		StringBuffer msg = new StringBuffer();
 		String pid = node.getPid();
@@ -297,6 +297,7 @@ public class Modify extends RegalAction {
 					.get(0);
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
+			alephid = alephid.replaceAll("#.*", "");
 			try {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
@@ -694,12 +695,12 @@ public class Modify extends RegalAction {
 	 * @param node generate metadatafile with lobid data for this node
 	 * @return a short message
 	 */
-	public String lobidify(Node node) {
+	public String lobidify2(Node node) {
 		return updateLobidify2AndEnrichMetadata(node, node.getMetadata2());
 	}
 
-	public String lobidify(Node node, LocalDate date) {
-		return updateLobidifyAndEnrichMetadataIfRecentlyUpdated(node,
+	public String lobidify2(Node node, LocalDate date) {
+		return updateLobidify2AndEnrichMetadataIfRecentlyUpdated(node,
 				node.getMetadata2(), date);
 	}
 
@@ -720,7 +721,7 @@ public class Modify extends RegalAction {
 	 * @return a message
 	 */
 	public String lobidify(List<Node> nodes) {
-		return apply(nodes, n -> lobidify(n));
+		return apply(nodes, n -> lobidify2(n));
 	}
 
 	/**
