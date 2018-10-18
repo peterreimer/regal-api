@@ -1051,7 +1051,7 @@ public class Node implements java.io.Serializable {
 		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2)
 				|| RdfUtils.hasTriple(pid,
 						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata2)
-				|| RdfUtils.hasTriple(pid, "http: // purl.org/ontology/bibo/doi",
+				|| RdfUtils.hasTriple(pid, "http://purl.org/ontology/bibo/doi",
 						metadata2)
 				|| hasDoi() || hasUrn();
 	}
