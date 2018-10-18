@@ -254,6 +254,7 @@ public class Modify extends RegalAction {
 					.get(0);
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
+			alephid = alephid.replaceAll("#.*", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
 
