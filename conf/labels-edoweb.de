@@ -8542,12 +8542,12 @@
 }, {
   "uri" : "http://purl.org/dc/terms/issued",
   "comment" : "",
-  "label" : "Erschienen in",
+  "label" : "Erscheinungsjahr",
   "icon" : "",
   "name" : "issued",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "51",
+  "weight" : "61",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
