@@ -482,9 +482,9 @@ public class Helper {
 			String publishedBy = hit.at("/publishedBy").asText();
 			String startDate = hit.at("/startDate").asText();
 
-			if (startDate != null && !startDate.isEmpty()) {
-				result.put("regal:publishYear", startDate);
-			}
+			// if (startDate != null && !startDate.isEmpty()) {
+			// result.put("regal:publishYear", startDate);
+			// }
 			if (location != null && !location.isEmpty()) {
 				result.put("regal:publishLocation", location);
 			}

@@ -850,10 +850,31 @@ public class JsonMapper {
 			}
 			rdf.put(hasData, hasDataMap);
 		}
+		ObjectMapper mapper = new ObjectMapper();
 
+		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		if (issued != null) {
+			rdf.put("issued", issued);
+		}
 		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
 		postprocessing(rdf);
 		return rdf;
+	}
+
+	public static String getPublicationMap(JsonNode hit) {
+		String issued = hit.at("/issued").asText();
+		if (issued != null && !issued.isEmpty()) {
+			return issued;
+		}
+		String startDate = hit.at("/publication/0/startDate").asText();
+		if (startDate != null && !startDate.isEmpty()) {
+			return startDate;
+		}
+		String publicationYear = hit.at("/publicationYear/0").asText();
+		if (publicationYear != null && !publicationYear.isEmpty()) {
+			return publicationYear.substring(0, 4);
+		}
+		return null;
 	}
 
 }
