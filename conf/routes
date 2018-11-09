@@ -19,7 +19,7 @@ GET /checks/doiStatus				controllers.Checks.doiStatus(from: Int?=0,until: Int?=1
 
 # Resource
 GET /resource/status				controllers.Resource.listResourcesStatus(namespace?="",contentType?="",from: Int ?=0, until: Int?=100)
-GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10)
+GET /find					        controllers.Resource.search(q?="*",from: Int?=0,until: Int?=10,format?="html")
 GET /resource/:pid/urn				controllers.Resource.listUrn(pid)
 GET /resource/:pid/edit				controllers.Resource.edit(pid:String,format : String?="json",topicId?=null)
 GET /resource/:pid/metadata			controllers.Resource.listMetadata(pid,field?="")
@@ -38,6 +38,7 @@ GET /resource/:pid.pdfbox			controllers.Resource.asPdfboxTxt(pid)
 GET /resource/:pid.aleph			controllers.Resource.asAleph(pid)
 GET /resource/:pid.datacite			controllers.Resource.asDatacite(pid, validate : Boolean ?= false)
 GET /resource/:pid.mets			    controllers.Resource.asMets(pid, validate : Boolean ?= false)
+GET /resource/:pid.csv			    controllers.Resource.asCsv(pid)
 GET /resource/:pid					controllers.Resource.listResource(pid,design?="")
 GET /resource 						controllers.Resource.listResources(namespace?="",contentType?="",from: Int ?=0, until: Int?=10)
 GET /resource/:pid/parts			controllers.Resource.listParts(pid,style?="")

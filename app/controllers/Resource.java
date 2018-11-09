@@ -612,7 +612,8 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json,text/html", nickname = "search", value = "search", notes = "Find resources", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> search(@QueryParam("q") String queryString,
-			@QueryParam("from") int from, @QueryParam("until") int until) {
+			@QueryParam("from") int from, @QueryParam("until") int until,
+			@QueryParam("format") String format) {
 		return new ReadMetadataAction().call(null, node -> {
 			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
 			try {
@@ -621,10 +622,20 @@ public class Resource extends MyController {
 				Aggregations aggs = response.getAggregations();
 				List<SearchHit> list = Arrays.asList(hits.getHits());
 				hitMap = read.hitlistToMap(list);
+				if ("csv".equals(format)) {
+					return getCsvResults(new ObjectMapper().valueToTree(hitMap));
+				}
+				if ("json".equals(format)) {
+					return getJsonResult(hitMap);
+				}
 				if (request().accepts("text/html")) {
 					return ok(search.render(hitMap, aggs, queryString,
 							hits.getTotalHits(), from, until, Globals.defaultNamespace));
+				}
+				if (request().accepts("text/csv")) {
+					return getCsvResults(new ObjectMapper().valueToTree(hitMap));
 				} else {
+
 					return getJsonResult(hitMap);
 				}
 			} catch (Exception e) {
@@ -848,6 +859,14 @@ public class Resource extends MyController {
 				validate(xml, "public/schemas/mets.xsd");
 			}
 			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "application/xml", nickname = "asCsv", value = "asCsv", notes = "Returns a Csv display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asCsv(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("application/xml");
+			return getCsvResult(new ObjectMapper().valueToTree(node.getLd2()));
 		});
 	}
 
