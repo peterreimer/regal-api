@@ -156,54 +156,17 @@ public class MyController extends Controller {
 		}
 	}
 
-	protected static Result getCsvResult(JsonNode hitMap) {
-
+	protected static Result getCsvResults(JsonNode hitMap) {
 		String[] header = new String[] { "id", "title", "contributions", "issued",
 				"contentType", "collectionOne", "created", "doi", "alephId", "url" };
-
 		try (Writer output = new StringWriter();
 				ICsvMapWriter mapWriter = new org.supercsv.io.CsvMapWriter(output,
 						CsvPreference.EXCEL_PREFERENCE);) {
-
-			// write the header
 			mapWriter.writeHeader(header);
-
 			hitMap.forEach(hit -> {
 				try {
-					Map<String, Object> result = new HashMap<>();
-					String id;
-					String title;
-					String contributions;
-					String issued;
-					String contentType;
-					String collectionOne;
-					String created;
-					String doi;
-					String alephId;
-					String url;
-					id = hit.at("/@id").asText();
-					title = hit.at("/title/0").asText();
-					contributions = getContributions(hit) + "";
-					issued = hit.at("/issued").asText();
-					url = Globals.protocol + "://" + Globals.server + "/resource/" + id;
-					contentType = hit.at("/contentType").asText();
-					collectionOne = hit.at("/collectionOne").asText();
-					created = hit.at("/isDescribedBy/created").asText();
-					doi = hit.at("/doi").asText();
-					alephId = hit.at("/hbzId/0").asText();
-					result.put(header[0], id);
-					result.put(header[1], title);
-					result.put(header[2], contributions);
-					result.put(header[3], issued);
-					result.put(header[4], contentType);
-					result.put(header[5], collectionOne);
-					result.put(header[6], created);
-					result.put(header[7], doi);
-					result.put(header[8], alephId);
-					result.put(header[9], url);
-					play.Logger.debug("" + result);
+					Map<String, Object> result = createCsvLine(hit, header);
 					mapWriter.write(result, header);
-
 				} catch (Exception e) {
 					play.Logger.warn("", e);
 				}
@@ -218,12 +181,78 @@ public class MyController extends Controller {
 
 	}
 
+	protected static Result getCsvResult(JsonNode hit) {
+		String[] header = new String[] { "id", "title", "contributions", "issued",
+				"contentType", "collectionOne", "created", "doi", "alephId", "url" };
+		try (Writer output = new StringWriter();
+				ICsvMapWriter mapWriter = new org.supercsv.io.CsvMapWriter(output,
+						CsvPreference.EXCEL_PREFERENCE);) {
+			mapWriter.writeHeader(header);
+			try {
+				Map<String, Object> result = createCsvLine(hit, header);
+				mapWriter.write(result, header);
+			} catch (Exception e) {
+				play.Logger.warn("", e);
+			}
+			output.flush();
+			mapWriter.flush();
+			response().setContentType("text/csv");
+			return ok(output.toString());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	private static Map<String, Object> createCsvLine(JsonNode hit,
+			String[] header) {
+		Map<String, Object> result = new HashMap<>();
+		String id;
+		String title;
+		String contributions;
+		String issued;
+		String contentType;
+		String collectionOne;
+		String created;
+		String doi;
+		String alephId;
+		String url;
+		id = hit.at("/@id").asText();
+		title = hit.at("/title/0").asText();
+		contributions = getContributions(hit) + "";
+		issued = hit.at("/issued").asText();
+		url = Globals.protocol + "://" + Globals.server + "/resource/" + id;
+		contentType = hit.at("/contentType").asText();
+		collectionOne = getCollectionOne(hit);
+		created = hit.at("/isDescribedBy/created").asText();
+		doi = hit.at("/doi").asText();
+		alephId = hit.at("/hbzId/0").asText();
+		result.put(header[0], id);
+		result.put(header[1], title);
+		result.put(header[2], contributions);
+		result.put(header[3], issued);
+		result.put(header[4], contentType);
+		result.put(header[5], collectionOne);
+		result.put(header[6], created);
+		result.put(header[7], doi);
+		result.put(header[8], alephId);
+		result.put(header[9], url);
+		play.Logger.debug("" + result);
+		return result;
+	}
+
+	private static String getCollectionOne(JsonNode hit) {
+		String label = hit.at("/collectionOne/0/prefLabel").asText();
+		String gndid = hit.at("/collectionOne/0/gndIdentifier").asText();
+		return label + " (" + gndid + ")";
+	}
+
 	private static List<String> getContributions(JsonNode hitMap) {
 		List<String> result = new ArrayList<>();
 		hitMap.at("/contribution").forEach(n -> {
 			String label = n.at("/agent/0/prefLabel") + "";
 			String gndid = n.at("/agent/0/gndIdentifier") + "";
-			result.add(label + "(" + gndid + ")");
+			result.add(label + " (" + gndid + ")");
 		});
 		return result;
 	}

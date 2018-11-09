@@ -623,7 +623,7 @@ public class Resource extends MyController {
 				List<SearchHit> list = Arrays.asList(hits.getHits());
 				hitMap = read.hitlistToMap(list);
 				if ("csv".equals(format)) {
-					return getCsvResult(new ObjectMapper().valueToTree(hitMap));
+					return getCsvResults(new ObjectMapper().valueToTree(hitMap));
 				}
 				if ("json".equals(format)) {
 					return getJsonResult(hitMap);
@@ -633,7 +633,7 @@ public class Resource extends MyController {
 							hits.getTotalHits(), from, until, Globals.defaultNamespace));
 				}
 				if (request().accepts("text/csv")) {
-					return getCsvResult(new ObjectMapper().valueToTree(hitMap));
+					return getCsvResults(new ObjectMapper().valueToTree(hitMap));
 				} else {
 
 					return getJsonResult(hitMap);
@@ -859,6 +859,14 @@ public class Resource extends MyController {
 				validate(xml, "public/schemas/mets.xsd");
 			}
 			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "application/xml", nickname = "asCsv", value = "asCsv", notes = "Returns a Csv display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asCsv(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("application/xml");
+			return getCsvResult(new ObjectMapper().valueToTree(node.getLd2()));
 		});
 	}
 
