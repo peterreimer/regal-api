@@ -221,7 +221,7 @@ public class MyController extends Controller {
 		title = hit.at("/title/0").asText();
 		contributions = getContributions(hit) + "";
 		issued = hit.at("/issued").asText();
-		url = Globals.protocol + "://" + Globals.server + "/resource/" + id;
+		url = Globals.protocol + Globals.server + "/resource/" + id;
 		contentType = hit.at("/contentType").asText();
 		collectionOne = getCollectionOne(hit);
 		created = hit.at("/isDescribedBy/created").asText();
