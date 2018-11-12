@@ -250,10 +250,24 @@ public class MyController extends Controller {
 	private static List<String> getContributions(JsonNode hitMap) {
 		List<String> result = new ArrayList<>();
 		hitMap.at("/contribution").forEach(n -> {
-			String label = n.at("/agent/0/prefLabel") + "";
-			String gndid = n.at("/agent/0/gndIdentifier") + "";
+			String label = n.at("/agent/0/prefLabel").textValue();
+			String gndid = n.at("/agent/0/gndIdentifier").textValue();
 			result.add(label + " (" + gndid + ")");
 		});
+		if (result.isEmpty()) {
+			hitMap.at("/creator").forEach(c -> {
+				String label = c.at("/prefLabel").asText();
+				String uri = c.at("/@id").asText();
+				String gndid = uri.substring(uri.lastIndexOf('/') + 1);
+				result.add(label + " (" + gndid + ")");
+			});
+			hitMap.at("/contributor").forEach(c -> {
+				String label = c.at("/prefLabel").asText();
+				String uri = c.at("/@id").asText();
+				String gndid = uri.substring(uri.lastIndexOf('/') + 1);
+				result.add(label + " (" + gndid + ")");
+			});
+		}
 		return result;
 	}
 
