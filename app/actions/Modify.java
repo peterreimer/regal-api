@@ -989,7 +989,7 @@ public class Modify extends RegalAction {
 		List<Statement> result = new ArrayList<Statement>();
 		try {
 			String alephid = new Read().getIdOfParallelEdition(node);
-			String uri = Globals.lobidAddress + alephid + "/about?format=source";
+			String uri = Globals.lobidHbz01 + alephid + "/about?format=source";
 			play.Logger.info("GET " + uri);
 			try (InputStream in =
 					RdfUtils.urlToInputStream(new URL(uri), "application/xml")) {
