@@ -625,6 +625,8 @@ public class Node implements java.io.Serializable {
 	 */
 	@JsonIgnore()
 	public String getMetadata2() {
+		if (metadata2 == null || metadata2.isEmpty())
+			return metadata1;
 		return metadata2;
 	}
 
