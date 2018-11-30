@@ -1240,7 +1240,6 @@ public class Node implements java.io.Serializable {
 	/**
 	 * @return a map representing the rdf data on this object
 	 */
-	@JsonValue
 	public Map<String, Object> getLd1() {
 		Map<String, Object> result = new JsonMapper(this).getLd();
 		if ("D".equals(getState())) {
@@ -1274,6 +1273,7 @@ public class Node implements java.io.Serializable {
 		}
 	}
 
+	@JsonValue
 	public Map<String, Object> getLd2() {
 		Map<String, Object> result = new JsonMapper(this).getLd2();
 		if ("D".equals(getState())) {
