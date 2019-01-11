@@ -90,6 +90,10 @@ public class DataciteRecord implements java.io.Serializable {
 	 * Type.
 	 */
 	public String type = null;
+	/**
+	 * General resource type
+	 */
+	public String typeGeneral = "";
 
 	/**
 	 * @param doi
@@ -216,6 +220,12 @@ public class DataciteRecord implements java.io.Serializable {
 					forms.appendChild(form);
 				}
 				root.appendChild(forms);
+			}
+			if (this.typeGeneral != null && !typeGeneral.isEmpty()) {
+				Element resourceType = doc.createElement("resourceType");
+				resourceType.setAttribute("resourceTypeGeneral", typeGeneral);
+				resourceType.appendChild(doc.createTextNode(type));
+				root.appendChild(resourceType);
 			}
 			doc.appendChild(root);
 			return archive.fedora.XmlUtils.docToString(doc);

@@ -32,6 +32,11 @@ import models.Pair;
 @SuppressWarnings("unchecked")
 public class DataciteMapper {
 
+	private static final String TYPE_VIDEO =
+			"http://rdaregistry.info/termList/RDAMediaType/1008";
+	private static final String TYPE_MISC =
+			"http://purl.org/lobid/lv#Miscellaneous";
+
 	/**
 	 * @param doi the doi identifier
 	 * @param ld the object as json-ld linked data in a map
@@ -51,12 +56,33 @@ public class DataciteMapper {
 		addAlternativeIdentifiers(ld, rec);
 		addSizes(ld, rec);// http://purl.org/dc/terms/bibliographicCitation
 		addFormats(ld, rec);// mime
-		addResourceType(ld, rec);// bibliographic resource
+		addResourceTypeGeneral(ld, rec);// bibliographic resource
+		addResourceType(ld, rec);
 		return rec;
 	}
 
 	private static void addResourceType(JsonNode ld, DataciteRecord rec) {
-		rec.type = "Text";
+		rec.type = ld.at("/rdftype/0/prefLabel").asText();
+		if ("Abschlussarbeit".equals(rec.type)) {
+			rec.type = "Hochschulschrift";
+		} else if ("Statistics".equals(rec.type)) {
+			rec.type = "Statistik";
+		} else if ("Leitlinie/Normschrift".equals(rec.type)) {
+			rec.type = "Leitlinie";
+		}
+	}
+
+	private static void addResourceTypeGeneral(JsonNode ld, DataciteRecord rec) {
+		rec.typeGeneral = ld.at("/rdftype/0/@id").asText();
+		play.Logger.debug(ld.asText());
+		if (TYPE_VIDEO.equals(rec.typeGeneral)) {
+			rec.typeGeneral = "AudioVisual";
+		}
+		if (TYPE_MISC.equals(rec.typeGeneral)) {
+			rec.typeGeneral = "Other";
+		} else {
+			rec.typeGeneral = "Text";
+		}
 	}
 
 	private static void addFormats(JsonNode ld, DataciteRecord rec) {
