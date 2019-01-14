@@ -69,7 +69,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum AgentIdSelection {
-		Undefined, Edge, IE, Firefox, Safari;
+		Undefined, Chrome, Edge, IE, Firefox, Safari;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -77,14 +77,16 @@ public class Gatherconf {
 			new Hashtable<AgentIdSelection, String>() {
 				{
 					put(AgentIdSelection.Undefined, "\"InconspiciousWebBrowser/1.0\"");
+					put(AgentIdSelection.Chrome,
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36\"");
 					put(AgentIdSelection.Edge,
-							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/62.0.3202.94%20Safari/537.36\"");
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36\"");
 					put(AgentIdSelection.IE,
 							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20Trident/7.0;%20BOIE9;ENUSMSE;%20rv:11.0)%20like%20Gecko\"");
 					put(AgentIdSelection.Firefox,
 							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:43.0)%20Gecko/20100101%20Firefox/43.0\"");
 					put(AgentIdSelection.Safari,
-							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/61.0.3163.100%20Safari/537.36\"");
+							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36\"");
 				}
 			};
 
@@ -127,7 +129,7 @@ public class Gatherconf {
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
 		quotaUnitSelection = null;
-		agentIdSelection = AgentIdSelection.Firefox;
+		agentIdSelection = AgentIdSelection.Chrome;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
