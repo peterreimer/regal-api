@@ -77,8 +77,7 @@ public class DataciteMapper {
 		play.Logger.debug(ld.asText());
 		if (TYPE_VIDEO.equals(rec.typeGeneral)) {
 			rec.typeGeneral = "AudioVisual";
-		}
-		if (TYPE_MISC.equals(rec.typeGeneral)) {
+		} else if (TYPE_MISC.equals(rec.typeGeneral)) {
 			rec.typeGeneral = "Other";
 		} else {
 			rec.typeGeneral = "Text";
