@@ -67,7 +67,7 @@ public class DataciteMapper {
 			rec.type = "Hochschulschrift";
 		} else if ("Statistics".equals(rec.type)) {
 			rec.type = "Statistik";
-		} else if ("Leitlinie/Normschrift".equals(rec.type)) {
+		} else if ("Leitlinien / Normschriften".equals(rec.type)) {
 			rec.type = "Leitlinie";
 		}
 	}
