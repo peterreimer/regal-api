@@ -10,12 +10,12 @@
 }
 @createViewerLinks(viewerInfo:ViewerInfo)={
 	@if(viewerInfo!=null){
-			@if(!viewerInfo.contentType.equals("version")) {
-				@if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
+			@if(!"version".equals(viewerInfo.contentType)) {
+				@if(ViewerInfo.Style.EMBEDDED.equals(viewerInfo.style)){
 				   @mediaViewers.standardViewer(viewerInfo)
 				} else{
-					@if(viewerInfo.accessScheme.equals("public")){
-						@if(viewerInfo.viewertype.equals(ViewerInfo.ViewerType.DEEPZOOM)){
+					@if("public".equals(viewerInfo.accessScheme)){
+						@if(ViewerInfo.ViewerType.DEEPZOOM.equals(viewerInfo.viewertype)){
 				   			<div id="thumbnail" class="thumb">
 							<a href=@viewerInfo.getViewerLink()  target="_blank">
 								<img src=@viewerInfo.thumbnail width="150"/>
