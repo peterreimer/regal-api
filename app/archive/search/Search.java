@@ -104,6 +104,9 @@ public class Search {
 			init(i);
 			play.Logger.info("Init elasticsearch index " + i + "2");
 			init(i + "2");
+			play.Logger.info(
+					"Init elasticsearch fulltext " + Globals.PDFBOX_OCR_INDEX_PREF + i);
+			init(Globals.PDFBOX_OCR_INDEX_PREF + i);
 		}
 	}
 
@@ -113,7 +116,6 @@ public class Search {
 			String indexConfig = CopyUtils.copyToString(
 					Play.application().resourceAsStream(Globals.elasticsearchSettings),
 					"utf-8");
-
 			client.admin().indices().prepareCreate(index).setSource(indexConfig)
 					.execute().actionGet();
 		} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
