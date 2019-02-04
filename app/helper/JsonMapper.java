@@ -111,6 +111,7 @@ public class JsonMapper {
 			"http://purl.org/ontology/bibo/AudioDocument",
 			"http://purl.org/ontology/bibo/Image",
 			"http://purl.org/ontology/bibo/Article",
+			"http://purl.org/ontology/bibo/Chapter",
 			"http://rdvocab.info/termList/RDACarrierType/1018",
 			"http://rdvocab.info/termList/RDACarrierType/1010",
 			"http://iflastandards.info/ns/isbd/terms/mediatype/T1002",

@@ -273,7 +273,7 @@
 }, {
   "uri" : "http://dbpedia.org/ontology/institution",
   "comment" : "",
-  "label" : "Sammlungszuordnung",
+  "label" : "Sammlung",
   "icon" : "",
   "name" : "institution",
   "referenceType" : "@id",
@@ -393,7 +393,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://dewey.info/class/018/",
-  "label" : "Kataloge nach Autor, Erscheinungsjahr usw.",
+  "label" : "Kataloge nach Autor/in, Erscheinungsjahr usw.",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -7768,7 +7768,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://id.loc.gov/vocabulary/relators/aft",
-  "label" : "Autor des Nachwortes",
+  "label" : "Autor/in des Nachwortes",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -7823,7 +7823,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://id.loc.gov/vocabulary/relators/ctb",
-  "label" : "Mitwirkende",
+  "label" : "Mitwirkende/r",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -8333,7 +8333,7 @@
 }, {
   "uri" : "http://purl.org/dc/elements/1.1/contributor",
   "comment" : "",
-  "label" : "Mitwirkende",
+  "label" : "Mitwirkende/r",
   "icon" : "",
   "name" : "contributorName",
   "referenceType" : "String",
@@ -8355,7 +8355,7 @@
 }, {
   "uri" : "http://purl.org/dc/elements/1.1/creator",
   "comment" : "",
-  "label" : "Autor",
+  "label" : "Autor/in",
   "icon" : "",
   "name" : "creatorName",
   "referenceType" : "String",
@@ -8406,7 +8406,7 @@
 }, {
   "uri" : "http://purl.org/dc/terms/abstract",
   "comment" : "",
-  "label" : "Zusammenfassung",
+  "label" : "Abstract/Summary",
   "icon" : "",
   "name" : "abstractText",
   "referenceType" : "String",
@@ -8439,7 +8439,7 @@
 }, {
   "uri" : "http://purl.org/dc/terms/contributor",
   "comment" : "",
-  "label" : "Mitwirkende",
+  "label" : "Mitwirkende/r",
   "icon" : "",
   "name" : "contributor",
   "referenceType" : "@id",
@@ -8461,7 +8461,7 @@
 }, {
   "uri" : "http://purl.org/dc/terms/creator",
   "comment" : "",
-  "label" : "Autor",
+  "label" : "Autor/in",
   "icon" : "",
   "name" : "creator",
   "referenceType" : "@id",
@@ -8933,7 +8933,7 @@
 }, {
   "uri" : "http://purl.org/lobid/lv#subjectAltLabel",
   "comment" : "",
-  "label" : "Freie Schlagwörter",
+  "label" : "Schlagwörter",
   "icon" : "",
   "name" : "subjectAltLabel",
   "referenceType" : "String",
@@ -13079,12 +13079,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/nwbib#s768010",
-  "label" : "Einzelne Autoren (Primärliteratur)",
+  "label" : "Einzelne AutorInnen (Primärliteratur)",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/lobid/nwbib#s768030",
-  "label" : "Einzelne Autoren (Sekundärliteratur)",
+  "label" : "Einzelne AutorInnen (Sekundärliteratur)",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -19967,7 +19967,7 @@
 }, {
   "uri" : "http://purl.org/ontology/bibo/editor",
   "comment" : "",
-  "label" : "Herausgeber",
+  "label" : "Herausgeber/in",
   "icon" : "",
   "name" : "editor",
   "referenceType" : "@id",
@@ -21254,7 +21254,7 @@
 }, {
   "uri" : "info:regal/zettel/collectionOne",
   "comment" : "",
-  "label" : "Leibniz Organisation",
+  "label" : "LeibnizOpen",
   "icon" : "",
   "name" : "collectionOne",
   "referenceType" : "@id",
@@ -21666,7 +21666,7 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
-  "uri" : "ttps://creativecommons.org/publicdomain/zero/1.0/",
+  "uri" : "https://creativecommons.org/publicdomain/zero/1.0/",
   "comment" : "",
   "label" : "CC0 1.0",
   "icon" : "",
@@ -21675,4 +21675,17 @@
   "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
-} ]
+}, {
+  "uri" : "info:regal/zettel/typeHeader",
+  "label" : "Publikationstyp",
+  "referenceType" : "String",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://purl.org/ontology/bibo/Chapter",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}
+
+
+]
