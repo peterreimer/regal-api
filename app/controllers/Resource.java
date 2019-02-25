@@ -1013,7 +1013,7 @@ public class Resource extends MyController {
 					response().setHeader("Content-Type", "text/html; charset=utf-8");
 					return ok(resource.render(result, null));
 				} else {
-					return getJsonResult(result);
+					return getJsonResult(result.getLd2());
 				}
 			} catch (Exception e) {
 				return JsonMessage(new Message(e, 500));
