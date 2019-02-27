@@ -1263,7 +1263,7 @@ public class Modify extends RegalAction {
 
 	private List<String> findAllOrcidIds(String metadata) {
 		HashMap<String, String> result = new HashMap<>();
-		Matcher m = Pattern.compile("http://orcid.org/[^>]*").matcher(metadata);
+		Matcher m = Pattern.compile("https?://orcid.org/[^>]*").matcher(metadata);
 		while (m.find()) {
 			String id = m.group();
 			result.put(id, id);
