@@ -854,6 +854,10 @@ public class Modify extends RegalAction {
 					find(node, metadata, "info:regal/zettel/collectionOne");
 			enrichStatements.addAll(collectionOne);
 
+			List<Statement> collectionTwo =
+					find(node, metadata, "info:regal/zettel/collectionTwo");
+			enrichStatements.addAll(collectionTwo);
+
 			List<Statement> containedIn =
 					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
 			enrichStatements.addAll(containedIn);
@@ -948,6 +952,10 @@ public class Modify extends RegalAction {
 			List<Statement> collectionOne =
 					find(node, metadata, "info:regal/zettel/collectionOne");
 			enrichStatements.addAll(collectionOne);
+
+			List<Statement> collectionTwo =
+					find(node, metadata, "info:regal/zettel/collectionTwo");
+			enrichStatements.addAll(collectionTwo);
 
 			List<Statement> containedIn =
 					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
