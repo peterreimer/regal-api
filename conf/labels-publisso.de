@@ -6342,6 +6342,17 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://hbz-nrw.de/regal#fundingJoined",
+  "comment" : "",
+  "label" : "Förderer",
+  "icon" : "",
+  "name" : "fundingJoined",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "172",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://hbz-nrw.de/regal#fundingProgram",
   "comment" : "",
   "label" : "Förderprogramm",
@@ -6349,6 +6360,17 @@
   "name" : "fundingProgram",
   "referenceType" : "String",
   "container" : "@list",
+  "weight" : "174",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#fundingProgramJoined",
+  "comment" : "",
+  "label" : "Förderprogramm",
+  "icon" : "",
+  "name" : "fundingProgramJoined",
+  "referenceType" : "String",
+  "container" : "",
   "weight" : "174",
   "type" : "CONTEXT",
   "multilangLabel" : { }
@@ -6563,6 +6585,17 @@
   "name" : "projectId",
   "referenceType" : "String",
   "container" : "@list",
+  "weight" : "173",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#projectIdJoined",
+  "comment" : "",
+  "label" : "Fördernummer",
+  "icon" : "",
+  "name" : "projectIdJoined",
+  "referenceType" : "String",
+  "container" : "",
   "weight" : "173",
   "type" : "CONTEXT",
   "multilangLabel" : { }
@@ -21222,6 +21255,17 @@
   "uri" : "https://www.edoweb-rlp.de/resource",
   "label" : "Edoweb",
   "type" : "STORE",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/regal/joinedFunding",
+  "comment" : "",
+  "label" : "Förderung",
+  "icon" : "",
+  "name" : "joinedFunding",
+  "referenceType" : "@id",
+  "container" : "@list",
+  "weight" : "175",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "info:regal/regal/publishLocation",
