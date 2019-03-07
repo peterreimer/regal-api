@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -398,10 +399,29 @@ public class JsonMapper {
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
 			postProcess(rdf, "creator");
+			createJoinedFunding(rdf);
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
+	}
+
+	private static void createJoinedFunding(Map<String, Object> rdf) {
+		List<String> funding = (List<String>) rdf.get("funding");
+		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+		List<String> projectId = (List<String>) rdf.get("projectId");
+
+		List<Map<String, Object>> joinedFundings = new ArrayList<>();
+
+		for (int i = 0; i < funding.size(); i++) {
+			play.Logger.info(funding.get(i));
+			Map<String, Object> f = new LinkedHashMap<>();
+			f.put("fundingJoined", funding.get(i));
+			f.put("fundingProgramJoined", fundingProgram.get(i));
+			f.put("projectIdJoined", projectId.get(i));
+			joinedFundings.add(f);
+		}
+		rdf.put("joinedFunding", joinedFundings);
 	}
 
 	private void addParts(Map<String, Object> rdf) {
