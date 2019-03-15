@@ -598,17 +598,13 @@ public class JsonMapper {
 		Collection<String> types = (Collection<String>) rdf.get(type);
 		play.Logger.trace("Found types: " + types);
 		if (types != null) {
-			for (String s : typePrios) {
-				if (s == null)
+			for (String t : types) {
+				if (t == null || "BibliographicResource".equals(t))
 					continue;
-				play.Logger.trace("Search for type: " + s);
-				if (types.contains(Globals.profile.getEtikett(s).name)) {
-					Map<String, Object> tmap = new HashMap<>();
-					tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
-					tmap.put(ID2, s);
-					result.add(tmap);
-					return result;
-				}
+				Map<String, Object> tmap = new HashMap<>();
+				tmap.put(PREF_LABEL, Globals.profile.getEtikett(t).getLabel());
+				tmap.put(ID2, t);
+				result.add(tmap);
 			}
 		}
 		return result;
