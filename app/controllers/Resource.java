@@ -202,6 +202,7 @@ public class Resource extends MyController {
 				Map<String, Object> rdf = node.getLd2();
 				rdf.put("@context", Globals.profile.getContext().get("@context"));
 				String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
+
 				if (request().accepts("application/rdf+xml")) {
 					result = RdfUtils.readRdfToString(
 							new ByteArrayInputStream(jsonString.getBytes("utf-8")),

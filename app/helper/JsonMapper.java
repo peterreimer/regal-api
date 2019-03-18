@@ -85,52 +85,12 @@ public class JsonMapper {
 	final static String size = "size";
 	final static String checksumValue = "checksumValue";
 	final static String generator = "generator";
-	final static String type = "rdftype";
+	final static String rdftype = "rdftype";
 	final static String checksum = "checksum";
 	final static String hasData = "hasData";
 	final static String fulltext_ocr = "fulltext-ocr";
 	final static String title = "title";
 	final static String fileLabel = "fileLabel";
-
-	final static String[] typePrios = new String[] {
-			"http://purl.org/lobid/lv#ArchivedWebPage",
-			"http://purl.org/ontology/bibo/Report",
-			"http://purl.org/lobid/lv#Biography", "http://purl.org/library/Game",
-			"http://purl.org/lobid/lv#Schoolbook",
-			"http://purl.org/ontology/mo/PublishedScore",
-			"http://purl.org/lobid/lv#Legislation",
-			"http://purl.org/ontology/bibo/ReferenceSource",
-			"http://purl.org/lobid/lv#OfficialPublication",
-			"http://purl.org/lobid/lv#Bibliography",
-			"http://purl.org/lobid/lv#Festschrift",
-			"http://purl.org/ontology/bibo/Proceedings",
-			"http://hbz-nrw.de/regal#ResearchData",
-			"http://purl.org/lobid/lv#EditedVolume",
-			"http://purl.org/ontology/bibo/Thesis",
-			"http://purl.org/ontology/mo/Record", "http://purl.org/ontology/bibo/Map",
-			"http://purl.org/ontology/bibo/AudioVisualDocument",
-			"http://purl.org/ontology/bibo/AudioDocument",
-			"http://purl.org/ontology/bibo/Image",
-			"http://purl.org/ontology/bibo/Article",
-			"http://purl.org/ontology/bibo/Chapter",
-			"http://rdvocab.info/termList/RDACarrierType/1018",
-			"http://rdvocab.info/termList/RDACarrierType/1010",
-			"http://iflastandards.info/ns/isbd/terms/mediatype/T1002",
-			"http://purl.org/ontology/bibo/MultiVolumeBook",
-			"http://purl.org/ontology/bibo/Journal",
-			"http://purl.org/ontology/bibo/Newspaper",
-			"http://purl.org/ontology/bibo/Series",
-			"http://purl.org/ontology/bibo/Periodical",
-			"http://purl.org/ontology/bibo/Collection",
-			"http://purl.org/ontology/bibo/Standard",
-			"http://purl.org/lobid/lv#Statistics",
-			"http://purl.org/ontology/bibo/Book",
-			"http://data.archiveshub.ac.uk/def/ArchivalResource",
-			"http://purl.org/ontology/bibo/Document",
-			"http://purl.org/vocab/frbr/core#Manifestation",
-			"http://purl.org/lobid/lv#Miscellaneous",
-			"http://purl.org/dc/terms/BibliographicResource",
-			"info:regal/zettel/File" };
 
 	Node node = null;
 	EtikettMakerInterface profile = Globals.profile;
@@ -146,9 +106,9 @@ public class JsonMapper {
 			if (node == null)
 				throw new NullPointerException(
 						"JsonMapper can not work on node with value NULL!");
-			if (node.getMetadata1() == null)
-				throw new NullPointerException(
-						node.getPid() + " metadata stream is NULL!");
+			// if (node.getMetadata1() == null)
+			// throw new NullPointerException(
+			// node.getPid() + " metadata stream is NULL!");
 			if (node.getMetadata2() == null)
 				throw new NullPointerException(
 						node.getPid() + " metadata2 stream is NULL!");
@@ -267,7 +227,7 @@ public class JsonMapper {
 				Map<String, Object> checksumMap = new TreeMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-				checksumMap.put(type,
+				checksumMap.put(rdftype,
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
@@ -296,8 +256,8 @@ public class JsonMapper {
 			return rdf;
 		} catch (Exception e) {
 			play.Logger
-					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
-			play.Logger.debug("", e);
+					.trace(node.getPid() + " can not create JSON! " + e.getMessage());
+			play.Logger.trace("", e);
 		}
 		return null;
 	}
@@ -346,7 +306,7 @@ public class JsonMapper {
 				Map<String, Object> checksumMap = new HashMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-				checksumMap.put(type,
+				checksumMap.put(rdftype,
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
@@ -360,12 +320,13 @@ public class JsonMapper {
 		try {
 			addCatalogLink(rdf);
 			if ("file".equals(rdf.get("contentType"))) {
-				rdf.put(type, Arrays.asList(new String[] { "File" }));
+				rdf.put(rdftype, Arrays.asList(new String[] { "File" }));
 			}
 
-			Collection<Map<String, Object>> t = getType(rdf);
+			Collection<Map<String, Object>> t =
+					getType(new ObjectMapper().valueToTree(rdf));
 			if (t != null && t.size() != 0)
-				rdf.put(type, t);
+				rdf.put(rdftype, t);
 
 			sortCreatorAndContributors(rdf);
 			postProcess(rdf, "subject");
@@ -412,7 +373,8 @@ public class JsonMapper {
 		List<String> projectId = (List<String>) rdf.get("projectId");
 
 		List<Map<String, Object>> joinedFundings = new ArrayList<>();
-
+		if (funding == null)
+			return;
 		for (int i = 0; i < funding.size(); i++) {
 			play.Logger.info(funding.get(i));
 			Map<String, Object> f = new LinkedHashMap<>();
@@ -448,6 +410,8 @@ public class JsonMapper {
 			List<Map<String, Object>> creator = new ArrayList<>();
 			Collection<Map<String, Object>> contributions =
 					(Collection<Map<String, Object>>) rdf.get("contribution");
+			if (contributions == null)
+				return;
 			for (Map<String, Object> contribution : contributions) {
 				Map<String, Object> agent =
 						((Collection<Map<String, Object>>) contribution.get("agent"))
@@ -473,18 +437,6 @@ public class JsonMapper {
 		} catch (Exception e) {
 			play.Logger.debug("Problem processing key contribution.agent", e);
 		}
-	}
-
-	private static boolean mediumArrayContains(Map<String, Object> rdf,
-			String key) {
-		boolean result = false;
-		JsonNode n = new ObjectMapper().valueToTree(rdf);
-		JsonNode mediumArray = n.at("/medium");
-		for (JsonNode item : mediumArray) {
-			if (key.equals(item.at("/@id").asText("no Value found")))
-				result = true;
-		}
-		return result;
 	}
 
 	private static void postProcess(Map<String, Object> m, String field) {
@@ -578,38 +530,6 @@ public class JsonMapper {
 		}
 	}
 
-	private static Collection<Map<String, Object>> getType(
-			Map<String, Object> rdf) {
-		Collection<Map<String, Object>> result = new ArrayList<>();
-
-		// Special case medium is video - override type
-		if (mediumArrayContains(rdf,
-				"http://rdaregistry.info/termList/RDAMediaType/1008")
-				|| mediumArrayContains(rdf,
-						"http://rdvocab.info/termList/RDACarrierType/1050")) {
-			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
-			Map<String, Object> tmap = new HashMap<>();
-			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
-			tmap.put(ID2, s);
-			result.add(tmap);
-			rdf.put(type, result);
-			return result;
-		}
-		Collection<String> types = (Collection<String>) rdf.get(type);
-		play.Logger.trace("Found types: " + types);
-		if (types != null) {
-			for (String t : types) {
-				if (t == null || "BibliographicResource".equals(t))
-					continue;
-				Map<String, Object> tmap = new HashMap<>();
-				tmap.put(PREF_LABEL, Globals.profile.getEtikett(t).getLabel());
-				tmap.put(ID2, t);
-				result.add(tmap);
-			}
-		}
-		return result;
-	}
-
 	private void addPartsToJsonMap(Map<String, Object> rdf) {
 		for (Link l : node.getPartsSorted()) {
 			if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
@@ -665,9 +585,10 @@ public class JsonMapper {
 					+ RdfUtils.urlEncode(authorsId).replace("+", "%20"));
 			return creatorWithoutId;
 		}
-		if (m.get("creator") instanceof List) {
+
+		if (m.get("creator") instanceof List
+				&& ((List) m.get("creator")).get(0) instanceof String) {
 			Collection<String> creators = (Collection<String>) m.get("creator");
-			play.Logger.trace("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
 				play.Logger.trace(creator + " - " + currentId + " - " + authorsId);
@@ -861,7 +782,7 @@ public class JsonMapper {
 				Map<String, Object> checksumMap = new TreeMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-				checksumMap.put(type,
+				checksumMap.put(rdftype,
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
@@ -892,6 +813,43 @@ public class JsonMapper {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
+	}
+
+	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
+		Collection<Map<String, Object>> result = new ArrayList<>();
+
+		// Special case medium is video - override type
+		if (mediumArrayContains(rdf,
+				"http://rdaregistry.info/termList/RDAMediaType/1008")
+				|| mediumArrayContains(rdf,
+						"http://rdvocab.info/termList/RDACarrierType/1050")) {
+			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
+			Map<String, Object> tmap = new HashMap<>();
+			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
+			tmap.put(ID2, s);
+			result.add(tmap);
+
+		}
+		JsonNode types = rdf.at("/rdftype");
+		types.forEach(t -> {
+			String typeId = t.at("/@id").asText();
+			Map<String, Object> tmap = new HashMap<>();
+			tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
+			tmap.put(ID2, typeId);
+			result.add(tmap);
+
+		});
+		return result;
+	}
+
+	private static boolean mediumArrayContains(JsonNode rdf, String key) {
+		boolean result = false;
+		JsonNode mediumArray = rdf.at("/medium");
+		for (JsonNode item : mediumArray) {
+			if (key.equals(item.at("/@id").asText("no Value found")))
+				result = true;
+		}
+		return result;
 	}
 
 }

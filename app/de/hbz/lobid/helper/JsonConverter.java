@@ -158,16 +158,7 @@ public class JsonConverter {
 								((BNode) s.getObject()).getID());
 					}
 				} else {
-					if (s.getPredicate().stringValue().equals(RDF_TYPE)) {
-						try {
-							addLiteralToJsonResult(jsonResult, key,
-									etikette.getEtikett(s.getObject().stringValue()).name);
-						} catch (Exception ex) {
-							logger.info("", ex);
-						}
-					} else {
-						addObjectToJsonResult(jsonResult, key, s.getObject().stringValue());
-					}
+					addObjectToJsonResult(jsonResult, key, s.getObject().stringValue());
 				}
 			}
 		} catch (Exception exc) {
