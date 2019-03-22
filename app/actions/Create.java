@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import helper.HttpArchiveException;
-import helper.mail.WebgatherExceptionMail;
 import helper.oai.OaiDispatcher;
 import helper.WpullCrawl;
 import models.Gatherconf;
