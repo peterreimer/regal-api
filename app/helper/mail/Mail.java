@@ -1,125 +1,65 @@
+/*
+ * Copyright 2019 hbz NRW (http://www.hbz-nrw.de/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package helper.mail;
 
 import java.util.*;
 import javax.mail.*;
 import javax.mail.internet.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import play.Logger;
-import play.Play;
+
+import models.Globals;
 
 /**
- * @author I. Kuss
- * @description Class for sending an E-Mail with javax.mail
+ * 
+ * @author Jan Schnasse, I. Kuss
+ * 
  *
  */
 public class Mail {
 
-	private String to;
-	private String from;
-	private String message;
-	private String subject;
-	private String smtpServ;
-	private String host;
-
-	/**
-	 * Konstruktor für die Klasse Mail. Legt SMTP-Server und aktuellen Hostnamen
-	 * fest
-	 */
-	public Mail() {
-		this.smtpServ = Play.application().configuration().getString("javax.mail.smtpServ");
+	public static void sendMail(String mailMessage, String mailSubject) {
 		try {
-			this.host = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			play.Logger.warn("Hostname nicht bekannt: {}", e);
-			play.Logger.info("Nehme als Default-Hostnamen \"localhost\"");
-			this.host = "localhost";
-
+			Properties properties = new Properties();
+			properties.load(Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream("mail.properties"));
+			properties.forEach((k, v) -> {
+				System.out.println(k + " : " + v);
+			});
+			String sender = properties.getProperty("sender");
+			if (sender == null || sender.isEmpty()) {
+				sender = "root@" + Globals.server;
+			}
+			String rc = properties.getProperty("recipient");
+			if (rc == null || rc.isEmpty()) {
+				rc = "root@localhost";
+			}
+			List<String> recipients = Arrays.asList(rc.split(","));
+			Session session = Session.getDefaultInstance(properties);
+			MimeMessage message = new MimeMessage(session);
+			message.setFrom(new InternetAddress(properties.getProperty("sender")));
+			for (String recipient : recipients) {
+				message.addRecipient(Message.RecipientType.TO,
+						new InternetAddress(recipient));
+			}
+			message.setSubject(mailSubject, "ISO-8859-1");
+			message.setText(mailMessage, "UTF-8");
+			message.setSentDate(new Date());
+			Transport.send(message);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
-
-	/**
-	 * verschickt eine Email mit javax.mail. Absender, Empfänger, Betreffzeile
-	 * und die eigentliche Nachricht (String) müssen vorher als Instanzvariablen
-	 * gesetzt worden sein.
-	 * 
-	 * @return int (0 = OK, -1 = ERROR)
-	 */
-	public int sendMail() {
-		try {
-
-			Properties props = System.getProperties();
-			props.put("mail.transport.protocol", "smtp");
-			props.put("mail.smtp.starttls.enable", "true");
-			props.put("mail.smtp.host", smtpServ);
-			props.put("mail.smtp.auth", "true");
-			Authenticator auth = new SMTPAuthenticator();
-			Session session = Session.getInstance(props, auth);
-			// -- Create a new message --
-			Message msg = new MimeMessage(session);
-			// -- Set the FROM and TO fields --
-			msg.setFrom(new InternetAddress(from + "@" + host));
-			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
-			msg.setSubject(subject);
-			msg.setText(message);
-			// -- Set some other header information --
-			// msg.setHeader("Content-Type", "text/pain");
-			msg.setSentDate(new Date());
-			// -- Send the message --
-			Transport.send(msg);
-			play.Logger.info("Message sent to" + to + " OK.");
-			return 0;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			play.Logger.error("Exception: " + ex);
-			return -1;
-		}
-	}
-
-	private class SMTPAuthenticator extends javax.mail.Authenticator {
-		@Override
-		public PasswordAuthentication getPasswordAuthentication() {
-			// (sender's email id)
-			String username = Play.application().configuration().getString("javax.mail.user");
-			String password = Play.application().configuration().getString("javax.mail.password");
-			return new PasswordAuthentication(username, password);
-		}
-	}
-
-	public String getTo() {
-		return to;
-	}
-
-	public void setTo(String to) {
-		this.to = to;
-	}
-
-	public String getFrom() {
-		return from;
-	}
-
-	public void setFrom(String from) {
-		this.from = from;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public String getSubject() {
-		return subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
-
-	public String getSmtpServ() {
-		return smtpServ;
-	}
-
 }

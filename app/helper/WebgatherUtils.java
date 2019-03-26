@@ -114,10 +114,7 @@ public class WebgatherUtils {
 	public static void sendInvalidUrlEmail(Node node, Gatherconf conf) {
 		WebgatherLogger.info("Schicke E-Mail mit Umzugsnotiz.");
 		try {
-			Mail mail = new Mail();
-			mail.setTo(Play.application().configuration().getString("javax.mail.to"));
-			mail.setFrom(
-					Play.application().configuration().getString("javax.mail.from"));
+
 			String siteName =
 					conf.getName() == null ? node.getAggregationUri() : conf.getName();
 			String mailMsg = "Die Website " + siteName + " ist ";
@@ -129,11 +126,10 @@ public class WebgatherUtils {
 						+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden): ";
 			}
 			mailMsg += Globals.urnbase + node.getAggregationUri() + "/crawler .";
-			mail.setMessage(mailMsg);
-			mail.setSubject("Die Website " + siteName + " ist umgezogen ! ");
-			// assertEquals(mail.sendMail(), 0); # zu hart, so bricht der
-			// Webgatherer-Lauf ab
-			if (mail.sendMail() != 0) {
+
+			try {
+				Mail.sendMail(mailMsg, "Die Website " + siteName + " ist umgezogen ! ");
+			} catch (Exception e) {
 				throw new RuntimeException("Email could not be sent successfully!");
 			}
 		} catch (Exception e) {
