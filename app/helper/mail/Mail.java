@@ -24,7 +24,8 @@ import models.Globals;
 
 /**
  * 
- * @author Jan Schnasse
+ * @author Jan Schnasse, I. Kuss
+ * 
  *
  */
 public class Mail {

@@ -128,8 +128,7 @@ public class WebgatherUtils {
 			mailMsg += Globals.urnbase + node.getAggregationUri() + "/crawler .";
 
 			try {
-				new Mail().sendMail(mailMsg,
-						"Die Website " + siteName + " ist umgezogen ! ");
+				Mail.sendMail(mailMsg, "Die Website " + siteName + " ist umgezogen ! ");
 			} catch (Exception e) {
 				throw new RuntimeException("Email could not be sent successfully!");
 			}
