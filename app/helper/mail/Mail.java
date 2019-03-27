@@ -60,6 +60,7 @@ public class Mail {
 			Transport.send(message);
 			play.Logger.info("Email was sent to " + recipients);
 		} catch (Exception e) {
+			play.Logger.warn("Could not sent email ", e);
 			throw new RuntimeException(e);
 		}
 	}
