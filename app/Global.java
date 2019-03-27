@@ -44,9 +44,7 @@ public class Global extends GlobalSettings {
 	public void onStart(Application app) {
 		try {
 			if (play.api.Play.isProd(play.api.Play.current())) {
-				play.Logger.info("Regal-API started!");
-				Mail.sendMail("",
-						"New instance of regal-api is starting on " + Globals.server);
+
 				for (int i = 0; i < Globals.namespaces.length; i++) {
 
 					play.Logger
@@ -65,8 +63,12 @@ public class Global extends GlobalSettings {
 			}
 			Globals.taskManager.init();
 			Globals.taskManager.execute();
+			play.Logger.info("Regal-API started!");
+			Mail.sendMail("",
+					"New instance of regal-api is starting on " + Globals.server);
 		} catch (Throwable t) {
 			t.printStackTrace();
+			play.Logger.warn("Failure at startup!", t);
 		}
 	}
 

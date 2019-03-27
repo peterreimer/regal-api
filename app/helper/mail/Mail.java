@@ -36,7 +36,7 @@ public class Mail {
 			properties.load(Thread.currentThread().getContextClassLoader()
 					.getResourceAsStream("mail.properties"));
 			properties.forEach((k, v) -> {
-				System.out.println(k + " : " + v);
+				play.Logger.debug(k + " : " + v);
 			});
 			String sender = properties.getProperty("sender");
 			if (sender == null || sender.isEmpty()) {
@@ -58,6 +58,7 @@ public class Mail {
 			message.setText(mailMessage, "UTF-8");
 			message.setSentDate(new Date());
 			Transport.send(message);
+			play.Logger.info("Email was sent to " + recipients);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
