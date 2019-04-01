@@ -62,14 +62,20 @@ public class DataciteMapper {
 	}
 
 	private static void addResourceType(JsonNode ld, DataciteRecord rec) {
-		rec.type = ld.at("/rdftype/0/prefLabel").asText();
-		if ("Abschlussarbeit".equals(rec.type)) {
-			rec.type = "Hochschulschrift";
-		} else if ("Statistics".equals(rec.type)) {
-			rec.type = "Statistik";
-		} else if ("Leitlinien / Normschriften".equals(rec.type)) {
-			rec.type = "Leitlinie";
-		}
+		rec.type = "";
+		ld.at("/rdftype/").forEach(curType -> {
+			String label = curType.at("prefLabel").asText();
+			if ("Abschlussarbeit".equals(label)) {
+				rec.type = "Hochschulschrift";
+			} else if ("Statistics".equals(label)) {
+				rec.type = "Statistik";
+			} else if ("Leitlinien / Normschriften".equals(label)) {
+				rec.type = "Leitlinie";
+			} else {
+				rec.type = label;
+			}
+		});
+
 	}
 
 	private static void addResourceTypeGeneral(JsonNode ld, DataciteRecord rec) {
