@@ -63,8 +63,10 @@ public class DataciteMapper {
 
 	private static void addResourceType(JsonNode ld, DataciteRecord rec) {
 		rec.type = "";
-		ld.at("/rdftype/").forEach(curType -> {
-			String label = curType.at("prefLabel").asText();
+		play.Logger.info("found type: " + rec.type);
+		ld.at("/rdftype").forEach(curType -> {
+			String label = curType.at("/prefLabel").asText();
+			play.Logger.info("found type: " + label);
 			if ("Abschlussarbeit".equals(label)) {
 				rec.type = "Hochschulschrift";
 			} else if ("Statistics".equals(label)) {
@@ -75,7 +77,6 @@ public class DataciteMapper {
 				rec.type = label;
 			}
 		});
-
 	}
 
 	private static void addResourceTypeGeneral(JsonNode ld, DataciteRecord rec) {
