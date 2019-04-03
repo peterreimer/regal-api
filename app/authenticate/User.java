@@ -20,19 +20,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.*;
+
 import play.data.validation.ValidationError;
 
 /**
  * @author Jan Schnasse
  *
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity()
+@Table(name = "regal_users")
 public class User {
 
+	@Id
 	String username;
 	String password;
 	String email;
 	Role role;
-	Date created;
+	String created;
 
 	public User() {
 
@@ -60,6 +70,22 @@ public class User {
 
 	public void setRole(Role role) {
 		this.role = role;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getCreated() {
+		return created;
+	}
+
+	public void setCreated(String dateCreated) {
+		this.created = dateCreated;
 	}
 
 	/**

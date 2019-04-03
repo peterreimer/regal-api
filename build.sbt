@@ -6,7 +6,7 @@ version := "0.8.0-SNAPSHOT"
 scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
-  cache,ws,javaWs,
+  cache,ws,javaWs,javaJdbc,
   "org.marc4j" % "marc4j" % "2.4", 
   "junit" % "junit" % "4.10", 
   "org.apache.pdfbox" % "pdfbox" % "1.8.0",
@@ -44,11 +44,11 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" %"jackson-databind" %"2.6.3",
   "com.fasterxml.jackson.dataformat" %"jackson-dataformat-xml" %"2.6.3",
   "javax.mail" % "mail" % "1.4.2",
-  "org.apache.lucene" % "lucene-core" % "4.7.2"
+  "org.apache.lucene" % "lucene-core" % "4.7.2",  
+  "mysql" % "mysql-connector-java" % "5.1.18"
 )
 
-
-val root = (project in file(".")).enablePlugins(PlayJava)
+val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
