@@ -45,7 +45,11 @@ public class User {
 	String created;
 
 	public User() {
-
+		username = null;
+		password = null;
+		email = null;
+		role = Role.READER;
+		created = "" + new Date().getTime();
 	}
 
 	public String getUsername() {
