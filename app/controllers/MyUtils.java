@@ -313,6 +313,12 @@ public class MyUtils extends MyController {
 			try {
 				JsonNode node = request().body().asJson();
 				User user = new ObjectMapper().treeToValue(node, User.class);
+				if (user.getUsername() == null || user.getUsername().isEmpty()) {
+					throw new RuntimeException("Please specify username!");
+				}
+				if (user.getPassword() == null || user.getPassword().isEmpty()) {
+					throw new RuntimeException("Please specify password!");
+				}
 				UserDB.getInstance().addUser(user, user.getPassword());
 				return ok();
 			} catch (Exception e) {

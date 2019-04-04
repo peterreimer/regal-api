@@ -109,8 +109,13 @@ public class UserDB {
 	}
 
 	public void addUser(User user, String password) {
-		user.setCreated("" + new Date().getTime());
 		user.setPassword(getSaltedPassword(password));
-		Ebean.update(user);
+		User oldUser = getUser(user.getUsername());
+		if (oldUser != null) {
+			Ebean.update(user);
+		} else {
+			user.setCreated("" + new Date().getTime());
+			Ebean.save(user);
+		}
 	}
 }
