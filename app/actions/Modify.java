@@ -862,6 +862,10 @@ public class Modify extends RegalAction {
 					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
 			enrichStatements.addAll(containedIn);
 
+			List<Statement> fundingId =
+					find(node, metadata, "http://hbz-nrw.de/regal#fundingId");
+			enrichStatements.addAll(fundingId);
+
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 
 			updateMetadata1(node, metadata);
@@ -960,6 +964,10 @@ public class Modify extends RegalAction {
 			List<Statement> containedIn =
 					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
 			enrichStatements.addAll(containedIn);
+
+			List<Statement> fundingId =
+					find(node, metadata, "http://hbz-nrw.de/regal#fundingId");
+			enrichStatements.addAll(fundingId);
 
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 

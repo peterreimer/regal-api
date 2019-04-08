@@ -407,22 +407,40 @@ public class JsonMapper {
 	}
 
 	private static void createJoinedFunding(Map<String, Object> rdf) {
-		List<String> funding = (List<String>) rdf.get("funding");
+
+		List<Map<String, Object>> fundingId =
+				(List<Map<String, Object>>) rdf.get("fundingId");
+		if (fundingId == null) {
+			fundingId = new ArrayList<>();
+		}
+		List<String> fundings = (List<String>) rdf.get("funding");
+		if (fundings != null) {
+			for (String funding : fundings) {
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put("@id", Globals.protocol + Globals.server
+						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+			}
+			// rdf.remove("funding");
+		}
 		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
 		List<String> projectId = (List<String>) rdf.get("projectId");
 
 		List<Map<String, Object>> joinedFundings = new ArrayList<>();
-		if (funding == null)
+		if (fundingId.isEmpty())
 			return;
-		for (int i = 0; i < funding.size(); i++) {
-			play.Logger.info(funding.get(i));
+		for (int i = 0; i < fundingId.size(); i++) {
+			// play.Logger.info(fundingId.get(i));
 			Map<String, Object> f = new LinkedHashMap<>();
-			f.put("fundingJoined", funding.get(i));
+			Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+			fundingJoinedMap.put("@id", fundingId.get(i).get("@id"));
+			fundingJoinedMap.put("prefLabel", fundingId.get(i).get("prefLabel"));
+			f.put("fundingJoined", fundingJoinedMap);
 			f.put("fundingProgramJoined", fundingProgram.get(i));
 			f.put("projectIdJoined", projectId.get(i));
 			joinedFundings.add(f);
 		}
 		rdf.put("joinedFunding", joinedFundings);
+		rdf.put("fundingId", fundingId);
 	}
 
 	private void addParts(Map<String, Object> rdf) {
