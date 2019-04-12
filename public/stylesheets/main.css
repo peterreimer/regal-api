@@ -239,7 +239,8 @@ do not display this fields
 .resourceTable .corporateBodyForTitle,
 .resourceTable .funding,
 .resourceTable .projectId,
-.resourceTable .fundingProgram
+.resourceTable .fundingProgram,
+.resourceTable .fundingId
 { 
 	display: none;
 }
