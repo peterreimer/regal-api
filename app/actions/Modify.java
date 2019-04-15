@@ -75,18 +75,6 @@ import models.RegalObject;
  */
 public class Modify extends RegalAction {
 
-	private static final String alternateName =
-			"http://www.geonames.org/ontology#alternateName";
-	private static final String first =
-			"http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
-	private static final String rest =
-			"http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
-	private static final String nil =
-			"http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
-
-	private static final String PREF_LABEL =
-			"http://www.w3.org/2004/02/skos/core#prefLabel";
-
 	/**
 	 * @param pid the pid that must be updated
 	 * @param content the file content as byte array
@@ -222,12 +210,12 @@ public class Modify extends RegalAction {
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
 
-			String enrichMessage2 = enrichMetadata2(node);
+			String enrichMessage2 = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage2;
 		} else {
 			updateMetadata2(node, content);
-			String enrichMessage2 = enrichMetadata2(node);
+			String enrichMessage2 = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage2;
 		}
@@ -258,12 +246,12 @@ public class Modify extends RegalAction {
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
 
-			String enrichMessage = enrichMetadata2(node);
+			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
 		} else {
 			updateMetadata2(node, content);
-			String enrichMessage = enrichMetadata2(node);
+			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;
 		}
@@ -302,7 +290,7 @@ public class Modify extends RegalAction {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
 				updateMetadata2(node, content);
-				msg.append(enrichMetadata2(node));
+				msg.append(Enrich.enrichMetadata2(node));
 			} catch (NotUpdatedException e) {
 				play.Logger.debug("", e);
 				play.Logger.info(pid + " Not updated. " + e.getMessage());
@@ -776,540 +764,6 @@ public class Modify extends RegalAction {
 		return node;
 	}
 
-	public String enrichMetadata(Node node) {
-		try {
-			play.Logger.info("Enrich " + node.getPid());
-			String metadata = node.getMetadata1();
-			if (metadata == null || metadata.isEmpty()) {
-				play.Logger.info("Not metadata to enrich " + node.getPid());
-				return "Not metadata to enrich " + node.getPid();
-			}
-			play.Logger.info("Enrich " + node.getPid() + " with gnd.");
-			List<String> gndIds = findAllGndIds(metadata);
-			List<Statement> enrichStatements = new ArrayList<Statement>();
-			for (String uri : gndIds) {
-				enrichStatements.addAll(getStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with geonames.");
-			List<String> geoNameIds = findAllGeonameIds(metadata);
-			for (String uri : geoNameIds) {
-				enrichStatements.addAll(getGeonamesStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with openstreetmap.");
-			List<String> osmIds = findAllOsmIds(metadata);
-			for (String uri : osmIds) {
-				enrichStatements.addAll(getOsmStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with orcid.");
-			List<String> orcidIds = findAllOrcidIds(metadata);
-			for (String uri : orcidIds) {
-				enrichStatements.addAll(getOrcidStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with adhoc keys.");
-			List<String> adhocIds = findAllAdhocIds(metadata);
-			for (String uri : adhocIds) {
-				enrichStatements.addAll(getAdhocStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
-			List<String> agrovocIds = findAllAgrovocIds(metadata);
-			for (String uri : agrovocIds) {
-				enrichStatements.addAll(getAgrovocStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with institution.");
-			List<Statement> institutions = findInstitution(node);
-			enrichStatements.addAll(institutions);
-
-			play.Logger.info("Enrich " + node.getPid() + " with parent.");
-			List<Statement> catalogParents =
-					find(node, metadata, "http://purl.org/dc/terms/isPartOf");
-			enrichStatements.addAll(catalogParents);
-
-			play.Logger.info("Enrich " + node.getPid() + " with inSeries.");
-			List<Statement> series =
-					find(node, metadata, "http://purl.org/lobid/lv#series");
-			enrichStatements.addAll(series);
-
-			play.Logger.info("Enrich " + node.getPid() + " with multiVolumeWork.");
-			List<Statement> multiVolumeWork =
-					find(node, metadata, "http://purl.org/lobid/lv#multiVolumeWork");
-			enrichStatements.addAll(multiVolumeWork);
-
-			play.Logger.info("Enrich " + node.getPid() + " with language.");
-			List<Statement> language =
-					find(node, metadata, "http://purl.org/dc/terms/language");
-			enrichStatements.addAll(language);
-
-			play.Logger.info("Enrich " + node.getPid() + " with recordingLocation.");
-			List<Statement> recordingLocation =
-					find(node, metadata, "http://hbz-nrw.de/regal#recordingLocation");
-			enrichStatements.addAll(recordingLocation);
-
-			List<Statement> collectionOne =
-					find(node, metadata, "info:regal/zettel/collectionOne");
-			enrichStatements.addAll(collectionOne);
-
-			List<Statement> collectionTwo =
-					find(node, metadata, "info:regal/zettel/collectionTwo");
-			enrichStatements.addAll(collectionTwo);
-
-			List<Statement> containedIn =
-					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
-			enrichStatements.addAll(containedIn);
-
-			List<Statement> fundingJoined =
-					find(node, metadata, "http://hbz-nrw.de/regal#fundingJoined");
-			enrichStatements.addAll(fundingJoined);
-
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-
-			updateMetadata1(node, metadata);
-
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-			play.Logger.debug("", e);
-			return "Enrichment of " + node.getPid() + " partially failed !\n"
-					+ e.getMessage();
-		}
-		return "Enrichment of " + node.getPid() + " succeeded!";
-	}
-
-	public String enrichMetadata2(Node node) {
-		try {
-			play.Logger.info("Enrich 2 " + node.getPid());
-			String metadata = node.getMetadata2();
-			if (metadata == null || metadata.isEmpty()) {
-				play.Logger.info("No metadata2 to enrich " + node.getPid());
-				return "No metadata2 to enrich " + node.getPid();
-			}
-			play.Logger.info("Enrich " + node.getPid() + " with gnd.");
-			List<String> gndIds = findAllGndIds(metadata);
-			List<Statement> enrichStatements = new ArrayList<Statement>();
-			for (String uri : gndIds) {
-				enrichStatements.addAll(getStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with geonames.");
-			List<String> geoNameIds = findAllGeonameIds(metadata);
-			for (String uri : geoNameIds) {
-				enrichStatements.addAll(getGeonamesStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with openstreetmap.");
-			List<String> osmIds = findAllOsmIds(metadata);
-			for (String uri : osmIds) {
-				enrichStatements.addAll(getOsmStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with orcid.");
-			List<String> orcidIds = findAllOrcidIds(metadata);
-			for (String uri : orcidIds) {
-				enrichStatements.addAll(getOrcidStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with adhoc keys.");
-			List<String> adhocIds = findAllAdhocIds(metadata);
-			for (String uri : adhocIds) {
-				enrichStatements.addAll(getAdhocStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
-			List<String> agrovocIds = findAllAgrovocIds(metadata);
-			for (String uri : agrovocIds) {
-				enrichStatements.addAll(getAgrovocStatements(uri));
-			}
-
-			play.Logger.info("Enrich " + node.getPid() + " with institution.");
-			List<Statement> institutions = findInstitution(node);
-			enrichStatements.addAll(institutions);
-
-			play.Logger.info("Enrich " + node.getPid() + " with parent.");
-			List<Statement> catalogParents =
-					find(node, metadata, "http://purl.org/dc/terms/isPartOf");
-			enrichStatements.addAll(catalogParents);
-
-			play.Logger.info("Enrich " + node.getPid() + " with inSeries.");
-			List<Statement> series =
-					find(node, metadata, "http://purl.org/lobid/lv#series");
-			enrichStatements.addAll(series);
-
-			play.Logger.info("Enrich " + node.getPid() + " with multiVolumeWork.");
-			List<Statement> multiVolumeWork =
-					find(node, metadata, "http://purl.org/lobid/lv#multiVolumeWork");
-			enrichStatements.addAll(multiVolumeWork);
-
-			play.Logger.info("Enrich " + node.getPid() + " with language.");
-			List<Statement> language =
-					find(node, metadata, "http://purl.org/dc/terms/language");
-			enrichStatements.addAll(language);
-
-			play.Logger.info("Enrich " + node.getPid() + " with recordingLocation.");
-			List<Statement> recordingLocation =
-					find(node, metadata, "http://hbz-nrw.de/regal#recordingLocation");
-			enrichStatements.addAll(recordingLocation);
-
-			List<Statement> collectionOne =
-					find(node, metadata, "info:regal/zettel/collectionOne");
-			enrichStatements.addAll(collectionOne);
-
-			List<Statement> collectionTwo =
-					find(node, metadata, "info:regal/zettel/collectionTwo");
-			enrichStatements.addAll(collectionTwo);
-
-			List<Statement> containedIn =
-					find(node, metadata, "http://purl.org/lobid/lv#containedIn");
-			enrichStatements.addAll(containedIn);
-
-			List<Statement> fundingJoined =
-					find(node, metadata, "http://hbz-nrw.de/regal#fundingJoined");
-			enrichStatements.addAll(fundingJoined);
-
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-
-			updateMetadata2(node, metadata);
-
-		} catch (Exception e) {
-			play.Logger.debug("", e);
-			return "Enrichment of " + node.getPid() + " partially failed !\n"
-					+ e.getMessage();
-		}
-		return "Enrichment of " + node.getPid() + " succeeded!";
-	}
-
-	private List<Statement> find(Node node, String metadata, String pred) {
-		List<Statement> result = new ArrayList<Statement>();
-		// getIsPartOf
-		List<String> statements = RdfUtils.findRdfObjects(node.getPid(), pred,
-				metadata, RDFFormat.NTRIPLES);
-		for (String p : statements) {
-			ValueFactory v = RdfUtils.valueFactory;
-			String label = getEtikett(p);
-			Statement st = v.createStatement(v.createIRI(p), v.createIRI(PREF_LABEL),
-					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
-			result.add(st);
-		}
-		return result;
-	}
-
-	private String getEtikett(String p) {
-		String prefLabel = MyEtikettMaker.getLabelFromEtikettWs(p);
-		return prefLabel;
-	}
-
-	private List<Statement> findInstitution(Node node) {
-		List<Statement> result = new ArrayList<Statement>();
-		try {
-			String alephid = new Read().getIdOfParallelEdition(node);
-			String uri = Globals.lobidHbz01 + alephid + "/about?format=source";
-			play.Logger.info("GET " + uri);
-			try (InputStream in =
-					RdfUtils.urlToInputStream(new URL(uri), "application/xml")) {
-				String gndEndpoint = "http://d-nb.info/gnd/";
-				List<Element> institutionHack = XmlUtils.getElements(
-						"//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield", in,
-						null);
-
-				for (Element el : institutionHack) {
-					String marker = el.getTextContent();
-					if (!marker.contains("ellinet"))
-						continue;
-					if (!marker.contains("GND"))
-						continue;
-					String gndId = gndEndpoint
-							+ marker.replaceFirst(".*ellinet.*GND:.*\\([^)]*\\)", "");
-					if (gndId.endsWith("16269969-4")) {
-						gndId = gndEndpoint + "2006655-7";
-					}
-					play.Logger.trace("Add data from " + gndId);
-					ValueFactory v = RdfUtils.valueFactory;
-					Statement link = v.createStatement(v.createIRI(node.getPid()),
-							v.createIRI("http://dbpedia.org/ontology/institution"),
-							v.createIRI(gndId));
-					result.add(link);
-					result.addAll(getStatements(gndId));
-				}
-
-			}
-		} catch (Exception e) {
-			play.Logger.info("No institution found for " + node.getPid());
-
-		}
-		play.Logger.info("ADD to collection: " + result);
-		return result;
-	}
-
-	private List<Statement> getStatements(String uri) {
-		play.Logger.info("GET " + uri);
-		List<Statement> filteredStatements = new ArrayList<Statement>();
-		try {
-			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about/lds"),
-					RDFFormat.RDFXML, "application/rdf+xml")) {
-				boolean isLiteral = s.getObject() instanceof Literal;
-				if (!(s.getSubject() instanceof BNode)) {
-					if (isLiteral) {
-						ValueFactory v = RdfUtils.valueFactory;
-
-						play.Logger.trace("Get data from " + uri);
-						Statement newS = v.createStatement(v.createIRI(uri),
-								s.getPredicate(), v.createLiteral(Normalizer.normalize(
-										s.getObject().stringValue(), Normalizer.Form.NFKC)));
-						filteredStatements.add(newS);
-					}
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.warn("Not able to get data from" + uri, e);
-		}
-		return filteredStatements;
-	}
-
-	private List<Statement> getOrcidStatements(String uri) {
-		play.Logger.trace("GET " + uri);
-		List<Statement> filteredStatements = new ArrayList<Statement>();
-		try (InputStream in =
-				RdfUtils.urlToInputStream(new URL(uri), "application/json")) {
-			String str =
-					CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
-			JsonNode hit = new ObjectMapper().readValue(str, JsonNode.class);
-			String label = hit.at("/person/name/family-name/value").asText() + ", "
-					+ hit.at("/person/name/given-names/value").asText();
-			ValueFactory v = RdfUtils.valueFactory;
-			Literal object =
-					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
-			Statement newS =
-					v.createStatement(v.createIRI(uri), v.createIRI(PREF_LABEL), object);
-			play.Logger.trace("Get data from " + uri + " " + newS);
-			filteredStatements.add(newS);
-		} catch (Exception e) {
-			play.Logger.warn("", e);
-		}
-		return filteredStatements;
-	}
-
-	private List<Statement> getAdhocStatements(String uri) {
-		play.Logger.info("GET " + uri);
-		List<Statement> filteredStatements = new ArrayList<Statement>();
-		try {
-			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri), RDFFormat.RDFXML,
-					"application/rdf+xml")) {
-				boolean isLiteral = s.getObject() instanceof Literal;
-				if (!(s.getSubject() instanceof BNode)) {
-					if (isLiteral) {
-						ValueFactory v = RdfUtils.valueFactory;
-
-						play.Logger.trace("Get data from " + uri);
-						Statement newS = v.createStatement(v.createIRI(uri),
-								s.getPredicate(), v.createLiteral(Normalizer.normalize(
-										s.getObject().stringValue(), Normalizer.Form.NFKC)));
-						filteredStatements.add(newS);
-					}
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.warn("Not able to get data from" + uri, e);
-		}
-		return filteredStatements;
-	}
-
-	private List<Statement> getOsmStatements(String uri) {
-		play.Logger.trace("GET " + uri);
-		List<Statement> filteredStatements = new ArrayList<Statement>();
-		try {
-			URL url = new URL(uri);
-			Map<String, String> map = new LinkedHashMap<String, String>();
-			String query = url.getQuery();
-			for (String pair : query.split("&")) {
-				String[] keyValue = pair.split("=");
-				int idx = pair.indexOf("=");
-				map.put(URLDecoder.decode(keyValue[0], "UTF-8"),
-						URLDecoder.decode(keyValue[1], "UTF-8"));
-			}
-			ValueFactory v = RdfUtils.valueFactory;
-			Literal object = v.createLiteral(Normalizer.normalize(
-					map.get("mlat") + "," + map.get("mlon"), Normalizer.Form.NFKC));
-			Statement newS =
-					v.createStatement(v.createIRI(uri), v.createIRI(PREF_LABEL), object);
-			play.Logger.trace("Get data from " + uri + " " + newS);
-			filteredStatements.add(newS);
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-			play.Logger.debug("", e);
-		}
-		return filteredStatements;
-	}
-
-	private List<Statement> getGeonamesStatements(String uri) {
-		play.Logger.trace("GET " + uri);
-		ValueFactory vf = SimpleValueFactory.getInstance();
-		List<Statement> filteredStatements = new ArrayList<Statement>();
-		List<Literal> alternateNames = new ArrayList<Literal>();
-		try {
-			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri + "/about.rdf"),
-					RDFFormat.RDFXML, "application/rdf+xml")) {
-				boolean isLiteral = s.getObject() instanceof Literal;
-				if (!(s.getSubject() instanceof BNode)) {
-					if (isLiteral) {
-						Literal l = (Literal) s.getObject();
-						Literal object = vf.createLiteral(Normalizer
-								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
-								l.getLanguage().get());
-						Statement newS =
-								vf.createStatement(vf.createIRI(uri), s.getPredicate(), object);
-						play.Logger.trace("Get data from " + uri + " " + newS);
-
-						if (alternateName.equals(s.getPredicate().stringValue())) {
-							newS = vf.createStatement(vf.createIRI(uri), vf.createIRI(
-									s.getPredicate().stringValue() + "_" + object.getLanguage()),
-									object);
-						}
-						filteredStatements.add(newS);
-					}
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.warn("Not able to get data from" + uri);
-		}
-
-		return filteredStatements;
-	}
-
-	private List<Statement> getAgrovocStatements(String uri) {
-		play.Logger.trace("GET " + uri);
-		ValueFactory vf = SimpleValueFactory.getInstance();
-		List<Statement> filteredStatements = new ArrayList<Statement>();
-		List<Literal> prefLabel = new ArrayList<Literal>();
-		try {
-			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri), RDFFormat.RDFXML,
-					"application/rdf+xml")) {
-				boolean isLiteral = s.getObject() instanceof Literal;
-				if (!(s.getSubject() instanceof BNode)) {
-					if (isLiteral) {
-						Literal l = (Literal) s.getObject();
-						Literal object = vf.createLiteral(Normalizer
-								.normalize(s.getObject().stringValue(), Normalizer.Form.NFKC),
-								l.getLanguage().get());
-						Statement newS =
-								vf.createStatement(vf.createIRI(uri), s.getPredicate(), object);
-						play.Logger.trace("Get data from " + uri + " " + newS);
-
-						if (PREF_LABEL.equals(s.getPredicate().stringValue())) {
-							if ("de".equals(object.getLanguage())) {
-								newS = vf.createStatement(vf.createIRI(uri), s.getPredicate(),
-										object);
-								filteredStatements.add(newS);
-							}
-							newS = vf.createStatement(vf.createIRI(uri), vf.createIRI(
-									s.getPredicate().stringValue() + "_" + object.getLanguage()),
-									object);
-						}
-						filteredStatements.add(newS);
-					}
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.warn("Not able to get data from" + uri);
-		}
-
-		return filteredStatements;
-	}
-
-	private List<Statement> getListAsStatements(List<Literal> list, String uri,
-			String predicate) {
-		List<Statement> listStatements = new ArrayList<Statement>();
-		ValueFactory vf = SimpleValueFactory.getInstance();
-		BNode head = vf.createBNode();
-		Statement newS =
-				vf.createStatement(vf.createIRI(uri), vf.createIRI(predicate), head);
-		listStatements.add(newS);
-
-		Resource cur = head;
-		for (Literal l : list) {
-			BNode r = vf.createBNode();
-			Statement linkToRest = vf.createStatement(cur, vf.createIRI(rest), r);
-			Statement linkToValue = vf.createStatement(cur, vf.createIRI(first), l);
-			cur = r;
-			listStatements.add(linkToRest);
-			listStatements.add(linkToValue);
-		}
-		Statement endOfList = listStatements.get(listStatements.size() - 1);
-		listStatements.remove(listStatements.size() - 1);
-		Statement linkToNill = vf.createStatement(endOfList.getSubject(),
-				vf.createIRI(rest), vf.createIRI(nil));
-		listStatements.add(linkToNill);
-		return listStatements;
-	}
-
-	private List<String> findAllGndIds(String metadata) {
-		HashMap<String, String> result = new HashMap<String, String>();
-		Matcher m = Pattern.compile("http://d-nb.info/gnd/[1234567890-]*[A-Z]*")
-				.matcher(metadata);
-		while (m.find()) {
-			String id = m.group();
-			result.put(id, id);
-		}
-		return new Vector<String>(result.keySet());
-	}
-
-	private List<String> findAllGeonameIds(String metadata) {
-		HashMap<String, String> result = new HashMap<String, String>();
-		Matcher m = Pattern.compile("http://www.geonames.org/[1234567890-]*")
-				.matcher(metadata);
-		while (m.find()) {
-			String id = m.group();
-			result.put(id, id);
-		}
-		return new Vector<String>(result.keySet());
-	}
-
-	private List<String> findAllOsmIds(String metadata) {
-		HashMap<String, String> result = new HashMap<String, String>();
-		Matcher m =
-				Pattern.compile("http://www.openstreetmap.org/[^>]*").matcher(metadata);
-		while (m.find()) {
-			String id = m.group();
-			result.put(id, id);
-		}
-		return new Vector<String>(result.keySet());
-	}
-
-	private List<String> findAllOrcidIds(String metadata) {
-		HashMap<String, String> result = new HashMap<>();
-		Matcher m = Pattern.compile("https?://orcid.org/[^>]*").matcher(metadata);
-		while (m.find()) {
-			String id = m.group();
-			result.put(id, id);
-		}
-		return new Vector<String>(result.keySet());
-	}
-
-	private List<String> findAllAdhocIds(String metadata) {
-		HashMap<String, String> result = new HashMap<>();
-		Matcher m =
-				Pattern.compile(Globals.protocol + Globals.server + "/adhoc/[^>]*")
-						.matcher(metadata);
-		while (m.find()) {
-			String id = m.group();
-			result.put(id, id);
-		}
-		return new Vector<String>(result.keySet());
-	}
-
-	private List<String> findAllAgrovocIds(String metadata) {
-		HashMap<String, String> result = new HashMap<>();
-		Matcher m = Pattern.compile("http://aims.fao.org/aos/agrovoc/[^>]*")
-				.matcher(metadata);
-		while (m.find()) {
-			String id = m.group();
-			result.put(id, id);
-		}
-		return new Vector<String>(result.keySet());
-	}
-
 	/**
 	 * @param nodes a list of nodes to hammer on
 	 * @return a message
@@ -1563,13 +1017,13 @@ public class Modify extends RegalAction {
 
 	public String lobidify(Node node, String alephid) {
 		updateMetadata1(node, getLobidDataAsNtripleString(node, alephid));
-		String enrichMessage = enrichMetadata(node);
+		String enrichMessage = Enrich.enrichMetadata(node);
 		return enrichMessage;
 	}
 
 	public String lobidify2(Node node, String alephid) {
 		updateMetadata2(node, getLobid2DataAsNtripleString(node, alephid));
-		String enrichMessage = enrichMetadata2(node);
+		String enrichMessage = Enrich.enrichMetadata2(node);
 		return enrichMessage;
 	}
 
