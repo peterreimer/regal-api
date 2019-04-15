@@ -1015,9 +1015,9 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	public String lobidify(Node node, String alephid) {
+	public String lobidify1(Node node, String alephid) {
 		updateMetadata1(node, getLobidDataAsNtripleString(node, alephid));
-		String enrichMessage = Enrich.enrichMetadata(node);
+		String enrichMessage = Enrich.enrichMetadata1(node);
 		return enrichMessage;
 	}
 

@@ -282,7 +282,7 @@ public class MyUtils extends MyController {
 									+ conf.getUrl()
 									+ "\"^^<http://www.w3.org/2001/XMLSchema#string> .");
 				} else {
-					new actions.Modify().lobidify(webpage, ht);
+					new actions.Modify().lobidify2(webpage, ht);
 				}
 				play.Logger.info("Import Webpage: " + webpage.getPid());
 			}

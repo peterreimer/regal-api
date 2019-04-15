@@ -6342,23 +6342,12 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
-  "uri" : "http://hbz-nrw.de/regal#fundingId",
-  "comment" : "",
-  "label" : "Förderer",
-  "icon" : "fa fa-bars",
-  "name" : "fundingId",
-  "referenceType" : "@id",
-  "container" : "@list",
-  "weight" : "173",
-  "type" : "CONTEXT",
-  "multilangLabel" : { }
-}, {
   "uri" : "http://hbz-nrw.de/regal#fundingJoined",
   "comment" : "",
   "label" : "Förderer",
   "icon" : "",
   "name" : "fundingJoined",
-  "referenceType" : "@id",
+  "referenceType" : "String",
   "container" : "",
   "weight" : "174",
   "type" : "CONTEXT",
@@ -19863,7 +19852,6 @@
   "label" : "Buch",
   "icon" : "fa fa-book",
   "name" : "Book",
-  "referenceType" : "@id",
   "container" : "",
   "weight" : "",
   "type" : "CONTEXT",
