@@ -419,8 +419,10 @@ public class JsonMapper {
 				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
 				fundingJoinedMap.put("@id", Globals.protocol + Globals.server
 						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+				fundingJoinedMap.put("prefLabel", funding);
+				fundingId.add(fundingJoinedMap);
 			}
-			// rdf.remove("funding");
+			rdf.remove("funding");
 		}
 		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
 		List<String> projectId = (List<String>) rdf.get("projectId");
