@@ -49,16 +49,42 @@ public class DublinCoreData implements java.io.Serializable {
 	List<String> type = new Vector<>();
 	List<String> wglcontributor = new Vector<>();
 	List<String> wglSubject = new Vector<>();
+	List<String> wglType = new Vector<>();
 
 	/**
 	 * @return wgl:wglcontributor
+	 */
+	public List<String> getWglType() {
+		return removeDuplicateEntries(wglType);
+	}
+
+	/**
+	 * @param cwgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData setWglType(List<String> wglType) {
+		this.wglType = wglType;
+		return this;
+	}
+
+	/**
+	 * @param e wgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData addWglType(String e) {
+		wglType.add(e);
+		return this;
+	}
+
+	/**
+	 * @return wgl:wglsubject
 	 */
 	public List<String> getWglSubject() {
 		return removeDuplicateEntries(wglSubject);
 	}
 
 	/**
-	 * @param cwgl:wglcontributor
+	 * @param cwgl:wglsubject
 	 * @return this
 	 */
 	public DublinCoreData setWglSubject(List<String> wglSubject) {
@@ -67,7 +93,7 @@ public class DublinCoreData implements java.io.Serializable {
 	}
 
 	/**
-	 * @param e wgl:wglcontributor
+	 * @param e wgl:wglsubject
 	 * @return this
 	 */
 	public DublinCoreData addWglSubject(String e) {

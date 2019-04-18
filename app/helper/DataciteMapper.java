@@ -21,6 +21,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.hbz.lobid.helper.LobidTypes;
 import models.DataciteRecord;
 import models.Globals;
 import models.Pair;
@@ -65,13 +66,14 @@ public class DataciteMapper {
 		rec.type = "";
 		play.Logger.info("found type: " + rec.type);
 		ld.at("/rdftype").forEach(curType -> {
+			String lobidType = curType.at("/@id").asText();
 			String label = curType.at("/prefLabel").asText();
-			play.Logger.info("found type: " + label);
-			if ("Abschlussarbeit".equals(label)) {
+			play.Logger.info("found type: " + lobidType);
+			if (LobidTypes.Thesis.equals(lobidType)) {
 				rec.type = "Hochschulschrift";
-			} else if ("Statistics".equals(label)) {
+			} else if (LobidTypes.Statistics.equals(lobidType)) {
 				rec.type = "Statistik";
-			} else if ("Leitlinien / Normschriften".equals(label)) {
+			} else if (LobidTypes.Standard.equals(lobidType)) {
 				rec.type = "Leitlinie";
 			} else {
 				rec.type = label;
