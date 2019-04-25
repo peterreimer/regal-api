@@ -892,11 +892,12 @@ public class JsonMapper {
 		JsonNode types = rdf.at("/rdftype");
 		types.forEach(t -> {
 			String typeId = t.at("/@id").asText();
-			Map<String, Object> tmap = new HashMap<>();
-			tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
-			tmap.put(ID2, typeId);
-			result.add(tmap);
-
+			if (!"http://purl.org/dc/terms/BibliographicResource".equals(typeId)) {
+				Map<String, Object> tmap = new HashMap<>();
+				tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
+				tmap.put(ID2, typeId);
+				result.add(tmap);
+			}
 		});
 		return result;
 	}
