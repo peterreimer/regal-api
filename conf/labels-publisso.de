@@ -69,7 +69,7 @@
   "name" : "ConferenceOrEvent",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "182",
+  "weight" : "184",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -80,7 +80,7 @@
   "name" : "CorporateBody",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "183",
+  "weight" : "185",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -91,7 +91,7 @@
   "name" : "DifferentiatedPerson",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "184",
+  "weight" : "186",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -102,7 +102,7 @@
   "name" : "Family",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "185",
+  "weight" : "187",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -113,7 +113,7 @@
   "name" : "Person",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "186",
+  "weight" : "188",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -124,7 +124,7 @@
   "name" : "PlaceOrGeographicName",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "187",
+  "weight" : "189",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -135,7 +135,7 @@
   "name" : "SubjectHeading",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "188",
+  "weight" : "190",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -146,7 +146,7 @@
   "name" : "Work",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "189",
+  "weight" : "191",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6122,7 +6122,7 @@
   "name" : "accessScheme",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "225",
+  "weight" : "227",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6159,7 +6159,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://hbz-nrw.de/regal#articleNumber",
-  "comment" : "**HELLO**",
+  "comment" : "",
   "label" : "Artikelnummer",
   "icon" : "",
   "name" : "articleNumber",
@@ -6275,7 +6275,7 @@
   "name" : "contentType",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "217",
+  "weight" : "219",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6338,7 +6338,18 @@
   "name" : "funding",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "173",
+  "weight" : "174",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#fundingId",
+  "comment" : "",
+  "label" : "Förderer",
+  "icon" : "",
+  "name" : "fundingId",
+  "referenceType" : "@id",
+  "container" : "@list",
+  "weight" : "175",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6349,7 +6360,7 @@
   "name" : "fundingJoined",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "174",
+  "weight" : "176",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6360,7 +6371,7 @@
   "name" : "fundingProgram",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "178",
+  "weight" : "180",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6371,7 +6382,7 @@
   "name" : "fundingProgramJoined",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "179",
+  "weight" : "181",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6505,7 +6516,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://hbz-nrw.de/regal#pages",
-  "comment" : "**HELLO**",
+  "comment" : "",
   "label" : "Seiten",
   "icon" : "",
   "name" : "pages",
@@ -6522,7 +6533,7 @@
   "name" : "parallelEdition",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "232",
+  "weight" : "234",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6585,7 +6596,7 @@
   "name" : "projectId",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "175",
+  "weight" : "177",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6596,7 +6607,7 @@
   "name" : "projectIdJoin",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "176",
+  "weight" : "178",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6607,12 +6618,12 @@
   "name" : "projectIdJoined",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "177",
+  "weight" : "179",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://hbz-nrw.de/regal#publicationStatus",
-  "comment" : "**HELLO**",
+  "comment" : "",
   "label" : "Publikationsstatus",
   "icon" : "",
   "name" : "publicationStatus",
@@ -6640,7 +6651,7 @@
   "name" : "publishScheme",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "224",
+  "weight" : "226",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6743,7 +6754,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://hbz-nrw.de/regal#volume",
-  "comment" : "**HELLO**",
+  "comment" : "",
   "label" : "Band",
   "icon" : "",
   "name" : "volume",
@@ -6809,7 +6820,7 @@
   "name" : "extent",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "213",
+  "weight" : "215",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6831,7 +6842,7 @@
   "name" : "hasItem",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "231",
+  "weight" : "233",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6842,7 +6853,7 @@
   "name" : "heldBy",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "209",
+  "weight" : "211",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6853,7 +6864,7 @@
   "name" : "itemOf",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "210",
+  "weight" : "212",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6897,7 +6908,7 @@
   "name" : "supplement",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "211",
+  "weight" : "213",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7950,10 +7961,11 @@
   "comment" : "",
   "label" : "Sonstige",
   "icon" : "",
-  "name" : "",
+  "name" : "Other",
+  "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
-  "type" : "STORE",
+  "weight" : "248",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://id.loc.gov/vocabulary/relators/pht",
@@ -8251,7 +8263,7 @@
   "name" : "fulltextOnline",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "230",
+  "weight" : "232",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8425,7 +8437,7 @@
   "name" : "isPartOfName",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "172",
+  "weight" : "173",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8557,7 +8569,7 @@
   "name" : "hasPart",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "180",
+  "weight" : "182",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8568,7 +8580,7 @@
   "name" : "hasVersion",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "228",
+  "weight" : "230",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8579,7 +8591,7 @@
   "name" : "primaryForm",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "198",
+  "weight" : "200",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8714,7 +8726,7 @@
   "name" : "Game",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "190",
+  "weight" : "192",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8777,7 +8789,7 @@
   "name" : "MultiVolumeWorkRelation",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "191",
+  "weight" : "193",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8788,7 +8800,7 @@
   "name" : "OfficialPublication",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "192",
+  "weight" : "194",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8799,7 +8811,7 @@
   "name" : "Schoolbook",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "193",
+  "weight" : "195",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8810,7 +8822,7 @@
   "name" : "SeriesRelation",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "194",
+  "weight" : "196",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8864,7 +8876,7 @@
   "name" : "hasSuperordinate",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "199",
+  "weight" : "201",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8886,7 +8898,7 @@
   "name" : "inCollection",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "200",
+  "weight" : "202",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8981,7 +8993,7 @@
   "name" : "series",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "171",
+  "weight" : "172",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8992,7 +9004,7 @@
   "name" : "subjectAltLabel",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "215",
+  "weight" : "217",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -9014,7 +9026,7 @@
   "name" : "subjectLabel",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "214",
+  "weight" : "216",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19821,7 +19833,7 @@
   "name" : "Article",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "235",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19832,7 +19844,7 @@
   "name" : "AudioDocument",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "236",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19843,17 +19855,18 @@
   "name" : "bibo:AudioVisual",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "256",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/Book",
   "comment" : "",
-  "label" : "Buch",
+  "label" : "Monografie",
   "icon" : "fa fa-book",
   "name" : "Book",
+  "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "237",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19864,7 +19877,7 @@
   "name" : "Chapter",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "238",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19875,7 +19888,7 @@
   "name" : "Collection",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "239",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19886,7 +19899,7 @@
   "name" : "DocumentPart",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "240",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19897,7 +19910,7 @@
   "name" : "Image",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "241",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19908,7 +19921,7 @@
   "name" : "Issue",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "242",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19919,7 +19932,7 @@
   "name" : "Journal",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "243",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19930,7 +19943,7 @@
   "name" : "Manuscript",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "244",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19941,7 +19954,7 @@
   "name" : "Map",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "245",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19952,7 +19965,7 @@
   "name" : "MultiVolumeBook",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "246",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19963,7 +19976,7 @@
   "name" : "Newspaper",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "247",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19974,18 +19987,18 @@
   "name" : "Periodical",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "250",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/Proceedings",
-  "comment" : "Markdown provides backslash escapes for the following characters:\r\n\r\n    \\   backslash\r\n    `   backtick\r\n    *   asterisk\r\n    _   underscore\r\n    {}  curly braces\r\n    []  square brackets\r\n    ()  parentheses\r\n    #   hash mark\r\n\t+\tplus sign\r\n\t-\tminus sign (hyphen)\r\n    .   dot\r\n    !   exclamation mark\r\n\r\n",
-  "label" : "Konferenzschrift",
+  "comment" : "",
+  "label" : "Kongressschrift",
   "icon" : "octicon octicon-three-bars",
   "name" : "Proceeding",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "2",
+  "weight" : "249",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19996,7 +20009,7 @@
   "name" : "ReferenceSource",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "195",
+  "weight" : "197",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20007,7 +20020,7 @@
   "name" : "Report",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "196",
+  "weight" : "198",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20018,7 +20031,7 @@
   "name" : "Series",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "251",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20029,7 +20042,7 @@
   "name" : "Standard",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "252",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20040,7 +20053,7 @@
   "name" : "Thesis",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "253",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20051,7 +20064,7 @@
   "name" : "volume",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "",
+  "weight" : "255",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20133,7 +20146,7 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/issn",
-  "comment" : "**HELLO**",
+  "comment" : "",
   "label" : "ISSN",
   "icon" : "",
   "name" : "issn",
@@ -20153,12 +20166,12 @@
 }, {
   "uri" : "http://purl.org/ontology/bibo/oclcnum",
   "comment" : "",
-  "label" : "",
+  "label" : "OCLC Nummer",
   "icon" : "",
   "name" : "oclcNumber",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "",
+  "weight" : "254",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20250,7 +20263,7 @@
   "name" : "Item",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "197",
+  "weight" : "199",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20303,7 +20316,7 @@
   "name" : "predecessor",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "201",
+  "weight" : "203",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20314,7 +20327,7 @@
   "name" : "successor",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "202",
+  "weight" : "204",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20334,7 +20347,7 @@
   "name" : "corporateBodyForTitle",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "203",
+  "weight" : "205",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20378,7 +20391,7 @@
   "name" : "natureOfContent",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "216",
+  "weight" : "218",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20528,7 +20541,7 @@
   "name" : "endDate",
   "referenceType" : "http://www.w3.org/2001/XMLSchema#gYear",
   "container" : "@set",
-  "weight" : "204",
+  "weight" : "206",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20539,7 +20552,7 @@
   "name" : "location",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "205",
+  "weight" : "207",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20561,7 +20574,7 @@
   "name" : "publishedBy",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "212",
+  "weight" : "214",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20572,7 +20585,7 @@
   "name" : "startDate",
   "referenceType" : "http://www.w3.org/2001/XMLSchema#gYear",
   "container" : "@set",
-  "weight" : "206",
+  "weight" : "208",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20703,7 +20716,7 @@
   "name" : "isLike",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "218",
+  "weight" : "220",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20729,7 +20742,7 @@
   "name" : "componentList",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "207",
+  "weight" : "209",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20740,7 +20753,7 @@
   "name" : "itemID",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "222",
+  "weight" : "224",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20767,7 +20780,7 @@
   "label" : "Beschrieben durch",
   "name" : "isDescribedBy",
   "referenceType" : "@id",
-  "weight" : "219",
+  "weight" : "221",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20778,7 +20791,7 @@
   "name" : "similarTo",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "229",
+  "weight" : "231",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20789,7 +20802,7 @@
   "name" : "isLike",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "220",
+  "weight" : "222",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20852,7 +20865,7 @@
   "name" : "sameAs",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "223",
+  "weight" : "225",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20863,7 +20876,7 @@
   "name" : "altLabel",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "208",
+  "weight" : "210",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20883,7 +20896,7 @@
   "name" : "prefLabel",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "170",
+  "weight" : "171",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20902,7 +20915,7 @@
   "label" : "Beschrieben durch",
   "name" : "describedby",
   "referenceType" : "@id",
-  "weight" : "226",
+  "weight" : "228",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20910,7 +20923,7 @@
   "label" : "Gegenstand von",
   "name" : "isPrimaryTopicOf",
   "referenceType" : "@id",
-  "weight" : "227",
+  "weight" : "229",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20921,7 +20934,7 @@
   "name" : "primaryTopic",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "221",
+  "weight" : "223",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21334,7 +21347,7 @@
   "name" : "joinedFunding",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "181",
+  "weight" : "183",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
