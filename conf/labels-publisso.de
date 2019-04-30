@@ -7961,7 +7961,7 @@
   "comment" : "",
   "label" : "Sonstige",
   "icon" : "",
-  "name" : "Other",
+  "name" : "other",
   "referenceType" : "@id",
   "container" : "",
   "weight" : "248",
