@@ -319,7 +319,8 @@ public class Create extends RegalAction {
 			}
 			webpageVersion.setMimeType("application/warc");
 			webpageVersion.setFileLabel(label);
-			webpageVersion.setAccessScheme(n.getAccessScheme());
+			// webpageVersion.setAccessScheme(n.getAccessScheme());
+			webpageVersion.setAccessScheme("restricted");
 			webpageVersion.setPublishScheme(n.getPublishScheme());
 			webpageVersion = updateResource(webpageVersion);
 
