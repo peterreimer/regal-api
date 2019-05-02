@@ -1,0 +1,52 @@
+@(node: Node)
+@pid={@node.getPid()}
+@main(node.getPid()+" Upload",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
+						
+								@tags.getTitle(node.getLd2())
+					<ul class="nav nav-tabs">
+					 	<li ><a href="/resource/@pid">Object</a></li>
+					  	<li><a href=".#2a">Download</a></li>
+					  	@if(models.Globals.users.isLoggedIn(ctx())){
+					  	<li class="active"><a href="./upload"">Upload</a></li>
+					  	<li><a href="./edit">Edit</a></li>
+					  	}
+					</ul> 
+					
+					<div class="tab-content">
+				  		<div class="tab-pane active" id="1a">
+						  	<div class="form-group">
+						  	
+						  		<form method="post" enctype="multipart/form-data" action="./data">
+								
+								  <input name="data" type="file" size="50"> 
+						 		  <label>
+						 		  MD5
+						 		  <input name="md5" type="text" size="50"> 
+						 		  </label>
+								  
+								  <br/>
+								  <button class="btn btn-primary" type="submit">Upload</button>
+								</form>
+						  	
+						  	</div>
+
+			        	</div>
+				  		<div class="tab-pane" id="2a">
+		
+			        	</div>
+			        	
+		       			@if(models.Globals.users.isLoggedIn(ctx())){
+			        	<div class="tab-pane" id="3a">
+
+			        	</div>
+			        	<div class="tab-pane" id="4a">
+		
+			        	</div>
+			        	}
+		        	</div>
+
+<script>
+
+</script>
+}

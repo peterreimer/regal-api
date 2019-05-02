@@ -23,8 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
@@ -50,6 +48,20 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	EtikettMaker maker;
 
 	public MyEtikettMaker() {
+		initMaker();
+	}
+
+	@Override
+	public void updateLabels(InputStream labelIn) {
+		if (labelIn != null) {
+			maker.updateLabels(labelIn);
+		} else {
+			initMaker();
+		}
+
+	}
+
+	private void initMaker() {
 		String url = null;
 		try {
 			url = Globals.etikettUrl + "/labels.json";
@@ -110,25 +122,30 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	 *         '#' or last index of '/'
 	 */
 	public String getJsonName(Etikett e) {
-		String result = null;
-		String uri = e.getUri();
+		try {
+			String result = null;
+			String uri = e.getUri();
 
-		if (e.getName() != null) {
-			result = e.getName();
-		}
-		if (result == null || result.isEmpty()) {
-			String prefix = "";
-			if (uri.startsWith("http://purl.org/dc/elements"))
-				prefix = "dc:";
-			if (uri.contains("#"))
-				return prefix + uri.split("#")[1];
-			else if (uri.startsWith("http")) {
-				int i = uri.lastIndexOf("/");
-				return prefix + uri.substring(i + 1);
+			if (e.getName() != null) {
+				result = e.getName();
 			}
-			result = prefix + uri;
+			if (result == null || result.isEmpty()) {
+				String prefix = "";
+				if (uri.startsWith("http://purl.org/dc/elements"))
+					prefix = "dc:";
+				if (uri.contains("#"))
+					return prefix + uri.split("#")[1];
+				else if (uri.startsWith("http")) {
+					int i = uri.lastIndexOf("/");
+					return prefix + uri.substring(i + 1);
+				}
+				result = prefix + uri;
+			}
+			return result;
+		} catch (Exception ex) {
+			play.Logger.error("", ex);
+			return e.getUri();
 		}
-		return result;
 	}
 
 	private Map<String, Object> getAnnotatedContext() {
@@ -194,11 +211,13 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 
 	public static String getLabelFromEtikettWs(String uri) {
 		try {
-			play.Logger.debug(Globals.etikettUrl + "?url=" + uri + "&column=label");
+			uri = uri.replaceAll("#", "%23");
+			// play.Logger.debug(Globals.etikettUrl + "?url=" + uri +
+			// "&column=label");
 			WSResponse response = play.libs.ws.WS
 					.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
 					.setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC)
-					.setFollowRedirects(true).get().get(1000);
+					.setFollowRedirects(true).get().get(2000);
 			InputStream input = response.getBodyAsStream();
 			String content =
 					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));

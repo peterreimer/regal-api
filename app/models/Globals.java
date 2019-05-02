@@ -19,6 +19,8 @@ package models;
 import helper.Heritrix;
 import helper.MyEtikettMaker;
 import helper.TaskManager;
+import helper.Wget;
+import helper.oai.WglContributor;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import play.Play;
 import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
 import archive.search.SearchFacade;
+import authenticate.UserDB;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 
 import com.google.common.net.InetAddresses;
@@ -39,6 +42,8 @@ import com.google.common.net.InetAddresses;
  *
  */
 public class Globals {
+
+	public static UserDB users = UserDB.getInstance();
 
 	/**
 	 * the server that hosts this app
@@ -69,6 +74,8 @@ public class Globals {
 	 */
 	public static String[] namespaces = Play.application().configuration()
 			.getString("regal-api.namespace").split("\\s*,[,\\s]*");
+
+	public static String defaultNamespace = namespaces[0];
 
 	/**
 	 * defines how objects will be referenced internally
@@ -187,10 +194,21 @@ public class Globals {
 	public static Heritrix heritrix = new Heritrix();
 
 	/**
+	 * Global wget instance
+	 */
+	public static Wget wget = new Wget();
+
+	/**
 	 * Url to heritrix data directory
 	 */
 	public static String heritrixData = Play.application().configuration()
 			.getString("regal-api.heritrix.dataUrl");
+
+	/**
+	 * Url to wget data directory
+	 */
+	public static String wgetData =
+			Play.application().configuration().getString("regal-api.wget.dataUrl");
 
 	/**
 	 * Datacite provides a service for minting Dois. Configure your user here.
@@ -273,7 +291,7 @@ public class Globals {
 				ips.putAll(computeRange(address));
 			}
 		}
-		play.Logger.debug(
+		play.Logger.info(
 				"The following IPs can access restricted data with anonymous login: "
 						+ ips);
 		return ips;
@@ -308,4 +326,20 @@ public class Globals {
 			.getString("regal-api.rechercheUrl.prefix");
 	public static String rechercheUrlSuffix = Play.application().configuration()
 			.getString("regal-api.rechercheUrl.suffix");
+
+	public static WglContributor wglContributor = new WglContributor();
+
+	public static String thumbyUrl =
+			Play.application().configuration().getString("regal-api.thumby.url");
+	public static String zettelUrl =
+			Play.application().configuration().getString("regal-api.zettel.url");
+	public static String deepzoomeUrl =
+			Play.application().configuration().getString("regal-api.deepzoom.url");
+	public static String webharvestsDataDir = Play.application().configuration()
+			.getString("regal-api.webharvests.dataDir");
+	public static String webharvestsDataUrl = Play.application().configuration()
+			.getString("regal-api.webharvests.dataUrl");
+
+	public static String lobidHbz01 =
+			Play.application().configuration().getString("regal-api.hbz01");
 }

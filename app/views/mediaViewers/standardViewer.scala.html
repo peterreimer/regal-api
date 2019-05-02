@@ -1,0 +1,7 @@
+@import views.Helper
+@import views.ViewerInfo
+@(viewerInfo:ViewerInfo)
+
+<div>
+<@viewerInfo.getHtml5Element() width="500" controls><source src="@viewerInfo.dataLink" type="@viewerInfo.mimetype"/>
+</div>

@@ -1,8 +1,5 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 @import views.Helper 
-@(hit: Map[String,Object],namespace: String)
+@(hit: Node)
 
-
-<div class="container">	
-@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
-</div>
+@tags.resourceView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))

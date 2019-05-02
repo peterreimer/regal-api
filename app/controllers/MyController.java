@@ -22,13 +22,21 @@ import helper.HttpArchiveException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.io.ICsvMapWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import models.Globals;
 import models.Message;
@@ -36,17 +44,21 @@ import models.Node;
 import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
+import views.Helper;
 import views.html.message;
+import actions.Activate;
 import actions.Create;
 import actions.Delete;
 import actions.Index;
 import actions.Modify;
 import actions.Read;
 import actions.Transform;
+import akka.event.slf4j.Logger;
 import archive.fedora.XmlUtils;
+import authenticate.Role;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
@@ -56,35 +68,6 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * 
  */
 public class MyController extends Controller {
-
-	/**
-	 * The admin can do everything
-	 */
-	public final static String ADMIN_ROLE = "edoweb-admin";
-	/**
-	 * The editor sees everything but cannot run some batch processes
-	 */
-	public final static String EDITOR_ROLE = "edoweb-editor";
-	/**
-	 * The reader can read all data flagged with "public","restricted","remote"
-	 * The reader is not able to perform modifying, creating, or deleting
-	 * operations
-	 */
-	public final static String READER_ROLE = "edoweb-reader";
-	/**
-	 * The subscriber behaves like the reader but can als access date flagged with
-	 * "single"
-	 */
-	public final static String SUBSCRIBER_ROLE = "edoweb-subscriber";
-	/**
-	 * The remote user behaves like the reader
-	 */
-	public final static String REMOTE_ROLE = "edoweb-remote";
-
-	/**
-	 * The anonymous user can read everything flagged with "public".
-	 */
-	public final static String ANONYMOUS_ROLE = "edoweb-anonymous";
 
 	/**
 	 * private metadata is only visible to admins and editors
@@ -127,22 +110,26 @@ public class MyController extends Controller {
 	static Index index = new Index();
 	static Modify modify = new Modify();
 	static Delete delete = new Delete();
+	static Activate activate = new Activate();
 	static Transform transform = new Transform();
 
 	/**
 	 * @return Html or Json Output
 	 */
 	public static Result AccessDenied() {
+		ctx().session().put("CURRENT_PAGE", request().uri());
 		Message msg = new Message("Access Denied!", 401);
-		play.Logger.debug("\nResponse: " + msg.toString());
+		play.Logger.debug(
+				"\nResponse: " + msg.toString() + "\nSession " + ctx().session());
 		if (request().accepts("text/html")) {
-			return HtmlMessage(msg);
+			flash("message", "You must be logged in to perform this action!");
+			return redirect(routes.Forms.getLoginForm());
 		} else {
 			return JsonMessage(msg);
 		}
 	}
 
-	private static void setJsonHeader() {
+	protected static void setJsonHeader() {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response().setContentType("application/json");
 	}
@@ -167,6 +154,121 @@ public class MyController extends Controller {
 			play.Logger.error("", e);
 			return internalServerError("Not able to create response!");
 		}
+	}
+
+	protected static Result getCsvResults(JsonNode hitMap) {
+		String[] header = new String[] { "id", "title", "contributions", "issued",
+				"contentType", "collectionOne", "created", "doi", "alephId", "url" };
+		try (Writer output = new StringWriter();
+				ICsvMapWriter mapWriter = new org.supercsv.io.CsvMapWriter(output,
+						CsvPreference.EXCEL_PREFERENCE);) {
+			mapWriter.writeHeader(header);
+			hitMap.forEach(hit -> {
+				try {
+					Map<String, Object> result = createCsvLine(hit, header);
+					mapWriter.write(result, header);
+				} catch (Exception e) {
+					play.Logger.warn("", e);
+				}
+			});
+			output.flush();
+			mapWriter.flush();
+			response().setContentType("text/csv");
+			return ok(output.toString());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	protected static Result getCsvResult(JsonNode hit) {
+		String[] header = new String[] { "id", "title", "contributions", "issued",
+				"contentType", "collectionOne", "created", "doi", "alephId", "url" };
+		try (Writer output = new StringWriter();
+				ICsvMapWriter mapWriter = new org.supercsv.io.CsvMapWriter(output,
+						CsvPreference.EXCEL_PREFERENCE);) {
+			mapWriter.writeHeader(header);
+			try {
+				Map<String, Object> result = createCsvLine(hit, header);
+				mapWriter.write(result, header);
+			} catch (Exception e) {
+				play.Logger.warn("", e);
+			}
+			output.flush();
+			mapWriter.flush();
+			response().setContentType("text/csv");
+			return ok(output.toString());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	private static Map<String, Object> createCsvLine(JsonNode hit,
+			String[] header) {
+		Map<String, Object> result = new HashMap<>();
+		String id;
+		String title;
+		String contributions;
+		String issued;
+		String contentType;
+		String collectionOne;
+		String created;
+		String doi;
+		String alephId;
+		String url;
+		id = hit.at("/@id").asText();
+		title = hit.at("/title/0").asText();
+		contributions = getContributions(hit) + "";
+		issued = hit.at("/issued").asText();
+		url = Globals.protocol + Globals.server + "/resource/" + id;
+		contentType = hit.at("/contentType").asText();
+		collectionOne = getCollectionOne(hit);
+		created = hit.at("/isDescribedBy/created").asText();
+		doi = hit.at("/doi").asText();
+		alephId = hit.at("/hbzId/0").asText();
+		result.put(header[0], id);
+		result.put(header[1], title);
+		result.put(header[2], contributions);
+		result.put(header[3], issued);
+		result.put(header[4], contentType);
+		result.put(header[5], collectionOne);
+		result.put(header[6], created);
+		result.put(header[7], doi);
+		result.put(header[8], alephId);
+		result.put(header[9], url);
+		play.Logger.debug("" + result);
+		return result;
+	}
+
+	private static String getCollectionOne(JsonNode hit) {
+		String label = hit.at("/collectionOne/0/prefLabel").asText();
+		String gndid = hit.at("/collectionOne/0/gndIdentifier").asText();
+		return label + " (" + gndid + ")";
+	}
+
+	private static List<String> getContributions(JsonNode hitMap) {
+		List<String> result = new ArrayList<>();
+		hitMap.at("/contribution").forEach(n -> {
+			String label = n.at("/agent/0/prefLabel").textValue();
+			String gndid = n.at("/agent/0/gndIdentifier").textValue();
+			result.add(label + " (" + gndid + ")");
+		});
+		if (result.isEmpty()) {
+			hitMap.at("/creator").forEach(c -> {
+				String label = c.at("/prefLabel").asText();
+				String uri = c.at("/@id").asText();
+				String gndid = uri.substring(uri.lastIndexOf('/') + 1);
+				result.add(label + " (" + gndid + ")");
+			});
+			hitMap.at("/contributor").forEach(c -> {
+				String label = c.at("/prefLabel").asText();
+				String uri = c.at("/@id").asText();
+				String gndid = uri.substring(uri.lastIndexOf('/') + 1);
+				result.add(label + " (" + gndid + ")");
+			});
+		}
+		return result;
 	}
 
 	protected static String json(Object obj) {
@@ -211,8 +313,8 @@ public class MyController extends Controller {
 	 * @return true if the user is allowed to read the object
 	 */
 	public static boolean readData_accessIsAllowed(String accessScheme,
-			String role) {
-		if (!ADMIN_ROLE.equals(role)) {
+			Role role) {
+		if (!Role.ADMIN.equals(role)) {
 			if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
 				return true;
 			} else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
@@ -221,29 +323,29 @@ public class MyController extends Controller {
 							+ " is white listed. Access to restricted data granted.");
 					return true;
 				}
-				if (READER_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)
-						|| REMOTE_ROLE.equals(role)) {
+				if (Role.READER.equals(role) || Role.SUBSCRIBER.equals(role)
+						|| Role.REMOTE.equals(role)) {
 					if (isWhitelisted(request().getHeader("UserIp"))) {
 						play.Logger.info("IP " + request().getHeader("UserIp")
 								+ " is white listed. Access to restricted data granted.");
 						return true;
 					}
 				}
-				if (EDITOR_ROLE.equals(role)) {
+				if (Role.EDITOR.equals(role)) {
 					return true;
 				}
 			} else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
-				if (EDITOR_ROLE.equals(role))
+				if (Role.EDITOR.equals(role))
 					return true;
 			} else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
-				if (EDITOR_ROLE.equals(role)) {// ||
+				if (Role.EDITOR.equals(role)) {// ||
 					// SUBSCRIBER_ROLE.equals(role))
 					// {
 					return true;
 				}
 			} else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
-				if (EDITOR_ROLE.equals(role)) { // || REMOTE_ROLE.equals(role)
-					// || READER_ROLE.equals(role)
+				if (Role.EDITOR.equals(role)) { // || REMOTE_ROLE.equals(role)
+					// || Role.Reader.equals(role)
 					// ||
 					// SUBSCRIBER_ROLE.equals(role))
 					// {
@@ -266,12 +368,12 @@ public class MyController extends Controller {
 	 * @return true if the user is allowed to read the object
 	 */
 	public static boolean readMetadata_accessIsAllowed(String publishScheme,
-			String role) {
-		if (!ADMIN_ROLE.equals(role)) {
+			Role role) {
+		if (!Role.ADMIN.equals(role)) {
 			if (METADATA_ACCESSOR_PUBLIC.equals(publishScheme)) {
 				return true;
 			} else if (METADATA_ACCESSOR_PRIVATE.equals(publishScheme)) {
-				if (EDITOR_ROLE.equals(role)) {
+				if (Role.EDITOR.equals(role)) {
 					return true;
 				}
 			}
@@ -285,8 +387,8 @@ public class MyController extends Controller {
 	 * @param role the role of the user
 	 * @return true if the user is allowed to modify the object
 	 */
-	public static boolean modifyingAccessIsAllowed(String role) {
-		if (ADMIN_ROLE.equals(role) || EDITOR_ROLE.equals(role))
+	public static boolean modifyingAccessIsAllowed(Role role) {
+		if (Role.ADMIN.equals(role) || Role.EDITOR.equals(role))
 			return true;
 		return false;
 	}
@@ -310,7 +412,7 @@ public class MyController extends Controller {
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
-						String role = (String) Http.Context.current().args.get("role");
+						Role role = Role.valueOf(ctx().session().get("role"));
 						String publishScheme = node.getPublishScheme();
 						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
 							return AccessDenied();
@@ -345,10 +447,11 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, NodeAction ca) {
 			return Promise.promise(() -> {
 				try {
+					Role role = findRole();
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
-						String role = (String) Http.Context.current().args.get("role");
+
 						String accessScheme = node.getAccessScheme();
 						if (!readData_accessIsAllowed(accessScheme, role)) {
 							return AccessDenied();
@@ -364,7 +467,15 @@ public class MyController extends Controller {
 				}
 			});
 		}
+	}
 
+	private static Role findRole() {
+		String roleString = session().get("role");
+		if (roleString == null || roleString.isEmpty()) {
+			roleString = Role.GUEST.toString();
+		}
+		play.Logger.debug("Access with role " + roleString);
+		return Role.valueOf(roleString);
 	}
 
 	/**
@@ -375,7 +486,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					if (!readMetadata_accessIsAllowed("private", role)) {
 						return AccessDenied();
 					}
@@ -399,7 +510,7 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					String userId = request().getHeader("UserId");
 					play.Logger.debug(
 							"Try to access with role: " + role + " and userId " + userId);
@@ -431,7 +542,7 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, NodeAction ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					play.Logger.debug("Try to access with role: " + role + ".");
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
@@ -461,7 +572,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
 					}
@@ -485,7 +596,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					play.Logger.debug("role={}", role);
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
@@ -543,15 +654,12 @@ public class MyController extends Controller {
 		return dateFormat.format(date);
 	}
 
-	public static void validate(String xml, String schema) {
+	public static void validate(String xml, String schema, String baseUri,
+			String localPath) {
 		try {
-			if (schema != null) {
-				XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
-						Play.application().resourceAsStream(schema));
-			} else {
-				XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
-						null);
-			}
+			XmlUtils.validator.validate(
+					new ByteArrayInputStream(xml.getBytes("utf-8")),
+					Play.application().resourceAsStream(schema), baseUri, localPath);
 		} catch (Exception e) {
 			throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
 		}

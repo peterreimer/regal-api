@@ -28,9 +28,12 @@ import models.Link;
 import models.Node;
 import models.Transformer;
 
-import org.openrdf.model.Statement;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import actions.Modify;
 import archive.fedora.RdfUtils;
@@ -71,37 +74,36 @@ public class OaiDispatcher {
 		addAlephTransformer(node);
 		addMetsTransformer(node);
 		addRdfTransformer(node);
+		addWglTransformer(node);
 	}
 
 	public static String initContentModels(String namespace) {
 		int port = Globals.getPort();
 		play.Logger.info("Reinit fedora content models to listen on port: " + port);
-		List<Transformer> transformers = new Vector<Transformer>();
+		List<Transformer> transformers = new Vector<>();
+		String internalAccessRoute =
+				"http://localhost:" + port + "/resource/(pid).";
 		transformers.add(new Transformer(namespace + "epicur", "epicur",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "epicur"));
+				internalAccessRoute + "epicur"));
 		transformers.add(new Transformer(namespace + "oaidc", "oaidc",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "oaidc"));
+				internalAccessRoute + "oaidc"));
 		transformers.add(new Transformer(namespace + "pdfa", "pdfa",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "pdfa"));
+				internalAccessRoute + "pdfa"));
 		transformers.add(new Transformer(namespace + "pdfbox", "pdfbox",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "pdfbox"));
+				internalAccessRoute + "pdfbox"));
 		transformers.add(new Transformer(namespace + "aleph", "aleph",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "aleph"));
+				internalAccessRoute + "aleph"));
 		transformers.add(new Transformer(namespace + "mets", "mets",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "mets"));
-		transformers.add(new Transformer(namespace + "rdf", "rdf",
-				"http://edoweb-anonymous:nopwd@" + "localhost:" + port
-						+ "/resource/(pid)." + namespace + "rdf"));
+				internalAccessRoute + "mets"));
+		transformers.add(
+				new Transformer(namespace + "rdf", "rdf", internalAccessRoute + "rdf"));
+		transformers.add(
+				new Transformer(namespace + "wgl", "wgl", internalAccessRoute + "wgl"));
 		OaiDispatcher.contentModelsInit(transformers);
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
-				+ "aleph, " + namespace + "mets" + namespace + "rdf";
+				+ "aleph, " + namespace + "mets, " + namespace + "rdf, " + namespace
+				+ "wgl";
 		play.Logger.info(result);
 		return result;
 	}
@@ -119,11 +121,11 @@ public class OaiDispatcher {
 
 	private static void createDDCSets(Node node) throws RepositoryException {
 		OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-		String metadata = node.getMetadata();
-		if (metadata == null)
+		String metadata2 = node.getMetadata2();
+		if (metadata2 == null)
 			return;
 		RepositoryResult<Statement> statements =
-				RdfUtils.getStatements(metadata, "fedora:info/");
+				RdfUtils.getStatements(metadata2, "fedora:info/");
 		while (statements.hasNext()) {
 			Statement st = statements.next();
 			String subject = st.getSubject().stringValue();
@@ -241,6 +243,8 @@ public class OaiDispatcher {
 					continue; // implicitly added - or not allowed to set
 				if ("rdf".equals(t))
 					continue; // implicitly added - or not allowed to set
+				if ("wgl".equals(t))
+					continue; // implicitly added - or not allowed to set
 				node.addTransformer(new Transformer(t));
 			}
 		}
@@ -292,6 +296,16 @@ public class OaiDispatcher {
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
 				node.addTransformer(new Transformer("rdf"));
+			}
+		}
+	}
+
+	private static void addWglTransformer(Node node) {
+		String type = node.getContentType();
+		if ("public".equals(node.getPublishScheme())) {
+			if ("article".equals(type)
+					&& node.getLd2().containsKey("collectionOne")) {
+				node.addTransformer(new Transformer("wgl"));
 			}
 		}
 	}

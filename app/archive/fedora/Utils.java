@@ -75,19 +75,20 @@ import models.Link;
 import models.Node;
 import models.Transformer;
 
-import org.openrdf.model.Literal;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -180,6 +181,7 @@ public class Utils {
 						.predicate(link.getPredicate())
 						.object(link.getObject(), link.isLiteral()).execute();
 			} catch (FedoraClientException e) {
+				play.Logger.warn(e.getMessage());
 				play.Logger.debug("", e);
 			}
 		}
@@ -199,6 +201,7 @@ public class Utils {
 								.object(link.getObject(), true).execute();
 					} catch (Exception e2) {
 
+						play.Logger.warn(e2.getMessage());
 						play.Logger.debug("", e2);
 					}
 
@@ -336,6 +339,21 @@ public class Utils {
 		}
 	}
 
+	@SuppressWarnings("javadoc")
+	public void createUrlHistStream(Node node) {
+		try {
+			Upload request = new Upload(new File(node.getUrlHistFile()));
+			UploadResponse response = request.execute();
+			String location = response.getUploadLocation();
+			new AddDatastream(node.getPid(), "urlHist").versionable(true).dsState("A")
+					.dsLabel("json file to keep track of a webpage's URL changes")
+					.controlGroup("M").mimeType("application/json").dsLocation(location)
+					.execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	/**
 	 * Sets a datastream objectTimestamp to the node
 	 * 
@@ -459,6 +477,27 @@ public class Utils {
 		}
 	}
 
+	@SuppressWarnings("javadoc")
+	public void updateUrlHistStream(Node node) {
+		try {
+			File file = new File(node.getUrlHistFile());
+			if (dataStreamExists(node.getPid(), "urlHist")) {
+				new ModifyDatastream(node.getPid(), "urlHist").versionable(true)
+						.dsLabel("json file to keep track of a webpage's URL history")
+						.dsState("A").controlGroup("M").mimeType("application/json")
+						.content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "urlHist").versionable(true)
+						.dsState("A")
+						.dsLabel("json file to keep track of a webpage's URL history")
+						.controlGroup("M").mimeType("application/json").content(file)
+						.execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	void updateMetadataStream(Node node) {
 		try {
 			File file = new File(node.getMetadataFile());
@@ -469,6 +508,23 @@ public class Utils {
 			} else {
 				new AddDatastream(node.getPid(), "metadata").versionable(true)
 						.dsState("A").dsLabel("n-triple rdf metadata").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void updateMetadata2Stream(Node node) {
+		try {
+			File file = new File(node.getMetadata2File());
+			if (dataStreamExists(node.getPid(), "metadata2")) {
+				new ModifyDatastream(node.getPid(), "metadata2").versionable(true)
+						.dsLabel("n-triple rdf metadata2").dsState("A").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "metadata2").versionable(true)
+						.dsState("A").dsLabel("n-triple rdf metadata2").controlGroup("M")
 						.mimeType("text/plain").content(file).execute();
 			}
 		} catch (FedoraClientException e) {
@@ -487,14 +543,14 @@ public class Utils {
 			String baseURI = "";
 			try {
 				ValueFactory f = myRepository.getValueFactory();
-				URI objectId = f.createURI("info:fedora/" + node.getPid());
+				IRI objectId = f.createIRI("info:fedora/" + node.getPid());
 				con.add(ds, baseURI, RDFFormat.RDFXML);
 				RepositoryResult<Statement> statements =
 						con.getStatements(objectId, null, null, true);
 				try {
 					while (statements.hasNext()) {
 						Statement st = statements.next();
-						URI predUri = st.getPredicate();
+						IRI predUri = st.getPredicate();
 						Value objUri = st.getObject();
 						Link link = new Link();
 						link.setObject(objUri.stringValue(), false);
@@ -700,6 +756,7 @@ public class Utils {
 								.execute();
 					}
 				} catch (Exception e) {
+					play.Logger.warn(e.getMessage());
 					play.Logger.debug("", e);
 				}
 			}

@@ -1,224 +1,422 @@
-.title {
-	padding: 0;
-	marging: 0;
-	border:red;
+h1 {
+	font-size: 2em;
 }
 
-.titlePre {
-	font-style: italic;
-	padding: 0;
-	marging: 0;
+h2 {
+	font-size: 1.2em;
 }
 
-.titleMain {
-	padding: 0;
-	marging: 0;
+body {
+	background: #fff;
 }
 
-.titlePost {
-	font-style: italic;
-	padding: 0;
-	marging: 0;
+.resourceTable_info {
+	display: none;
 }
+
+.resourceTable tr td, tr {
+	background-color: #ffffff !important;
+	border-spacing: 0;
+	border-collapse: collapse;
+	padding-top: 0px;
+	padding-right: 20px;
+	padding-bottom: 2px;
+	padding-left: 0px;
+	margin: 0;
+}
+
+.resourceTable th {
+	display: none;
+}
+
+.resourceTable td {
+	vertical-align: top;
+}
+
+
+
+.resourceTable .title {
+	display: none;
+}
+
 .public-access {
-    position:relative;
-} 
-.public-access:before{
-	color:green;
+	position: relative;
+}
+
+.public-access:before {
+	color: green;
 	content: "\f13e";
-    font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
+	font-family: FontAwesome;
+	top: 0;
+	left: -5px;
+	padding-right: 10px;
 }
 
 .private-access {
-    position:relative;
-} 
-.private-access:before{
-	color:red;
-	content: "\f023";
-   font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
+	position: relative;
 }
+
+.private-access:before {
+	color: red;
+	content: "\f023";
+	font-family: FontAwesome;
+	top: 0;
+	left: -5px;
+	padding-right: 10px;
+}
+
 .restricted-access {
-    position:relative;
-} 
-.restricted-access:before{
-	color:orange;
-    font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
+	position: relative;
+}
+
+.restricted-access:before {
+	color: orange;
+	font-family: FontAwesome;
+	top: 0;
+	left: -5px;
+	padding-right: 10px;
 	content: "\f023";
 }
 
-.folder {
-    position:relative;
-} 
-.folder:before{
-	color:orange;
-    font-family: FontAwesome;
-    top:0;
-    left:-5px;
-    padding-right:10px;
-	content: "\f114";
+.downloadIcon img {
+	width: 20px;
 }
 
-ol{
-	list-style-type:none
+.downloadIcon a, .downloadIcon div, .downloadIcon span, .downloadIcon img
+	{
+	display: inline-block;
+}
+
+td:empty {
+	display: none;
+}
+
+tr.inSeries tr.rdftype, tr.inSeries td.numbering, tr.inSeries td.series
+	{
+	display: none;
+}
+
+tr.volumeIn tr.rdftype, tr.volumeIn td.numbering, tr.volumeIn td.multiVolumeWork
+	{
+	display: none;
+}
+
+.resourceTable .catalogLink a[title], .resourceTable .parallelEdition a[title]
+	{
+	pointer-events: none;
+	cursor: default;
+	color: rgb(75, 75, 77);
+}
+
+body, table, input, label, .fieldset-legend, .ui-widget {
+  font-family: "TabletGothicNarrow", "roboto_condensedregular",sans-serif;
+  line-height: 1.5em;
+  color: #4b4b4d;
+  max-width: 1650px;
 }
 
 
-.reset-this {
-    animation : none;
-    animation-delay : 0;
-    animation-direction : normal;
-    animation-duration : 0;
-    animation-fill-mode : none;
-    animation-iteration-count : 1;
-    animation-name : none;
-    animation-play-state : running;
-    animation-timing-function : ease;
-    backface-visibility : visible;
-    background : 0;
-    background-attachment : scroll;
-    background-clip : border-box;
-    background-color : transparent;
-    background-image : none;
-    background-origin : padding-box;
-    background-position : 0 0;
-    background-position-x : 0;
-    background-position-y : 0;
-    background-repeat : repeat;
-    background-size : auto auto;
-    border : 0;
-    border-style : none;
-    border-width : medium;
-    border-color : inherit;
-    border-bottom : 0;
-    border-bottom-color : inherit;
-    border-bottom-left-radius : 0;
-    border-bottom-right-radius : 0;
-    border-bottom-style : none;
-    border-bottom-width : medium;
-    border-collapse : separate;
-    border-image : none;
-    border-left : 0;
-    border-left-color : inherit;
-    border-left-style : none;
-    border-left-width : medium;
-    border-radius : 0;
-    border-right : 0;
-    border-right-color : inherit;
-    border-right-style : none;
-    border-right-width : medium;
-    border-spacing : 0;
-    border-top : 0;
-    border-top-color : inherit;
-    border-top-left-radius : 0;
-    border-top-right-radius : 0;
-    border-top-style : none;
-    border-top-width : medium;
-    bottom : auto;
-    box-shadow : none;
-    box-sizing : content-box;
-    caption-side : top;
-    clear : none;
-    clip : auto;
-    color : inherit;
-    columns : auto;
-    column-count : auto;
-    column-fill : balance;
-    column-gap : normal;
-    column-rule : medium none currentColor;
-    column-rule-color : currentColor;
-    column-rule-style : none;
-    column-rule-width : none;
-    column-span : 1;
-    column-width : auto;
-    content : normal;
-    counter-increment : none;
-    counter-reset : none;
-    cursor : auto;
-    direction : ltr;
-    display : inline;
-    empty-cells : show;
-    float : none;
-    font : normal;
-    font-family : inherit;
-    font-size : medium;
-    font-style : normal;
-    font-variant : normal;
-    font-weight : normal;
-    height : auto;
-    hyphens : none;
-    left : auto;
-    letter-spacing : normal;
-    line-height : normal;
-    list-style : none;
-    list-style-image : none;
-    list-style-position : outside;
-    list-style-type : disc;
-    margin : 0;
-    margin-bottom : 0;
-    margin-left : 0;
-    margin-right : 0;
-    margin-top : 0;
-    max-height : none;
-    max-width : none;
-    min-height : 0;
-    min-width : 0;
-    opacity : 1;
-    orphans : 0;
-    outline : 0;
-    outline-color : invert;
-    outline-style : none;
-    outline-width : medium;
-    overflow : visible;
-    overflow-x : visible;
-    overflow-y : visible;
-    padding : 0;
-    padding-bottom : 0;
-    padding-left : 0;
-    padding-right : 0;
-    padding-top : 0;
-    page-break-after : auto;
-    page-break-before : auto;
-    page-break-inside : auto;
-    perspective : none;
-    perspective-origin : 50% 50%;
-    position : static;
-    /* May need to alter quotes for different locales (e.g fr) */
-    quotes : '\201C' '\201D' '\2018' '\2019';
-    right : auto;
-    tab-size : 8;
-    table-layout : auto;
-    text-align : inherit;
-    text-align-last : auto;
-    text-decoration : none;
-    text-decoration-color : inherit;
-    text-decoration-line : none;
-    text-decoration-style : solid;
-    text-indent : 0;
-    text-shadow : none;
-    text-transform : none;
-    top : auto;
-    transform : none;
-    transform-style : flat;
-    transition : none;
-    transition-delay : 0s;
-    transition-duration : 0s;
-    transition-property : none;
-    transition-timing-function : ease;
-    unicode-bidi : normal;
-    vertical-align : baseline;
-    visibility : visible;
-    white-space : normal;
-    widows : 0;
-    width : auto;
-    word-spacing : normal;
-    z-index : auto;
+td {
+	max-width: 30em;
+	font-weight: 400;
 }
+
+
+td .item-list ul li a {
+  word-wrap: break-word;
+}
+
+table:not ([tableheader-processed] ) th {
+	background-repeat: no-repeat;
+	background-position: right;
+}
+
+table:not ([tableheader-processed] ) th:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+table:not ([tableheader-processed] ) th.headerSortDown {
+	background-image: url('/misc/arrow-desc.png');
+}
+
+table:not ([tableheader-processed] ) th.headerSortUp {
+	background-image: url('/misc/arrow-asc.png');
+}
+
+table h1 {
+	font-size: 1.2em;
+	font-weight: 400;
+	margin-top: 3px;
+}
+
+.edoweb-entity-list table td:nth-child(1),
+.edoweb-entity-list table th:nth-child(1)
+ {
+    display: block; display: table-cell;
+}
+.edoweb-entity-list table th:nth-child(1),
+.edoweb-entity-list table td:nth-child(1),
+.edoweb-entity-list table th:nth-child(2),
+.edoweb-entity-list table td:nth-child(2),
+.edoweb-entity-list table th:nth-child(4),
+.edoweb-entity-list table td:nth-child(4),
+.edoweb-entity-list table th:nth-child(5),
+.edoweb-entity-list table td:nth-child(5)
+ {
+    display: block; display: table-cell;
+}
+
+.edoweb-entity-list table th,
+.edoweb-entity-list table td
+ {
+    display: block; display: table-cell;
+
+}
+
+.edoweb-entity-list table td:nth-child(6),
+.edoweb-entity-list table th:nth-child(7),
+.edoweb-entity-list table td:nth-child(7),
+.edoweb-entity-list table th:nth-child(8),
+.edoweb-entity-list table td:nth-child(8)
+ {
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.edoweb-entity-list table th,
+.edoweb-entity-list table td
+ {
+    display: block; display: table-cell;
+}
+
+.edoweb-entity-list table td:nth-child(6),
+.edoweb-entity-list table th:nth-child(7),
+.edoweb-entity-list table td:nth-child(7),
+.edoweb-entity-list table th:nth-child(8),
+.edoweb-entity-list table td:nth-child(8)
+ {
+    word-wrap: normal;
+    word-break: normal;
+}
+
+.resourceTable tr, td, th {
+padding-left:0px !important;
+}
+
+/**
+do not display this fields
+**/
+.resourceTable .isDescribedBy, 
+.resourceTable .primaryTopic,
+.resourceTable .itemID, 
+.resourceTable .title, 
+.resourceTable .hbzId,
+.resourceTable .contributorOrder, 
+.resourceTable .fulltextOnline,
+.resourceTable .contributingCorporateBodyLabel, 
+.resourceTable .isPrimaryTopicOf,
+.resourceTable .hasVersion, 
+.resourceTable .isLike, 
+.resourceTable .exemplar,
+.resourceTable .subjectOrder, 
+.resourceTable .seeAlso, 
+.resourceTable .subjectLabel,
+.resourceTable .creator, 
+.resourceTable .contributor, 
+.resourceTable .volume,
+.resourceTable .externalParent, 
+.resourceTable .collectionOne,
+.resourceTable .accessScheme, 
+.resourceTable .publishScheme,
+.resourceTable .contentType, 
+.resourceTable .sameAs, 
+.resourceTable .describedby,
+.resourceTable .parallelEdition, 
+.resourceTable .hasItem,
+.resourceTable .predecessor, 
+.resourceTable .successor, 
+.resourceTable .corporateBodyForTitle
+{ 
+	display: none;
+}
+
+/**
+do not show external links on this fields
+**/
+.resourceTable .medium a span, 
+.resourceTable .subject a span,
+.resourceTable .rdftype a span, 
+.resourceTable .nwbibsubject a span,
+.resourceTable .nwbibspatial a span, 
+.resourceTable .language a span,
+.resourceTable .ddc a span, 
+.resourceTable .reviewStatus a span,
+.resourceTable .publicationStatus a span,
+.resourceTable .ddc a span,
+.resourceTable .subjectName a span,
+.resourceTable .language a span,
+.resourceTable .reviewStatus a span,
+.resourceTable .publicationStatus a span, 
+.resourceTable .professionalGroup a span{
+	display: none;
+}
+
+/**
+do not show separator before external links
+**/
+.resourceTable .medium .separator, 
+.resourceTable .subject .separator,
+.resourceTable .rdftype .separator, 
+.resourceTable .nwbibsubject .separator,
+.resourceTable .nwbibspatial .separator, 
+.resourceTable .language .separator,
+.resourceTable .ddc .separator, 
+.resourceTable .reviewStatus .separator,
+.resourceTable .publicationStatus .separator,
+ .resourceTable .ddc .separator,
+ .resourceTable .subjectName .separator,
+ .resourceTable .language .separator,
+ .resourceTable .reviewStatus .separator,
+ .resourceTable .publicationStatus .separator,
+ .resourceTable .professionalGroup .separator {
+	display: none;
+}
+
+.resourceTable ul, .resourceTable ol, .searchResults, .searchResults {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.subjectAltLabelList {
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.componentList, .subjectAltLabelList {
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.componentList li, .subjectAltLabelList li {
+	display: inline;
+}
+
+.componentList li:after, .subjectAltLabelList li:after {
+	content: ", ";
+}
+
+.componentList li:last-child:after, .subjectAltLabelList li:last-child:after{
+	content: "";
+}
+.search .titleMain, .search .otherTitle, .search .corporateBodyForTitle{
+	font-size:12pt;
+}
+
+.search .author-title-list, .search .publicationYear {
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	color:#555555;
+	font-size:10pt;
+}
+
+.author-title-list {
+	display: inline;
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.author-title-list li {
+	display: inline;
+}
+
+.author-title-list li:after {
+	content: "| ";
+}
+
+.author-title-list li:last-child:after {
+	content: "";
+}
+.contribution tr td, .contribution tr th {
+	margin: 0;
+	padding: 0;
+}
+
+.lastModifiedLabel {
+	display: none;
+}
+
+.hasPart, .hasPart table, .hasPart tr, .hasPart td {
+	background-color: #efefef !important;
+	border: none;
+}
+
+.hasPart img {
+	width: 40px;
+}
+
+.facets_header {
+	margin: 14px 0 4.6666666667px;
+	margin-top: 14px;
+	margin-right: 0px;
+	margin-bottom: 4.66667px;
+	margin-left: 0px;
+}
+
+.facets_nav a {
+	line-height: 1em;
+	display: block;
+	margin: 0;
+	padding: 6px 6px 6px 0;
+	position: relative;
+	z-index: 1;
+	border-radius: 2px;
+}
+
+.facets_nav {
+	margin: 0;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding: 0;
+	list-style: none;
+}
+
+.more_facets_link {
+	line-height: 1em;
+	display: block;
+	margin: 0;
+	padding: 6px 6px 6px 0;
+	position: relative;
+	z-index: 1;
+	border-radius: 2px;
+}
+
+#thumbnail {
+	box-shadow: 3px 3px 7px #666;
+	width: 150px;
+}
+
+.title , .titlePre{
+  padding: 0;
+  margin: 0;
+}
+/**
+For development uncomment, but do not show to enduser yet
+**/
+.banner,footer{
+	display:none;
+}
+
+

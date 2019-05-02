@@ -1,0 +1,37 @@
+@import views.Helper
+@import views.ViewerInfo
+@(viewerInfo:ViewerInfo)
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>View @viewerInfo.pid</title>
+				<link rel="shortcut icon" href="/public/images/favicon.ico" type="image/x-icon" /> 
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/edoweb_lbz.css")">
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
+        <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
+		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/font-awesome.min.css")">
+		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/listnav.css")">
+		<link rel="stylesheet" href="@controllers.routes.Assets.at("octicons/octicons.css")">
+        <script src="@controllers.routes.Assets.at("javascripts/jquery-3.2.1.min.js")"></script>
+        <script src="@controllers.routes.Assets.at("javascripts/jquery-ui.min.js")"></script>
+        <script src="@controllers.routes.Assets.at("javascripts/bootstrap.min.js")"></script>
+		<script src="@controllers.routes.Assets.at("javascripts/dataTables.bootstrap.js")"></script>
+		<script src="@controllers.routes.Assets.at("javascripts/jstree.min.js")"></script>
+    	<script src="@controllers.routes.Assets.at("javascripts/jquery.dataTables.min.js")"></script>
+    	<script src="@controllers.routes.Assets.at("javascripts/jquery-listnav.min.js")"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
+	 
+    </head>
+	<body>
+		<iframe frameBorder="0" src="@models.Globals.deepzoomeUrl/viewer?imageUrl=@Globals.protocol@Globals.server/resource/@viewerInfo.pid/data" allowfullscreen width="800px" height="600px" scrolling="no">
+		
+		</iframe>
+		<br/>
+		<a href=@viewerInfo.dataLink><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
+				
+	</body>
+</html>			

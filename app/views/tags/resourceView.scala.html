@@ -1,35 +1,48 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+@import views.Helper
+@import views.ViewerInfo
+@import models.Node
+@(node: Node,hit:Map[String,Object],context:List[String])
 
-@(hit: Map[String,Object],context:List[String],namespace:String)
-
-<table class="table table-striped table-condensed" id="example" class="display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
+@{
+		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
+		createViewerLinks(viewerInfo)
+}
+@createViewerLinks(viewerInfo:ViewerInfo)={
+	@if(viewerInfo!=null){
+			@if(!viewerInfo.contentType.equals("version")) {
+				@if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
+				   @mediaViewers.standardViewer(viewerInfo)
+				} else{
+					@if(viewerInfo.accessScheme.equals("public")){
+						@if(viewerInfo.viewertype.equals(ViewerInfo.ViewerType.DEEPZOOM)){
+				   			<div id="thumbnail" class="thumb">
+							<a href=@viewerInfo.getViewerLink()  target="_blank">
+								<img src=@viewerInfo.thumbnail width="150"/>
+							</a>
+							</div>
+							<a href=@viewerInfo.getViewerLink() target="_blank"><b>View<i class="fa fa-eye"></i></b><br/></a>
+						}else{
+							<div id="thumbnail" class="thumb">
+								<a href=@viewerInfo.viewerAdress target="_blank"><img src=@viewerInfo.thumbnail width="150"/></a>
+							</div>		
+						}
+					}	
+				}
+				@createViewerLink(viewerInfo)
+			}
+		} 
+}
+@createViewerLink(viewerInfo:ViewerInfo)={
+	<a href=@viewerInfo.dataLink><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
+ 	@if("public".equals(viewerInfo.accessScheme)){
+		<i class="fa fa-unlock" style="color:green;"></i>
+ 	}else {
+		<i class="fa fa-lock" style="color:red;"></i>
+	}
+}
+<table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
-@hit.get("hasPart") match{
-	 case d: List[Any] => {
-		<tr class="hasPart">
-			<td style="display:none;"></td>
-			<td class="field-label hasPart">@getLabel("hasPart")</td>
-			<td class="field-item"
-				property="@models.Globals.profile.getEtikettByName("hasPart").getUri()">	
-				<ul class="list-group row">			
-					@for(field <- d){
-					<li class="list-group-item col-xs-2">@tags.partsView(field)</li> 
-					}
-				</ul>
-		</tr>
-	} case _ =>{} 
-}
-@hit.get("hasData") match{ 
-
-case fileMap :Map[String,Object] =>{
-<tr class="hasData">
-    <td style="display:none;"></td>
-	<td class="field-label hasData">@getLabel("hasData")</td>
-	<td class="field-item" property="@models.Globals.profile.getEtikettByName("hasData").getUri()">
-	@tags.partsView(hit)
-</tr>
-} case _ =>{} 
-}
 	@context match{
 		case list : List[String] => {
 			@for(k<-context){
@@ -45,10 +58,138 @@ case fileMap :Map[String,Object] =>{
 
 	@key match {
 		case "hasPart"=>{
+			@values match {
+				case d: List[Any] => { 
+					<tr class="hasPart">
+						<td style="display:none;">@getWeight("hasPart")</td>
+						<td class="field-label hasPart">@getLabel("hasPart")</td>
+						<td class="field-item"
+							property="@models.Globals.profile.getEtikettByName("hasPart").getUri()">	
+							<ol id="hasPartList">			
+								@for(field <- d){
+								<li>@tags.partsView(field)</li>
+								}
+							</ol>
+					</tr>
+				} case _ =>{} 
+			}
+		}
+		case "notification"=>{
+		@values match {
+				case d: String => { 
+					<tr class="notification" style="border:solid; border-color:#ff5555;;">
+						<td style="display:none;">@getWeight("notification")</td>
+						<td class="field-label hasPart">@getLabel("notification")</td>
+						<td class="field-item"
+							property="@models.Globals.profile.getEtikettByName("notification").getUri()">	
+							
+							<ol id="notification" class="list-group row">	
+							
+							 <span style="color:#ff5555;" class="fa fa-exclamation-triangle"></span>	
+							 <span style="color:#8c2e0b;">	
+								@values
+								</span>
+							</ol>
+					</tr> 
+					} case _ =>{} 
+			}
+		}
+		case "inCollection"=>{
 			
 		}
 		case "hasData"=>{
-						
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+					
+						@values match {
+								case d:  Map[String,Object] => {
+									@getFileInfo(views.Helper.getFile(d))
+								}
+								case _ => {
+									@values
+								}
+						}	
+				}
+			}				
+		}
+		case "publication"=>{
+					@values match {
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+			@values match {
+						case d: Set[ Map[String,Object]] => {
+							@createPublicationFields(views.Helper.getPublicationMap(d))
+						}
+						case _ => {
+							@values
+						}
+				}
+				}
+			}			
+		}
+		case "lv:isPartOf"=>{
+			@values match {
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+			<tr class="@key">
+				<td style="display:none;">@getWeight(key)</td>
+				<td class="field-label @key">@getLabel(key)</td>
+				<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+				@values match {
+						case isPartOf: Set[ Map[String,Object]] => {
+							@for(item<-isPartOf){
+								@Html(views.Helper.getLobidIsPartOf(item))<br/>
+							}
+						}
+						case _ => {
+							@values
+						}
+				}				
+			</tr>
+			}
+			}		
+		}
+		case "subject"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				 @if(hit.contains("subject")){
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td>
+						<table id="subjects">
+						@for(c <-views.Helper.listSubjects(hit)){
+						@displaySubjects(c)
+						}
+						</table>
+						</ol>
+						</td>
+					</tr>
+				}
+				}
+			}
+		}
+		case "contribution"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+			    @if(views.Helper.contributionContainsAdditionalFields(hit)){
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(c <-views.Helper.listContributions(hit)){
+						@displayContributions(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())
+					}
+					</table>
+					</td>
+				</tr>
+				}
+				}
+			}
 		}
 		case "inSeries"=>{
 			@values match {
@@ -69,8 +210,44 @@ case fileMap :Map[String,Object] =>{
 			</tr>
 			}
 			}
+		}case "subjectAltLabel"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+						@values match {
+								case d: Set[String] => {
+									<ul class="subjectAltLabelList">
+									@for(e<-d){
+									<li class="subjectAltLabelEntry">
+										<a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(e)@models.Globals.rechercheUrlSuffix">
+					                       @e
+					                    </a>
+					                 </li>
+									}
+									</ul>
+								}
+								case _ => {
+									@values
+								}
+						}				
+					</tr>
+				}
+			}
 		}
-		case "volumeIn"=>{
+		case "fulltextVersion"=>{
+			@showLinkList(values,"fulltextVersion")
+		}
+		case "publisherVersion"=>{
+			@showLinkList(values,"publisherVersion")
+		}
+		case "additionalMaterial"=>{
+			@showLinkList(values,"additionalMaterial")
+		}
+		case "lv:volumeIn"=>{
 		@values match {
 			case nullCase if nullCase == null =>{}
 			case _ =>{
@@ -90,6 +267,109 @@ case fileMap :Map[String,Object] =>{
 			}
 			}
 		}
+		case "urn"=>{
+		@values match {
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+					@values match {
+							case d: Set[String] => {
+								<ul class="urnList">
+									@for(e<-d){
+										<li class="urn">
+											@e
+						                 	<span class="separator">|</span>
+						                    <a href=https://nbn-resolving.org/@e  target="_blank">
+						                               <span class="octicon-link-external"></span>
+						                    </a>
+					                 	</li>
+									}
+									</ul>
+							}
+							case _ => {
+								@values
+									<span class="separator">|</span>
+							        <a href=https://nbn-resolving.org/@values  target="_blank">
+							            <span class="octicon-link-external"></span>
+							        </a>
+							}
+					}				
+				</tr>
+			}
+			}
+		}
+		case "doi"=>{
+		@values match {
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+					@values match {
+							case d: Set[String] => {
+								<ul class="doiList">
+									@for(e<-d){
+										<li class="doi">
+											@e
+						                 	<span class="separator">|</span>
+						                    <a href=https://dx.doi.org/@e  target="_blank">
+						                               <span class="octicon-link-external"></span>
+						                    </a>
+					                 	</li>
+									}
+									</ul>
+							}
+							case _ => {
+								@values
+								<span class="separator">|</span>
+						        <a href=https://dx.doi.org/@values  target="_blank">
+						            <span class="octicon-link-external"></span>
+						        </a>
+							}
+					}				
+				</tr>
+			}
+			}
+		}case "bibo:doi"=>{
+		@if(!hit.contains("doi")){
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+						@values match {
+								case d: Set[String] => {
+									<ul class="biboDoiList">
+										@for(e<-d){
+											<li class="biboDoi">
+												@e
+							                 	<span class="separator">|</span>
+							                    <a href=https://dx.doi.org/@e  target="_blank">
+							                               <span class="octicon-link-external"></span>
+							                    </a>
+						                 	</li>
+										}
+										</ul>
+								}
+								case _ => {
+									@values
+									<span class="separator">|</span>
+							        <a href=https://dx.doi.org/@values  target="_blank">
+							            <span class="octicon-link-external"></span>
+							        </a>
+								}
+						}				
+					</tr>
+				}
+				}
+			}
+		}		
 		case _ =>{
 		
 			@values match {
@@ -101,17 +381,21 @@ case fileMap :Map[String,Object] =>{
 								<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
 									@values match {
 										case a: String => {
-													@value(a,key)
+											@value(a,key)
 								  		}
 										case b: Set[Any] => {
+										   <ul>
 											@for(field <- b){
-												@value(field,key)
+												<li>@value(field,key)</li>
 											}
+											</ul>
 										}
 										case d: List[Any] => {
+											<ol>
 											@for(field <- d){
-												@value(field,key)
+												<li>@value(field,key)</li>
 											}
+											</ol>
 										}
 										case c : Map[String,Object] => {
 											<table class="table table-striped table-condensed" resource=@c.get("@id")>
@@ -120,7 +404,6 @@ case fileMap :Map[String,Object] =>{
 													}
 											</table>
 										}
-										
 										case _ => {
 													@values
 										}
@@ -134,39 +417,169 @@ case fileMap :Map[String,Object] =>{
 	}
 }
 
+@showLinkList(values:Any,key:String)={
+		@values match {
+				case nullCase if nullCase == null =>{}
+				case a:List[Map[String,String]] =>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									<ul class=@key+"List">
+									@for(map<-a){
+									<li class=@key+"ListEntry">
+					                       @map.get("prefLabel")
+					                    <span class="separator">|</span>
+							        <a href=@map.get("@id")  target="_blank">
+							            <span class="octicon-link-external"></span>
+							        </a>
+					                 </li>
+									}
+									</ul>
+											
+					</tr>
+				}
+			}
+}
+@showNoLink(values:Any,key:String)={
+		@values match {
+				case nullCase if nullCase == null =>{}
+				case a:Set[Map[String,String]] =>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									<ul class=@key+"List">
+									@for(map<-a){
+										<li class=@key+"ListEntry">
+									    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@map.get("prefLabel")@models.Globals.rechercheUrlSuffix">
+					                        @map.get("prefLabel")
+					                    </a>
+					                 </li>
+									}
+									</ul>
+											
+					</tr>
+				}
+				case map:Map[String,String]=>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@map.get("prefLabel")@models.Globals.rechercheUrlSuffix">
+					                        @map.get("prefLabel")
+					                    </a>
+					              
+									</ul>
+											
+					</tr>
+				}
+			}
+}
+@createPublicationFields(fields:Map[String,String])={
+@if(fields.get("regal:publishLocation")!=null){
+<tr class="regal:publishLocation">
+<td style="display:none;">@getWeight("regal:publishLocation")</td>
+<td class="field-label regal-publishLocation">@getLabel("regal:publishLocation")</td>
+<td class="field-item" property="@models.Globals.profile.getEtikettByName("regal:publishLocation").getUri()">
+		@fields.get("regal:publishLocation")
+</td>
+</tr>		
+}
+@if(fields.get("regal:publishedBy")!=null){
+<tr class="regal:publishedBy">
+<td style="display:none;">@getWeight("regal:publishedBy")</td>
+<td class="field-label regal-publishedBy">@getLabel("regal:publishedBy")</td>
+<td class="field-item" property="@models.Globals.profile.getEtikettByName("regal:publishedBy").getUri()">
+		@fields.get("regal:publishedBy")
+</td>
+</tr>	
+}
+@if(fields.get("regal:publishYear")!=null){
+<tr class="regal:publishYear">
+<td style="display:none;">@getWeight("regal:publishYear")</td>
+<td class="field-label regal-publishYear">@getLabel("regal:publishYear")</td>
+<td class="field-item" property="@models.Globals.profile.getEtikettByName("regal:publishYear").getUri()">
+		@fields.get("regal:publishYear")
+</td>
+</tr>		
+}					
+}
+@displayContributions(id:String,label:String,roleId:String,roleName:String)={
+		<tr class=@roleId>
+			
+			 			<td> 
+			 			   @if(id!=null && !id.isEmpty()){
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       }else{
+	                       <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       }
+	                       @label <span style="font-size:smaller;">(@roleName)</span>
+	                       </a> <span class="separator">|</span>
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
+	                               <span class="octicon-link-external"></span>
+	                       </a>
+	                       <br/>	</td> 
+	   </tr>	
+}
 
-@analyseString(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			<a href=@v>@v</a>
+@displaySubjects(entry:Any)={
+
+	@entry match {
+		case map:Map[String,Object] =>{
+			@displaySubject(map.get("id").toString(),map.get("label").toString(),map.get("sourceId").toString(),map.get("sourceName").toString())
 		}
-		case a if v.startsWith(namespace) => {
-			<a href=/resource/@v>@v</a>
-		}
-		case _ => {
-			@v
+		case list: List[Map[String,Object]] =>{
+			<tr class="egal">
+			    <td>
+	           	   Schlagwortfolge
+	           </td>
+			 	<td class="subject" style="text-align:left;">
+			 	<ol class="componentList">@for(e<-list){
+					   @displayComponentList(e.get("id").toString(),e.get("label").toString(),e.get("sourceId").toString(),e.get("sourceName").toString())
+					}
+	            </ol>
+	           </td>
+	         
+	        </tr>
+		
 		}
 	}
 }
-
-@analyseValue(v: String)={
-	@v match {
-		case a if v.startsWith("http") => {
-			@v
-		}
-		case a if v.startsWith(namespace) => {
-			/resource/@v
-		}
-		case _ => {
-			@v
-		}
-	}
+@displaySubject(id:String,label:String,roleId:String,roleName:String)={
+		
+			<tr class=@roleId>
+			    <td>
+	           		@roleName
+	           </td>
+			 	<td class="subject" style="text-align:left;">
+			 		<a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @label 
+	                      </a>
+	           </td>
+	         
+	        </tr>
+	                      
 }
+
+                 
+@displayComponentList(id:String,label:String,roleId:String,roleName:String)={
+	<li >
+		<a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+			@label 
+		</a>      
+	</li>	                      
+}
+
 
 @value(value: Any,key:String)= {
 			@value match {
 				case a: String => {
-					@analyseString(value.asInstanceOf[String])
+					@if(Helper.getLinkAdressOrNull(a)!=null){
+						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
+					}else{
+						@a
+					}
 				}
 				case c : Map[String,Object] => {
 							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
@@ -183,10 +596,11 @@ case fileMap :Map[String,Object] =>{
 			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(a)@models.Globals.rechercheUrlSuffix">
 	                       @(map.get(Globals.profile.getLabelKey()))
-	                       </a> |
-	                       <a href=@analyseValue(a)>
-	                               <span class="glyphicon glyphicon-link"></span>
+	                       </a> <span class="separator">|</span>
+	                       <a href=@Helper.getLinkAdressOrNull(a)  target="_blank">
+	                               <span class="octicon-link-external"></span>
 	                       </a>
+	                       <br/>
 			}
 			case _ => {		
 				<table class="table table-striped table-condensed">
@@ -196,8 +610,9 @@ case fileMap :Map[String,Object] =>{
 		}
 }
 
+
 @getLabel(key: String)={
-		@hit.get("@context") match{
+		@Globals.profile.getContext().get("@context") match{
 			case map : Map[String,Object] => {
 				@map.get(key) match { 
 					case keyMap : Map[String,Object]=> {

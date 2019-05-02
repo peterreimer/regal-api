@@ -22,6 +22,7 @@ import java.util.Map;
 import models.Node;
 
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -130,12 +131,12 @@ public class SearchFacade {
 	 * @param until for paging
 	 * @return all Hits
 	 */
-	public SearchHits query(String[] index, String queryString, int from,
+	public SearchResponse query(String[] index, String queryString, int from,
 			int until) {
 		return search.query(index, queryString, from, until);
 	}
 
-	public SearchHits query(String[] index, QueryBuilder query, int from,
+	public SearchResponse query(String[] index, QueryBuilder query, int from,
 			int until) {
 		return search.query(index, query, from, until);
 	}
@@ -168,5 +169,10 @@ public class SearchFacade {
 	 */
 	public List<String> indexAll(List<Node> list, String index) {
 		return search.indexAll(list, index);
+	}
+
+	public SearchResponse query(String[] index, String query, int from, int until,
+			Map<String, Object> aggregationConf) {
+		return search.query(index, query, from, until, aggregationConf);
 	}
 }

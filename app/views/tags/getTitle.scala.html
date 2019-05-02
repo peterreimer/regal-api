@@ -1,26 +1,96 @@
 @* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
 @import views.Title 
+@import views.Helper
 @(hit:Map[String,Object])
+
+@displayCreators(id:Object,label:String)={
+						@if(id != null && !id.toString().isEmpty()){
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id.toString())@models.Globals.rechercheUrlSuffix">
+	                       @label
+	                       <a href=@Helper.getLinkAdressOrNull(id.toString())  target="_blank">
+	                               <span class="octicon-link-external"></span>
+	                       </a>
+	                       }else{
+	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       	@label
+	                       	</a>
+	                       }
+}
+@displayAuthors(id:String,label:String,roleId:String,roleName:String)={
+						@if(id != null && !id.isEmpty()){
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @label
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
+	                               <span class="octicon-link-external"></span>
+	                       </a>
+	                       }else{
+	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       	@label
+	                       	</a>
+	                       }
+}
 
 <div class="row">
 <div class="title">
 			<div class="col-md-8">
 					<div class="titlePre"></div>
-					<div class="titleMain">
-						<h1>
-							<a href=/resource/@hit.get( "@id")>@Html(Title.getTitle(hit))</a>
-						</h1>
-					</div>
-			
-					<div class="titlePost">@Html(Title.getAuthorNames(hit))
-						@Html(Title.getIssued(hit))
-					</div>
+					
+					<a href="/resource/@hit.get("@id")">
+					<h1 class="title" id="page-title">
+					<span class="titleMain">
+							@Html(Title.getTitle(hit))
+					</span>
+					@if(hit.contains("corporateBodyForTitle")){
+					    <span class="corporateBodyForTitle">
+						/ @hit.get("corporateBodyForTitle").asInstanceOf[Collection[String]].toArray()
+						</span>
+					 }
+					@if(hit.contains("otherTitleInformation")){
+						<span class="otherTitleInformation">
+						: @hit.get("otherTitleInformation").asInstanceOf[Collection[String]].toArray()
+						</span>
+					 }
+					
+					</h1>
+					</a>
+					<h2 id="page-title-suffix" class="titlePost title-suffix">
+						@if(hit.contains("contribution")){
+							<ol class="author-title-list">
+								@for(c <-views.Helper.listAuthors(hit)){
+									<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
+								}
+							</ol>
+						
+						}else{
+							<ol class="author-title-list">
+							@for(c <-views.Helper.listCreators(hit)){
+									<li>@displayCreators(c.get("id"),c.get("label").toString())</li>
+								}
+								</ol>
+						}
+					<p>
+					@if(hit.contains("edition")){
+						
+						<span class="edition">
+						@hit.get("edition").asInstanceOf[Collection[String]].toArray() .
+						</span>
+						
+					 }
+					 @if(hit.contains("publication")){
+					
+					 @hit.get("publication") match {
+					    	case publication:Set[ Map[String,Object]] => {
+					    		@Html(Title.getIssued(publication)) 
+					    	}
+					    	case _ => {}
+					    }
+					 
+					 }
+					 </p>
+					</h2>
+					
 			</div>
-			<div class="col-md-4" >
-					<div class="thumby">
-						<a href=@views.Helper.getDataLink(hit)><img src="/public/images/download.png" style="padding-top: 12px; margin-top: 12px;"></img></a>
-					</div>
-			</div>	
+			
 		</div>
 
 

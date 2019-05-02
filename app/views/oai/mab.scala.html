@@ -1,0 +1,10 @@
+@(data:MabRecord)<datensatz typ="h" status="n" mabVersion="M2.0">
+<feld nr="001" ind=" ">@data.id</feld>
+@if(data.doi!=null){<feld nr="552" ind="a">@data.doi</feld>}
+@if(data.urn!=null){<feld nr="552" ind="b">@data.urn</feld>}
+<feld nr="655" ind="e">
+<uf code="u">@data.httpAdresse</uf>
+<uf code="x">@models.Globals.mab655x</uf>
+<uf code="A">0</uf>
+</feld>
+</datensatz>

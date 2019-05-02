@@ -21,6 +21,7 @@ import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
 import helper.oai.OaiDcMapper;
+import helper.oai.WglMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -61,7 +62,7 @@ public class Transform {
 			RegalToMabMapper mapper = new RegalToMabMapper();
 			MabRecord record;
 			record = mapper.map(
-					new ByteArrayInputStream(node.getMetadata().getBytes("utf-8")),
+					new ByteArrayInputStream(node.getMetadata2().getBytes("utf-8")),
 					node.getPid());
 			record.httpAdresse = Globals.urnbase + node.getPid();
 			record.doi = node.getDoi();
@@ -175,6 +176,17 @@ public class Transform {
 	}
 
 	/**
+	 * @param pid The pid of an object
+	 * @return a wgl mapping
+	 */
+	public DublinCoreData wgl(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		DublinCoreData data = new WglMapper(node, uri).getData();
+		return data;
+	}
+
+	/**
 	 * @param pid the pid of a node with pdf data
 	 * @return the plain text content of the pdf
 	 */
@@ -200,10 +212,7 @@ public class Transform {
 
 		try {
 			URL url = new URL(getInternalDataUri(node));
-			String authStr = "edoweb-anonymous:nopwd";
-			String authEncoded = Base64.encodeBase64String(authStr.getBytes());
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestProperty("Authorization", "Basic " + authEncoded);
 			PdfText pdf = new PdfText();
 			result.addFulltext(pdf.toString(connection.getInputStream()));
 		} catch (MalformedURLException e) {
@@ -253,8 +262,7 @@ public class Transform {
 	 * @return an xml string for datacite
 	 */
 	public String datacite(Node node, String doi) {
-		DataciteRecord dc =
-				DataciteMapper.getDataciteRecord(doi, new JsonMapper(node).getLd());
+		DataciteRecord dc = DataciteMapper.getDataciteRecord(doi, node.getLd2());
 		return dc.toString();
 	}
 

@@ -34,15 +34,15 @@ import models.Link;
 import models.Node;
 import models.Transformer;
 
-import org.openrdf.model.Statement;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import com.yourmediashelf.fedora.client.FedoraClient;
 import com.yourmediashelf.fedora.client.FedoraClientException;
@@ -202,6 +202,8 @@ public class FedoraFacade {
 	 */
 	public void createNode(Node node) {
 		try {
+			play.Logger.debug("node.getPid()=" + node.getPid());
+			play.Logger.debug("node.getLabel()=" + node.getLabel());
 			new Ingest(node.getPid()).label(node.getLabel()).execute();
 			DublinCoreHandler.updateDc(node);
 			List<Transformer> cms = node.getTransformer();
@@ -221,6 +223,9 @@ public class FedoraFacade {
 			}
 			if (node.getConfFile() != null) {
 				utils.createConfStream(node);
+			}
+			if (node.getUrlHistFile() != null) {
+				utils.createUrlHistStream(node);
 			}
 			if (node.getObjectTimestampFile() != null) {
 				utils.createObjectTimestampStream(node);
@@ -264,8 +269,10 @@ public class FedoraFacade {
 		getDatesFromFedora(node);
 		getChecksumFromFedora(node);
 		getMetadataFromFedora(node);
+		getMetadata2FromFedora(node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
+		getUrlHistFromFedora(pid, node);
 		getObjectTimestampFromFedora(node);
 		return node;
 	}
@@ -300,7 +307,18 @@ public class FedoraFacade {
 			node.setConf(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name metadata is optional
+			// datastream with name conf is optional
+		}
+	}
+
+	private void getUrlHistFromFedora(String pid, Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(pid, "urlHist").execute();
+			node.setUrlHist(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name urlHist is optional
 		}
 	}
 
@@ -308,7 +326,18 @@ public class FedoraFacade {
 		try {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "metadata").execute();
-			node.setMetadata(
+			node.setMetadata1(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name metadata is optional
+		}
+	}
+
+	private void getMetadata2FromFedora(Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(node.getPid(), "metadata2").execute();
+			node.setMetadata2(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -366,12 +395,19 @@ public class FedoraFacade {
 		if (node.getMetadataFile() != null) {
 			utils.updateMetadataStream(node);
 		}
+		if (node.getMetadata2File() != null) {
+			utils.updateMetadata2Stream(node);
+		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
 		}
 		if (node.getConfFile() != null) {
 			play.Logger.info("Write conf file to fedora");
 			utils.updateConfStream(node);
+		}
+		if (node.getUrlHistFile() != null) {
+			play.Logger.info("Write URL history file to fedora");
+			utils.updateUrlHistStream(node);
 		}
 		if (node.getObjectTimestampFile() != null) {
 			utils.updateObjectTimestampStream(node);
@@ -459,6 +495,14 @@ public class FedoraFacade {
 	public void deleteNode(String rootPID) {
 		try {
 			new ModifyObject(rootPID).state("D").execute();
+		} catch (FedoraClientException e) {
+			throw new DeleteException(e.getStatus(), e);
+		}
+	}
+
+	public void activateNode(String rootPID) {
+		try {
+			new ModifyObject(rootPID).state("A").execute();
 		} catch (FedoraClientException e) {
 			throw new DeleteException(e.getStatus(), e);
 		}
@@ -604,8 +648,10 @@ public class FedoraFacade {
 			parent.removeRelation(HAS_PART, node.getPid());
 			updateNode(parent);
 		} catch (NodeNotFoundException e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 		} catch (ReadNodeException e) {
+			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 		}
 	}

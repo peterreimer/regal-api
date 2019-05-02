@@ -16,10 +16,13 @@
  */
 package controllers;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.ws.rs.DefaultValue;
@@ -31,8 +34,8 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import actions.BasicAuth;
 import actions.Create;
+import authenticate.BasicAuth;
 import helper.GatherconfImporter;
 import helper.Webgatherer;
 import helper.oai.OaiDispatcher;
@@ -139,10 +142,11 @@ public class MyUtils extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			if (alephid != null && !alephid.isEmpty()) {
-				String result = modify.lobidify(node, alephid);
-				return JsonMessage(new Message(result));
+				String result2 = modify.lobidify2(node, alephid);
+				return JsonMessage(
+						new Message("Load " + alephid + " to " + pid + ".\n" + result2));
 			} else {
-				String result = modify.lobidify(node);
+				String result = modify.lobidify2(node);
 				return JsonMessage(new Message(result));
 			}
 		});
@@ -154,15 +158,41 @@ public class MyUtils extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			if (date != null && !date.isEmpty()) {
-				String result = modify.lobidify(node,
+				String result = modify.lobidify2(node,
 						LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")));
 				return JsonMessage(new Message(result));
 			} else {
-				String result = modify.lobidify(node);
+				LocalDate lastUpdate = getUpdateTimeStamp(node);
+				String result = modify.lobidify2(node, lastUpdate);
 				return JsonMessage(new Message(result));
 			}
 
 		});
+	}
+
+	private static LocalDate getUpdateTimeStamp(Node node) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		// initialise date
+		String lastUpdate = formatter.format(new Date());
+		// try to set date to created (should work in any case)
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("created").toString();
+		} catch (Exception e) {
+			play.Logger.warn(
+					node.getPid() + " couldn't get created timestamp " + e.getMessage());
+			play.Logger.debug("", e);
+		}
+		// try to set date to modified (overrides created)
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("modified").toString();
+		} catch (Exception e) {
+			play.Logger.info(
+					node.getPid() + " couldn't get modified timestamp " + e.getMessage());
+			play.Logger.debug("", e);
+		}
+		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
 
 	@ApiOperation(produces = "application/json,application/html", nickname = "addObjectTimestamp", value = "addObjectTimestamp", notes = "Add a objectTimestamp", httpMethod = "POST")

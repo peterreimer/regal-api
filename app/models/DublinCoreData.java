@@ -19,8 +19,10 @@ package models;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
@@ -30,21 +32,85 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 public class DublinCoreData implements java.io.Serializable {
 
-	List<String> contributor = new Vector<String>();
-	List<String> coverage = new Vector<String>();
-	List<String> creator = new Vector<String>();
-	List<String> date = new Vector<String>();
-	List<String> description = new Vector<String>();
-	List<String> format = new Vector<String>();
-	List<Pair<String, String>> identifier = new Vector<Pair<String, String>>();
-	List<String> language = new Vector<String>();
-	List<String> publisher = new Vector<String>();
-	List<String> relation = new Vector<String>();
-	List<String> rights = new Vector<String>();
-	List<String> source = new Vector<String>();
-	List<String> subject = new Vector<String>();
-	List<String> title = new Vector<String>();
-	List<String> type = new Vector<String>();
+	List<String> contributor = new Vector<>();
+	List<String> coverage = new Vector<>();
+	List<String> creator = new Vector<>();
+	List<String> date = new Vector<>();
+	List<String> description = new Vector<>();
+	List<String> format = new Vector<>();
+	List<Pair<String, String>> identifier = new Vector<>();
+	List<String> language = new Vector<>();
+	List<String> publisher = new Vector<>();
+	List<String> relation = new Vector<>();
+	List<String> rights = new Vector<>();
+	List<String> source = new Vector<>();
+	List<String> subject = new Vector<>();
+	List<String> title = new Vector<>();
+	List<String> type = new Vector<>();
+	List<String> wglcontributor = new Vector<>();
+	List<String> wglSubject = new Vector<>();
+
+	/**
+	 * @return wgl:wglcontributor
+	 */
+	public List<String> getWglSubject() {
+		return removeDuplicateEntries(wglSubject);
+	}
+
+	/**
+	 * @param cwgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData setWglSubject(List<String> wglSubject) {
+		this.wglSubject = wglSubject;
+		return this;
+	}
+
+	/**
+	 * @param e wgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData addWglSubject(String e) {
+		wglSubject.add(e);
+		return this;
+	}
+
+	/**
+	 * @return wgl:wglcontributor
+	 */
+	public List<String> getWglContributor() {
+		return wglcontributor;
+	}
+
+	/**
+	 * @param cwgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData setWglContributor(List<String> wglContributor) {
+		this.wglcontributor = wglContributor;
+		return this;
+	}
+
+	/**
+	 * @param e wgl:wglcontributor
+	 * @return this
+	 */
+	public DublinCoreData addWglContributor(String e) {
+		wglcontributor.add(e);
+		return this;
+	}
+
+	/**
+	 * @return wgl:wglcontributor
+	 */
+	public String getFirstWglContributor() {
+		List<String> elements = getWglContributor();
+		if (elements == null || elements.size() == 0) {
+			return "";
+		}
+
+		return elements.get(0);
+	}
 
 	/**
 	 * @return dc:contributer
@@ -288,7 +354,19 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return this
 	 */
 	public DublinCoreData addIdentifier(String e) {
+		if (e == null || e.isEmpty())
+			return this;
 		identifier.add(new Pair<String, String>(e, null));
+		return this;
+	}
+
+	public DublinCoreData addIdentifier(List<String> list) {
+		if (identifier == null) {
+			identifier = new Vector<>();
+		}
+		for (String i : list) {
+			addIdentifier(i);
+		}
 		return this;
 	}
 
@@ -298,6 +376,8 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return the modified Data
 	 */
 	public DublinCoreData addIdentifier(String value, String type) {
+		if (value == null || value.isEmpty())
+			return this;
 		identifier.add(new Pair<String, String>(value, type));
 		return this;
 	}
@@ -503,7 +583,11 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @return dc:subject
 	 */
 	public List<String> getSubject() {
-		return subject;
+		return removeDuplicateEntries(subject);
+	}
+
+	private List<String> removeDuplicateEntries(List<String> list) {
+		return list.stream().distinct().collect(Collectors.toList());
 	}
 
 	/**
@@ -521,6 +605,11 @@ public class DublinCoreData implements java.io.Serializable {
 	 */
 	public DublinCoreData addSubject(String e) {
 		subject.add(e);
+		return this;
+	}
+
+	public DublinCoreData addSubjects(List<String> list) {
+		subject.addAll(list);
 		return this;
 	}
 

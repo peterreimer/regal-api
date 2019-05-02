@@ -18,6 +18,7 @@ package converter.mab;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,9 +29,8 @@ import models.MabRecord.Person;
 import models.MabRecord.PersonType;
 import models.MabRecord.Subject;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Statement;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
 
@@ -59,7 +59,8 @@ public class RegalToMabMapper {
 	}
 
 	private void mapStatements(InputStream in) {
-		Graph graph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+		Collection<Statement> graph =
+				RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 		Iterator<Statement> it = graph.iterator();
 		while (it.hasNext()) {
 			Statement st = it.next();
@@ -99,7 +100,7 @@ public class RegalToMabMapper {
 	private void handleFreeFields(String subj, String pred, String obj) {
 
 		if (archive.fedora.Vocabulary.REL_MAB_527.equals(pred)) {
-			String id = obj.substring(obj.lastIndexOf('/') + 1);
+			String id = obj.substring(obj.lastIndexOf('/') + 1, obj.length() - 2);
 			if (!id.startsWith("urn")) {
 				record.id = id;
 			}

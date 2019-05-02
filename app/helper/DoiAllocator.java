@@ -49,7 +49,8 @@ public class DoiAllocator implements Runnable {
 		// SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		// String d = dateFormat.format(until);
 
-		List<SearchHit> hits = new Read().list(Globals.namespaces[0], from, until);
+		List<SearchHit> hits =
+				new Read().list(Globals.defaultNamespace, from, until);
 		List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
 				.collect(Collectors.toList());
 		List<Node> nodes = new Read().getNodes(ids);

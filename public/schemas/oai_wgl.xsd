@@ -1,0 +1,36 @@
+<schema targetNamespace="http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/" 
+    xmlns:oai_wgl="http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/" 
+    xmlns:wgl="http://www.leibnizopen.de/fileadmin/default/documents/wgl_dc/" 
+    xmlns="http://www.w3.org/2001/XMLSchema" 
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+    
+    
+    <import namespace="http://www.leibnizopen.de/fileadmin/default/documents/wgl_dc/" 
+        schemaLocation="http://www.leibnizopen.de/fileadmin/default/documents/wgl_dc.xsd"/> 
+
+    <element name="wgl" type="oai_wgl:oai_wglType"/>
+    
+    <complexType name="oai_wglType">
+        <choice minOccurs="0" maxOccurs="unbounded">
+            <element ref="wgl:title"/>
+            <element ref="wgl:creator"/>
+            <element ref="wgl:subject"/>
+            <element ref="wgl:description"/>
+            <element ref="wgl:publisher"/>
+            <element ref="wgl:contributor"/>
+            <element ref="wgl:date"/>
+            <element ref="wgl:type"/>
+            <element ref="wgl:format"/>
+            <element ref="wgl:identifier"/>
+            <element ref="wgl:source"/>
+            <element ref="wgl:language"/>
+            <element ref="wgl:relation"/>
+            <element ref="wgl:coverage"/>
+            <element ref="wgl:rights"/>
+            <element ref="wgl:wgltype"/>
+            <element ref="wgl:wglsubject"/>
+            <element ref="wgl:wglcontributor"/>  
+        </choice>
+    </complexType>
+    
+</schema>

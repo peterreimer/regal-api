@@ -1,19 +1,42 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
 @import views.Helper
+@import org.elasticsearch.search.aggregations.Aggregations
 
-@(hits: List[Map[String,Object]],namespace: String)
+@(hit:Node,aggregations:Aggregations)
+@pid={@hit.getPid()}
+@main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 
-
-@main("") {
-
-		@for( hit <- hits){
-			<div class="container">
-			@tags.getTitle(hit)
-			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(hit.get("@context").asInstanceOf[Map[String,Object]]),namespace)
-			</div>
-
-	}
+			        		@tags.getTitle(hit.getLd2())
+					<ul class="nav nav-tabs">
+					 	<li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
+					  	<li><a href="#2a" data-toggle="tab">Download</a></li>
+					  	@if(models.Globals.users.isLoggedIn(ctx())){
+					  	<li><a href="./@pid/upload"">Upload</a></li>
+					  	<li><a href="./@pid/edit">Edit</a></li>
+					  	}
+					</ul> 
+					
+					<div class="tab-content">
+				  		<div class="tab-pane active" id="1a">
+				  	
+			@tags.resourceView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+			        	</div>
+				  		<div class="tab-pane" id="2a">
+		
+			        	</div>
+			        	
+		       			@if(models.Globals.users.isLoggedIn(ctx())){
+			        	<div class="tab-pane" id="3a">
+		
+			        	</div>
+			        	<div class="tab-pane" id="4a">
+		
+			        	</div>
+			        	}
+		        	</div>
+		
 }
 
 

@@ -23,7 +23,9 @@ import static archive.fedora.Vocabulary.REL_HBZ_ID;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,14 +33,19 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import actions.Read;
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
+import play.Play;
 
 /**
  * @author jan schnasse
@@ -99,7 +106,6 @@ public class JsonMapper {
 			"http://hbz-nrw.de/regal#ResearchData",
 			"http://purl.org/lobid/lv#EditedVolume",
 			"http://purl.org/ontology/bibo/Thesis",
-			"http://purl.org/lobid/lv#Miscellaneous",
 			"http://purl.org/ontology/mo/Record", "http://purl.org/ontology/bibo/Map",
 			"http://purl.org/ontology/bibo/AudioVisualDocument",
 			"http://purl.org/ontology/bibo/AudioDocument",
@@ -114,11 +120,15 @@ public class JsonMapper {
 			"http://purl.org/ontology/bibo/Series",
 			"http://purl.org/ontology/bibo/Periodical",
 			"http://purl.org/ontology/bibo/Collection",
+			"http://purl.org/ontology/bibo/Standard",
+			"http://purl.org/lobid/lv#Statistics",
 			"http://purl.org/ontology/bibo/Book",
 			"http://data.archiveshub.ac.uk/def/ArchivalResource",
 			"http://purl.org/ontology/bibo/Document",
 			"http://purl.org/vocab/frbr/core#Manifestation",
-			"http://purl.org/dc/terms/BibliographicResource" };
+			"http://purl.org/lobid/lv#Miscellaneous",
+			"http://purl.org/dc/terms/BibliographicResource",
+			"info:regal/zettel/File" };
 
 	Node node = null;
 	EtikettMakerInterface profile = Globals.profile;
@@ -127,9 +137,24 @@ public class JsonMapper {
 	/**
 	 * @param node the node will be mapped to json ld in accordance to the profile
 	 */
-	public JsonMapper(Node node) {
-		jsonConverter = new JsonConverter(profile);
-		this.node = node;
+	public JsonMapper(final Node n) {
+		try {
+			jsonConverter = new JsonConverter(profile);
+			this.node = n;
+			if (node == null)
+				throw new NullPointerException(
+						"JsonMapper can not work on node with value NULL!");
+			if (node.getMetadata1() == null)
+				throw new NullPointerException(
+						node.getPid() + " metadata stream is NULL!");
+			if (node.getMetadata2() == null)
+				throw new NullPointerException(
+						node.getPid() + " metadata2 stream is NULL!");
+		} catch (Exception e) {
+			play.Logger.warn("", e.getMessage());
+			play.Logger.debug("", e);
+		}
+
 	}
 
 	/**
@@ -137,6 +162,15 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLdWithoutContext() {
 		Map<String, Object> map = getLd();
+		map.remove("@context");
+		return map;
+	}
+
+	/**
+	 * @return a map without the context document
+	 */
+	public Map<String, Object> getLd2WithoutContext() {
+		Map<String, Object> map = getLd2();
 		map.remove("@context");
 		return map;
 
@@ -156,7 +190,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata();
+		Map<String, Object> m = getDescriptiveMetadata1();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
 		changeDcIsPartOfToRegalIsPartOf(rdf);
@@ -237,11 +271,9 @@ public class JsonMapper {
 			}
 			rdf.put(hasData, hasDataMap);
 		}
-
-		// play.Logger.debug("CONF: " + node.getConf());
-
-		rdf.put("@context", profile.getContext().get("@context"));
+		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
 		postprocessing(rdf);
+		rdf.remove("note");
 		return rdf;
 	}
 
@@ -253,17 +285,34 @@ public class JsonMapper {
 		}
 	}
 
-	private Map<String, Object> getDescriptiveMetadata() {
+	private Map<String, Object> getDescriptiveMetadata1() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata().getBytes(StandardCharsets.UTF_8));
+					node.getMetadata1().getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.debug(node.getPid() + " has no descriptive Metadata!");
+			play.Logger
+					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
+			play.Logger.debug("", e);
 		}
 		return null;
+	}
+
+	private Map<String, Object> getDescriptiveMetadata2() {
+		try {
+			InputStream stream = new ByteArrayInputStream(
+					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
+			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
+					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
+			return rdf;
+		} catch (Exception e) {
+			play.Logger.warn(node.getPid()
+					+ " has no descriptive Metadata2! Try to return metadata instead.");
+			play.Logger.debug("", e);
+		}
+		return getDescriptiveMetadata1();
 	}
 
 	/**
@@ -272,7 +321,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLdShortStyle() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata();
+		Map<String, Object> m = getDescriptiveMetadata1();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		rdf.put(ID2, node.getPid());
 		for (Link l : ls) {
@@ -308,12 +357,15 @@ public class JsonMapper {
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
+			if ("file".equals(rdf.get("contentType"))) {
+				rdf.put(type, Arrays.asList(new String[] { "File" }));
+			}
+
 			Collection<Map<String, Object>> t = getType(rdf);
 			if (t != null && t.size() != 0)
 				rdf.put(type, t);
-			postProcessInstitution(rdf);
+
 			sortCreatorAndContributors(rdf);
-			postProcess(rdf, "creator");
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
@@ -336,38 +388,98 @@ public class JsonMapper {
 			postProcess(rdf, "publisher");
 			postProcess(rdf, "recordingLocation");
 			postProcess(rdf, "recordingCoords");
+			postProcess(rdf, "collectionOne");
+			postProcess(rdf, "medium");
+			postProcess(rdf, "predecessor");
+			postProcess(rdf, "successor");
+			postProcess(rdf, "primaryForm");
+			postProcess(rdf, "natureOfContent");
+			postProcess(rdf, "institution");
+			postProcessContribution(rdf);
+			postProcess(rdf, "creator");
+
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
 	}
 
-	private static void postProcess(Map<String, Object> m, String role) {
+	private void addParts(Map<String, Object> rdf) {
+		Read read = new Read();
+		List<Map<String, Object>> parts =
+				(List<Map<String, Object>>) rdf.get("hasPart");
+		List<Map<String, Object>> children = new ArrayList();
+		if (parts != null) {
+			for (Map<String, Object> part : parts) {
+				String id = (String) part.get("@id");
+				Node cn = read.internalReadNode(id);
+				if (!"D".equals(cn.getState())) {
+					children.add(new JsonMapper(cn).getLd2WithoutContext());
+				}
+			}
+			if (!children.isEmpty()) {
+				rdf.put("hasPart", children);
+			}
+		}
+	}
+
+	private void postProcessContribution(Map<String, Object> rdf) {
 		try {
-			Collection<Map<String, Object>> roles =
-					(Collection<Map<String, Object>>) m.get(role);
-			if (roles != null) {
-				play.Logger.debug("Found roles: " + roles);
-				for (Map<String, Object> r : roles) {
+			List<Map<String, Object>> creator = new ArrayList<>();
+			Collection<Map<String, Object>> contributions =
+					(Collection<Map<String, Object>>) rdf.get("contribution");
+			for (Map<String, Object> contribution : contributions) {
+				Map<String, Object> agent =
+						((Collection<Map<String, Object>>) contribution.get("agent"))
+								.iterator().next();
+				if (agent != null) {
+					String prefLabel = findLabel(agent);
+					agent.put(PREF_LABEL, prefLabel);
+					String id = null;
+					if (agent.containsKey("@id")) {
+						id = agent.get("@id").toString();
+					}
+					if (id == null) {
+						id = Globals.protocol + Globals.server + "/adhoc/author/"
+								+ prefLabel;
+					}
+					Map<String, Object> cmap = new HashMap<>();
+					cmap.put(PREF_LABEL, prefLabel);
+					cmap.put("@id", id);
+					creator.add(cmap);
+				}
+			}
+			rdf.put("creator", creator);
+		} catch (Exception e) {
+			play.Logger.debug("Problem processing key contribution.agent", e);
+		}
+	}
+
+	private static boolean mediumArrayContains(Map<String, Object> rdf,
+			String key) {
+		boolean result = false;
+		JsonNode n = new ObjectMapper().valueToTree(rdf);
+		JsonNode mediumArray = n.at("/medium");
+		for (JsonNode item : mediumArray) {
+			if (key.equals(item.at("/@id").asText("no Value found")))
+				result = true;
+		}
+		return result;
+	}
+
+	private static void postProcess(Map<String, Object> m, String field) {
+		try {
+			Collection<Map<String, Object>> fields =
+					(Collection<Map<String, Object>>) m.get(field);
+			if (fields != null) {
+				play.Logger.trace("Found roles: " + fields);
+				for (Map<String, Object> r : fields) {
 					String prefLabel = findLabel(r);
-					play.Logger.debug("Found label " + prefLabel + " for role " + r);
+					play.Logger.trace("Found label " + prefLabel + " for role " + r);
 					r.put(PREF_LABEL, prefLabel);
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.debug("", e);
-		}
-	}
-
-	private static void postProcessInstitution(Map<String, Object> rdf) {
-		try {
-			Collection<Object> institution =
-					(Collection<Object>) rdf.get("institution");
-			Map<String, Object> inst =
-					((Map<String, Object>) institution.iterator().next());
-			String label = findLabel(inst);
-			inst.put(PREF_LABEL, label);
-		} catch (Exception e) {
-			play.Logger.trace("", e);
+			play.Logger.debug("Problem processing key " + field, e);
 		}
 	}
 
@@ -376,13 +488,12 @@ public class JsonMapper {
 			String hbzId = ((Collection<String>) rdf.get("hbzId")).iterator().next();
 			Collection<Map<String, Object>> catalogLink = new ArrayList<>();
 			Map<String, Object> cl = new HashMap<>();
-			cl.put(ID2,
-					"http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D" + hbzId);
+			cl.put(ID2, "https://lobid.org/resources/" + hbzId);
 			cl.put(PREF_LABEL, hbzId);
 			catalogLink.add(cl);
 			rdf.put("catalogLink", catalogLink);
 		} catch (Exception e) {
-			play.Logger.debug("No catalog link available!");
+			play.Logger.trace("No catalog link available!");
 		}
 	}
 
@@ -449,11 +560,27 @@ public class JsonMapper {
 	private static Collection<Map<String, Object>> getType(
 			Map<String, Object> rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
+
+		// Special case medium is video - override type
+		if (mediumArrayContains(rdf,
+				"http://rdaregistry.info/termList/RDAMediaType/1008")
+				|| mediumArrayContains(rdf,
+						"http://rdvocab.info/termList/RDACarrierType/1050")) {
+			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
+			Map<String, Object> tmap = new HashMap<>();
+			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
+			tmap.put(ID2, s);
+			result.add(tmap);
+			rdf.put(type, result);
+			return result;
+		}
 		Collection<String> types = (Collection<String>) rdf.get(type);
-		play.Logger.debug("Found types: " + types);
+		play.Logger.trace("Found types: " + types);
 		if (types != null) {
 			for (String s : typePrios) {
-				play.Logger.debug("Search for type: " + s);
+				if (s == null)
+					continue;
+				play.Logger.trace("Search for type: " + s);
 				if (types.contains(Globals.profile.getEtikett(s).name)) {
 					Map<String, Object> tmap = new HashMap<>();
 					tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
@@ -523,10 +650,10 @@ public class JsonMapper {
 		}
 		if (m.get("creator") instanceof List) {
 			Collection<String> creators = (Collection<String>) m.get("creator");
-			play.Logger.debug("" + creators.getClass());
+			play.Logger.trace("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
-				play.Logger.debug(creator + " - " + currentId + " - " + authorsId);
+				play.Logger.trace(creator + " - " + currentId + " - " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
 					Map<String, Object> result = new HashMap<>();
 					result.put(ID2, currentId);
@@ -539,7 +666,7 @@ public class JsonMapper {
 			if (creators != null) {
 				for (Map<String, Object> creator : creators) {
 					String currentId = (String) creator.get(ID2);
-					play.Logger.debug(creator + " " + currentId + " " + authorsId);
+					play.Logger.trace(creator + " " + currentId + " " + authorsId);
 					if (authorsId.compareTo(currentId) == 0) {
 						return creator;
 					}
@@ -553,10 +680,10 @@ public class JsonMapper {
 			String authorsId) {
 		if (m.get("contributor") instanceof List) {
 			Collection<String> creators = (Collection<String>) m.get("contributor");
-			play.Logger.debug("" + creators.getClass());
+			play.Logger.trace("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
-				play.Logger.debug(creator + " " + currentId + " " + authorsId);
+				play.Logger.trace(creator + " " + currentId + " " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
 					Map<String, Object> result = new HashMap<>();
 					result.put(ID2, currentId);
@@ -604,6 +731,8 @@ public class JsonMapper {
 		} else if (map.containsKey("alternateName_en")) {
 			return (String) map.get("alternateName_en");
 		}
+		if (map.containsKey("label"))
+			return (String) map.get("label");
 
 		if (map.containsKey(PREF_LABEL))
 			return (String) map.get(PREF_LABEL);
@@ -625,6 +754,127 @@ public class JsonMapper {
 		}
 
 		return result;
+	}
+
+	public Map<String, Object> getLd2WithParts() {
+		Map<String, Object> rdf = getLd2();
+		addParts(rdf);
+		return rdf;
+	}
+
+	public Map<String, Object> getLd2() {
+		Collection<Link> ls = node.getRelsExt();
+		Map<String, Object> m = getDescriptiveMetadata2();
+		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+
+		changeDcIsPartOfToRegalIsPartOf(rdf);
+		// rdf.remove("describedby");
+		// rdf.remove("sameAs");
+
+		rdf.put(ID2, node.getPid());
+		rdf.put(primaryTopic, node.getPid());
+		for (Link l : ls) {
+			if (HAS_PART.equals(l.getPredicate()))
+				continue;
+			if (REL_HBZ_ID.equals(l.getPredicate()))
+				continue;
+			if (IS_PART_OF.equals(l.getPredicate()))
+				continue;
+			addLinkToJsonMap(rdf, l);
+		}
+		addPartsToJsonMap(rdf);
+		rdf.remove("isNodeType");
+
+		rdf.put(contentType, node.getContentType());
+		rdf.put(accessScheme, node.getAccessScheme());
+		rdf.put(publishScheme, node.getPublishScheme());
+		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
+				.collect(Collectors.toList()));
+		rdf.put(catalogId, node.getCatalogId());
+
+		if (node.getFulltext() != null)
+			rdf.put(fulltext_ocr, node.getFulltext());
+
+		Map<String, Object> aboutMap = new TreeMap<>();
+		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
+		if (node.getCreatedBy() != null)
+			aboutMap.put(createdBy, node.getCreatedBy());
+		if (node.getLegacyId() != null)
+			aboutMap.put(legacyId, node.getLegacyId());
+		if (node.getImportedFrom() != null)
+			aboutMap.put(importedFrom, node.getImportedFrom());
+		if (node.getName() != null)
+			aboutMap.put(name, node.getName());
+		if (node.getLastModifiedBy() != null)
+			aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
+
+		aboutMap.put(modified, node.getLastModified());
+		if (node.getObjectTimestamp() != null) {
+			aboutMap.put(objectTimestamp, node.getObjectTimestamp());
+		} else {
+			aboutMap.put(objectTimestamp, node.getLastModified());
+		}
+		try {
+			aboutMap.put(created, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+					.format(node.getCreationDate()));
+		} catch (Exception e) {
+			aboutMap.put(created, node.getCreationDate());
+		}
+		aboutMap.put(describes, node.getAggregationUri());
+
+		rdf.put(isDescribedBy, aboutMap);
+		if (node.getDoi() != null) {
+			rdf.put(doi, node.getDoi());
+		}
+		if (node.getUrn() != null) {
+			rdf.put(urn, node.getUrn());
+		}
+
+		if (node.getParentPid() != null)
+			rdf.put(parentPid, node.getParentPid());
+
+		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
+			Map<String, Object> hasDataMap = new TreeMap<>();
+			hasDataMap.put(ID2, node.getDataUri());
+			hasDataMap.put(format, node.getMimeType());
+			hasDataMap.put(size, node.getFileSize());
+			if (node.getFileLabel() != null)
+				hasDataMap.put(fileLabel, node.getFileLabel());
+			if (node.getChecksum() != null) {
+				Map<String, Object> checksumMap = new TreeMap<>();
+				checksumMap.put(checksumValue, node.getChecksum());
+				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
+				checksumMap.put(type,
+						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
+				hasDataMap.put(checksum, checksumMap);
+			}
+			rdf.put(hasData, hasDataMap);
+		}
+		ObjectMapper mapper = new ObjectMapper();
+
+		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		if (issued != null) {
+			rdf.put("issued", issued);
+		}
+		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
+		postprocessing(rdf);
+		return rdf;
+	}
+
+	public static String getPublicationMap(JsonNode hit) {
+		String issued = hit.at("/issued").asText();
+		if (issued != null && !issued.isEmpty()) {
+			return issued;
+		}
+		String startDate = hit.at("/publication/0/startDate").asText();
+		if (startDate != null && !startDate.isEmpty()) {
+			return startDate;
+		}
+		String publicationYear = hit.at("/publicationYear/0").asText();
+		if (publicationYear != null && !publicationYear.isEmpty()) {
+			return publicationYear.substring(0, 4);
+		}
+		return null;
 	}
 
 }

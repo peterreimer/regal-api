@@ -21,11 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openrdf.model.Graph;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import base.BaseModelTest;
 
@@ -42,7 +43,8 @@ public class RdfUtilsTest extends BaseModelTest {
 				.getResourceAsStream("HT015954381.txt")) {
 			File expected = new File(Thread.currentThread().getContextClassLoader()
 					.getResource("HT015954381_expected.txt").toURI().getPath());
-			Graph graph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+			Collection<Statement> graph =
+					RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			String actual = RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
 			System.out.println(actual);
 			Assert.assertEquals(XmlUtils.fileToString(expected), actual);

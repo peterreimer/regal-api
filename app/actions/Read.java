@@ -24,6 +24,7 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.Webgatherer;
+import helper.WpullCrawl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,11 +46,12 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import models.Pair;
+import models.UrlHist;
 import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
 import play.Logger;
@@ -75,10 +77,6 @@ public class Read extends RegalAction {
 	 */
 	public Node readNode(String pid) {
 		Node n = internalReadNode(pid);
-		if ("D".equals(n.getState())) {
-			throw new HttpArchiveException(410,
-					"The requested resource " + pid + " has been marked as deleted.");
-		}
 		addLabelsForParts(n);
 		writeNodeToCache(n);
 		return n;
@@ -136,15 +134,30 @@ public class Read extends RegalAction {
 
 	/**
 	 * @param node
-	 * @return returns the recently modified node of list containing the passed
-	 *         node itself and all of it's children nodes.
+	 * @param defaultNode
+	 * @return returns the recently modified node of list containing all of the
+	 *         nodes' children nodes and a defaultNode. The defaultNode might be
+	 *         the node itself or null.
 	 */
-	public Node getLastModifiedChild(Node node) {
-		Node oldestNode = node;
-		for (Node n : getParts(node)) {
-			oldestNode = compareDates(n, oldestNode);
+	public Node getLastModifiedChild(Node node, Node defaultNode) {
+		Node oldestNode = defaultNode;
+		for (Node n : getParts(node, defaultNode)) {
+			if (oldestNode == null) {
+				oldestNode = n;
+			} else {
+				oldestNode = compareDates(n, oldestNode);
+			}
 		}
 		return oldestNode;
+	}
+
+	/**
+	 * @param node
+	 * @return returns the recently modified node of list containing the passed
+	 *         node and all of it's children nodes.
+	 */
+	public Node getLastModifiedChild(Node node) {
+		return getLastModifiedChild(node, node);
 	}
 
 	/**
@@ -160,8 +173,7 @@ public class Read extends RegalAction {
 		n.setAggregationUri(createAggregationUri(n.getPid()));
 		n.setRemUri(n.getAggregationUri() + ".rdf");
 		n.setDataUri(n.getAggregationUri() + "/data");
-		n.setContextDocumentUri(
-				"http://" + Globals.server + "/public/edoweb-resources.json");
+		n.setContextDocumentUri("http://" + Globals.server + "/context.json");
 		writeNodeToCache(n);
 		return n;
 	}
@@ -178,7 +190,7 @@ public class Read extends RegalAction {
 
 	private void addLabel(Node n, Link l) {
 		try {
-			String label = readMetadata(l.getObject(), "title");
+			String label = readMetadata2(l.getObject(), "title");
 			l.setObjectLabel(label);
 			n.removeRelation(l.getPredicate(), l.getObject());
 			n.addRelation(l);
@@ -197,11 +209,15 @@ public class Read extends RegalAction {
 
 	/**
 	 * @param node
-	 * @return all parts and their parts recursively
+	 * @param defaultNode
+	 * @return all parts and their parts recursively and a default node. The
+	 *         default node might be the node itself.
 	 */
-	public List<Node> getParts(Node node) {
+	public List<Node> getParts(Node node, Node defaultNode) {
 		List<Node> result = new ArrayList<Node>();
-		result.add(node);
+		if (defaultNode != null) {
+			result.add(defaultNode);
+		}
 		List<Node> parts = getNodes(node.getPartsSorted().stream()
 				.map((Link l) -> l.getObject()).collect(Collectors.toList()));
 		for (Node p : parts) {
@@ -211,18 +227,25 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * @param node
+	 * @return all parts and their parts recursively and the node itself.
+	 */
+	public List<Node> getParts(Node node) {
+		return getParts(node, node);
+	}
+
+	/**
 	 * @param node a regal node
 	 * @param style if "short".equals(style), a shortened representation will be
 	 *          returned
 	 * @return a tree of regal objects starting with the passed node as root
 	 */
 	public Map<String, Object> getPartsAsTree(Node node, String style) {
-		Map<String, Object> nm = null;
-		if ("short".equals(style)) {
-			nm = new JsonMapper(node).getLdWithoutContextShortStyle();
-		} else {
-			nm = new JsonMapper(node).getLdWithoutContext();
+		if ("D".equals(node.getState())) {
+			return null;
 		}
+		Map<String, Object> nm = node.getLd2();
+
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> parts =
 				(List<Map<String, Object>>) nm.get("hasPart");
@@ -230,27 +253,12 @@ public class Read extends RegalAction {
 		if (parts != null) {
 			for (Map<String, Object> part : parts) {
 				String id = (String) part.get("@id");
-				Map<String, Object> child = new HashMap<String, Object>();
-				child.put(id, getPartsAsTree(internalReadNode(id), style));
-				children.add(child);
-			}
-			nm.put("hasPart", children);
-		}
-		return nm;
-	}
-
-	public Map<String, Object> getMapWithParts(Node node) {
-		Map<String, Object> nm = node.getLd();
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> parts =
-				(List<Map<String, Object>>) nm.get("hasPart");
-		List<Map<String, Object>> children = new ArrayList();
-		if (parts != null) {
-			for (Map<String, Object> part : parts) {
-				String id = (String) part.get("@id");
-
-				children
-						.add(new JsonMapper(internalReadNode(id)).getLdWithoutContext());
+				Map<String, Object> child = new HashMap<>();
+				Map<String, Object> c = getPartsAsTree(internalReadNode(id), style);
+				if (c != null) {
+					child.put(id, c);
+					children.add(child);
+				}
 			}
 			nm.put("hasPart", children);
 		}
@@ -438,9 +446,9 @@ public class Read extends RegalAction {
 	 *          be returned
 	 * @return n-triple metadata
 	 */
-	public String readMetadata(String pid, String field) {
+	public String readMetadata1(String pid, String field) {
 		Node node = internalReadNode(pid);
-		String result = readMetadata(node, field);
+		String result = readMetadata1(node, field);
 		return result == null ? "No " + field : result;
 	}
 
@@ -449,9 +457,46 @@ public class Read extends RegalAction {
 	 * @param field the shortname of metadata field
 	 * @return the ntriples or just one field
 	 */
-	public String readMetadata(Node node, String field) {
+	public String readMetadata1(Node node, String field) {
 		try {
-			String metadata = node.getMetadata();
+			String metadata = node.getMetadata1();
+			if (metadata == null)
+				return null;
+			if (field == null || field.isEmpty()) {
+				return metadata;
+			} else {
+				String pred = getUriFromJsonName(field);
+				List<String> value = RdfUtils.findRdfObjects(node.getPid(), pred,
+						metadata, RDFFormat.NTRIPLES);
+				return value == null || value.isEmpty() ? null : value.get(0);
+			}
+		} catch (UrlConnectionException e) {
+			throw new HttpArchiveException(404, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * @param pid the pid of the object
+	 * @param field if field is specified, only the value of a certain field will
+	 *          be returned
+	 * @return n-triple metadata
+	 */
+	public String readMetadata2(String pid, String field) {
+		Node node = internalReadNode(pid);
+		String result = readMetadata2(node, field);
+		return result == null ? "No " + field : result;
+	}
+
+	/**
+	 * @param node
+	 * @param field the shortname of metadata field
+	 * @return the ntriples or just one field
+	 */
+	public String readMetadata2(Node node, String field) {
+		try {
+			String metadata = node.getMetadata2();
 			if (metadata == null)
 				return null;
 			if (field == null || field.isEmpty()) {
@@ -480,10 +525,35 @@ public class Read extends RegalAction {
 				return "";
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
-			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-			conf.setOpenWaybackLink(
-					Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
+			if (conf.getOpenWaybackLink() == null
+					|| conf.getOpenWaybackLink().isEmpty()) {
+				String owDatestamp =
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
+						+ "/" + conf.getUrl());
+			}
 			return conf.toString();
+		} catch (UrlConnectionException e) {
+			throw new HttpArchiveException(404, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * read a webpage's url history
+	 * 
+	 * @param node the node of the webpage
+	 * @return an url history
+	 */
+	public String readUrlHist(Node node) {
+		try {
+			String urlHistString = node.getUrlHist();
+			if (urlHistString == null)
+				return "";
+			ObjectMapper mapper = JsonUtil.mapper();
+			UrlHist urlHist = mapper.readValue(urlHistString, UrlHist.class);
+			return urlHist.toString();
 		} catch (UrlConnectionException e) {
 			throw new HttpArchiveException(404, e);
 		} catch (Exception e) {
@@ -497,10 +567,10 @@ public class Read extends RegalAction {
 	 *          metadata will be returned
 	 * @return n-triple metadata
 	 */
-	public String readMetadataFromCache(String pid, String field) {
+	public String readMetadata1FromCache(String pid, String field) {
 		try {
 			Node node = readNode(pid);
-			String metadata = node.getMetadata();
+			String metadata = node.getMetadata1();
 			if (metadata == null || metadata.isEmpty())
 				throw new HttpArchiveException(404,
 						"No Metadata on " + pid + " available!");
@@ -564,9 +634,9 @@ public class Read extends RegalAction {
 	 * @param predicate the property in its long form
 	 * @return all objects that are referenced using the predicate
 	 */
-	public List<String> getNodeLdProperty(Node node, String predicate) {
+	public List<String> getNodeLdProperty1(Node node, String predicate) {
 		List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
-				predicate, node.getMetadata(), RDFFormat.NTRIPLES);
+				predicate, node.getMetadata1(), RDFFormat.NTRIPLES);
 		return linkedObjects;
 	}
 
@@ -651,14 +721,14 @@ public class Read extends RegalAction {
 
 	private String getTitle(Node node) {
 		try {
-			return readMetadata(node, "title");
+			return readMetadata2(node, "title");
 		} catch (Exception e) {
 			return "No Title";
 		}
 	}
 
 	private Map<String, Object> getGatherStatus(Node node) {
-		Map<String, Object> entries = null;
+		Map<String, Object> entries = new HashMap<String, Object>();
 		try {
 			// if ("version".equals(node.getContentType())) {
 			//
@@ -667,14 +737,36 @@ public class Read extends RegalAction {
 			// .as("text/plain");
 			// } else
 			if ("webpage".equals(node.getContentType())) {
-				String hertrixXmlResponse =
-						Globals.heritrix.getJobStatus(node.getPid());
-				XmlMapper xmlMapper = new XmlMapper();
-				entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+				Gatherconf conf = Gatherconf.create(node.getConf());
+				if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.heritrix)) {
+					String hertrixXmlResponse =
+							Globals.heritrix.getJobStatus(node.getPid());
+					XmlMapper xmlMapper = new XmlMapper();
+					entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
+				} else if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.wpull)) {
+					entries.put("crawlControllerState",
+							WpullCrawl.getCrawlControllerState(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
+				}
+				/*
+				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
+				 * überschreibt launchCount von Heritrix
+				 */
+				entries.put("launchCount", Webgatherer.getLaunchCount(node));
+				/*
+				 * call of getLastLaunch may be omitted for heritrix, as also determined
+				 * by heritrixXmlResponse
+				 */
+				entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
+						: Webgatherer.getLastLaunch(node));
 				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
-			}
+			} // end if webpage
 		} catch (Exception e) {
-			play.Logger.warn("", e);
+			play.Logger.warn(
+					"Gather-Status kann nicht oder nur teilweise ermittelt werden.", e);
 		}
 		return entries == null ? new HashMap<String, Object>() : entries;
 	}
@@ -727,13 +819,14 @@ public class Read extends RegalAction {
 		List<SearchHit> result = new ArrayList<SearchHit>();
 		int step = 100;
 		int start = 0;
-		SearchHits hits =
-				Globals.search.query(new String[] { namespace }, query, start, step);
+		SearchHits hits = Globals.search
+				.query(new String[] { namespace }, query, start, step).getHits();
 		long size = hits.getTotalHits();
 
 		result.addAll(Arrays.asList((hits.getHits())));
 		for (int i = 0; i < (size - (size % step)); i += step) {
-			hits = Globals.search.query(new String[] { namespace }, query, i, step);
+			hits = Globals.search.query(new String[] { namespace }, query, i, step)
+					.getHits();
 			result.addAll(Arrays.asList((hits.getHits())));
 		}
 		return result;
@@ -794,7 +887,7 @@ public class Read extends RegalAction {
 
 	String getIdOfParallelEdition(Node node) {
 		String alephid;
-		alephid = new Read().readMetadata(node, "parallelEdition");
+		alephid = new Read().readMetadata2(node, "parallelEdition");
 		alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
 		return alephid;
 	}

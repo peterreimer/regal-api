@@ -22,12 +22,15 @@ import helper.HttpArchiveException;
 import helper.JsonMapper;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +39,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
 
@@ -61,17 +64,21 @@ public class Node implements java.io.Serializable {
 	public DublinCoreData dublinCoreData = new DublinCoreData();
 
 	private String metadataFile = null;
+	private String metadata2File = null;
 	private String seqFile = null;
 	private String confFile = null;
+	private String urlHistFile = null;
 	private String uploadFile = null;
 	private String objectTimestampFile = null;
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
 
-	private String metadata = null;
+	private String metadata1 = null;
+	private String metadata2 = null;
 	private String seq = null;
 
 	private String conf = null;
+	private String urlHist = null;
 
 	private Date objectTimestamp = null;
 
@@ -305,6 +312,22 @@ public class Node implements java.io.Serializable {
 	 * 
 	 * @return the absolute path to file
 	 */
+	public String getMetadata2File() {
+		return metadata2File;
+	}
+
+	/**
+	 * @param metadataFile The absolutepath to the metadatafile
+	 */
+	public void setMetadata2File(String metadataFile) {
+		this.metadata2File = metadataFile;
+	}
+
+	/**
+	 * The metadata file
+	 * 
+	 * @return the absolute path to file
+	 */
 	public String getSeqFile() {
 		return seqFile;
 	}
@@ -330,6 +353,21 @@ public class Node implements java.io.Serializable {
 	 */
 	public String getConfFile() {
 		return confFile;
+	}
+
+	/**
+	 * @param absolutePath to a webpages' URL history file
+	 */
+	public void setUrlHistFile(String absolutePath) {
+		this.urlHistFile = absolutePath;
+
+	}
+
+	/**
+	 * @return absolute path to a webpage's URL history file
+	 */
+	public String getUrlHistFile() {
+		return urlHistFile;
 	}
 
 	/**
@@ -569,16 +607,35 @@ public class Node implements java.io.Serializable {
 	 * @return n-triple metadata as string
 	 */
 	@JsonIgnore()
-	public String getMetadata() {
-		return metadata;
+	public String getMetadata1() {
+		return metadata1;
 	}
 
 	/**
 	 * @param metadata n-triple metadata as string
 	 * @return this
 	 */
-	public Node setMetadata(String metadata) {
-		this.metadata = metadata;
+	public Node setMetadata1(String metadata) {
+		this.metadata1 = metadata;
+		return this;
+	}
+
+	/**
+	 * @return n-triple metadata as string
+	 */
+	@JsonIgnore()
+	public String getMetadata2() {
+		if (metadata2 == null || metadata2.isEmpty())
+			return metadata1;
+		return metadata2;
+	}
+
+	/**
+	 * @param metadata n-triple metadata as string
+	 * @return this
+	 */
+	public Node setMetadata2(String metadata2) {
+		this.metadata2 = metadata2;
 		return this;
 	}
 
@@ -614,6 +671,23 @@ public class Node implements java.io.Serializable {
 	@JsonIgnore()
 	public String getConf() {
 		return conf;
+	}
+
+	/**
+	 * @param urlHist datastream as string
+	 * @return this
+	 */
+	public Node setUrlHist(String urlHist) {
+		this.urlHist = urlHist;
+		return this;
+	}
+
+	/**
+	 * @return the content of webpage's URL history datastream in a string
+	 */
+	@JsonIgnore()
+	public String getUrlHist() {
+		return urlHist;
 	}
 
 	/**
@@ -831,16 +905,15 @@ public class Node implements java.io.Serializable {
 	 */
 	@JsonIgnore()
 	public List<Link> getLinks() {
-		try {
-			InputStream stream =
-					new ByteArrayInputStream(metadata.getBytes(StandardCharsets.UTF_8));
+		try (InputStream stream =
+				new ByteArrayInputStream(metadata2.getBytes(StandardCharsets.UTF_8));) {
 			RdfResource rdf =
 					RdfUtils.createRdfResource(stream, RDFFormat.NTRIPLES, pid);
 			rdf = rdf.resolve();
 			rdf.addLinks(getRelsExt());
 			return rdf.getLinks();
-		} catch (NullPointerException e) {
-			return new ArrayList<Link>();
+		} catch (Exception e) {
+			return new ArrayList<>();
 		}
 	}
 
@@ -853,7 +926,7 @@ public class Node implements java.io.Serializable {
 	 * @return list of pids of related objects
 	 */
 	public List<Link> getRelatives(String relation) {
-		List<Link> result = new Vector<Link>();
+		List<Link> result = new Vector<>();
 		for (Link l : links) {
 			if (l.getPredicate().equals(relation))
 				result.add(l);
@@ -874,6 +947,7 @@ public class Node implements java.io.Serializable {
 		List<Link> sorted = new ArrayList<Link>();
 		if (nodeIds == null || nodeIds.isEmpty())
 			return sorted;
+		nodeIds.sort((a, b) -> a.getObject().compareTo(b.getObject()));
 		for (String i : seq) {
 			int j = -1;
 			if ((j = nodeIds.stream().map((Link l) -> l.getObject())
@@ -968,19 +1042,6 @@ public class Node implements java.io.Serializable {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		ObjectMapper mapper = JsonUtil.mapper();
-		StringWriter w = new StringWriter();
-		try {
-			mapper.writeValue(w, this);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return super.toString();
-		}
-		return w.toString();
-	}
-
 	/**
 	 * @return true if the metadata contains one of the following predicates or if
 	 *         a doi is present at RELS-EXT -http://purl.org/lobid/lv#urn
@@ -989,11 +1050,11 @@ public class Node implements java.io.Serializable {
 	 * 
 	 */
 	public boolean hasPersistentIdentifier() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata)
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2)
 				|| RdfUtils.hasTriple(pid,
-						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata)
-				|| RdfUtils.hasTriple(pid, "http: // purl.org/ontology/bibo/doi",
-						metadata)
+						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata2)
+				|| RdfUtils.hasTriple(pid, "http://purl.org/ontology/bibo/doi",
+						metadata2)
 				|| hasDoi() || hasUrn();
 	}
 
@@ -1001,14 +1062,14 @@ public class Node implements java.io.Serializable {
 	 * @return true if the metadata contains urn
 	 */
 	public boolean hasUrnInMetadata() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata);
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2);
 	}
 
 	/**
 	 * @return true if metadata contains catalog id
 	 */
 	public boolean hasLinkToCatalogId() {
-		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata);
+		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata2);
 		return result;
 	}
 
@@ -1018,7 +1079,7 @@ public class Node implements java.io.Serializable {
 	public String getUrnFromMetadata() {
 		try {
 			String hasUrn = "http://purl.org/lobid/lv#urn";
-			return RdfUtils.findRdfObjects(pid, hasUrn, metadata, RDFFormat.NTRIPLES)
+			return RdfUtils.findRdfObjects(pid, hasUrn, metadata2, RDFFormat.NTRIPLES)
 					.get(0);
 		} catch (Exception e) {
 			return null;
@@ -1182,8 +1243,52 @@ public class Node implements java.io.Serializable {
 	 * @return a map representing the rdf data on this object
 	 */
 	@JsonValue
-	public Map<String, Object> getLd() {
-		return new JsonMapper(this).getLd();
+	public Map<String, Object> getLd1() {
+		Map<String, Object> result = new JsonMapper(this).getLd();
+		if ("D".equals(getState())) {
+			result.put("notification", "Dieses Objekt wurde gelöscht");
+
+		}
+		Map<String, Object> newData = getLd2();
+		result.put("rdftype", newData.get("rdftype"));
+		result.put("webPageArchived", newData.get("webPageArchived"));
+		return result;
 	}
 
+	public String toString2() {
+		ObjectMapper mapper = JsonUtil.mapper();
+		try {
+			return mapper.writeValueAsString(new JsonMapper(this).getLd2());
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return super.toString();
+		}
+	}
+
+	@Override
+	public String toString() {
+		ObjectMapper mapper = JsonUtil.mapper();
+		try {
+			return mapper.writeValueAsString(new JsonMapper(this).getLd());
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return super.toString();
+		}
+	}
+
+	public Map<String, Object> getLd2() {
+		Map<String, Object> result = new JsonMapper(this).getLd2();
+		if ("D".equals(getState())) {
+			result.put("notification", "Dieses Objekt wurde gelöscht");
+		}
+		return result;
+	}
+
+	public Map<String, Object> getLd2WithParts() {
+		Map<String, Object> result = new JsonMapper(this).getLd2WithParts();
+		if ("D".equals(getState())) {
+			result.put("notification", "Dieses Objekt wurde gelöscht");
+		}
+		return result;
+	}
 }

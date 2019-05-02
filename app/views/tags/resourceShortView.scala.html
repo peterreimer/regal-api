@@ -1,0 +1,127 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@import views.Helper;
+
+@(hit: Map[String,Object],context:List[String],namespace:String)
+@import views.Title 
+
+@displayCreators(id:Object,label:Object)={
+						@if(id != null){
+	                       @label
+	                       }else{
+	                       	@label
+	                       }
+}
+@displayAuthors(id:String,label:String,roleId:String,roleName:String)={
+						@if(id != null && !id.isEmpty()){
+	                       @label
+	                      
+	                       }else{
+	                       
+	                       	@label
+	                       }
+}
+@analyseValue(v: String)={
+	@v match {
+		case a if v.startsWith("http") => {
+			@v
+		}
+		case a if v.startsWith(namespace) => { 
+			/resource/@v
+		}
+		case _ => {
+			@v
+		}
+	}
+}
+<a href="/resource/@hit.get("@id")">
+<div class="title">
+					<div class="titlePre"></div>
+					<h3 class="title">
+					<span class="titleMain">			
+							@fieldIcon(hit.get("rdftype"),"rdftype")
+							@Html(Title.getTitle(hit))
+					</span>
+					@if(hit.contains("corporateBodyForTitle")){
+					    <span class="corporateBodyForTitle">
+						/ @hit.get("corporateBodyForTitle").asInstanceOf[Collection[String]].toArray()
+						</span>
+					 }
+					@if(hit.contains("P60493")){
+						<span class="otherTitle">
+						: @hit.get("P60493").asInstanceOf[Collection[String]].toArray()
+						</span>
+					 }
+					 @hit.get("publication") match {
+					    	case publication:Set[ Map[String,Object]] => {
+					    		@Html(Title.getIssued(publication)) 
+					    	}
+					    	case _ => {}
+					    }
+					</h3>
+					<h4 id="page-title-suffix" class="titlePost title-suffix">
+						@if(hit.contains("contribution")){
+							<ol class="author-title-list">
+								@for(c <-views.Helper.listAuthors(hit)){
+									<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
+								}
+							</ol>
+						
+						}else{
+							<ol class="author-title-list">
+							@for(c <-views.Helper.listCreators(hit)){
+									<li>@displayCreators(c.get("id"),c.get("label"))</li>
+								}
+								</ol>
+						}
+						
+					</h4>
+		</div>
+</a>
+
+@fieldIcon(values: Any,key: String)={
+			@values match {
+				case d if d == null =>{}
+				case _ =>{
+							
+									@values match {
+									
+										case d: List[Any] => {
+										
+											@for(field <- d){
+												@value(field,key)
+											}
+											
+										}										
+									}
+									
+				}				
+			}
+}
+
+@value(value: Any,key:String)= {
+			@value match {
+				case a: String => {
+					@if(Helper.getLinkAdressOrNull(a)!=null){
+						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
+					}else{
+						@a
+					}
+				}
+				case c : Map[String,Object] => {
+							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
+				}
+				case _ => {
+				
+				}
+			}
+}
+
+@displayMap(value:Any,map:Map[String,Object],key:String)={
+	  @value match {
+			case a: String => {
+			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
+			}
+			
+		} 
+}

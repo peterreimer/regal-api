@@ -17,7 +17,9 @@
 package archive.search;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import play.Play;
 import actions.Transform;
 import archive.fedora.CopyUtils;
@@ -53,6 +57,8 @@ import archive.fedora.CopyUtils;
  * 
  */
 public class Search {
+
+	Map<String, Object> aggregations;
 
 	@SuppressWarnings("serial")
 	class InvalidRangeException extends RuntimeException {
@@ -74,6 +80,7 @@ public class Search {
 
 	Search(Client client) {
 		this.client = client;
+		initAggregations();
 	}
 
 	void init(String[] index, String config) {
@@ -95,12 +102,14 @@ public class Search {
 		for (String i : index) {
 			play.Logger.info("Init elasticsearch index " + i);
 			init(i);
+			play.Logger.info("Init elasticsearch index " + i + "2");
+			init(i + "2");
 		}
 	}
 
 	void init(String index) {
 		try {
-			play.Logger.debug("Configure " + index);
+			play.Logger.info("Configure " + index);
 			String indexConfig = CopyUtils.copyToString(
 					Play.application().resourceAsStream(Globals.elasticsearchSettings),
 					"utf-8");
@@ -108,7 +117,7 @@ public class Search {
 			client.admin().indices().prepareCreate(index).setSource(indexConfig)
 					.execute().actionGet();
 		} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-			play.Logger.debug("Index already exists!");
+			play.Logger.info("Index already exists!");
 		} catch (Exception e) {
 			play.Logger
 					.warn("Problems when creating " + index + " :" + e.getMessage());
@@ -183,18 +192,21 @@ public class Search {
 		return response.getHits();
 	}
 
-	SearchHits query(String[] index, String queryString, int from, int until) {
+	SearchResponse query(String[] index, String queryString, int from,
+			int until) {
 		refresh();
 		play.Logger.debug("Search for " + queryString);
 		QueryBuilder query = QueryBuilders.queryString(queryString);
 		return query(index, query, from, until);
 	}
 
-	SearchHits query(String[] index, QueryBuilder query, int from, int until) {
+	SearchResponse query(String[] index, QueryBuilder query, int from,
+			int until) {
 		refresh();
 		SearchResponse response = client.prepareSearch(index).setQuery(query)
-				.setFrom(from).setSize(until - from).execute().actionGet();
-		return response.getHits();
+				.setFrom(from).setSize(until - from).setAggregations(aggregations)
+				.execute().actionGet();
+		return response;
 	}
 
 	Map<String, Object> getSettings(String index, String type) {
@@ -269,7 +281,7 @@ public class Search {
 				}
 				msg.append("\n");
 				result.add(msg.toString());
-				play.Logger.debug("Add " + node.getPid() + " to bulk action");
+				play.Logger.info("Add " + node.getPid() + " to bulk action");
 			} catch (Exception e) {
 				play.Logger.warn("", e);
 				result.add("A problem occured: " + e.getMessage());
@@ -280,15 +292,15 @@ public class Search {
 			BulkResponse bulkResponse = internalIndexBulk.execute().actionGet();
 			if (bulkResponse.hasFailures()) {
 				result.add(bulkResponse.buildFailureMessage());
-				play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+				play.Logger.warn("FAIL: " + bulkResponse.buildFailureMessage());
 			}
 
-			play.Logger.debug("Start building public Index " + index);
+			play.Logger.info("Start building public Index " + index);
 
 			bulkResponse = publicIndexBulk.execute().actionGet();
 			if (bulkResponse.hasFailures()) {
 				result.add(bulkResponse.buildFailureMessage());
-				play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+				play.Logger.warn("FAIL: " + bulkResponse.buildFailureMessage());
 			}
 		} catch (Exception e) {
 			play.Logger.warn("", e);
@@ -300,4 +312,24 @@ public class Search {
 		client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 
+	private void initAggregations() {
+		ObjectMapper mapper = new ObjectMapper();
+		try (InputStream in =
+				play.Play.application().resourceAsStream("aggregations.conf")) {
+			Map map = mapper.readValue(in, Map.class);
+			aggregations = (Map<String, Object>) map.get("aggs");
+		} catch (Exception e) {
+			aggregations = new HashMap<>();
+		}
+	}
+
+	public SearchResponse query(String[] index, String queryString, int from,
+			int until, Map<String, Object> aggregationConf) {
+		refresh();
+		SearchResponse response = client.prepareSearch(index)
+				.setQuery(QueryBuilders.queryString(queryString)).setFrom(from)
+				.setSize(until - from).setAggregations(aggregationConf).execute()
+				.actionGet();
+		return response;
+	}
 }

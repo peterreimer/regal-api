@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import helper.DevLoggerContext;
+import helper.mail.Mail;
 import helper.oai.OaiDispatcher;
 import models.Globals;
 import play.Application;
@@ -40,52 +41,100 @@ import play.mvc.Result;
  *
  */
 public class Global extends GlobalSettings {
+	@Override
 	public void onStart(Application app) {
+		if (play.api.Play.isProd(play.api.Play.current())) {
+			startInProductionMode();
+		} else {
+			// play Framework läuft im Test- oder Entwicklungsmodus
+			// Logger-Konfiguration für Entwickler/innen laden
+			DevLoggerContext.doConfigure(Play.application().configuration()
+					.getString("logger.config.developer"));
+		}
+	}
+
+	private static void startInProductionMode() {
 		try {
-			if (play.api.Play.isProd(play.api.Play.current())) {
-				play.Logger.info("Regal-API started!");
-				for (int i = 0; i < Globals.namespaces.length; i++) {
+			initializeContentModels();
+			initializeSearchIndex();
+			initializeTaskManager();
+			sendMail();
+			play.Logger.info("Success! Regal-API started!");
+		} catch (Throwable t) {
+			play.Logger.error("Failure at startup!", t);
+			play.Logger.error("Fail :-( - Regal-API not properly started!");
+			throw new RuntimeException(t);
+		}
 
-					play.Logger
-							.info("Init fedora content models for " + Globals.namespaces[i]);
-					OaiDispatcher.initContentModels(Globals.namespaces[i]);
-				}
-				play.Logger.info("Init fedora content models for default namespace");
-				OaiDispatcher.initContentModels("");
+	}
 
-				Globals.search.init(Globals.namespaces);
-			} else {
-				// play Framework läuft im Test- oder Entwicklungsmodus
-				// Logger-Konfiguration für Entwickler/innen laden
-				DevLoggerContext.doConfigure(Play.application().configuration()
-						.getString("logger.config.developer"));
-			}
+	private static void sendMail() {
+		try {
+			Mail.sendMail("",
+					"New instance of regal-api is starting on " + Globals.server);
+		} catch (Throwable t) {
+			play.Logger.warn("Failure at startup! Could not sent email!");
+		}
+	}
+
+	private static void initializeTaskManager() {
+		try {
 			Globals.taskManager.init();
 			Globals.taskManager.execute();
 		} catch (Throwable t) {
-			t.printStackTrace();
+			play.Logger
+					.error("Failure at startup! Could not initialize Task Manager!");
+			throw new RuntimeException("", t);
+		}
+	}
+
+	private static void initializeSearchIndex() {
+		try {
+			Globals.search.init(Globals.namespaces);
+		} catch (Throwable t) {
+			play.Logger
+					.error("Failure at startup! Could not initialize Search Index!");
+			throw new RuntimeException("", t);
+		}
+	}
+
+	private static void initializeContentModels() {
+		try {
+			for (int i = 0; i < Globals.namespaces.length; i++) {
+
+				play.Logger
+						.info("Init fedora content models for " + Globals.namespaces[i]);
+				OaiDispatcher.initContentModels(Globals.namespaces[i]);
+			}
+			play.Logger.info("Init fedora content models for default namespace");
+			OaiDispatcher.initContentModels("");
+		} catch (Throwable t) {
+			play.Logger
+					.error("Failure at startup! Could not initialize Content Models!");
+			throw new RuntimeException("", t);
 		}
 	}
 
 	@Override
 	public void onStop(Application app) {
-		// Globals.profile.saveMap();
 		play.Logger.info("Application shutdown...");
 		Globals.taskManager.shutdown();
 	}
 
+	@Override
 	public Promise<Result> onHandlerNotFound(RequestHeader request) {
 		return Promise.<Result> pure(notFound("Action not found " + request.uri()));
 	}
 
-	@SuppressWarnings("rawtypes")
+	@Override
 	public Action onRequest(Request request, Method actionMethod) {
-		play.Logger.debug("\n" + request.toString() + "\n\t"
-				+ mapToString(request.headers()) + "\n\t" + request.body().toString());
+		play.Logger.info(
+				"\n" + request.toString() + "\n\t" + mapToString(request.headers()));
+		play.Logger.debug("\t" + request.body().toString());
 		return super.onRequest(request, actionMethod);
 	}
 
-	private String mapToString(Map<String, String[]> map) {
+	private static String mapToString(Map<String, String[]> map) {
 		StringBuilder sb = new StringBuilder();
 		Iterator<Entry<String, String[]>> iter = map.entrySet().iterator();
 		while (iter.hasNext()) {

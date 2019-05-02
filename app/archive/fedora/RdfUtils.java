@@ -22,56 +22,50 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import models.Link;
-import models.RdfResource;
-
-import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import helper.HttpArchiveException;
+import models.Link;
+import models.RdfResource;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -81,7 +75,7 @@ public class RdfUtils {
 
 	final static Logger logger = LoggerFactory.getLogger(RdfUtils.class);
 	public final static ValueFactory valueFactory =
-			ValueFactoryImpl.getInstance();
+			SimpleValueFactory.getInstance();
 
 	/**
 	 * @param url the url to read from
@@ -93,7 +87,7 @@ public class RdfUtils {
 	public static String readRdfToString(URL url, RDFFormat inf, RDFFormat outf,
 			String accept) {
 		try {
-			Graph myGraph = null;
+			Collection<Statement> myGraph = null;
 			myGraph = readRdfToGraph(url, inf, accept);
 			return graphToString(myGraph, outf);
 		} catch (Exception e) {
@@ -109,7 +103,8 @@ public class RdfUtils {
 	 * @param outf the expected output format
 	 * @return a rdf string
 	 */
-	public static String graphToString(Graph myGraph, RDFFormat outf) {
+	public static String graphToString(Collection<Statement> myGraph,
+			RDFFormat outf) {
 		StringWriter out = new StringWriter();
 		RDFWriter writer = Rio.createWriter(outf, out);
 		try {
@@ -133,7 +128,7 @@ public class RdfUtils {
 	 */
 	public static String readRdfToString(InputStream in, RDFFormat inf,
 			RDFFormat outf, String baseUrl) {
-		Graph myGraph = null;
+		Collection<Statement> myGraph = null;
 		myGraph = readRdfToGraph(in, inf, baseUrl);
 		return graphToString(myGraph, outf);
 	}
@@ -145,16 +140,16 @@ public class RdfUtils {
 	 * @return a Graph with the rdf
 	 * @throws IOException
 	 */
-	public static Graph readRdfToGraph(URL url, RDFFormat inf, String accept)
-			throws IOException {
+	public static Collection<Statement> readRdfToGraph(URL url, RDFFormat inf,
+			String accept) throws IOException {
 		try (InputStream in = urlToInputStream(url, accept)) {
 			return readRdfToGraph(in, inf, url.toString());
 		}
 	}
 
-	public static Graph readRdfToGraphAndFollowSameAs(URL url, RDFFormat inf,
-			String accept) throws IOException {
-		Graph graph = null;
+	public static Collection<Statement> readRdfToGraphAndFollowSameAs(URL url,
+			RDFFormat inf, String accept) throws IOException {
+		Collection<Statement> graph = null;
 		try (InputStream in = urlToInputStream(url, accept)) {
 			graph = readRdfToGraph(in, inf, url.toString());
 			String sameAsTarget = getSameAsTarget(graph);
@@ -167,7 +162,7 @@ public class RdfUtils {
 		return graph;
 	}
 
-	private static String getSameAsTarget(Graph graph) {
+	private static String getSameAsTarget(Collection<Statement> graph) {
 		Iterator<Statement> statements = graph.iterator();
 		while (statements.hasNext()) {
 			Statement curStatement = statements.next();
@@ -186,23 +181,7 @@ public class RdfUtils {
 		try {
 			con = (HttpURLConnection) url.openConnection();
 			con.setConnectTimeout(15000);
-			con.setReadTimeout(15000);
-			con.setRequestProperty("Accept", accept);
-			con.connect();
-			inputStream = con.getInputStream();
-		} catch (IOException e) {
-			throw new UrlConnectionException(e);
-		}
-		return inputStream;
-	}
-
-	private static InputStream urlToInputStreamWithRedirects(URL url,
-			String accept) throws IOException {
-		HttpURLConnection con = null;
-		InputStream inputStream = null;
-		try {
-			con = (HttpURLConnection) url.openConnection();
-			con.setConnectTimeout(15000);
+			con.setRequestProperty("User-Agent", "Regal Webservice");
 			con.setReadTimeout(15000);
 			con.setRequestProperty("Accept", accept);
 			con.connect();
@@ -215,8 +194,16 @@ public class RdfUtils {
 					|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
 					|| responseCode == 307 || responseCode == 303) {
 				String redirectUrl = con.getHeaderField("Location");
-				play.Logger.debug("Redirect to Location: " + redirectUrl);
-				return urlToInputStreamWithRedirects(new URL(redirectUrl), accept);
+				try {
+					URL newUrl = new URL(redirectUrl);
+					play.Logger.debug("Redirect to Location: " + newUrl);
+					return urlToInputStream(newUrl, accept);
+				} catch (MalformedURLException e) {
+					URL newUrl =
+							new URL(url.getProtocol() + "://" + url.getHost() + redirectUrl);
+					play.Logger.debug("Redirect to Location: " + newUrl);
+					return urlToInputStream(newUrl, accept);
+				}
 			}
 			inputStream = con.getInputStream();
 			return inputStream;
@@ -233,13 +220,13 @@ public class RdfUtils {
 	 * @param inputStream an Input stream containing rdf data
 	 * @param inf the rdf format
 	 * @param baseUrl see sesame docu
-	 * @return a Graph representing the rdf in the input stream
+	 * @return a Collection<Statement> representing the rdf in the input stream
 	 */
-	public static Graph readRdfToGraph(InputStream inputStream, RDFFormat inf,
-			String baseUrl) {
+	public static Collection<Statement> readRdfToGraph(InputStream inputStream,
+			RDFFormat inf, String baseUrl) {
 		try {
 			RDFParser rdfParser = Rio.createParser(inf);
-			org.openrdf.model.Graph myGraph = new TreeModel();
+			Collection<Statement> myGraph = new TreeModel();
 			StatementCollector collector = new StatementCollector(myGraph);
 			rdfParser.setRDFHandler(collector);
 			rdfParser.parse(inputStream, baseUrl);
@@ -254,7 +241,7 @@ public class RdfUtils {
 	 * @return all subjects without info:fedora/ at the beginning
 	 */
 	public static List<String> getFedoraSubject(InputStream in) {
-		Vector<String> pids = new Vector<String>();
+		Vector<String> pids = new Vector<>();
 		String findpid = null;
 		try {
 			RepositoryConnection con =
@@ -363,12 +350,12 @@ public class RdfUtils {
 
 	private static void addStatements(String pid, List<Link> links,
 			RepositoryConnection con, SailRepository myRepository)
-					throws RepositoryException {
+			throws RepositoryException {
 
 		ValueFactory f = myRepository.getValueFactory();
-		URI subject = f.createURI("info:fedora/" + pid);
+		IRI subject = f.createIRI("info:fedora/" + pid);
 		for (Link link : links) {
-			URI predicate = f.createURI(link.getPredicate());
+			IRI predicate = f.createIRI(link.getPredicate());
 			if (link.getObject() == null || link.getObject().isEmpty())
 				continue;
 			if (link.isLiteral()) {
@@ -376,7 +363,7 @@ public class RdfUtils {
 				con.add(subject, predicate, object);
 			} else {
 				try {
-					URI object = f.createURI(link.getObject());
+					IRI object = f.createIRI(link.getObject());
 					con.add(subject, predicate, object);
 				} catch (IllegalArgumentException e) {
 					logger.debug("", e);
@@ -450,7 +437,7 @@ public class RdfUtils {
 		}
 	}
 
-	private static RepositoryConnection readRdfInputStreamToRepository(
+	public static RepositoryConnection readRdfInputStreamToRepository(
 			InputStream is, RDFFormat inf) {
 		RepositoryConnection con = null;
 		try {
@@ -484,11 +471,11 @@ public class RdfUtils {
 			RepositoryConnection con =
 					readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
 			ValueFactory f = con.getValueFactory();
-			URI s = f.createURI(subject);
-			URI p = f.createURI(predicate);
+			IRI s = f.createIRI(subject);
+			IRI p = f.createIRI(predicate);
 			Value o = null;
 			if (!isLiteral) {
-				o = f.createURI(object);
+				o = f.createIRI(object);
 			} else {
 				o = f.createLiteral(object);
 			}
@@ -596,11 +583,11 @@ public class RdfUtils {
 				con = myRepository.getConnection();
 			}
 			ValueFactory f = con.getValueFactory();
-			URI s = f.createURI(subject);
-			URI p = f.createURI(predicate);
+			IRI s = f.createIRI(subject);
+			IRI p = f.createIRI(predicate);
 			Value o = null;
 			if (!isLiteral) {
-				o = f.createURI(object);
+				o = f.createIRI(object);
 			} else {
 				o = f.createLiteral(object);
 			}
@@ -681,8 +668,9 @@ public class RdfUtils {
 		return subjs;
 	}
 
-	public static Graph rewriteSubject(String lobidUri, String pid, Graph graph) {
-		org.openrdf.model.Graph result = new TreeModel();
+	public static Collection<Statement> rewriteSubject(String lobidUri,
+			String pid, Collection<Statement> graph) {
+		Collection<Statement> result = new TreeModel();
 		Iterator<Statement> statements = graph.iterator();
 		while (statements.hasNext()) {
 			Statement curStatement = statements.next();
@@ -690,8 +678,8 @@ public class RdfUtils {
 			Resource pred = curStatement.getPredicate();
 			Value obj = curStatement.getObject();
 			if (subj.equals(lobidUri)) {
-				result.add(valueFactory.createStatement(valueFactory.createURI(pid),
-						valueFactory.createURI(pred.stringValue()), obj));
+				result.add(valueFactory.createStatement(valueFactory.createIRI(pid),
+						valueFactory.createIRI(pred.stringValue()), obj));
 			} else {
 				result.add(curStatement);
 			}
@@ -715,4 +703,11 @@ public class RdfUtils {
 		}
 	}
 
+	public static Collection<Statement> deletePredicateFromRepo(
+			RepositoryConnection con, String pred) {
+		String queryString = "DELETE WHERE{?s <" + pred + "> ?o .} ";
+		play.Logger.debug(queryString);
+		con.prepareUpdate(QueryLanguage.SPARQL, queryString).execute();
+		return Iterations.asList(con.getStatements(null, null, null, true));
+	}
 }

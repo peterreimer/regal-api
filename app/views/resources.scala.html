@@ -1,0 +1,20 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@import views.Helper
+@import models.Node
+@import authenticate.User
+
+@(hits: List[Node])
+
+
+@main("",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){ 
+
+		@for( hit <- hits){
+			@tags.getTitle(hit.getLd2())
+			@tags.resourceView(hit,hit.getLd2(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+
+	}
+}
+
+

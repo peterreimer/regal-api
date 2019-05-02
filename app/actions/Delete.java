@@ -19,8 +19,15 @@ package actions;
 import helper.HttpArchiveError;
 import helper.HttpArchiveException;
 
+import java.io.ByteArrayInputStream;
+import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFFormat;
+
+import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Node;
 
@@ -75,33 +82,11 @@ public class Delete extends RegalAction {
 	 * @return a message
 	 */
 	public String delete(List<Node> nodes) {
-		/*- 
-		 * Special case: if a single node should be deleted.
-		 *	- check whether the node has urn or doi
-		 *	- if not: purge!
-		 *	- if : mark as deleted!
-		 */
-		if (nodes.size() == 1) {
-			Node n = nodes.get(0);
-			if (!nodesArePersistent(nodes)) {
-				return purge(n);
-			} else {
-				return delete(n);
-			}
-		} else {
-			/*- 
-			 * Normal case: complexe object should be deleted.
-			 * 	- check whether all nodes have doi or urn
-			 * 	- if not: purge all!
-			 *  - if: throw exception!
-			 */
-			if (!nodesArePersistent(nodes)) {
-				return purge(nodes);
-			}
+		StringBuffer message = new StringBuffer();
+		for (Node n : nodes) {
+			message.append(delete(n) + " \n");
 		}
-
-		throw new HttpArchiveError(405,
-				"At least one of the child objects has a urn or doi. Deletion aborted!");
+		return message.toString();
 	}
 
 	/**
@@ -149,6 +134,16 @@ public class Delete extends RegalAction {
 	}
 
 	/**
+	 * @param pid a namespace qualified id
+	 * @return a message
+	 */
+	public String deleteMetadata2(String pid) {
+		Globals.fedora.deleteDatastream(pid, "metadata2");
+		updateIndex(pid);
+		return pid + ": metadata2 - datastream successfully deleted! ";
+	}
+
+	/**
 	 * @param pid the pid og the object
 	 * @return a message
 	 */
@@ -156,5 +151,29 @@ public class Delete extends RegalAction {
 		Globals.fedora.deleteDatastream(pid, "data");
 		updateIndex(pid);
 		return pid + ": data - datastream successfully deleted! ";
+	}
+
+	public String deleteMetadataField(String pid, String field) {
+		Node node = new Read().readNode(pid);
+		String pred = getUriFromJsonName(field);
+		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
+				new ByteArrayInputStream(node.getMetadata1().getBytes()),
+				RDFFormat.NTRIPLES);
+		Collection<Statement> myGraph =
+				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
+		return new Modify().updateMetadata1(node,
+				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
+	}
+
+	public String deleteMetadata2Field(String pid, String field) {
+		Node node = new Read().readNode(pid);
+		String pred = getUriFromJsonName(field);
+		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
+				new ByteArrayInputStream(node.getMetadata2().getBytes()),
+				RDFFormat.NTRIPLES);
+		Collection<Statement> myGraph =
+				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
+		return new Modify().updateMetadata2(node,
+				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 }
