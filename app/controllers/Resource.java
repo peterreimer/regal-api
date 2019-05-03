@@ -365,6 +365,9 @@ public class Resource extends MyController {
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
 			RegalObject object = getRegalObject(request().body().asJson());
+			if (object.getContentType().equals("webpage")) {
+				object.setAccessScheme("restricted");
+			}
 			Node newNode = create.createResource(namespace, object);
 			String result = newNode.getPid() + " created/updated!";
 			response().setHeader("Location", read.getHttpUriOfResource(newNode));
