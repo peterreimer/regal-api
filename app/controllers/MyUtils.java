@@ -29,6 +29,9 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import com.avaje.ebean.Ebean;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -36,6 +39,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import actions.Create;
 import authenticate.BasicAuth;
+import authenticate.User;
+import authenticate.UserDB;
 import helper.GatherconfImporter;
 import helper.Webgatherer;
 import helper.oai.OaiDispatcher;
@@ -302,4 +307,25 @@ public class MyUtils extends MyController {
 			return ok();
 		});
 	}
+
+	public static Promise<Result> addUser() {
+		return new BulkActionAccessor().call((userId) -> {
+			try {
+				JsonNode node = request().body().asJson();
+				User user = new ObjectMapper().treeToValue(node, User.class);
+				if (user.getUsername() == null || user.getUsername().isEmpty()) {
+					throw new RuntimeException("Please specify username!");
+				}
+				if (user.getPassword() == null || user.getPassword().isEmpty()) {
+					throw new RuntimeException("Please specify password!");
+				}
+				UserDB.getInstance().addUser(user, user.getPassword());
+				return ok();
+			} catch (Exception e) {
+				play.Logger.warn("", e);
+				return JsonMessage(new Message(e.getMessage(), 400));
+			}
+		});
+	}
+
 }
