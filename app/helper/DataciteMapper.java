@@ -21,6 +21,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.hbz.lobid.helper.LobidTypes;
 import models.DataciteRecord;
 import models.Globals;
 import models.Pair;
@@ -62,14 +63,22 @@ public class DataciteMapper {
 	}
 
 	private static void addResourceType(JsonNode ld, DataciteRecord rec) {
-		rec.type = ld.at("/rdftype/0/prefLabel").asText();
-		if ("Abschlussarbeit".equals(rec.type)) {
-			rec.type = "Hochschulschrift";
-		} else if ("Statistics".equals(rec.type)) {
-			rec.type = "Statistik";
-		} else if ("Leitlinien / Normschriften".equals(rec.type)) {
-			rec.type = "Leitlinie";
-		}
+		rec.type = "";
+		play.Logger.info("found type: " + rec.type);
+		ld.at("/rdftype").forEach(curType -> {
+			String lobidType = curType.at("/@id").asText();
+			String label = curType.at("/prefLabel").asText();
+			play.Logger.info("found type: " + lobidType);
+			if (LobidTypes.Thesis.equals(lobidType)) {
+				rec.type = "Hochschulschrift";
+			} else if (LobidTypes.Statistics.equals(lobidType)) {
+				rec.type = "Statistik";
+			} else if (LobidTypes.Standard.equals(lobidType)) {
+				rec.type = "Leitlinie";
+			} else {
+				rec.type = label;
+			}
+		});
 	}
 
 	private static void addResourceTypeGeneral(JsonNode ld, DataciteRecord rec) {

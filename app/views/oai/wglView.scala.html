@@ -57,5 +57,8 @@
 @field(data.getWglSubject(),"wgl:wglsubject")
 @field(data.getRights(),"wgl:rights")
 @typedField(data.getIdentifier(),"wgl:identifier")
-<wgl:wgltype>Zeitschriftenartikel</wgl:wgltype>
+@for(wgltype<-data.getWglType()){
+
+<wgl:wgltype>@wgltype</wgl:wgltype>
+}
 </oai_wgl:wgl>

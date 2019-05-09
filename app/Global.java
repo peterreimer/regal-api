@@ -18,7 +18,9 @@
 import static play.mvc.Results.notFound;
 
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -128,10 +130,23 @@ public class Global extends GlobalSettings {
 
 	@Override
 	public Action onRequest(Request request, Method actionMethod) {
-		play.Logger.info(
+		String host = request.getHeader("Host");
+		String date = getDate();
+		String httpReq = request.toString();
+		String agent = request.getHeader("User-Agent");
+		String userIp = request.getHeader("UserIp");
+
+		play.Logger.info(String.format("%s %s [%s]  \"%s\" %s", host, userIp, date,
+				httpReq, agent));
+		play.Logger.debug(
 				"\n" + request.toString() + "\n\t" + mapToString(request.headers()));
-		play.Logger.debug("\t" + request.body().toString());
 		return super.onRequest(request, actionMethod);
+	}
+
+	private String getDate() {
+		SimpleDateFormat simpleDateFormat =
+				new SimpleDateFormat("dd/mm/yyyy:hh:mm:ss +SSS");
+		return simpleDateFormat.format(new Date());
 	}
 
 	private static String mapToString(Map<String, String[]> map) {

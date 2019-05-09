@@ -53,6 +53,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
+import actions.Enrich;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
@@ -202,6 +203,7 @@ public class Resource extends MyController {
 				Map<String, Object> rdf = node.getLd2();
 				rdf.put("@context", Globals.profile.getContext().get("@context"));
 				String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
+
 				if (request().accepts("application/rdf+xml")) {
 					result = RdfUtils.readRdfToString(
 							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
@@ -934,7 +936,7 @@ public class Resource extends MyController {
 	public static Promise<Result> enrichMetadata(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			String result = modify.enrichMetadata(node);
+			String result = Enrich.enrichMetadata1(node);
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -943,7 +945,7 @@ public class Resource extends MyController {
 	public static Promise<Result> enrichMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			String result = modify.enrichMetadata(node);
+			String result = Enrich.enrichMetadata2(node);
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -1233,7 +1235,7 @@ public class Resource extends MyController {
 				} else {
 					node = create.createResource(namespace, object);
 				}
-				String message = modify.lobidify(node, alephId);
+				String message = modify.lobidify2(node, alephId);
 				flash("message", message);
 				return redirect(routes.Resource.listResource(node.getPid(), null));
 			} catch (Exception e) {
