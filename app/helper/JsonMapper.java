@@ -152,7 +152,7 @@ public class JsonMapper {
 						node.getPid() + " metadata2 stream is NULL!");
 		} catch (Exception e) {
 			play.Logger.warn("", e.getMessage());
-			play.Logger.debug("", e);
+			// play.Logger.debug("", e);
 		}
 
 	}
@@ -295,7 +295,7 @@ public class JsonMapper {
 		} catch (Exception e) {
 			play.Logger
 					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
-			play.Logger.debug("", e);
+			// play.Logger.debug("", e);
 		}
 		return null;
 	}
@@ -310,7 +310,7 @@ public class JsonMapper {
 		} catch (Exception e) {
 			play.Logger.warn(node.getPid()
 					+ " has no descriptive Metadata2! Try to return metadata instead.");
-			play.Logger.debug("", e);
+			// play.Logger.debug("", e);
 		}
 		return getDescriptiveMetadata1();
 	}
@@ -450,7 +450,9 @@ public class JsonMapper {
 			}
 			rdf.put("creator", creator);
 		} catch (Exception e) {
-			play.Logger.debug("Problem processing key contribution.agent", e);
+			play.Logger.debug("Problem processing key contribution.agent",
+					e.getMessage());
+			// play.Logger.debug("", e);
 		}
 	}
 

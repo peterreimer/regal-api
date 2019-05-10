@@ -137,4 +137,18 @@ public class WebgatherUtils {
 		}
 	}
 
+	/**
+	 * Veröffentlicht eine Webpage-Version (=Webschnitt), indem es sie in der
+	 * Openwayback-Kollektion "weltweit" anlegt.
+	 * 
+	 * @param node der Knoten des Webschnittes
+	 */
+	public static void publishWebpageVersion(Node node) {
+		play.Logger.info("Jetzt wird ein Webschnitt veröffentlicht.");
+		String[] seqArray = node.getSeqArray();
+		for (String seq : seqArray) {
+			play.Logger.debug(seq);
+		}
+	}
+
 }

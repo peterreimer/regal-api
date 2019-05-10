@@ -414,7 +414,6 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @return the node's type
 	 */
 	public String getNodeType() {
 		return type;
@@ -960,7 +959,7 @@ public class Node implements java.io.Serializable {
 		return sorted;
 	}
 
-	private String[] getSeqArray() {
+	public String[] getSeqArray() {
 		try {
 			if (this.seq == null || this.seq.isEmpty())
 				return new String[] {};

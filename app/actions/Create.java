@@ -68,6 +68,7 @@ public class Create extends RegalAction {
 	}
 
 	private Node updateResource(Node node) {
+		play.Logger.debug("Updating Node with Pid " + node.getPid());
 		Globals.fedora.updateNode(node);
 		updateIndex(node.getPid());
 		return node;
@@ -79,6 +80,7 @@ public class Create extends RegalAction {
 	 * @return the updated node
 	 */
 	public Node patchResource(Node node, RegalObject object) {
+		play.Logger.debug("Patching Node with Pid " + node.getPid());
 		new Index().remove(node);
 		setNodeMembers(node, object);
 		return updateResource(node);

@@ -313,8 +313,13 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Patching Pid: " + pid);
 			Node node = readNodeOrNull(pid);
 			RegalObject object = getRegalObject(request().body().asJson());
+			if (object.getAccessScheme().equals("public")
+					&& object.getContentType().equals("version")) {
+				WebgatherUtils.publishWebpageVersion(node);
+			}
 			Node newNode = create.patchResource(node, object);
 			String result = newNode.getPid() + " created/updated!";
 			return JsonMessage(new Message(result));
@@ -343,8 +348,13 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Updating Pid: " + pid);
 			Node node = readNodeOrNull(pid);
 			RegalObject object = getRegalObject(request().body().asJson());
+			if (object.getAccessScheme().equals("public")
+					&& object.getContentType().equals("version")) {
+				WebgatherUtils.publishWebpageVersion(node);
+			}
 			Node newNode = null;
 			if (node == null) {
 				String[] namespacePlusId = pid.split(":");
@@ -355,7 +365,9 @@ public class Resource extends MyController {
 			}
 			String result = newNode.getPid() + " created/updated!";
 			return JsonMessage(new Message(result));
+
 		});
+
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
