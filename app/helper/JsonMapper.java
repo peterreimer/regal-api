@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -407,9 +408,9 @@ public class JsonMapper {
 		}
 	}
 
-	private void postProcessSubjectName(Map<String, Object> rdf) {
+	private static void postProcessSubjectName(Map<String, Object> rdf) {
 		List<Map<String, Object>> newSubjects = new ArrayList<>();
-		List<String> subjects = (List<String>) rdf.get("subjectName");
+		Set<String> subjects = (Set<String>) rdf.get("subjectName");
 		if (subjects == null || subjects.isEmpty()) {
 			return;
 		}
