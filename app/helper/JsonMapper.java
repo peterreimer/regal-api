@@ -368,6 +368,7 @@ public class JsonMapper {
 				rdf.put(rdftype, t);
 
 			sortCreatorAndContributors(rdf);
+			postProcessSubjectName(rdf);
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
@@ -400,7 +401,6 @@ public class JsonMapper {
 			postProcessContribution(rdf);
 			postProcess(rdf, "creator");
 			createJoinedFunding(rdf);
-			postProcessSubjectName(rdf);
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);

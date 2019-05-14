@@ -237,6 +237,9 @@ public class Helper {
 	public static String getSubjectSource(String sourceId, String uri,
 			String notation) {
 		String source = "";
+		if (uri == null) {
+			return "";
+		}
 		if ("https://w3id.org/lobid/rpb2".equals(sourceId)) {
 			source = "lbz " + getLbzId(uri);
 		} else if ("https://w3id.org/lobid/rpb".equals(sourceId)) {
@@ -247,10 +250,14 @@ public class Helper {
 			} else {
 				source = "ddc " + getDdcId(uri);
 			}
-		} else if ("http://d-nb.info/gnd/7749153-1".equals(sourceId)) {
+		} else if ("http://d-nb.info/gnd/7749153-1".equals(sourceId)
+				|| uri.startsWith("http://d-nb.info/gnd/")
+				|| uri.startsWith("https://d-nb.info/gnd/")) {
 			source = "gnd " + getGndId(uri);
 		} else if ("http://purl.org/lobid/nwbib".equals(sourceId)) {
 			source = "nwbib " + getNwbibId(uri);
+		} else if (uri.startsWith(Globals.protocol + Globals.server + "/adhoc")) {
+			source = "lokal";
 		}
 		return source;
 	}
