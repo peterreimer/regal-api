@@ -400,10 +400,35 @@ public class JsonMapper {
 			postProcessContribution(rdf);
 			postProcess(rdf, "creator");
 			createJoinedFunding(rdf);
+			postProcessSubjectName(rdf);
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
+	}
+
+	private void postProcessSubjectName(Map<String, Object> rdf) {
+		List<Map<String, Object>> newSubjects = new ArrayList<>();
+		List<String> subjects = (List<String>) rdf.get("subjectName");
+		if (subjects == null || subjects.isEmpty()) {
+			return;
+		}
+		subjects.forEach((subject) -> {
+			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
+					+ helper.MyURLEncoding.encode(subject);
+			Map<String, Object> subjectMap = new HashMap<>();
+			subjectMap.put("prefLabel", subject);
+			subjectMap.put("@id", id);
+			newSubjects.add(subjectMap);
+		});
+		rdf.remove("subjectName");
+		List<Map<String, Object>> oldSubjects =
+				(List<Map<String, Object>>) rdf.get("subject");
+		if (oldSubjects == null) {
+			oldSubjects = new ArrayList<>();
+		}
+		oldSubjects.addAll(newSubjects);
+		rdf.put("subject", oldSubjects);
 	}
 
 	private static void createJoinedFunding(Map<String, Object> rdf) {
