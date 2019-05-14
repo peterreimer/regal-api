@@ -258,6 +258,9 @@ public class Helper {
 			source = "nwbib " + getNwbibId(uri);
 		} else if (uri.startsWith(Globals.protocol + Globals.server + "/adhoc")) {
 			source = "lokal";
+		} else if (uri.startsWith("http://aims.fao.org/aos/agrovoc")
+				|| uri.startsWith("https://aims.fao.org/aos/agrovoc")) {
+			source = "agrovoc";
 		}
 		return source;
 	}
