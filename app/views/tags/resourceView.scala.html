@@ -533,9 +533,15 @@
 	                       }
 	                       @label <span style="font-size:smaller;">(@roleName)</span>
 	                       </a> <span class="separator">|</span>
+	                       @if(id.startsWith("https://orcid.org")){
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
+	                               <img class="orcid-pic" src="https://orcid.org/sites/default/files/images/orcid_16x16(1).gif"/>
+	                       </a>
+	                       }else{
 	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
+	                       }
 	                       <br/>	</td> 
 	   </tr>	
 }
