@@ -440,8 +440,9 @@
 				case nullCase if nullCase == null =>{}
 				case a:List[Map[String,String]] =>{
 					<tr class="@key">
+				
 						<td style="display:none;">@getWeight(key)</td>
-						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-label @key">@getLabel(key) </td>
 						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
 									<ul class=@key+"List">
 									@for(map<-a){
@@ -621,7 +622,7 @@
 			}
 			case _ => {		
 				<table class="table table-striped table-condensed">
-				@htmlRow(map,"")
+				@htmlRow(map,key+"-child")
 				
 				</table>
 			}
