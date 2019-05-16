@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -368,6 +369,7 @@ public class JsonMapper {
 				rdf.put(rdftype, t);
 
 			sortCreatorAndContributors(rdf);
+			postProcessSubjectName(rdf);
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
@@ -404,6 +406,30 @@ public class JsonMapper {
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
+	}
+
+	private static void postProcessSubjectName(Map<String, Object> rdf) {
+		List<Map<String, Object>> newSubjects = new ArrayList<>();
+		Set<String> subjects = (Set<String>) rdf.get("subjectName");
+		if (subjects == null || subjects.isEmpty()) {
+			return;
+		}
+		subjects.forEach((subject) -> {
+			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
+					+ helper.MyURLEncoding.encode(subject);
+			Map<String, Object> subjectMap = new HashMap<>();
+			subjectMap.put("prefLabel", subject);
+			subjectMap.put("@id", id);
+			newSubjects.add(subjectMap);
+		});
+		rdf.remove("subjectName");
+		List<Map<String, Object>> oldSubjects =
+				(List<Map<String, Object>>) rdf.get("subject");
+		if (oldSubjects == null) {
+			oldSubjects = new ArrayList<>();
+		}
+		oldSubjects.addAll(newSubjects);
+		rdf.put("subject", oldSubjects);
 	}
 
 	private static void createJoinedFunding(Map<String, Object> rdf) {
