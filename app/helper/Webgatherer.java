@@ -84,6 +84,10 @@ public class Webgatherer implements Runnable {
 				conf = null;
 				WebgatherLogger.info("Precount: " + precount);
 				WebgatherLogger.info("PID: " + n.getPid());
+				if (n.getState().equals("D")) {
+					WebgatherLogger.info("Objekt " + n.getPid() + " wurde gelöscht.");
+					continue;
+				}
 				if (n.getConf() == null) {
 					WebgatherLogger.info("Webpage " + n.getPid()
 							+ " hat noch keine Crawler-Konfigration.");
