@@ -423,4 +423,9 @@ For development uncomment, but do not show to enduser yet
 	display:none;
 }
 
-
+.joinedFunding-child .field-label{
+	width:80px;
+}
+.joinedFunding-child.field-label{
+	display:none;
+}
