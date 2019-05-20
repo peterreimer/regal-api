@@ -1,5 +1,6 @@
 package actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -16,11 +17,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
@@ -181,10 +186,19 @@ public class Enrich {
 
 	private static List<String> findAllUris(String metadata) {
 		HashMap<String, String> result = new HashMap<>();
-		Matcher m = Pattern.compile("(https?://[^>]*)> \\.").matcher(metadata);
-		while (m.find()) {
-			String id = m.group(1);
-			result.put(id, id);
+		try (
+				RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
+						new ByteArrayInputStream(metadata.getBytes()), RDFFormat.NTRIPLES);
+				RepositoryResult<Statement> statements =
+						con.getStatements(null, null, null);) {
+			while (statements.hasNext()) {
+				Statement st = statements.next();
+				Value o = st.getObject();
+				if (o instanceof IRI) {
+					String objectUri = o.stringValue();
+					result.put(objectUri, objectUri);
+				}
+			}
 		}
 		return new Vector<>(result.keySet());
 	}
