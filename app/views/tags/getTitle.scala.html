@@ -7,7 +7,7 @@
 						@if(id != null && !id.toString().isEmpty()){
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id.toString())@models.Globals.rechercheUrlSuffix">
 	                       @label
-	                       @if(id.toString().startsWith("https://orcid.org")){
+	                       @if(id.toString().startsWith("https://orcid.org")||id.toString().startsWith("http://orcid.org")){
 	                       <a href=@Helper.getLinkAdressOrNull(id.toString())  target="_blank">
 	                               <img class="orcid-pic" src="https://orcid.org/sites/default/files/images/orcid_16x16(1).gif"/>
 	                       </a>
@@ -26,7 +26,7 @@
 						@if(id != null && !id.isEmpty()){
 			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
 	                       @label
-	                       @if(id.startsWith("https://orcid.org")){
+	                       @if(id.startsWith("https://orcid.org")||id.toString().startsWith("http://orcid.org")){
 	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <img class="orcid-pic" src="https://orcid.org/sites/default/files/images/orcid_16x16(1).gif"/>
 	                       </a>
