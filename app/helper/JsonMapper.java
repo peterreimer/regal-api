@@ -401,11 +401,23 @@ public class JsonMapper {
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
 			postProcess(rdf, "creator");
+			postProcessLinkFields("additionalMaterial", rdf);
+			postProcessLinkFields("publisherVersion", rdf);
+			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
+	}
+
+	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
+		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
+		if (all == null)
+			return;
+		for (Map<String, String> m : all) {
+			m.put(PREF_LABEL, m.get(ID2));
+		}
+
 	}
 
 	private static void postProcessSubjectName(Map<String, Object> rdf) {
@@ -418,8 +430,8 @@ public class JsonMapper {
 			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
 					+ helper.MyURLEncoding.encode(subject);
 			Map<String, Object> subjectMap = new HashMap<>();
-			subjectMap.put("prefLabel", subject);
-			subjectMap.put("@id", id);
+			subjectMap.put(PREF_LABEL, subject);
+			subjectMap.put(ID2, id);
 			newSubjects.add(subjectMap);
 		});
 		rdf.remove("subjectName");
@@ -443,9 +455,9 @@ public class JsonMapper {
 		if (fundings != null) {
 			for (String funding : fundings) {
 				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-				fundingJoinedMap.put("@id", Globals.protocol + Globals.server
+				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
 						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-				fundingJoinedMap.put("prefLabel", funding);
+				fundingJoinedMap.put(PREF_LABEL, funding);
 				fundingId.add(fundingJoinedMap);
 			}
 			rdf.remove("funding");
@@ -460,8 +472,8 @@ public class JsonMapper {
 			// play.Logger.info(fundingId.get(i));
 			Map<String, Object> f = new LinkedHashMap<>();
 			Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-			fundingJoinedMap.put("@id", fundingId.get(i).get("@id"));
-			fundingJoinedMap.put("prefLabel", fundingId.get(i).get("prefLabel"));
+			fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
+			fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
 			f.put("fundingJoined", fundingJoinedMap);
 			f.put("fundingProgramJoined", fundingProgram.get(i));
 			f.put("projectIdJoined", projectId.get(i));
@@ -478,7 +490,7 @@ public class JsonMapper {
 		List<Map<String, Object>> children = new ArrayList();
 		if (parts != null) {
 			for (Map<String, Object> part : parts) {
-				String id = (String) part.get("@id");
+				String id = (String) part.get(ID2);
 				Node cn = read.internalReadNode(id);
 				if (!"D".equals(cn.getState())) {
 					children.add(new JsonMapper(cn).getLd2WithoutContext());
@@ -505,8 +517,8 @@ public class JsonMapper {
 					String prefLabel = findLabel(agent);
 					agent.put(PREF_LABEL, prefLabel);
 					String id = null;
-					if (agent.containsKey("@id")) {
-						id = agent.get("@id").toString();
+					if (agent.containsKey(ID2)) {
+						id = agent.get(ID2).toString();
 					}
 					if (id == null) {
 						id = Globals.protocol + Globals.server + "/adhoc/author/"
@@ -514,7 +526,7 @@ public class JsonMapper {
 					}
 					Map<String, Object> cmap = new HashMap<>();
 					cmap.put(PREF_LABEL, prefLabel);
-					cmap.put("@id", id);
+					cmap.put(ID2, id);
 					creator.add(cmap);
 				}
 			}
@@ -917,7 +929,7 @@ public class JsonMapper {
 		}
 		JsonNode types = rdf.at("/rdftype");
 		types.forEach(t -> {
-			String typeId = t.at("/@id").asText();
+			String typeId = t.at("/" + ID2).asText();
 			if (!"http://purl.org/dc/terms/BibliographicResource".equals(typeId)) {
 				Map<String, Object> tmap = new HashMap<>();
 				tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
@@ -932,7 +944,7 @@ public class JsonMapper {
 		boolean result = false;
 		JsonNode mediumArray = rdf.at("/medium");
 		for (JsonNode item : mediumArray) {
-			if (key.equals(item.at("/@id").asText("no Value found")))
+			if (key.equals(item.at("/" + ID2).asText("no Value found")))
 				result = true;
 		}
 		return result;
