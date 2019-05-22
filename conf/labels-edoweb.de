@@ -6342,6 +6342,28 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://hbz-nrw.de/regal#fundingId",
+  "comment" : "",
+  "label" : "Förderer",
+  "icon" : "",
+  "name" : "fundingId",
+  "referenceType" : "@id",
+  "container" : "@list",
+  "weight" : "175",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#fundingJoined",
+  "comment" : "",
+  "label" : "Förderer",
+  "icon" : "",
+  "name" : "fundingJoined",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "176",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://hbz-nrw.de/regal#fundingProgram",
   "comment" : "",
   "label" : "Förderprogramm",
@@ -6349,6 +6371,17 @@
   "name" : "fundingProgram",
   "referenceType" : "String",
   "container" : "@list",
+  "weight" : "176",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#fundingProgramJoined",
+  "comment" : "",
+  "label" : "Förderprogramm",
+  "icon" : "",
+  "name" : "fundingProgramJoined",
+  "referenceType" : "String",
+  "container" : "",
   "weight" : "176",
   "type" : "CONTEXT",
   "multilangLabel" : { }
@@ -6564,6 +6597,28 @@
   "referenceType" : "String",
   "container" : "@list",
   "weight" : "175",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#projectIdJoin",
+  "comment" : "",
+  "label" : "Fördernummer",
+  "icon" : "",
+  "name" : "projectIdJoin",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "178",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#projectIdJoined",
+  "comment" : "",
+  "label" : "Fördernummer",
+  "icon" : "",
+  "name" : "projectIdJoined",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "179",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7902,6 +7957,17 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://id.loc.gov/vocabulary/relators/oth",
+  "comment" : "",
+  "label" : "Sonstige",
+  "icon" : "",
+  "name" : "other",
+  "referenceType" : "@id",
+  "container" : "",
+  "weight" : "248",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://id.loc.gov/vocabulary/relators/pht",
   "label" : "Fotografie",
   "type" : "STORE",
@@ -8547,7 +8613,7 @@
   "name" : "issued",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "61",
+  "weight" : "51",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19803,6 +19869,17 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "http://purl.org/ontology/bibo/Chapter",
+  "comment" : "",
+  "label" : "Kapitel",
+  "icon" : "",
+  "name" : "Chapter",
+  "referenceType" : "@id",
+  "container" : "",
+  "weight" : "238",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "http://purl.org/ontology/bibo/Collection",
   "label" : "Sammlung",
   "icon" : "glyphicon glyphicon-th-large",
@@ -19814,10 +19891,11 @@
   "comment" : "",
   "label" : "Unterordnung",
   "icon" : "fa fa-folder-o",
-  "name" : "documentPart",
+  "name" : "DocumentPart",
+  "referenceType" : "@id",
   "container" : "",
   "weight" : "",
-  "type" : "STORE",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/Image",
@@ -19845,18 +19923,25 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/Manuscript",
+  "comment" : "",
   "label" : "Manuskript",
-  "type" : "STORE",
+  "icon" : "",
+  "name" : "Manuscript",
+  "referenceType" : "@id",
+  "container" : "",
+  "weight" : "",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/Map",
   "comment" : "",
   "label" : "Karte",
   "icon" : "",
-  "name" : "map",
+  "name" : "Map",
+  "referenceType" : "@id",
   "container" : "",
   "weight" : "",
-  "type" : "STORE",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://purl.org/ontology/bibo/MultiVolumeBook",
@@ -20315,6 +20400,17 @@
   "referenceType" : "String",
   "container" : "@set",
   "weight" : "155",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://rdvocab.info/Elements/otherTitleInformation",
+  "comment" : "",
+  "label" : "Titelzusatz weitere",
+  "icon" : "",
+  "name" : "otherTitleInformation",
+  "referenceType" : "String",
+  "container" : "@set",
+  "weight" : "",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20829,6 +20925,16 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "https://creativecommons.org/publicdomain/zero/1.0/",
+  "comment" : "",
+  "label" : "CC0 1.0",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
   "uri" : "https://w3id.org/lobid/rpb",
   "label" : "Systematik der Rheinland-Pfälzischen Bibliographie",
   "referenceType" : "http://www.w3.org/2004/02/skos/core#ConceptScheme",
@@ -21201,6 +21307,17 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
+  "uri" : "info:regal/regal/joinedFunding",
+  "comment" : "",
+  "label" : "Förderung",
+  "icon" : "",
+  "name" : "joinedFunding",
+  "referenceType" : "@id",
+  "container" : "@list",
+  "weight" : "183",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
   "uri" : "info:regal/regal/publishLocation",
   "comment" : "",
   "label" : "Erscheinungsort",
@@ -21255,6 +21372,27 @@
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
+  "uri" : "info:regal/zettel/additionalNotes",
+  "comment" : "",
+  "label" : "Hinweis",
+  "icon" : "",
+  "name" : "additionalNotes",
+  "referenceType" : "String",
+  "container" : "",
+  "weight" : "170",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/zettel/additionalNotesHeader",
+  "comment" : "",
+  "label" : "Erweiterte Angaben",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
+  "type" : "STORE",
+  "multilangLabel" : { }
+}, {
   "uri" : "info:regal/zettel/catalogingHeader",
   "comment" : "",
   "label" : "Inhaltliche Angaben",
@@ -21279,6 +21417,17 @@
   "referenceType" : "@id",
   "container" : "",
   "weight" : "59",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/zettel/collectionTwo",
+  "comment" : "",
+  "label" : "Übergeordneter Kongress",
+  "icon" : "",
+  "name" : "collectionTwo",
+  "referenceType" : "@id",
+  "container" : "",
+  "weight" : "64",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21327,6 +21476,17 @@
   "container" : "",
   "weight" : "",
   "type" : "STORE",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/zettel/internalReference",
+  "comment" : "",
+  "label" : "Interne Referenz",
+  "icon" : "",
+  "name" : "internalReference",
+  "referenceType" : "@id",
+  "container" : "",
+  "weight" : "70",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "info:regal/zettel/leibniz/org/BIPS",
@@ -21679,9 +21839,24 @@
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
-  "uri" : "info:regal/zettel/uploadHeader",
-  "label" : "Dateiupload",
+  "uri" : "info:regal/zettel/typeHeader",
+  "comment" : "",
+  "label" : "Publikationstyp",
+  "icon" : "",
+  "name" : "",
   "referenceType" : "String",
+  "container" : "",
+  "weight" : "",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "info:regal/zettel/uploadHeader",
+  "comment" : "",
+  "label" : "Dateiupload",
+  "icon" : "",
+  "name" : "",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
