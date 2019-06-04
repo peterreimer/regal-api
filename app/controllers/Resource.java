@@ -788,7 +788,7 @@ public class Resource extends MyController {
 			@QueryParam("validate") boolean validate) {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setContentType("application/xml");
-			Html result = oaidc.render(transform.oaidc(pid));
+			Html result = oaidc.render(transform.wgl(pid), node.getLd2());
 			String xml = result.toString();
 			if (validate) {
 				validate(xml, "public/schemas/oai_dc.xsd", null, "public/schemas");
@@ -855,7 +855,7 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setContentType("application/xml");
 			Html result =
-					mets.render(read.getPartsAsTree(node, "long"), transform.oaidc(pid));
+					mets.render(read.getPartsAsTree(node, "long"), transform.wgl(pid));
 			String xml = result.toString();
 			if (validate) {
 				validate(xml, "public/schemas/mets.xsd", null, "public/schemas/");
