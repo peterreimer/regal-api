@@ -10,12 +10,12 @@
 }
 @createViewerLinks(viewerInfo:ViewerInfo)={
 	@if(viewerInfo!=null){
-			@if(!viewerInfo.contentType.equals("version")) {
-				@if(viewerInfo.style.equals(ViewerInfo.Style.EMBEDDED)){
+			@if(!"version".equals(viewerInfo.contentType)) {
+				@if(ViewerInfo.Style.EMBEDDED.equals(viewerInfo.style)){
 				   @mediaViewers.standardViewer(viewerInfo)
 				} else{
-					@if(viewerInfo.accessScheme.equals("public")){
-						@if(viewerInfo.viewertype.equals(ViewerInfo.ViewerType.DEEPZOOM)){
+					@if("public".equals(viewerInfo.accessScheme)){
+						@if(ViewerInfo.ViewerType.DEEPZOOM.equals(viewerInfo.viewertype)){
 				   			<div id="thumbnail" class="thumb">
 							<a href=@viewerInfo.getViewerLink()  target="_blank">
 								<img src=@viewerInfo.thumbnail width="150"/>
@@ -55,7 +55,6 @@
 
 
 @htmlRow(values: Any,key: String)={
-
 	@key match {
 		case "hasPart"=>{
 			@values match {
@@ -96,6 +95,25 @@
 		}
 		case "inCollection"=>{
 			
+		}case "fundingJoined"=>{
+			@values match {
+				case map:Map[String,String]=>{
+						<tr class="">
+							<td style="display:none;">@getWeight(key)</td>
+							<td class="field-label @key">@getLabel(key)</td>
+							<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+										    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@map.get("prefLabel")@models.Globals.rechercheUrlSuffix">
+						                        @map.get("prefLabel")
+						                    </a>
+						              		<span class="separator">|</span>
+						                    <a href=@map.get("@id")  target="_blank">
+						                               <span class="octicon-link-external"></span>
+						                    </a>
+										</ul>
+												
+						</tr>
+					} case _ =>{} 
+				}
 		}
 		case "hasData"=>{
 			@values match {
@@ -422,8 +440,9 @@
 				case nullCase if nullCase == null =>{}
 				case a:List[Map[String,String]] =>{
 					<tr class="@key">
+				
 						<td style="display:none;">@getWeight(key)</td>
-						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-label @key">@getLabel(key) </td>
 						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
 									<ul class=@key+"List">
 									@for(map<-a){
@@ -457,8 +476,7 @@
 					                    </a>
 					                 </li>
 									}
-									</ul>
-											
+									</ul>		
 					</tr>
 				}
 				case map:Map[String,String]=>{
@@ -516,9 +534,15 @@
 	                       }
 	                       @label <span style="font-size:smaller;">(@roleName)</span>
 	                       </a> <span class="separator">|</span>
+	                       @if(id.startsWith("https://orcid.org")||id.toString().startsWith("http://orcid.org")){
+	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
+	                               <img class="orcid-pic" src="https://orcid.org/sites/default/files/images/orcid_16x16(1).gif"/>
+	                       </a>
+	                       }else{
 	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
 	                               <span class="octicon-link-external"></span>
 	                       </a>
+	                       }
 	                       <br/>	</td> 
 	   </tr>	
 }
@@ -531,7 +555,7 @@
 		}
 		case list: List[Map[String,Object]] =>{
 			<tr class="egal">
-			    <td>
+			    <td class="subjectSource">
 	           	   Schlagwortfolge
 	           </td>
 			 	<td class="subject" style="text-align:left;">
@@ -549,7 +573,7 @@
 @displaySubject(id:String,label:String,roleId:String,roleName:String)={
 		
 			<tr class=@roleId>
-			    <td>
+			    <td  class="subjectSource">
 	           		@roleName
 	           </td>
 			 	<td class="subject" style="text-align:left;">
@@ -604,7 +628,8 @@
 			}
 			case _ => {		
 				<table class="table table-striped table-condensed">
-				@htmlRow(map,"")
+				@htmlRow(map,key+"-child")
+				
 				</table>
 			}
 		}

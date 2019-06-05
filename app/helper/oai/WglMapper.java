@@ -23,6 +23,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.hbz.lobid.helper.LobidTypes;
 import models.DublinCoreData;
 import models.Globals;
 import models.Node;
@@ -49,6 +50,7 @@ public class WglMapper {
 		JsonNode n = new ObjectMapper().valueToTree(node.getLd2());
 		data.setWglContributor(getWglContributor(n));
 		data.setWglSubject(getWglSubject(n));
+		data.setWglType(getWglType(n));
 		data.setCreator(getCreator(n));
 		data.setDescription(getList(n, "/abstractText"));
 		data.setTitle(getList(n, "/title"));
@@ -142,6 +144,38 @@ public class WglMapper {
 			result.addAll(getList(n, "/contributorName"));
 		}
 		return result;
+	}
+
+	private List<String> getWglType(JsonNode n) {
+		List<String> result = new ArrayList<>();
+		JsonNode a = n.at("/rdftype");
+		a.forEach(type -> {
+			String lobidType = type.at("/@id").textValue();
+			String wglType = mapLobidType(lobidType);
+			if (wglType != null) {
+				result.add(wglType);
+			}
+		});
+		return result;
+	}
+
+	private String mapLobidType(String lobidType) {
+		if (LobidTypes.Book.equals(lobidType)) {
+			return "Buch / Sammelwerk";
+		} else if (LobidTypes.Chapter.equals(lobidType)) {
+			return "Buchkapitel / Sammelwerksbeitrag";
+		} else if (LobidTypes.Thesis.equals(lobidType)) {
+			return "Hochschulschrift";
+		} else if (LobidTypes.Proceedings.equals(lobidType)) {
+			return "Konferenzbeitrag";
+		} else if (LobidTypes.Report.equals(lobidType)) {
+			return "Report / Forschungsbericht / Arbeitspapier";
+		} else if (LobidTypes.Miscellaneous.equals(lobidType)) {
+			return "Sonstige";
+		} else if (LobidTypes.Article.equals(lobidType)) {
+			return "Zeitschriftenartikel";
+		}
+		return null;
 	}
 
 	private List<String> getWglSubject(JsonNode n) {

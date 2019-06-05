@@ -16,10 +16,13 @@
  */
 package authenticate;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
+
+import com.avaje.ebean.Ebean;
 
 import play.Play;
 import play.mvc.Http.Context;
@@ -34,7 +37,7 @@ public class UserDB {
 	private static UserDB db = null;
 
 	private String salt;
-	Map<String, User> users;
+	Map<String, User> administrativUsers;
 
 	public static UserDB getInstance() {
 		if (UserDB.db == null) {
@@ -45,20 +48,24 @@ public class UserDB {
 
 	private UserDB() {
 		salt = Play.application().configuration().getString("regal-api.admin-salt");
+		createAdministrativUsers();
+	}
+
+	private void createAdministrativUsers() {
 		String pwd =
 				Play.application().configuration().getString("regal-api.admin-hash");
-		users = new HashMap<>();
+		administrativUsers = new HashMap<>();
 		User admin = createAdministrativUser("edoweb-admin", pwd, Role.ADMIN);
-		users.put(admin.getUsername(), admin);
+		administrativUsers.put(admin.getUsername(), admin);
 		User editor = createAdministrativUser("edoweb-editor", pwd, Role.EDITOR);
-		users.put(editor.getUsername(), editor);
+		administrativUsers.put(editor.getUsername(), editor);
 		User reader = createAdministrativUser("edoweb-reader", pwd, Role.READER);
-		users.put(reader.getUsername(), reader);
+		administrativUsers.put(reader.getUsername(), reader);
 		User subscriber =
 				createAdministrativUser("edoweb-subscriber", pwd, Role.SUBSCRIBER);
-		users.put(subscriber.getUsername(), subscriber);
+		administrativUsers.put(subscriber.getUsername(), subscriber);
 		User remote = createAdministrativUser("edoweb-remote", pwd, Role.REMOTE);
-		users.put(remote.getUsername(), remote);
+		administrativUsers.put(remote.getUsername(), remote);
 	}
 
 	private static User createAdministrativUser(String name, String pwd,
@@ -75,7 +82,12 @@ public class UserDB {
 	}
 
 	public User getUser(String username) {
-		return users.get(username);
+		if (administrativUsers.containsKey(username)) {
+			return administrativUsers.get(username);
+		} else {
+			return Ebean.find(User.class).where().eq("username", username)
+					.findUnique();
+		}
 	}
 
 	public boolean isLoggedIn(Context ctx) {
@@ -87,11 +99,23 @@ public class UserDB {
 	}
 
 	public boolean isUser(String username) {
-		return users.containsKey(username);
+		return administrativUsers.containsKey(username) || Ebean.find(User.class)
+				.where().eq("username", username).findUnique() != null;
 	}
 
-	public boolean isValid(String usernane, String password) {
-		return ((usernane != null) && (password != null) && isUser(usernane)
-				&& getUser(usernane).getPassword().equals(getSaltedPassword(password)));
+	public boolean isValid(String username, String password) {
+		return ((username != null) && (password != null) && isUser(username)
+				&& getUser(username).getPassword().equals(getSaltedPassword(password)));
+	}
+
+	public void addUser(User user, String password) {
+		user.setPassword(getSaltedPassword(password));
+		User oldUser = getUser(user.getUsername());
+		if (oldUser != null) {
+			Ebean.update(user);
+		} else {
+			user.setCreated("" + new Date().getTime());
+			Ebean.save(user);
+		}
 	}
 }

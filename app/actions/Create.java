@@ -331,7 +331,9 @@ public class Create extends RegalAction {
 					Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
-			WebgatherLogger.info(msg);
+			WebgatherLogger.debug(msg);
+			WebgatherLogger.info("Version " + webpageVersion.getPid()
+					+ " zur Website " + n.getPid() + " erfolgreich angelegt!");
 
 			return webpageVersion;
 		} catch (Exception e) {

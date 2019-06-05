@@ -84,6 +84,10 @@ public class Webgatherer implements Runnable {
 				conf = null;
 				WebgatherLogger.info("Precount: " + precount);
 				WebgatherLogger.info("PID: " + n.getPid());
+				if (n.getState().equals("D")) {
+					WebgatherLogger.info("Objekt " + n.getPid() + " wurde gelöscht.");
+					continue;
+				}
 				if (n.getConf() == null) {
 					WebgatherLogger.info("Webpage " + n.getPid()
 							+ " hat noch keine Crawler-Konfigration.");
@@ -99,13 +103,15 @@ public class Webgatherer implements Runnable {
 				WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
 				// find open jobs
 				if (isOutstanding(n, conf)) {
-					WebgatherLogger.info("Die Website soll jetzt eingesammelt werden.");
+					WebgatherLogger.info(
+							"Die Website " + n.getPid() + " soll jetzt eingesammelt werden.");
 					if (conf.hasUrlMoved(n)) {
 						if (conf.getUrlNew() == null) {
-							WebgatherLogger.info("De Sick is unbekannt vertrocke !");
-						} else {
 							WebgatherLogger
-									.info("De Sick is umjetrocke noh " + conf.getUrlNew() + " .");
+									.info("De Sick " + n.getPid() + " is unbekannt vertrocke !");
+						} else {
+							WebgatherLogger.info("De Sick " + n.getPid()
+									+ " is umjetrocke noh " + conf.getUrlNew() + " .");
 						}
 						WebgatherUtils.sendInvalidUrlEmail(n, conf);
 					} else {
@@ -119,16 +125,18 @@ public class Webgatherer implements Runnable {
 				}
 
 			} catch (WebgathererTooBusyException e) {
-				WebgatherLogger.error("Webgatherer stopped! Heritrix is too busy.");
+				WebgatherLogger.error("Webgathering for " + n.getPid()
+						+ " stopped! Heritrix is too busy.");
 			} catch (MalformedURLException | URISyntaxException e) {
 				setUnknownHost(node, conf);
-				WebgatherLogger.error("Fehlgeformte URL !");
+				WebgatherLogger.error("Fehlgeformte URL bei " + n.getPid() + " !");
 			} catch (UnknownHostException e) {
 				setUnknownHost(node, conf);
-				WebgatherLogger.error("Kein Host zur URL !");
+				WebgatherLogger.error(
+						"Ungültige URL. Neue URL unbekannt für " + n.getPid() + " !");
 			} catch (Exception e) {
-				WebgatherLogger
-						.error("Couldn't create webpage version for " + n.getPid(), e);
+				WebgatherLogger.error("Couldn't create webpage version for "
+						+ n.getPid() + ". Cause: " + e.getLocalizedMessage(), e);
 			}
 			if (count >= limit)
 				break;

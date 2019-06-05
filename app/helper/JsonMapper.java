@@ -28,8 +28,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -84,7 +86,7 @@ public class JsonMapper {
 	final static String size = "size";
 	final static String checksumValue = "checksumValue";
 	final static String generator = "generator";
-	final static String type = "rdftype";
+	final static String rdftype = "rdftype";
 	final static String checksum = "checksum";
 	final static String hasData = "hasData";
 	final static String fulltext_ocr = "fulltext-ocr";
@@ -144,9 +146,9 @@ public class JsonMapper {
 			if (node == null)
 				throw new NullPointerException(
 						"JsonMapper can not work on node with value NULL!");
-			if (node.getMetadata1() == null)
-				throw new NullPointerException(
-						node.getPid() + " metadata stream is NULL!");
+			// if (node.getMetadata1() == null)
+			// throw new NullPointerException(
+			// node.getPid() + " metadata stream is NULL!");
 			if (node.getMetadata2() == null)
 				throw new NullPointerException(
 						node.getPid() + " metadata2 stream is NULL!");
@@ -265,7 +267,7 @@ public class JsonMapper {
 				Map<String, Object> checksumMap = new TreeMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-				checksumMap.put(type,
+				checksumMap.put(rdftype,
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
@@ -293,9 +295,8 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger
-					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
-			// play.Logger.debug("", e);
+			play.Logger.warn(node.getPid() + " can not create JSON! " + e.getMessage());
+			play.Logger.trace("", e);
 		}
 		return null;
 	}
@@ -344,7 +345,7 @@ public class JsonMapper {
 				Map<String, Object> checksumMap = new HashMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-				checksumMap.put(type,
+				checksumMap.put(rdftype,
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
@@ -358,14 +359,16 @@ public class JsonMapper {
 		try {
 			addCatalogLink(rdf);
 			if ("file".equals(rdf.get("contentType"))) {
-				rdf.put(type, Arrays.asList(new String[] { "File" }));
+				rdf.put(rdftype, Arrays.asList(new String[] { "File" }));
 			}
 
-			Collection<Map<String, Object>> t = getType(rdf);
+			Collection<Map<String, Object>> t =
+					getType(new ObjectMapper().valueToTree(rdf));
 			if (t != null && t.size() != 0)
-				rdf.put(type, t);
+				rdf.put(rdftype, t);
 
 			sortCreatorAndContributors(rdf);
+			postProcessSubjectName(rdf);
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
@@ -397,10 +400,86 @@ public class JsonMapper {
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
 			postProcess(rdf, "creator");
-
+			postProcessLinkFields("additionalMaterial", rdf);
+			postProcessLinkFields("publisherVersion", rdf);
+			postProcessLinkFields("fulltextVersion", rdf);
+			createJoinedFunding(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
+	}
+
+	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
+		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
+		if (all == null)
+			return;
+		for (Map<String, String> m : all) {
+			m.put(PREF_LABEL, m.get(ID2));
+		}
+
+	}
+
+	private static void postProcessSubjectName(Map<String, Object> rdf) {
+		List<Map<String, Object>> newSubjects = new ArrayList<>();
+		Set<String> subjects = (Set<String>) rdf.get("subjectName");
+		if (subjects == null || subjects.isEmpty()) {
+			return;
+		}
+		subjects.forEach((subject) -> {
+			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
+					+ helper.MyURLEncoding.encode(subject);
+			Map<String, Object> subjectMap = new HashMap<>();
+			subjectMap.put(PREF_LABEL, subject);
+			subjectMap.put(ID2, id);
+			newSubjects.add(subjectMap);
+		});
+		rdf.remove("subjectName");
+		List<Map<String, Object>> oldSubjects =
+				(List<Map<String, Object>>) rdf.get("subject");
+		if (oldSubjects == null) {
+			oldSubjects = new ArrayList<>();
+		}
+		oldSubjects.addAll(newSubjects);
+		rdf.put("subject", oldSubjects);
+	}
+
+	private static void createJoinedFunding(Map<String, Object> rdf) {
+
+		List<Map<String, Object>> fundingId =
+				(List<Map<String, Object>>) rdf.get("fundingId");
+		if (fundingId == null) {
+			fundingId = new ArrayList<>();
+		}
+		List<String> fundings = (List<String>) rdf.get("funding");
+		if (fundings != null) {
+			for (String funding : fundings) {
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+				fundingJoinedMap.put(PREF_LABEL, funding);
+				fundingId.add(fundingJoinedMap);
+			}
+			rdf.remove("funding");
+		}
+		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+		List<String> projectId = (List<String>) rdf.get("projectId");
+
+		List<Map<String, Object>> joinedFundings = new ArrayList<>();
+		if (fundingId.isEmpty())
+			return;
+		for (int i = 0; i < fundingId.size(); i++) {
+			// play.Logger.info(fundingId.get(i));
+			Map<String, Object> f = new LinkedHashMap<>();
+			Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+			fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
+			fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
+			f.put("fundingJoined", fundingJoinedMap);
+			f.put("fundingProgramJoined", fundingProgram.get(i));
+			f.put("projectIdJoined", projectId.get(i));
+			joinedFundings.add(f);
+		}
+		rdf.put("joinedFunding", joinedFundings);
+		rdf.put("fundingId", fundingId);
 	}
 
 	private void addParts(Map<String, Object> rdf) {
@@ -410,7 +489,7 @@ public class JsonMapper {
 		List<Map<String, Object>> children = new ArrayList();
 		if (parts != null) {
 			for (Map<String, Object> part : parts) {
-				String id = (String) part.get("@id");
+				String id = (String) part.get(ID2);
 				Node cn = read.internalReadNode(id);
 				if (!"D".equals(cn.getState())) {
 					children.add(new JsonMapper(cn).getLd2WithoutContext());
@@ -427,6 +506,8 @@ public class JsonMapper {
 			List<Map<String, Object>> creator = new ArrayList<>();
 			Collection<Map<String, Object>> contributions =
 					(Collection<Map<String, Object>>) rdf.get("contribution");
+			if (contributions == null)
+				return;
 			for (Map<String, Object> contribution : contributions) {
 				Map<String, Object> agent =
 						((Collection<Map<String, Object>>) contribution.get("agent"))
@@ -435,8 +516,8 @@ public class JsonMapper {
 					String prefLabel = findLabel(agent);
 					agent.put(PREF_LABEL, prefLabel);
 					String id = null;
-					if (agent.containsKey("@id")) {
-						id = agent.get("@id").toString();
+					if (agent.containsKey(ID2)) {
+						id = agent.get(ID2).toString();
 					}
 					if (id == null) {
 						id = Globals.protocol + Globals.server + "/adhoc/author/"
@@ -444,7 +525,7 @@ public class JsonMapper {
 					}
 					Map<String, Object> cmap = new HashMap<>();
 					cmap.put(PREF_LABEL, prefLabel);
-					cmap.put("@id", id);
+					cmap.put(ID2, id);
 					creator.add(cmap);
 				}
 			}
@@ -454,18 +535,6 @@ public class JsonMapper {
 					e.getMessage());
 			// play.Logger.debug("", e);
 		}
-	}
-
-	private static boolean mediumArrayContains(Map<String, Object> rdf,
-			String key) {
-		boolean result = false;
-		JsonNode n = new ObjectMapper().valueToTree(rdf);
-		JsonNode mediumArray = n.at("/medium");
-		for (JsonNode item : mediumArray) {
-			if (key.equals(item.at("/@id").asText("no Value found")))
-				result = true;
-		}
-		return result;
 	}
 
 	private static void postProcess(Map<String, Object> m, String field) {
@@ -559,42 +628,6 @@ public class JsonMapper {
 		}
 	}
 
-	private static Collection<Map<String, Object>> getType(
-			Map<String, Object> rdf) {
-		Collection<Map<String, Object>> result = new ArrayList<>();
-
-		// Special case medium is video - override type
-		if (mediumArrayContains(rdf,
-				"http://rdaregistry.info/termList/RDAMediaType/1008")
-				|| mediumArrayContains(rdf,
-						"http://rdvocab.info/termList/RDACarrierType/1050")) {
-			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
-			Map<String, Object> tmap = new HashMap<>();
-			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
-			tmap.put(ID2, s);
-			result.add(tmap);
-			rdf.put(type, result);
-			return result;
-		}
-		Collection<String> types = (Collection<String>) rdf.get(type);
-		play.Logger.trace("Found types: " + types);
-		if (types != null) {
-			for (String s : typePrios) {
-				if (s == null)
-					continue;
-				play.Logger.trace("Search for type: " + s);
-				if (types.contains(Globals.profile.getEtikett(s).name)) {
-					Map<String, Object> tmap = new HashMap<>();
-					tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
-					tmap.put(ID2, s);
-					result.add(tmap);
-					return result;
-				}
-			}
-		}
-		return result;
-	}
-
 	private void addPartsToJsonMap(Map<String, Object> rdf) {
 		for (Link l : node.getPartsSorted()) {
 			if (l.getObjectLabel() == null || l.getObjectLabel().isEmpty())
@@ -650,9 +683,10 @@ public class JsonMapper {
 					+ RdfUtils.urlEncode(authorsId).replace("+", "%20"));
 			return creatorWithoutId;
 		}
-		if (m.get("creator") instanceof List) {
+
+		if (m.get("creator") instanceof List
+				&& ((List) m.get("creator")).get(0) instanceof String) {
 			Collection<String> creators = (Collection<String>) m.get("creator");
-			play.Logger.trace("" + creators.getClass());
 			for (String creator : creators) {
 				String currentId = creator;
 				play.Logger.trace(creator + " - " + currentId + " - " + authorsId);
@@ -846,7 +880,7 @@ public class JsonMapper {
 				Map<String, Object> checksumMap = new TreeMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
-				checksumMap.put(type,
+				checksumMap.put(rdftype,
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
@@ -877,6 +911,44 @@ public class JsonMapper {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
+	}
+
+	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
+		Collection<Map<String, Object>> result = new ArrayList<>();
+
+		// Special case medium is video - override type
+		if (mediumArrayContains(rdf,
+				"http://rdaregistry.info/termList/RDAMediaType/1008")
+				|| mediumArrayContains(rdf,
+						"http://rdvocab.info/termList/RDACarrierType/1050")) {
+			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
+			Map<String, Object> tmap = new HashMap<>();
+			tmap.put(PREF_LABEL, Globals.profile.getEtikett(s).getLabel());
+			tmap.put(ID2, s);
+			result.add(tmap);
+
+		}
+		JsonNode types = rdf.at("/rdftype");
+		types.forEach(t -> {
+			String typeId = t.at("/" + ID2).asText();
+			if (!"http://purl.org/dc/terms/BibliographicResource".equals(typeId)) {
+				Map<String, Object> tmap = new HashMap<>();
+				tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
+				tmap.put(ID2, typeId);
+				result.add(tmap);
+			}
+		});
+		return result;
+	}
+
+	private static boolean mediumArrayContains(JsonNode rdf, String key) {
+		boolean result = false;
+		JsonNode mediumArray = rdf.at("/medium");
+		for (JsonNode item : mediumArray) {
+			if (key.equals(item.at("/" + ID2).asText("no Value found")))
+				result = true;
+		}
+		return result;
 	}
 
 }

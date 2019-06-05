@@ -119,6 +119,7 @@ POST /utils/addUrnToAll 			controllers.MyUtils.addUrnToAll(namespace,snid,dateBe
 POST /utils/gatherconf				controllers.MyUtils.importGatherConf(namespace,firstId)
 POST /utils/runGatherer 			controllers.MyUtils.runGatherer()
 POST /utils/addObjectTimestamp/:pid		controllers.MyUtils.addObjectTimestamp(pid)
+PUT /utils/addUser					controllers.MyUtils.addUser()
 
 POST /resource/:pid/index			controllers.MyUtils.index(pid,index?="")
 DELETE /resource/:pid/removeFromIndex controllers.MyUtils.removeFromIndex(pid)
