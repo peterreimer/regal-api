@@ -1,7 +1,7 @@
 <!--
   ~ Copyright (C) 2009-2015 Typesafe Inc. <http://www.typesafe.com>
   -->
-<!-- Logback configuration for developers by I. Kuss (hbz)  -->
+<!-- Logback Konfiguration für Entwickler, von I. Kuss (hbz)  -->
 <!--   macht kürzere Log-Zeilen als Standard-Logging -->
 <!--   zeigt Klasse, Methode, Zeile anstatt Logger und Thread -->
 <configuration>

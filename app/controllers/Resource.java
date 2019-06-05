@@ -313,16 +313,21 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
-			play.Logger.debug("Patching Pid: " + pid);
-			Node node = readNodeOrNull(pid);
-			RegalObject object = getRegalObject(request().body().asJson());
-			if (object.getAccessScheme().equals("public")
-					&& object.getContentType().equals("version")) {
-				WebgatherUtils.publishWebpageVersion(node);
+			try {
+				play.Logger.debug("Patching Pid: " + pid);
+				Node node = readNodeOrNull(pid);
+				RegalObject object = getRegalObject(request().body().asJson());
+				if (object.getAccessScheme().equals("public")
+						&& object.getContentType().equals("version")) {
+					WebgatherUtils.publishWebpageVersion(node);
+				}
+				Node newNode = create.patchResource(node, object);
+				String result = newNode.getPid() + " created/updated!";
+				return JsonMessage(new Message(result));
+			} catch (Exception e) {
+				play.Logger.error("", e);
+				return JsonMessage(new Message(json(e.toString())));
 			}
-			Node newNode = create.patchResource(node, object);
-			String result = newNode.getPid() + " created/updated!";
-			return JsonMessage(new Message(result));
 		});
 	}
 

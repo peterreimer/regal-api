@@ -36,6 +36,7 @@ import com.google.common.base.CharMatcher;
 import actions.Create;
 import actions.Modify;
 import actions.RegalAction;
+import archive.fedora.CopyUtils;
 import helper.mail.Mail;
 import models.Gatherconf;
 import models.Globals;
@@ -43,6 +44,9 @@ import models.Message;
 import models.Node;
 import play.Logger;
 import play.Play;
+import com.yourmediashelf.fedora.client.request.GetDatastream;
+import com.yourmediashelf.fedora.client.request.GetDatastreamDissemination;
+import com.yourmediashelf.fedora.client.response.FedoraResponse;
 
 /**
  * Eine Klasse mit nützlichen Methoden im Umfeld des Webgatherings
@@ -142,12 +146,71 @@ public class WebgatherUtils {
 	 * Openwayback-Kollektion "weltweit" anlegt.
 	 * 
 	 * @param node der Knoten des Webschnittes
+	 * @throws RuntimeException Ausnahme aufgetreten
 	 */
-	public static void publishWebpageVersion(Node node) {
-		play.Logger.info("Jetzt wird ein Webschnitt veröffentlicht.");
-		String[] seqArray = node.getSeqArray();
-		for (String seq : seqArray) {
-			play.Logger.debug(seq);
+	public static void publishWebpageVersion(Node node) throws RuntimeException {
+		WebgatherLogger.info("Jetzt wird ein Webschnitt veröffentlicht.");
+		try {
+			getConfFromFedora(node.getPid(), node);
+			Gatherconf conf = Gatherconf.create(node.getConf());
+			WebgatherLogger.debug("conf=" + conf.toString());
+			WebgatherLogger.debug("localDir=" + conf.getLocalDir());
+			WebgatherLogger.debug("uploadFile=" + node.getUploadFile());
+			/* Hier weitere Verarbeitung: localDir ausparsen etc. pp. */
+			// localDir besteht aus:
+			String jobDir = Play.application().configuration()
+					.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
+			WebgatherLogger.debug("jobDir=" + jobDir);
+			getDataFromFedora(node.getPid(), node);
+			String dataStreamLocation = node.getSeqFile();
+			WebgatherLogger.debug("dataStreamLocation=" + dataStreamLocation);
+		} catch (Exception e) {
+			WebgatherLogger.error("Webpage Version " + node.getPid()
+					+ " kann nicht veröffentlicht werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Lies einen Datenstrom "conf" (Konfigurationsdatei für das Webgathering) aus
+	 * der Fedora
+	 * 
+	 * @param pid
+	 * @param node
+	 * @throws Exception
+	 */
+	private static void getConfFromFedora(String pid, Node node)
+			throws RuntimeException {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(pid, "conf").execute();
+			node.setConf(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			WebgatherLogger.warn("Datenstrom \"conf\" konnte nicht gelesen werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Lies einen Datenstrom "seq" (auch data genannt; das WARC-Objekt
+	 * beschreibend) aus der Fedora
+	 * 
+	 * @param pid
+	 * @param node
+	 * @throws Exception
+	 */
+	private static void getDataFromFedora(String pid, Node node)
+			throws RuntimeException {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(pid, "data").execute();
+			node.setSeqFile(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			WebgatherLogger
+					.warn("Datenstrom \"seq\" (data) konnte nicht gelesen werden!");
+			throw new RuntimeException(e);
 		}
 	}
 
