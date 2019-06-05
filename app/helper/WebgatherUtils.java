@@ -18,6 +18,7 @@ package helper;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.IDN;
@@ -25,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -155,6 +157,58 @@ public class WebgatherUtils {
 			getConfFromFedora(node.getPid(), node);
 			Gatherconf conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("conf=" + conf.toString());
+			createSoftlinkInPublicData(node, conf);
+			setOpenwaybackLinkToPublicAccessPoint(node, conf);
+		} catch (Exception e) {
+			WebgatherLogger.error("Webpage Version " + node.getPid()
+					+ " kann nicht veröffentlicht werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
+	 * auf den öffentlichen Zugriffspunkt zeigt. Tut er dies schon, wird nichts
+	 * gemacht.
+	 * 
+	 * @param node der Knoten des Webschnitts
+	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
+	 *          diesen Webschnitt maßgeblich war
+	 */
+	private static void setOpenwaybackLinkToPublicAccessPoint(Node node,
+			Gatherconf conf) {
+		try {
+			String openWaybackLink = conf.getOpenWaybackLink();
+			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
+			String publicOpenWaybackLink =
+					openWaybackLink.replace("/wayback/", "/weltweit/");
+			publicOpenWaybackLink =
+					publicOpenWaybackLink.replace("/lesesaal/", "/weltweit/");
+			conf.setOpenWaybackLink(publicOpenWaybackLink);
+			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info(
+					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
+							+ node.getPid() + ". Modify-Message: " + msg);
+		} catch (Exception e) {
+			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
+					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Ermittelt Speicherort der Webarchiv-Datei (WARC) und legt einen Softlink
+	 * unterhalb von public-data/ an, der auf diese Webarchiv-Datei zeigt. Dadurch
+	 * wird das Webarchiv zur Openwayback-Kollektion "weltweit" hinzugefügt und
+	 * subsequent im Openwayback-Zugriffspunkt "weltweit" indexiert, also
+	 * veröffentlicht.
+	 *
+	 * @param node Der Knoten des Webschnittes
+	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
+	 *          diesem Webschnitt zugrunde gelegt wurde.
+	 */
+	private static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
+		try {
 			String localDir = conf.getLocalDir();
 			WebgatherLogger.debug("localDir=" + localDir);
 			String jobDir = Play.application().configuration()
@@ -167,14 +221,50 @@ public class WebgatherUtils {
 			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
-			createPublicDataSubDir(subDir);
-
+			File publicCrawlDir = createPublicDataSubDir(subDir);
 			getDataFromFedora(node.getPid(), node);
-			WebgatherLogger.debug("uploadFile=" + node.getUploadFile());
+			File uploadFile = new File(node.getUploadFile());
+			WebgatherLogger.debug("uploadFile=" + uploadFile.toString());
+			chkCreateSoftlink(publicCrawlDir.getPath(), localDir,
+					uploadFile.getName());
 		} catch (Exception e) {
-			WebgatherLogger.error(e.toString());
-			WebgatherLogger.error("Webpage Version " + node.getPid()
-					+ " kann nicht veröffentlicht werden!");
+			WebgatherLogger.error("Softlink für Webschnitt " + node.getPid()
+					+ " konnte unterhalb des Verzeichnisses public-data/ nicht angelegt werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Erzeugt eine weiche Verknüpfung (Softlink) in einem Unterverzeichnis von
+	 * public-data/ auf eine eingesammelte WARC-Datei in einem der
+	 * Crawler-Verzeichnisse. Macht nichts, falls diese weiche Verknüpfung schon
+	 * existiert.
+	 * 
+	 * @param publicCrawlDir Das Verzeichnis public-data/ mit Unterverzeichnissen,
+	 *          in denen der Softlink angelegt werden soll.
+	 * @param localDir Das Verzeichnis, in dem die WARC-Datei wirklich liegt.
+	 * @param uploadFile Der Dateiname der WARC-Datei (ohne Pfadangaben).
+	 */
+	private static void chkCreateSoftlink(String publicCrawlDir, String localDir,
+			String uploadFile) {
+		try {
+			File softLink = new File(publicCrawlDir + "/" + uploadFile);
+			if (softLink.exists()) {
+				WebgatherLogger
+						.info("Softlink " + softLink.getPath() + " gibt es schon.");
+				return;
+			}
+			File localFile = new File(localDir + "/" + uploadFile);
+			if (!localFile.exists()) {
+				throw new RuntimeException("Lokale Webarchiv-Datei "
+						+ localFile.getPath() + " existiert nicht!");
+			}
+			Files.createSymbolicLink(softLink.toPath(), localFile.toPath());
+			WebgatherLogger.info("Symbolischer Link " + softLink.getPath()
+					+ " wurde erfolgreich angelegt.");
+		} catch (Exception e) {
+			WebgatherLogger.error("Kann Softlink " + uploadFile + " in Verzeichnis "
+					+ publicCrawlDir + " nicht anlegen!");
 			throw new RuntimeException(e);
 		}
 	}
@@ -186,12 +276,15 @@ public class WebgatherUtils {
 	 * @param subDir die Verzeichnisstruktur unterhalb von public-data/.
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 */
-	private static void createPublicDataSubDir(String subDir) {
+	private static File createPublicDataSubDir(String subDir) {
 		try {
-			String[] subDirs = subDir.split("/");
-			for (String dir : subDirs) {
-
+			String publicJobDir = Play.application().configuration()
+					.getString("regal-api.public.jobDir");
+			File publicCrawlDir = new File(publicJobDir + "/" + subDir);
+			if (!publicCrawlDir.exists()) {
+				publicCrawlDir.mkdirs();
 			}
+			return publicCrawlDir;
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann Verzeichnisstruktur " + subDir
 					+ " unterhalb von public-data/ nicht anlegen!");
