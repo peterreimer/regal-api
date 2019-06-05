@@ -47,6 +47,7 @@ import play.Play;
 import com.yourmediashelf.fedora.client.request.GetDatastream;
 import com.yourmediashelf.fedora.client.request.GetDatastreamDissemination;
 import com.yourmediashelf.fedora.client.response.FedoraResponse;
+import com.yourmediashelf.fedora.client.response.GetDatastreamResponse;
 
 /**
  * Eine Klasse mit nützlichen Methoden im Umfeld des Webgatherings
@@ -154,19 +155,46 @@ public class WebgatherUtils {
 			getConfFromFedora(node.getPid(), node);
 			Gatherconf conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("conf=" + conf.toString());
-			WebgatherLogger.debug("localDir=" + conf.getLocalDir());
-			WebgatherLogger.debug("uploadFile=" + node.getUploadFile());
-			/* Hier weitere Verarbeitung: localDir ausparsen etc. pp. */
-			// localDir besteht aus:
+			String localDir = conf.getLocalDir();
+			WebgatherLogger.debug("localDir=" + localDir);
 			String jobDir = Play.application().configuration()
 					.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
 			WebgatherLogger.debug("jobDir=" + jobDir);
+			if (!localDir.startsWith(jobDir)) {
+				throw new RuntimeException("Crawl-Verzeichnis " + localDir
+						+ " beginnt nicht mit " + conf.getCrawlerSelection()
+						+ "-jobDir für PID " + node.getPid());
+			}
+			String subDir = localDir.substring(jobDir.length() + 1);
+			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
+			createPublicDataSubDir(subDir);
+
 			getDataFromFedora(node.getPid(), node);
-			String dataStreamLocation = node.getSeqFile();
-			WebgatherLogger.debug("dataStreamLocation=" + dataStreamLocation);
+			WebgatherLogger.debug("uploadFile=" + node.getUploadFile());
 		} catch (Exception e) {
+			WebgatherLogger.error(e.toString());
 			WebgatherLogger.error("Webpage Version " + node.getPid()
 					+ " kann nicht veröffentlicht werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Legt eine Verzeichnisstruktur unterhalb von public-data/ an, falls diese
+	 * noch nicht vorhanden ist.
+	 * 
+	 * @param subDir die Verzeichnisstruktur unterhalb von public-data/.
+	 *          Unterverzeichnisse sind durch "/" getrennt.
+	 */
+	private static void createPublicDataSubDir(String subDir) {
+		try {
+			String[] subDirs = subDir.split("/");
+			for (String dir : subDirs) {
+
+			}
+		} catch (Exception e) {
+			WebgatherLogger.error("Kann Verzeichnisstruktur " + subDir
+					+ " unterhalb von public-data/ nicht anlegen!");
 			throw new RuntimeException(e);
 		}
 	}
@@ -193,8 +221,7 @@ public class WebgatherUtils {
 	}
 
 	/**
-	 * Lies einen Datenstrom "seq" (auch data genannt; das WARC-Objekt
-	 * beschreibend) aus der Fedora
+	 * Lies einen Datenstrom "data" (die WARC-Datei beschreibend) aus der Fedora
 	 * 
 	 * @param pid
 	 * @param node
@@ -203,13 +230,11 @@ public class WebgatherUtils {
 	private static void getDataFromFedora(String pid, Node node)
 			throws RuntimeException {
 		try {
-			FedoraResponse response =
-					new GetDatastreamDissemination(pid, "data").execute();
-			node.setSeqFile(
-					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+			GetDatastreamResponse response = new GetDatastream(pid, "data").execute();
+			node.setUploadFile(response.getDatastreamProfile().getDsLocation());
+			// Hier könnte man noch weitere Felder in den Node übernehmen
 		} catch (Exception e) {
-			WebgatherLogger
-					.warn("Datenstrom \"seq\" (data) konnte nicht gelesen werden!");
+			WebgatherLogger.warn("Datenstrom \"data\" konnte nicht gelesen werden!");
 			throw new RuntimeException(e);
 		}
 	}
