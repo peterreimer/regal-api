@@ -383,14 +383,18 @@ public class FedoraFacade {
 		List<Transformer> models = node.getTransformer();
 		// utils.updateContentModels(models);
 		node.removeRelations(REL_HAS_MODEL);
+		play.Logger.debug("Removed relations");
 		if (node.getUploadFile() != null) {
+			play.Logger.debug("Got an upload file");
 			if (node.isManaged()) {
+				play.Logger.debug("Got a managed upload file");
 				utils.updateManagedStream(node);
 				getChecksumFromFedora(node);
 			} else {
+				play.Logger.debug("Got an unmanaged upload file");
 				utils.updateUnManagedStream(node);
 			}
-
+			play.Logger.debug("Updated stream");
 		}
 		if (node.getMetadataFile() != null) {
 			utils.updateMetadataStream(node);

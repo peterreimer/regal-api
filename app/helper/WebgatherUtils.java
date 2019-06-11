@@ -19,6 +19,7 @@ package helper;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.IDN;
@@ -37,10 +38,12 @@ import com.google.common.base.CharMatcher;
 
 import actions.Create;
 import actions.Modify;
+import actions.Modify.UpdateNodeException;
 import actions.RegalAction;
 import archive.fedora.CopyUtils;
 import helper.mail.Mail;
 import models.Gatherconf;
+import models.Gatherconf.CrawlerSelection;
 import models.Globals;
 import models.Message;
 import models.Node;
@@ -180,15 +183,19 @@ public class WebgatherUtils {
 		try {
 			String openWaybackLink = conf.getOpenWaybackLink();
 			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
+			play.Logger.debug("openWaybackLink=" + openWaybackLink);
 			String publicOpenWaybackLink =
 					openWaybackLink.replace("/wayback/", "/weltweit/");
 			publicOpenWaybackLink =
 					publicOpenWaybackLink.replace("/lesesaal/", "/weltweit/");
 			conf.setOpenWaybackLink(publicOpenWaybackLink);
+			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
 			String msg = new Modify().updateConf(node, conf.toString());
 			WebgatherLogger.info(
 					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
 							+ node.getPid() + ". Modify-Message: " + msg);
+		} catch (UpdateNodeException e) {
+			e.printStackTrace();
 		} catch (Exception e) {
 			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
 					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
@@ -219,12 +226,17 @@ public class WebgatherUtils {
 						+ " beginnt nicht mit " + conf.getCrawlerSelection()
 						+ "-jobDir für PID " + node.getPid());
 			}
+			if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+				// zusätzliches Unterverzeichnis für Heritrix-Crawls
+				localDir = localDir.concat("/warcs");
+			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
 			File publicCrawlDir = createPublicDataSubDir(subDir);
-			getDataFromFedora(node.getPid(), node);
-			File uploadFile = new File(node.getUploadFile());
-			WebgatherLogger.debug("uploadFile=" + uploadFile.toString());
+			getDataFromFedora(node, localDir);
+			String DSLocation = node.getUploadFile();
+			WebgatherLogger.debug("uploadFile=" + DSLocation);
+			File uploadFile = new File(DSLocation);
 			chkCreateSoftlink(publicCrawlDir.getPath(), localDir,
 					uploadFile.getName());
 		} catch (Exception e) {
@@ -320,14 +332,22 @@ public class WebgatherUtils {
 	 * @param node
 	 * @throws Exception
 	 */
-	private static void getDataFromFedora(String pid, Node node)
+	private static void getDataFromFedora(Node node, String localDir)
 			throws RuntimeException {
 		try {
-			GetDatastreamResponse response = new GetDatastream(pid, "data").execute();
-			node.setUploadFile(response.getDatastreamProfile().getDsLocation());
+			GetDatastreamResponse response =
+					new GetDatastream(node.getPid(), "data").execute();
+			String dsLocation = response.getDatastreamProfile().getDsLocation();
+			WebgatherLogger.debug("datastream location: " + dsLocation);
+			// Bastle upload file zusammen
+			File fileLocation = new File(dsLocation);
+			String uploadFile = localDir + "/" + fileLocation.getName();
+			WebgatherLogger.info("Upload File wird gesetzt auf: " + uploadFile);
+			node.setUploadFile(uploadFile);
 			// Hier könnte man noch weitere Felder in den Node übernehmen
 		} catch (Exception e) {
-			WebgatherLogger.warn("Datenstrom \"data\" konnte nicht gelesen werden!");
+			WebgatherLogger.warn(
+					"Datenstrom \"data\" konnte nicht gelesen werden oder enthält ungültige Werte !");
 			throw new RuntimeException(e);
 		}
 	}
