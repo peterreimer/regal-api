@@ -58,6 +58,7 @@ import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.WebgatherUtils;
+import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
 import models.Gatherconf;
@@ -321,7 +322,7 @@ public class Resource extends MyController {
 				RegalObject object = getRegalObject(request().body().asJson());
 				if (object.getAccessScheme().equals("public")
 						&& object.getContentType().equals("version")) {
-					WebgatherUtils.publishWebpageVersion(node);
+					WebsiteVersionPublisher.publishWebpageVersion(node);
 				}
 				Node newNode = create.patchResource(node, object);
 				String result = newNode.getPid() + " created/updated!";
@@ -360,7 +361,7 @@ public class Resource extends MyController {
 			RegalObject object = getRegalObject(request().body().asJson());
 			if (object.getAccessScheme().equals("public")
 					&& object.getContentType().equals("version")) {
-				WebgatherUtils.publishWebpageVersion(node);
+				WebsiteVersionPublisher.publishWebpageVersion(node);
 			}
 			Node newNode = null;
 			if (node == null) {
