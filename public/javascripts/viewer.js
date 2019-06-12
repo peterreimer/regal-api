@@ -1589,12 +1589,22 @@ function loadAndEnablePDFBug(enabledTabs) {
     }, appConfig.mainContainer);
   });
 }
+/*
+ * We are constructing the path of the file from the viewers url, which contains the pid
+ * ?file=/resource/test:1234/data
+ *
+ */
+var parts = location.pathname.split('/')
+var path = "/resource/" + parts[parts.length - 2] + "/" + parts[parts.length - 1]
+console.log(path)
+
 function webViewerInitialized() {
   var appConfig = PDFViewerApplication.appConfig;
   var file = void 0;
   var queryString = document.location.search.substring(1);
   var params = (0, _ui_utils.parseQueryString)(queryString);
-  file = 'file' in params ? params.file : _app_options.AppOptions.get('defaultUrl');
+  //file = 'file' in params ? params.file : _app_options.AppOptions.get('defaultUrl');
+  file = path
   validateFileURL(file);
   var fileInput = document.createElement('input');
   fileInput.id = appConfig.openFileInputName;
@@ -4351,7 +4361,7 @@ var defaultOptions = {
   },
   defaultUrl: {
     value: 'compressed.tracemonkey-pldi-09.pdf',
-    kind: OptionKind.VIEWER
+	kind: OptionKind.VIEWER
   },
   defaultZoomValue: {
     value: '',
@@ -4714,7 +4724,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { 	lve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
