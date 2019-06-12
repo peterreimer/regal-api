@@ -321,6 +321,9 @@ public class Resource extends MyController {
 				String result = "";
 				Node node = readNodeOrNull(pid);
 				RegalObject object = getRegalObject(request().body().asJson());
+				play.Logger
+						.debug("object.getAccessScheme: " + object.getAccessScheme());
+				Node newNode = create.patchResource(node, object);
 				if (object.getAccessScheme().equals("public")
 						&& object.getContentType().equals("version")) {
 					WebsiteVersionPublisher.publishWebpageVersion(node);
@@ -332,9 +335,6 @@ public class Resource extends MyController {
 					WebsiteVersionPublisher.retreatWebpageVersion(node);
 					result = "Webschnitt ist auf zugriffsbeschränkt (Lesesaal) gesetzt. ";
 				}
-				play.Logger
-						.debug("object.getAccessScheme: " + object.getAccessScheme());
-				Node newNode = create.patchResource(node, object);
 				result = result.concat(newNode.getPid() + " created/updated!");
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {
@@ -370,6 +370,14 @@ public class Resource extends MyController {
 			String result = "";
 			Node node = readNodeOrNull(pid);
 			RegalObject object = getRegalObject(request().body().asJson());
+			Node newNode = null;
+			if (node == null) {
+				String[] namespacePlusId = pid.split(":");
+				newNode = create.createResource(namespacePlusId[1], namespacePlusId[0],
+						object);
+			} else {
+				newNode = create.updateResource(node, object);
+			}
 			if (object.getAccessScheme().equals("public")
 					&& object.getContentType().equals("version")) {
 				WebsiteVersionPublisher.publishWebpageVersion(node);
@@ -380,14 +388,6 @@ public class Resource extends MyController {
 					&& object.getContentType().equals("version")) {
 				WebsiteVersionPublisher.retreatWebpageVersion(node);
 				result = "Webschnitt ist auf beschränkten Zugang (Lesesaal) gesetzt. ";
-			}
-			Node newNode = null;
-			if (node == null) {
-				String[] namespacePlusId = pid.split(":");
-				newNode = create.createResource(namespacePlusId[1], namespacePlusId[0],
-						object);
-			} else {
-				newNode = create.updateResource(node, object);
 			}
 			result = result.concat(newNode.getPid() + " created/updated!");
 			return JsonMessage(new Message(result));
