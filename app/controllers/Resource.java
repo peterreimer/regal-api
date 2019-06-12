@@ -318,14 +318,24 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			try {
 				play.Logger.debug("Patching Pid: " + pid);
+				String result = "";
 				Node node = readNodeOrNull(pid);
 				RegalObject object = getRegalObject(request().body().asJson());
 				if (object.getAccessScheme().equals("public")
 						&& object.getContentType().equals("version")) {
 					WebsiteVersionPublisher.publishWebpageVersion(node);
+					result = "Webschnitt ist veröffentlicht. ";
 				}
+				if ((object.getAccessScheme().equals("private")
+						|| object.getAccessScheme().equals("restricted"))
+						&& object.getContentType().equals("version")) {
+					WebsiteVersionPublisher.retreatWebpageVersion(node);
+					result = "Webschnitt ist auf zugriffsbeschränkt (Lesesaal) gesetzt. ";
+				}
+				play.Logger
+						.debug("object.getAccessScheme: " + object.getAccessScheme());
 				Node newNode = create.patchResource(node, object);
-				String result = newNode.getPid() + " created/updated!";
+				result = result.concat(newNode.getPid() + " created/updated!");
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {
 				play.Logger.error("", e);
@@ -357,11 +367,19 @@ public class Resource extends MyController {
 	public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Updating Pid: " + pid);
+			String result = "";
 			Node node = readNodeOrNull(pid);
 			RegalObject object = getRegalObject(request().body().asJson());
 			if (object.getAccessScheme().equals("public")
 					&& object.getContentType().equals("version")) {
 				WebsiteVersionPublisher.publishWebpageVersion(node);
+				result = "Webschnitt ist veröffentlicht. ";
+			}
+			if ((object.getAccessScheme().equals("private")
+					|| object.getAccessScheme().equals("restricted"))
+					&& object.getContentType().equals("version")) {
+				WebsiteVersionPublisher.retreatWebpageVersion(node);
+				result = "Webschnitt ist auf beschränkten Zugang (Lesesaal) gesetzt. ";
 			}
 			Node newNode = null;
 			if (node == null) {
@@ -371,7 +389,7 @@ public class Resource extends MyController {
 			} else {
 				newNode = create.updateResource(node, object);
 			}
-			String result = newNode.getPid() + " created/updated!";
+			result = result.concat(newNode.getPid() + " created/updated!");
 			return JsonMessage(new Message(result));
 
 		});
