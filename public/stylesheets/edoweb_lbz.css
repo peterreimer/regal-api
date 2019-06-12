@@ -24,3 +24,31 @@
 	font-style:italic;
 }
 
+
+/* PDF Viewer */
+#toolbarContainer, .findbar, .secondaryToolbar {
+  position: relative;
+  height: 32px;
+  background-color: #000000; /* fallback */
+  background-image: none;
+}
+#toolbarViewer {
+    height: 40px;
+}
+.toolbarButton::before {
+    top: 6px;
+}
+div {
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+@media print {
+  /* General rules for printing. */
+  * {
+    background: red !important;
+    color: #ffffff !important;
+  }
+}
+
