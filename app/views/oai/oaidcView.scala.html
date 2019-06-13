@@ -1,4 +1,6 @@
-@(data:DublinCoreData)	<oai_dc:dc 
+@(data:DublinCoreData,hit:Map[String,Object])
+@import views.Title
+<oai_dc:dc 
     xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xmlns:dcterms="http://purl.org/dc/terms/" 
@@ -6,18 +8,55 @@
 	xsi:schemaLocation="http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd 
 	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd 
 	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd">
+	
 @field(list: Seq[String],fieldname: String)() = {
 @for(i <- list){<@fieldname>@archive.fedora.XmlUtils.escapeContent(i)</@fieldname>}
 }
+
+@fieldCombined(list: Seq[String],fieldname: String)() = {
+@if(list.size>0){
+	<@fieldname>
+	@for((item, index) <- list.zipWithIndex) {
+		@item 
+		@if(index != list.size-1){
+			; 
+		}
+	}
+	</@fieldname>
+}
+}
+
 @import models.Pair
 @typedField(list: Seq[Pair[String,String]],fieldname: String)() = {
-@for(i <- list){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}
+@for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
 }
-@typedField(data.getIdentifier(),"dc:identifier")
-@field(data.getTitle(),"dc:title")
-@field(data.getDate(),"dc:date")
+
+<dc:title>
+@archive.fedora.XmlUtils.escapeContent(Title.getTitle(hit))
+@if(hit.contains("corporateBodyForTitle")){
+	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
+}
+@if(hit.contains("P60493")){
+	: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
+ }
+</dc:title>
+
+@for(i <- data.getDate()){
+<dc:date>
+@i.substring(0,4)
+</dc:date>
+}
 @field(data.getCreator(),"dc:creator")
+@field(data.getLanguage(),"dc:language")
 @field(data.getContributor(),"dc:contributor")
 @field(data.getType(),"dc:type")
-@field(data.getSubject(),"dc:subject")
+@fieldCombined(data.getSubject(),"dc:subject")
+@field(data.getDescription(),"dc:description")
+@field(data.getSource(),"dc:source")
+@field(data.getCoverage(),"dc:coverage")
+@field(data.getRights(),"dc:rights")
+@typedField(data.getIdentifier(),"dc:identifier")
+@for(wgltype<-data.getWglType()){
+<dc:type>@wgltype</dc:type>
+}
 </oai_dc:dc>

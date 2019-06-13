@@ -20,7 +20,6 @@ import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
-import helper.oai.OaiDcMapper;
 import helper.oai.WglMapper;
 
 import java.io.ByteArrayInputStream;
@@ -161,18 +160,6 @@ public class Transform {
 						+ "\t\t<format scheme=\"imt\">text/html</format>\n"
 						+ "\t</resource>" + "</record>\n" + "</epicur> ";
 		return result;
-	}
-
-	/**
-	 * @param pid The pid of an object
-	 * @return a dc mapping
-	 */
-	public DublinCoreData oaidc(String pid) {
-		Node node = new Read().readNode(pid);
-		String uri = Globals.urnbase + node.getPid();
-		DublinCoreData data =
-				new OaiDcMapper(node).getData().addIdentifier(uri, "dcterms-Uri");
-		return data;
 	}
 
 	/**
