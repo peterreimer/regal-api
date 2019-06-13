@@ -327,7 +327,8 @@ public class Resource extends MyController {
 				if (object.getAccessScheme().equals("public")
 						&& object.getContentType().equals("version")) {
 					WebsiteVersionPublisher.publishWebpageVersion(node);
-					result = "Webschnitt ist veröffentlicht. ";
+					result =
+							"Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.";
 				}
 				if ((object.getAccessScheme().equals("private")
 						|| object.getAccessScheme().equals("restricted"))
@@ -381,7 +382,8 @@ public class Resource extends MyController {
 			if (object.getAccessScheme().equals("public")
 					&& object.getContentType().equals("version")) {
 				WebsiteVersionPublisher.publishWebpageVersion(node);
-				result = "Webschnitt ist veröffentlicht. ";
+				result =
+						"Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.";
 			}
 			if ((object.getAccessScheme().equals("private")
 					|| object.getAccessScheme().equals("restricted"))
