@@ -415,6 +415,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * @return the node's type
 	 */
 	public String getNodeType() {
 		return type;
@@ -1138,12 +1139,17 @@ public class Node implements java.io.Serializable {
 		return fulltext;
 	}
 
+	/**
+	 * A message describing the last modification of the note
+	 * 
+	 * @param string the message string
+	 */
 	public void setLastModifyMessage(String string) {
 		lastModifyMessage = string;
 	}
 
 	/**
-	 * @return a text extraction of the nodes data
+	 * @return a text message describing the last modification of the note
 	 */
 	public String getLastModifyMessage() {
 		return lastModifyMessage;

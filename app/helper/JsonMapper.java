@@ -295,7 +295,8 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.warn(node.getPid() + " can not create JSON! " + e.getMessage());
+			play.Logger
+					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
 			play.Logger.trace("", e);
 		}
 		return null;
@@ -531,8 +532,7 @@ public class JsonMapper {
 			}
 			rdf.put("creator", creator);
 		} catch (Exception e) {
-			play.Logger.debug("Problem processing key contribution.agent",
-					e.getMessage());
+			play.Logger.debug("Problem processing key contribution.agent", e);
 			// play.Logger.debug("", e);
 		}
 	}

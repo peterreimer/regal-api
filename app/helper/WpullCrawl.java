@@ -18,6 +18,7 @@ package helper;
 
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
+import models.Gatherconf.RobotsPolicy;
 import models.Gatherconf.QuotaUnitSelection;
 import models.Globals;
 import models.Node;
@@ -250,7 +251,10 @@ public class WpullCrawl {
 
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
-		// sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
+		if (conf.getRobotsPolicy().equals(RobotsPolicy.classic)
+				|| conf.getRobotsPolicy().equals(RobotsPolicy.ignore)) {
+			sb.append(" --no-robots");
+		}
 		sb.append(" --escaped-fragment --strip-session-id");
 		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");

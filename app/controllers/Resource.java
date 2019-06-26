@@ -321,15 +321,14 @@ public class Resource extends MyController {
 				String result = "";
 				Node node = readNodeOrNull(pid);
 				RegalObject object = getRegalObject(request().body().asJson());
-				play.Logger
-						.debug("object.getAccessScheme: " + object.getAccessScheme());
 				Node newNode = create.patchResource(node, object);
 				result = newNode.getLastModifyMessage();
 				result = result.concat(" " + newNode.getPid() + " created/updated!");
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {
 				play.Logger.error("", e);
-				return JsonMessage(new Message(json(e.toString())));
+				return JsonMessage(new Message(e, 500));
+				// return JsonMessage(new Message( json(e.toString()) ));
 			}
 		});
 	}

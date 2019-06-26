@@ -25,6 +25,7 @@ import archive.fedora.CopyUtils;
 import models.Gatherconf;
 import models.Gatherconf.CrawlerSelection;
 import models.Node;
+import models.RegalObject;
 import play.Logger;
 import play.Play;
 import com.yourmediashelf.fedora.client.request.GetDatastream;
@@ -46,6 +47,39 @@ public class WebsiteVersionPublisher {
 	// Das Unterverzeichnis in public-data/ (volle Pfadangabe) als Java-Klasse
 	// "File"
 	private static File publicCrawlDir = null;
+
+	/**
+	 * Veröffentlicht und De-Publiziert Webschnitte
+	 * 
+	 * @param node Der Knoten (Klasse models.Node) einer zu patchenden Ressource
+	 * @param object Das Regal-Objekt einer zu patchenden Ressource
+	 * @return eine Textnachricht über die hier ausgeführten Aktionen
+	 */
+	public static String handleWebpagePublishing(Node node, RegalObject object) {
+		try {
+			if (object.getAccessScheme().equals("public")) {
+				if (node.getContentType().equals("version")) {
+					publishWebpageVersion(node);
+					return "Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.";
+				} else if (node.getContentType().equals("webpage")) {
+					return "Webpage ist veröffentlicht.";
+				}
+			}
+
+			if ((object.getAccessScheme().equals("private")
+					|| object.getAccessScheme().equals("restricted"))
+					&& node.getContentType().equals("version")) {
+				retreatWebpageVersion(node);
+				return "Webschnitt ist auf zugriffsbeschränkt (Lesesaal) gesetzt.";
+			} else if (node.getContentType().equals("webpage")) {
+				return "Webpage ist nur im Lesesaal zugänglich.";
+			}
+			return "";
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			return e.toString();
+		}
+	}
 
 	/**
 	 * Veröffentlicht eine Webpage-Version (=Webschnitt), indem es sie in der
@@ -117,8 +151,6 @@ public class WebsiteVersionPublisher {
 			WebgatherLogger.info(
 					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
 							+ node.getPid() + ". Modify-Message: " + msg);
-		} catch (UpdateNodeException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
 					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
