@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import helper.HttpArchiveException;
+import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import helper.WpullCrawl;
 import models.Gatherconf;
@@ -83,6 +84,33 @@ public class Create extends RegalAction {
 		play.Logger.debug("Patching Node with Pid " + node.getPid());
 		new Index().remove(node);
 		setNodeMembers(node, object);
+
+		try {
+			if (object.getAccessScheme().equals("public")) {
+				if (node.getContentType().equals("version")) {
+					WebsiteVersionPublisher.publishWebpageVersion(node);
+					node.setLastModifyMessage(
+							"Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.");
+				} else if (node.getContentType().equals("webpage")) {
+					node.setLastModifyMessage("Webpage ist veröffentlicht.");
+				}
+			}
+
+			if ((object.getAccessScheme().equals("private")
+					|| object.getAccessScheme().equals("restricted"))
+					&& node.getContentType().equals("version")) {
+				WebsiteVersionPublisher.retreatWebpageVersion(node);
+				node.setLastModifyMessage(
+						"Webschnitt ist auf zugriffsbeschränkt (Lesesaal) gesetzt.");
+			} else if (node.getContentType().equals("webpage")) {
+				node.setLastModifyMessage("Webpage ist nur im Lesesaal zugänglich.");
+			}
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			node.setLastModifyMessage(e.toString());
+			return node;
+		}
+
 		return updateResource(node);
 	}
 

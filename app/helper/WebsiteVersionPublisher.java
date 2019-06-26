@@ -43,6 +43,9 @@ public class WebsiteVersionPublisher {
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+	// Das Unterverzeichnis in public-data/ (volle Pfadangabe) als Java-Klasse
+	// "File"
+	private static File publicCrawlDir = null;
 
 	/**
 	 * Veröffentlicht eine Webpage-Version (=Webschnitt), indem es sie in der
@@ -80,7 +83,7 @@ public class WebsiteVersionPublisher {
 			getConfFromFedora(node.getPid(), node);
 			Gatherconf conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("conf=" + conf.toString());
-			removeSoftlinkInPublicData(node, conf);
+			chkRemoveSoftlinkInPublicData(node, conf);
 			setOpenwaybackLinkToRestrictedAccessPoint(node, conf);
 		} catch (Exception e) {
 			WebgatherLogger.error("Webpage Version " + node.getPid()
@@ -225,7 +228,8 @@ public class WebsiteVersionPublisher {
 	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
 	 *          diesem Webschnitt zugrunde gelegt wurde.
 	 */
-	private static void removeSoftlinkInPublicData(Node node, Gatherconf conf) {
+	private static void chkRemoveSoftlinkInPublicData(Node node,
+			Gatherconf conf) {
 		String localDir = null;
 		try {
 			localDir = conf.getLocalDir();
@@ -244,7 +248,10 @@ public class WebsiteVersionPublisher {
 			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
-			File publicCrawlDir = chkExistsPublicDataSubDir(subDir);
+			if (!chkExistsPublicDataSubDir(subDir)) {
+				WebgatherLogger.debug("Nichts zu tun.");
+				return;
+			}
 			getDataFromFedora(node, localDir);
 			String DSLocation = node.getUploadFile();
 			WebgatherLogger.debug("uploadFile=" + DSLocation);
@@ -349,18 +356,20 @@ public class WebsiteVersionPublisher {
 	 * 
 	 * @param subDir die Verzeichnisstruktur unterhalb von public-data/.
 	 *          Unterverzeichnisse sind durch "/" getrennt.
-	 * @return das Unterverzeichnis (volle Pfadangabe) als Java-Klasse "File"
+	 * @return Ja oder Nein : Verzeichnis existiert
 	 */
-	private static File chkExistsPublicDataSubDir(String subDir) {
+	private static boolean chkExistsPublicDataSubDir(String subDir) {
+		publicCrawlDir = null;
 		try {
 			String publicJobDir = Play.application().configuration()
 					.getString("regal-api.public.jobDir");
-			File publicCrawlDir = new File(publicJobDir + "/" + subDir);
+			publicCrawlDir = new File(publicJobDir + "/" + subDir);
 			if (!publicCrawlDir.exists()) {
-				throw new RuntimeException(
-						"Datenverzeichnis " + publicCrawlDir.getPath() + "gibt es nicht !");
+				WebgatherLogger.debug("Das Datenverzeichnis " + publicCrawlDir.getPath()
+						+ " gibt es nicht.");
+				return false;
 			}
-			return publicCrawlDir;
+			return true;
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann Verzeichnisstruktur " + subDir
 					+ " unterhalb von public-data/ nicht überprüfen !");

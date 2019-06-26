@@ -324,19 +324,8 @@ public class Resource extends MyController {
 				play.Logger
 						.debug("object.getAccessScheme: " + object.getAccessScheme());
 				Node newNode = create.patchResource(node, object);
-				if (object.getAccessScheme().equals("public")
-						&& object.getContentType().equals("version")) {
-					WebsiteVersionPublisher.publishWebpageVersion(node);
-					result =
-							"Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.";
-				}
-				if ((object.getAccessScheme().equals("private")
-						|| object.getAccessScheme().equals("restricted"))
-						&& object.getContentType().equals("version")) {
-					WebsiteVersionPublisher.retreatWebpageVersion(node);
-					result = "Webschnitt ist auf zugriffsbeschränkt (Lesesaal) gesetzt. ";
-				}
-				result = result.concat(newNode.getPid() + " created/updated!");
+				result = newNode.getLastModifyMessage();
+				result = result.concat(" " + newNode.getPid() + " created/updated!");
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {
 				play.Logger.error("", e);
@@ -378,18 +367,6 @@ public class Resource extends MyController {
 						object);
 			} else {
 				newNode = create.updateResource(node, object);
-			}
-			if (object.getAccessScheme().equals("public")
-					&& object.getContentType().equals("version")) {
-				WebsiteVersionPublisher.publishWebpageVersion(node);
-				result =
-						"Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.";
-			}
-			if ((object.getAccessScheme().equals("private")
-					|| object.getAccessScheme().equals("restricted"))
-					&& object.getContentType().equals("version")) {
-				WebsiteVersionPublisher.retreatWebpageVersion(node);
-				result = "Webschnitt ist auf beschränkten Zugang (Lesesaal) gesetzt. ";
 			}
 			result = result.concat(newNode.getPid() + " created/updated!");
 			return JsonMessage(new Message(result));
