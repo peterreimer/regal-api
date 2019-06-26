@@ -791,7 +791,7 @@ public class Modify extends RegalAction {
 	}
 
 	@SuppressWarnings({ "serial" })
-	private class UpdateNodeException extends RuntimeException {
+	public class UpdateNodeException extends RuntimeException {
 		UpdateNodeException(Throwable cause) {
 			super(cause);
 		}

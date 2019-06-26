@@ -116,6 +116,7 @@ public class Node implements java.io.Serializable {
 	private String urn = null;
 
 	private String fulltext;
+	private String lastModifyMessage = "";
 
 	private boolean isManaged = true;
 
@@ -960,7 +961,7 @@ public class Node implements java.io.Serializable {
 		return sorted;
 	}
 
-	private String[] getSeqArray() {
+	public String[] getSeqArray() {
 		try {
 			if (this.seq == null || this.seq.isEmpty())
 				return new String[] {};
@@ -1136,6 +1137,22 @@ public class Node implements java.io.Serializable {
 	 */
 	public String getFulltext() {
 		return fulltext;
+	}
+
+	/**
+	 * A message describing the last modification of the note
+	 * 
+	 * @param string the message string
+	 */
+	public void setLastModifyMessage(String string) {
+		lastModifyMessage = string;
+	}
+
+	/**
+	 * @return a text message describing the last modification of the note
+	 */
+	public String getLastModifyMessage() {
+		return lastModifyMessage;
 	}
 
 	/**

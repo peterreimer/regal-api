@@ -16,33 +16,18 @@
  */
 package helper;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.IDN;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map.Entry;
-
-import com.google.common.base.CharMatcher;
-
-import actions.Create;
-import actions.Modify;
-import actions.RegalAction;
 import helper.mail.Mail;
 import models.Gatherconf;
 import models.Globals;
 import models.Message;
 import models.Node;
 import play.Logger;
-import play.Play;
 
 /**
  * Eine Klasse mit nützlichen Methoden im Umfeld des Webgatherings

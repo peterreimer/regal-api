@@ -58,6 +58,7 @@ import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.WebgatherUtils;
+import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
 import models.Gatherconf;
@@ -315,11 +316,20 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
-			Node node = readNodeOrNull(pid);
-			RegalObject object = getRegalObject(request().body().asJson());
-			Node newNode = create.patchResource(node, object);
-			String result = newNode.getPid() + " created/updated!";
-			return JsonMessage(new Message(result));
+			try {
+				play.Logger.debug("Patching Pid: " + pid);
+				String result = "";
+				Node node = readNodeOrNull(pid);
+				RegalObject object = getRegalObject(request().body().asJson());
+				Node newNode = create.patchResource(node, object);
+				result = newNode.getLastModifyMessage();
+				result = result.concat(" " + newNode.getPid() + " created/updated!");
+				return JsonMessage(new Message(result));
+			} catch (Exception e) {
+				play.Logger.error("", e);
+				return JsonMessage(new Message(e, 500));
+				// return JsonMessage(new Message( json(e.toString()) ));
+			}
 		});
 	}
 
@@ -345,6 +355,8 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Updating Pid: " + pid);
+			String result = "";
 			Node node = readNodeOrNull(pid);
 			RegalObject object = getRegalObject(request().body().asJson());
 			Node newNode = null;
@@ -355,9 +367,11 @@ public class Resource extends MyController {
 			} else {
 				newNode = create.updateResource(node, object);
 			}
-			String result = newNode.getPid() + " created/updated!";
+			result = result.concat(newNode.getPid() + " created/updated!");
 			return JsonMessage(new Message(result));
+
 		});
+
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
@@ -367,6 +381,9 @@ public class Resource extends MyController {
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
 			RegalObject object = getRegalObject(request().body().asJson());
+			if (object.getContentType().equals("webpage")) {
+				object.setAccessScheme("restricted");
+			}
 			Node newNode = create.createResource(namespace, object);
 			String result = newNode.getPid() + " created/updated!";
 			response().setHeader("Location", read.getHttpUriOfResource(newNode));

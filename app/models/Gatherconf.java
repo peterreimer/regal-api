@@ -423,8 +423,7 @@ public class Gatherconf {
 	 * @throws IOException
 	 */
 	@JsonIgnore
-	public static Gatherconf create(String json)
-			throws JsonParseException, JsonMappingException, IOException {
+	public static Gatherconf create(String json) throws IOException {
 		return (Gatherconf) JsonUtil.mapper().readValue(json, Gatherconf.class);
 	}
 

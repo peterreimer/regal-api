@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import helper.HttpArchiveException;
+import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import helper.WpullCrawl;
 import models.Gatherconf;
@@ -68,6 +69,7 @@ public class Create extends RegalAction {
 	}
 
 	private Node updateResource(Node node) {
+		play.Logger.debug("Updating Node with Pid " + node.getPid());
 		Globals.fedora.updateNode(node);
 		updateIndex(node.getPid());
 		return node;
@@ -79,8 +81,11 @@ public class Create extends RegalAction {
 	 * @return the updated node
 	 */
 	public Node patchResource(Node node, RegalObject object) {
+		play.Logger.debug("Patching Node with Pid " + node.getPid());
 		new Index().remove(node);
 		setNodeMembers(node, object);
+		node.setLastModifyMessage(
+				WebsiteVersionPublisher.handleWebpagePublishing(node, object));
 		return updateResource(node);
 	}
 

@@ -390,7 +390,7 @@ public class FedoraFacade {
 			} else {
 				utils.updateUnManagedStream(node);
 			}
-
+			play.Logger.debug("Updated stream");
 		}
 		if (node.getMetadataFile() != null) {
 			utils.updateMetadataStream(node);
