@@ -66,6 +66,7 @@ public class WglMapper {
 		data.addIdentifier(getComplexList(n, "/additionalMaterial", "/@id"));
 		data.addIdentifier(getString(n, "/urn"));
 		data.addIdentifier(getString(n, "/doi"));
+		data.addIdentifier(getString(n, "/bibo:doi"));
 		return data;
 	}
 
