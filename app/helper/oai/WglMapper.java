@@ -268,9 +268,13 @@ public class WglMapper {
 	private String getString(JsonNode n, String string) {
 		StringBuffer result = new StringBuffer();
 		JsonNode a = n.at(string);
-		for (JsonNode item : a) {
-			String str = item.asText("no Value found");
-			result.append(str + " ,");
+		if (a.isArray()) {
+			for (JsonNode item : a) {
+				String str = item.asText("no Value found");
+				result.append(str + " ,");
+			}
+		} else {
+			result.append(a.asText());
 		}
 		if (result.length() == 0)
 			return null;
