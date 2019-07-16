@@ -127,7 +127,7 @@ public class Gatherconf {
 		deepness = -1;
 		robotsPolicy = RobotsPolicy.ignore;
 		interval = null;
-		crawlerSelection = CrawlerSelection.heritrix;
+		crawlerSelection = CrawlerSelection.wpull;
 		quotaUnitSelection = null;
 		agentIdSelection = AgentIdSelection.Chrome;
 		urlsExcluded = new ArrayList<String>();
