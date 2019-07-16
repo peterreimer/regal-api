@@ -125,7 +125,7 @@ public class Gatherconf {
 		domains = new ArrayList<String>();
 		active = true;
 		deepness = -1;
-		robotsPolicy = null;
+		robotsPolicy = RobotsPolicy.ignore;
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
 		quotaUnitSelection = null;
