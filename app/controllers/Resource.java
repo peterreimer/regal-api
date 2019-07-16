@@ -62,6 +62,7 @@ import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
 import models.Gatherconf;
+import models.Gatherconf.RobotsPolicy;
 import models.Globals;
 import models.Link;
 import models.MabRecord;
@@ -1052,6 +1053,7 @@ public class Resource extends MyController {
 							Gatherconf.class);
 					// hier die neue conf auch im JobDir von Heritrix ablegen
 					conf.setName(pid);
+					conf.setRobotsPolicy(RobotsPolicy.ignore);
 					play.Logger.debug("conf.toString=" + conf.toString());
 					String result = modify.updateConf(node, conf.toString());
 					// Neue urlHist anlegen, falls es noch keine gibt (nur dann)
