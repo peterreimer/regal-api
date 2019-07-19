@@ -205,12 +205,14 @@ public class FedoraFacade {
 			play.Logger.debug("node.getPid()=" + node.getPid());
 			play.Logger.debug("node.getLabel()=" + node.getLabel());
 			new Ingest(node.getPid()).label(node.getLabel()).execute();
+			play.Logger.debug("node ingested");
 			DublinCoreHandler.updateDc(node);
 			List<Transformer> cms = node.getTransformer();
 			// utils.createContentModels(cms);
 			utils.linkContentModels(cms, node);
 			if (node.getUploadFile() != null) {
 				if (node.isManaged()) {
+					play.Logger.debug("node is managed");
 					utils.createManagedStream(node);
 					getChecksumFromFedora(node);
 				} else {

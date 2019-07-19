@@ -133,7 +133,7 @@ public class Create extends RegalAction {
 		node.setDataUri(node.getAggregationUri() + "/data");
 		node.setContextDocumentUri(
 				"http://" + Globals.server + "/public/edoweb-resources.json");
-		// node.setLabel("Hannes");
+		node.setLabel(object.getIsDescribedBy().getName());
 		Globals.fedora.createNode(node);
 		return node;
 	}
