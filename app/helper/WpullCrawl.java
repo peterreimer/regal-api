@@ -187,7 +187,7 @@ public class WpullCrawl {
 		ArrayList<String> domains = conf.getDomains();
 		if (domains.size() > 0) {
 			sb.append(" --span-hosts");
-			sb.append(" --domains=" + host);
+			sb.append(" --hostnames=" + host);
 			for (int i = 0; i < domains.size(); i++) {
 				sb.append("," + domains.get(i));
 			}
