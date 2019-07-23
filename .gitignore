@@ -20,4 +20,5 @@ data
 bin
 conf/application.conf
 scripts/variables.conf
+*.HIST
 *~
