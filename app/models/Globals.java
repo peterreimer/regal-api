@@ -339,6 +339,10 @@ public class Globals {
 			.getString("regal-api.webharvests.dataDir");
 	public static String webharvestsDataUrl = Play.application().configuration()
 			.getString("regal-api.webharvests.dataUrl");
+	public static String restrictedwebDataDir = Play.application().configuration()
+			.getString("regal-api.restrictedweb.dataDir");
+	public static String restrictedwebDataUrl = Play.application().configuration()
+			.getString("regal-api.restrictedweb.dataUrl");
 
 	public static String lobidHbz01 =
 			Play.application().configuration().getString("regal-api.hbz01");
