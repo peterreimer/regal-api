@@ -84,8 +84,8 @@ public class Create extends RegalAction {
 		play.Logger.debug("Patching Node with Pid " + node.getPid());
 		new Index().remove(node);
 		setNodeMembers(node, object);
-		node.setLastModifyMessage(
-				WebsiteVersionPublisher.handleWebpagePublishing(node, object));
+		WebsiteVersionPublisher wvp = new WebsiteVersionPublisher();
+		node.setLastModifyMessage(wvp.handleWebpagePublishing(node, object));
 		return updateResource(node);
 	}
 
