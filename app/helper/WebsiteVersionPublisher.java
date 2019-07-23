@@ -61,7 +61,7 @@ public class WebsiteVersionPublisher {
 			if (object.getAccessScheme().equals("public")) {
 				if (node.getContentType().equals("version")) {
 					publishWebpageVersion(node);
-					return "Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten (bis zu 30 Min.) dauern.";
+					return "Webschnitt ist veröffentlicht. Das Indexieren des Webschnitts in der OpenWayback-Maschine kann mehrere Minuten dauern.";
 				} else if (node.getContentType().equals("webpage")) {
 					return "Webpage ist veröffentlicht.";
 				}
@@ -84,7 +84,8 @@ public class WebsiteVersionPublisher {
 
 	/**
 	 * Veröffentlicht eine Webpage-Version (=Webschnitt), indem es sie in der
-	 * Openwayback-Kollektion "weltweit" anlegt.
+	 * Openwayback-Kollektion "weltweit" anlegt (WARC-Objekte) oder indem es sie
+	 * in den Apache-Pfad webharvests/ schiebt (ausgpackte Sites).
 	 * 
 	 * @param node der Knoten des Webschnittes
 	 * @throws RuntimeException Ausnahme aufgetreten
@@ -95,8 +96,7 @@ public class WebsiteVersionPublisher {
 			getConfFromFedora(node.getPid(), node);
 			Gatherconf conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("conf=" + conf.toString());
-			createSoftlinkInPublicData(node, conf);
-			setOpenwaybackLinkToPublicAccessPoint(node, conf);
+			PublishWebArchive(node, conf);
 		} catch (Exception e) {
 			WebgatherLogger.error("Webpage Version " + node.getPid()
 					+ " kann nicht veröffentlicht werden!");
@@ -106,7 +106,9 @@ public class WebsiteVersionPublisher {
 
 	/**
 	 * Zieht eine Webpage-Version (=Webschnitt) von der Veröffentlichung zurück,
-	 * indem es sie in der Openwayback-Kollektion "weltweit" löscht.
+	 * indem es sie in der Openwayback-Kollektion "weltweit" löscht (WARC-Objekte)
+	 * oder indem es sie in den Apache-Pfad restrictedweb/ schiebt (ausgepackte
+	 * Sites).
 	 * 
 	 * @param node der Knoten des Webschnittes
 	 * @throws RuntimeException Ausnahme aufgetreten
@@ -127,117 +129,59 @@ public class WebsiteVersionPublisher {
 	}
 
 	/**
-	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
-	 * auf den öffentlichen Zugriffspunkt zeigt. Tut er dies schon, wird nichts
-	 * gemacht.
+	 * Publiziert ein Webarchiv (gepackte Seite oder ausgepackte Seite)
 	 * 
-	 * @param node der Knoten des Webschnitts
-	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
-	 *          diesen Webschnitt maßgeblich war
+	 * @param node Der Knoten des Webschnitts
+	 * @param conf Die Gatherconf des Webschnitts
 	 */
-	private void setOpenwaybackLinkToPublicAccessPoint(Node node,
-			Gatherconf conf) {
+	private static void PublishWebArchive(Node node, Gatherconf conf) {
+		String localDir = null;
 		try {
-			String openWaybackLink = conf.getOpenWaybackLink();
-			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
-			play.Logger.debug("openWaybackLink=" + openWaybackLink);
-			String publicOpenWaybackLink =
-					openWaybackLink.replace("/wayback/", "/weltweit/");
-			publicOpenWaybackLink =
-					publicOpenWaybackLink.replace("/lesesaal/", "/weltweit/");
-			conf.setOpenWaybackLink(publicOpenWaybackLink);
-			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info(
-					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
-							+ node.getPid() + ". Modify-Message: " + msg);
+			localDir = conf.getLocalDir();
+			if (localDir.matches("(.*)/webharvests/(.*)")
+					|| localDir.matches("(.*)/restrictedweb/(.*)")) {
+				// Auf der Platte ausgepackte Website (direkter Aufruf im Browser)
+				WebgatherLogger.debug("Publiziere localDir " + localDir);
+				String newLocalDir = chkMvSiteToPublicWebharvests(node, conf, localDir);
+				// localDir UND OpenwaybackLink in der Conf updaten
+				setLocalDirAndOpenwaybackLinkToPublicWebharvests(node, conf,
+						newLocalDir);
+			} else {
+				// als WARC-Archiv gepackte Website (indexiert in Wayback)
+				createSoftlinkInPublicData(node, conf);
+				setOpenwaybackLinkToPublicAccessPoint(node, conf);
+			}
 		} catch (Exception e) {
-			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
-					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
+			WebgatherLogger.error(
+					"Webschnitt " + node.getPid() + " konnte nicht publiziert werden.");
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
-	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
-	 * auf den öffentlichen Zugriffspunkt zeigt. Tut er dies schon, wird nichts
-	 * gemacht.
+	 * De-Publiziert ein Webarchiv (gepackte Seite oder ausgepackte Seite)
 	 * 
-	 * @param node der Knoten des Webschnitts
-	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
-	 *          diesen Webschnitt maßgeblich war
+	 * @param node Der Knoten des Webschnitts
+	 * @param conf Die Gatherconf des Webschnitts
 	 */
-	private void setOpenwaybackLinkToRestrictedAccessPoint(Node node,
-			Gatherconf conf) {
+	private static void dePublishWebArchive(Node node, Gatherconf conf) {
+		String localDir = null;
 		try {
-			String openWaybackLink = conf.getOpenWaybackLink();
-			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
-			play.Logger.debug("openWaybackLink=" + openWaybackLink);
-
-			String restrictedAccessPoint = Play.application().configuration()
-					.getString("regal-api.heritrix.openwaybackLink");
-			if (openWaybackLink.startsWith(restrictedAccessPoint)) {
-				WebgatherLogger
-						.info("openWaybackLink steht schon auf beschränktem Zugriff.");
-				return;
+			localDir = conf.getLocalDir();
+			if (localDir.matches("(.*)/webharvests/(.*)")
+					|| localDir.matches("(.*)/restrictedweb/(.*)")) {
+				// Auf der Platte ausgepackte Website (direkter Aufruf im Browser)
+				WebgatherLogger.debug("De-publiziere localDir " + localDir);
+				String newLocalDir = chkMvSiteToRestrictedWeb(node, conf, localDir);
+				setLocalDirAndOpenwaybackLinkToRestrictedWeb(node, conf, newLocalDir);
+			} else {
+				// als WARC-Archiv gepackte Website (indexiert in Wayback)
+				chkRemoveSoftlinkInPublicData(node, conf, localDir);
+				setOpenwaybackLinkToRestrictedAccessPoint(node, conf);
 			}
-			int startIndex = openWaybackLink.indexOf("weltweit/");
-			if (startIndex < 0) {
-				throw new RuntimeException(
-						"Unbekannter Zugriffspunkt in OpenwaybackLink " + openWaybackLink
-								+ " !");
-			}
-			String restrictedOpenWaybackLink =
-					restrictedAccessPoint + openWaybackLink.substring(startIndex + 9);
-			WebgatherLogger
-					.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
-
-			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
-			play.Logger
-					.debug("restrictedOpenWaybackLink=" + restrictedOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info(
-					"Openwayback-Link wurde auf \"lesesaal|wayback\" gesetzt für Webschnitt "
-							+ node.getPid() + ". Modify-Message: " + msg);
-		} catch (UpdateNodeException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
-			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
-					+ " kann nicht auf \"lesesaal|wayback\" gesetzt werden!");
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Ändert localDir (den Speicherort des Webarchivs) und den Openwayback-Link
-	 * in der Gatherconf des Webschnittes auf den zugriffsbeschränkten Bereich
-	 * (restrictedweb). Ist dies schon der Fall, wird nichts gemacht.
-	 * 
-	 * @param node der Knoten der WebpageVersion
-	 * @param conf Gatherconf des Webschnitts
-	 * @param newLocalDir neuer lokaler Speicherpfad des Webschnitts
-	 */
-	private void setLocalDirAndOpenwaybackLinkToRestrictedWeb(Node node,
-			Gatherconf conf, String newLocalDir) {
-		try {
-			conf.setLocalDir(newLocalDir);
-			String versionDir =
-					newLocalDir.substring(Globals.restrictedwebDataDir.length() + 1);
-			String restrictedOpenWaybackLink =
-					Globals.restrictedwebDataUrl + "/" + versionDir;
-			WebgatherLogger
-					.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
-			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info(
-					"localDir und Openwayback-Link wurde auf zugriffbeschränkt gesetzt für Webschnitt "
-							+ node.getPid() + ". Modify-Message: " + msg);
-		} catch (UpdateNodeException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			WebgatherLogger
-					.error("localDir und Openwayback-Link für Webschnitt " + node.getPid()
-							+ " konnten nicht auf zugriffsbeschränkt gesetzt werden!");
+			WebgatherLogger.error("Webschnitt " + node.getPid()
+					+ " konnte nicht de-publiziert werden.");
 			throw new RuntimeException(e);
 		}
 	}
@@ -253,7 +197,7 @@ public class WebsiteVersionPublisher {
 	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
 	 *          diesem Webschnitt zugrunde gelegt wurde.
 	 */
-	private void createSoftlinkInPublicData(Node node, Gatherconf conf) {
+	private static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
 		try {
 			String localDir = conf.getLocalDir();
 			WebgatherLogger.debug("localDir=" + localDir);
@@ -271,12 +215,12 @@ public class WebsiteVersionPublisher {
 			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
-			File publicCrawlDir = createPublicDataSubDir(subDir);
+			File publicCrawlDirL = createPublicDataSubDir(subDir);
 			getDataFromFedora(node, localDir);
 			String DSLocation = node.getUploadFile();
 			WebgatherLogger.debug("uploadFile=" + DSLocation);
 			File uploadFile = new File(DSLocation);
-			chkCreateSoftlink(publicCrawlDir.getPath(), localDir,
+			chkCreateSoftlink(publicCrawlDirL.getPath(), localDir,
 					uploadFile.getName());
 		} catch (Exception e) {
 			WebgatherLogger.error("Softlink für Webschnitt " + node.getPid()
@@ -286,29 +230,109 @@ public class WebsiteVersionPublisher {
 	}
 
 	/**
-	 * De-Publiziert ein Webarchiv (gepackte Seite oder ausgepackte Seite)
+	 * Löscht einen Softlink unterhalb von public-data/, der auf eine
+	 * Webarchiv-Datei zeigt. Dadurch wird das Webarchiv in der
+	 * Openwayback-Kollektion "weltweit" entfernt.
 	 * 
-	 * @param node Der Knoten des Webschnitts
-	 * @param conf Die Gatherconf des Webschnitts
+	 * @param node Der Knoten des Webschnittes
+	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
+	 *          diesem Webschnitt zugrunde gelegt wurde.
 	 */
-	private void dePublishWebArchive(Node node, Gatherconf conf) {
-		String localDir = null;
+	private static void chkRemoveSoftlinkInPublicData(Node node, Gatherconf conf,
+			String localDirP) {
+		String localDir = localDirP;
 		try {
-			localDir = conf.getLocalDir();
-			if (localDir.matches("(.*)/webharvests/(.*)")) {
-				// Auf der Platte ausgepackte Website (direkter Aufruf im Browser)
-				WebgatherLogger.debug("De-publiziere localDir " + localDir);
-				String newLocalDir = chkMvSiteToRestrictedWeb(node, conf, localDir);
-				// localDir UND OpenwaybackLink in der Conf updaten
-				setLocalDirAndOpenwaybackLinkToRestrictedWeb(node, conf, newLocalDir);
-			} else {
-				// als WARC-Archiv gepackte Website (indexiert in Wayback)
-				chkRemoveSoftlinkInPublicData(node, conf, localDir);
-				setOpenwaybackLinkToRestrictedAccessPoint(node, conf);
+			WebgatherLogger.debug("localDir=" + localDir);
+			String jobDir = Play.application().configuration()
+					.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
+			WebgatherLogger.debug("jobDir=" + jobDir);
+			if (!localDir.startsWith(jobDir)) {
+				throw new RuntimeException("Crawl-Verzeichnis " + localDir
+						+ " beginnt nicht mit " + conf.getCrawlerSelection()
+						+ "-jobDir für PID " + node.getPid());
 			}
+			if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+				// zusätzliches Unterverzeichnis für Heritrix-Crawls
+				localDir = localDir.concat("/warcs");
+			}
+			String subDir = localDir.substring(jobDir.length() + 1);
+			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
+			if (!chkExistsPublicDataSubDir(subDir)) {
+				WebgatherLogger.debug("Nichts zu tun.");
+				return;
+			}
+			getDataFromFedora(node, localDir);
+			String DSLocation = node.getUploadFile();
+			WebgatherLogger.debug("uploadFile=" + DSLocation);
+			File uploadFile = new File(DSLocation);
+			chkRemoveSoftlink(publicCrawlDir.getPath(), uploadFile.getName());
 		} catch (Exception e) {
-			WebgatherLogger.error("Webschnitt " + node.getPid()
-					+ " konnte nicht de-publiziert werden.");
+			WebgatherLogger.error("Softlink für Webschnitt " + node.getPid()
+					+ " auf Verzeichnis " + localDir
+					+ " konnte unterhalb von public-data/ nicht gelöscht werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Verschiebt eine ausgepackte Website in den veröffentlchten Bereich. Macht
+	 * nichts, falls die Site sich schon dort befindet.
+	 * 
+	 * @param node der Knoten des Webschnitts
+	 * @param conf die Gatherconf am Webschnitt
+	 * @param localDir localDir aus der Gatherconf
+	 * @return Der volle Pfadname der Website im veröffentlichten Bereich
+	 */
+	private static String chkMvSiteToPublicWebharvests(Node node, Gatherconf conf,
+			String localDir) {
+		File localFile = new File(localDir);
+		if (!localFile.exists()) {
+			throw new RuntimeException("Ausgepackte Website " + localDir
+					+ " existiert nicht! PID=" + node.getPid());
+		}
+		if (localDir.startsWith(Globals.webharvestsDataDir)) {
+			WebgatherLogger.info("Nichts zu tun. " + node.getPid()
+					+ " liegt bereits veröffentlicht unter " + localDir);
+			return localDir;
+		}
+		if (!localDir.startsWith(Globals.restrictedwebDataDir)) {
+			throw new RuntimeException(
+					"Ausgepackte Website befindet sich in keinem bekannten Verzeichnis! localDir="
+							+ localDir + "; PID" + node.getPid());
+		}
+		WebgatherLogger.debug("dataDir=" + Globals.restrictedwebDataDir);
+		try {
+			// ermittle Pfad unterhalb von restrictedweb/
+			String versionDir =
+					localDir.substring(Globals.restrictedwebDataDir.length() + 1);
+			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + versionDir);
+			File versionFile =
+					new File(Globals.webharvestsDataDir + "/" + versionDir);
+			if (versionFile.exists()) {
+				WebgatherLogger.info(
+						"Ausgepackte Website befindet sich schon im veröffentlichten Bereich:"
+								+ versionFile.getPath());
+				return versionFile.getPath();
+			}
+			// gehe ein Verzeichnis höher, das sollte das Verz. der Webpage sein
+			String webpageDir = versionDir.replaceAll("/\\w+:\\d+$", "");
+			WebgatherLogger.debug("Verzeichnis für Webpage: " + webpageDir);
+			// lege das Verzeichnis der Webpage ggfs. an
+			File webpageFile =
+					new File(Globals.webharvestsDataDir + "/" + webpageDir);
+			if (!webpageFile.exists()) {
+				webpageFile.mkdirs();
+				WebgatherLogger
+						.info("Verzeichnis " + webpageFile.getPath() + " wurde angelegt.");
+			}
+			localFile.renameTo(versionFile);
+			WebgatherLogger.info("Verzeichnis " + localDir + " wurde umbenannt zu "
+					+ versionFile.toPath());
+			return versionFile.getPath();
+		} catch (Exception e) {
+			WebgatherLogger.error("Ausgepackter Webschnitt " + node.getPid()
+					+ " in Verzeichnis " + localDir
+					+ " konnte nicht in den veröffentlichten Bereich verschoben werden.");
 			throw new RuntimeException(e);
 		}
 	}
@@ -322,7 +346,7 @@ public class WebsiteVersionPublisher {
 	 * @param localDir localDir aus der Gatherconf
 	 * @return Der volle Pfadname der Website im zugriffsbeschränkten bereich
 	 */
-	private String chkMvSiteToRestrictedWeb(Node node, Gatherconf conf,
+	private static String chkMvSiteToRestrictedWeb(Node node, Gatherconf conf,
 			String localDir) {
 		File localFile = new File(localDir);
 		if (!localFile.exists()) {
@@ -377,45 +401,149 @@ public class WebsiteVersionPublisher {
 	}
 
 	/**
-	 * Löscht einen Softlink unterhalb von public-data/, der auf eine
-	 * Webarchiv-Datei zeigt. Dadurch wird das Webarchiv in der
-	 * Openwayback-Kollektion "weltweit" entfernt.
+	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
+	 * auf den öffentlichen Zugriffspunkt zeigt. Tut er dies schon, wird nichts
+	 * gemacht.
 	 * 
-	 * @param node Der Knoten des Webschnittes
-	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
-	 *          diesem Webschnitt zugrunde gelegt wurde.
+	 * @param node der Knoten des Webschnitts
+	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
+	 *          diesen Webschnitt maßgeblich war
 	 */
-	private void chkRemoveSoftlinkInPublicData(Node node, Gatherconf conf,
-			String localDir) {
+	private static void setOpenwaybackLinkToPublicAccessPoint(Node node,
+			Gatherconf conf) {
 		try {
-			WebgatherLogger.debug("localDir=" + localDir);
-			String jobDir = Play.application().configuration()
-					.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			if (!localDir.startsWith(jobDir)) {
-				throw new RuntimeException("Crawl-Verzeichnis " + localDir
-						+ " beginnt nicht mit " + conf.getCrawlerSelection()
-						+ "-jobDir für PID " + node.getPid());
-			}
-			if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
-				// zusätzliches Unterverzeichnis für Heritrix-Crawls
-				localDir = localDir.concat("/warcs");
-			}
-			String subDir = localDir.substring(jobDir.length() + 1);
-			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
-			if (!chkExistsPublicDataSubDir(subDir)) {
-				WebgatherLogger.debug("Nichts zu tun.");
+			String openWaybackLink = conf.getOpenWaybackLink();
+			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
+			play.Logger.debug("openWaybackLink=" + openWaybackLink);
+			String publicOpenWaybackLink =
+					openWaybackLink.replace("/wayback/", "/weltweit/");
+			publicOpenWaybackLink =
+					publicOpenWaybackLink.replace("/lesesaal/", "/weltweit/");
+			conf.setOpenWaybackLink(publicOpenWaybackLink);
+			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
+			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info(
+					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
+							+ node.getPid() + ". Modify-Message: " + msg);
+		} catch (Exception e) {
+			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
+					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
+	 * auf den öffentlichen Zugriffspunkt zeigt. Tut er dies schon, wird nichts
+	 * gemacht.
+	 * 
+	 * @param node der Knoten des Webschnitts
+	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
+	 *          diesen Webschnitt maßgeblich war
+	 */
+	private static void setOpenwaybackLinkToRestrictedAccessPoint(Node node,
+			Gatherconf conf) {
+		try {
+			String openWaybackLink = conf.getOpenWaybackLink();
+			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
+			play.Logger.debug("openWaybackLink=" + openWaybackLink);
+
+			String restrictedAccessPoint = Play.application().configuration()
+					.getString("regal-api.heritrix.openwaybackLink");
+			if (openWaybackLink.startsWith(restrictedAccessPoint)) {
+				WebgatherLogger
+						.info("openWaybackLink steht schon auf beschränktem Zugriff.");
 				return;
 			}
-			getDataFromFedora(node, localDir);
-			String DSLocation = node.getUploadFile();
-			WebgatherLogger.debug("uploadFile=" + DSLocation);
-			File uploadFile = new File(DSLocation);
-			chkRemoveSoftlink(publicCrawlDir.getPath(), uploadFile.getName());
+			int startIndex = openWaybackLink.indexOf("weltweit/");
+			if (startIndex < 0) {
+				throw new RuntimeException(
+						"Unbekannter Zugriffspunkt in OpenwaybackLink " + openWaybackLink
+								+ " !");
+			}
+			String restrictedOpenWaybackLink =
+					restrictedAccessPoint + openWaybackLink.substring(startIndex + 9);
+			WebgatherLogger
+					.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
+
+			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
+			play.Logger
+					.debug("restrictedOpenWaybackLink=" + restrictedOpenWaybackLink);
+			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info(
+					"Openwayback-Link wurde auf \"lesesaal|wayback\" gesetzt für Webschnitt "
+							+ node.getPid() + ". Modify-Message: " + msg);
+		} catch (UpdateNodeException e) {
+			e.printStackTrace();
 		} catch (Exception e) {
-			WebgatherLogger.error("Softlink für Webschnitt " + node.getPid()
-					+ " auf Verzeichnis " + localDir
-					+ " konnte unterhalb von public-data/ nicht gelöscht werden!");
+			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
+					+ " kann nicht auf \"lesesaal|wayback\" gesetzt werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Ändert localDir (den Speicherort des Webarchivs) und den Openwayback-Link
+	 * in der Gatherconf des Webschnittes auf den veröffentlichten Bereich
+	 * (webharvests). Ist dies schon der Fall, wird nichts gemacht.
+	 * 
+	 * @param node der Knoten der WebpageVersion
+	 * @param conf Gatherconf des Webschnitts
+	 * @param newLocalDir neuer lokaler Speicherpfad des Webschnitts
+	 */
+	private static void setLocalDirAndOpenwaybackLinkToPublicWebharvests(
+			Node node, Gatherconf conf, String newLocalDir) {
+		try {
+			conf.setLocalDir(newLocalDir);
+			String versionDir =
+					newLocalDir.substring(Globals.webharvestsDataDir.length() + 1);
+			String publicOpenWaybackLink =
+					Globals.webharvestsDataUrl + "/" + versionDir + "/webschnitt.xml";
+			WebgatherLogger.info("Neuer Openwayback-Link: " + publicOpenWaybackLink);
+			conf.setOpenWaybackLink(publicOpenWaybackLink);
+			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info(
+					"localDir und Openwayback-Link wurde auf öffentlich gesetzt für Webschnitt "
+							+ node.getPid() + ". Modify-Message: " + msg);
+		} catch (UpdateNodeException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			WebgatherLogger.error("localDir und Openwayback-Link für Webschnitt "
+					+ node.getPid() + " konnten nicht auf öffentlich gesetzt werden!");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Ändert localDir (den Speicherort des Webarchivs) und den Openwayback-Link
+	 * in der Gatherconf des Webschnittes auf den zugriffsbeschränkten Bereich
+	 * (restrictedweb). Ist dies schon der Fall, wird nichts gemacht.
+	 * 
+	 * @param node der Knoten der WebpageVersion
+	 * @param conf Gatherconf des Webschnitts
+	 * @param newLocalDir neuer lokaler Speicherpfad des Webschnitts
+	 */
+	private static void setLocalDirAndOpenwaybackLinkToRestrictedWeb(Node node,
+			Gatherconf conf, String newLocalDir) {
+		try {
+			conf.setLocalDir(newLocalDir);
+			String versionDir =
+					newLocalDir.substring(Globals.restrictedwebDataDir.length() + 1);
+			String restrictedOpenWaybackLink =
+					Globals.restrictedwebDataUrl + "/" + versionDir + "/webschnitt.xml";
+			WebgatherLogger
+					.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
+			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
+			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info(
+					"localDir und Openwayback-Link wurde auf zugriffbeschränkt gesetzt für Webschnitt "
+							+ node.getPid() + ". Modify-Message: " + msg);
+		} catch (UpdateNodeException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			WebgatherLogger
+					.error("localDir und Openwayback-Link für Webschnitt " + node.getPid()
+							+ " konnten nicht auf zugriffsbeschränkt gesetzt werden!");
 			throw new RuntimeException(e);
 		}
 	}
@@ -431,10 +559,10 @@ public class WebsiteVersionPublisher {
 	 * @param localDir Das Verzeichnis, in dem die WARC-Datei wirklich liegt.
 	 * @param uploadFile Der Dateiname der WARC-Datei (ohne Pfadangaben).
 	 */
-	private void chkCreateSoftlink(String publicCrawlDir, String localDir,
+	private static void chkCreateSoftlink(String publicCrawlDirP, String localDir,
 			String uploadFile) {
 		try {
-			File softLink = new File(publicCrawlDir + "/" + uploadFile);
+			File softLink = new File(publicCrawlDirP + "/" + uploadFile);
 			if (softLink.exists()) {
 				WebgatherLogger
 						.info("Softlink " + softLink.getPath() + " gibt es schon.");
@@ -450,7 +578,7 @@ public class WebsiteVersionPublisher {
 					+ " wurde erfolgreich angelegt.");
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann Softlink " + uploadFile + " in Verzeichnis "
-					+ publicCrawlDir + " nicht anlegen!");
+					+ publicCrawlDirP + " nicht anlegen!");
 			throw new RuntimeException(e);
 		}
 	}
@@ -464,9 +592,10 @@ public class WebsiteVersionPublisher {
 	 *          in denen der Softlink gelöscht werden soll.
 	 * @param uploadFile Der Dateiname der WARC-Datei (ohne Pfadangaben).
 	 */
-	private void chkRemoveSoftlink(String publicCrawlDir, String uploadFile) {
+	private static void chkRemoveSoftlink(String publicCrawlDirP,
+			String uploadFile) {
 		try {
-			File softLink = new File(publicCrawlDir + "/" + uploadFile);
+			File softLink = new File(publicCrawlDirP + "/" + uploadFile);
 			if (!softLink.exists()) {
 				WebgatherLogger.info(
 						"Softlink " + softLink + " gibt es nicht bzw. ist schon gelöscht.");
@@ -477,7 +606,7 @@ public class WebsiteVersionPublisher {
 					.info("Softlink " + softLink.getPath() + " wurde entfernt.");
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann Softlink " + uploadFile + " in Verzeichnis "
-					+ publicCrawlDir + " nicht löschen !");
+					+ publicCrawlDirP + " nicht löschen !");
 			throw new RuntimeException(e);
 		}
 	}
@@ -489,15 +618,15 @@ public class WebsiteVersionPublisher {
 	 * @param subDir die Verzeichnisstruktur unterhalb von public-data/.
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 */
-	private File createPublicDataSubDir(String subDir) {
+	private static File createPublicDataSubDir(String subDir) {
 		try {
 			String publicJobDir = Play.application().configuration()
 					.getString("regal-api.public.jobDir");
-			File publicCrawlDir = new File(publicJobDir + "/" + subDir);
-			if (!publicCrawlDir.exists()) {
-				publicCrawlDir.mkdirs();
+			File publicCrawlDirL = new File(publicJobDir + "/" + subDir);
+			if (!publicCrawlDirL.exists()) {
+				publicCrawlDirL.mkdirs();
 			}
-			return publicCrawlDir;
+			return publicCrawlDirL;
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann Verzeichnisstruktur " + subDir
 					+ " unterhalb von public-data/ nicht anlegen!");
@@ -512,7 +641,7 @@ public class WebsiteVersionPublisher {
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 * @return Ja oder Nein : Verzeichnis existiert
 	 */
-	private boolean chkExistsPublicDataSubDir(String subDir) {
+	private static boolean chkExistsPublicDataSubDir(String subDir) {
 		publicCrawlDir = null;
 		try {
 			String publicJobDir = Play.application().configuration()
@@ -539,7 +668,7 @@ public class WebsiteVersionPublisher {
 	 * @param node
 	 * @throws Exception
 	 */
-	private void getConfFromFedora(String pid, Node node)
+	private static void getConfFromFedora(String pid, Node node)
 			throws RuntimeException {
 		try {
 			FedoraResponse response =
@@ -559,7 +688,7 @@ public class WebsiteVersionPublisher {
 	 * @param node
 	 * @throws Exception
 	 */
-	private void getDataFromFedora(Node node, String localDir)
+	private static void getDataFromFedora(Node node, String localDir)
 			throws RuntimeException {
 		try {
 			GetDatastreamResponse response =
