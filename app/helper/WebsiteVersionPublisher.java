@@ -67,8 +67,7 @@ public class WebsiteVersionPublisher {
 				}
 			}
 
-			if ((object.getAccessScheme().equals("private")
-					|| object.getAccessScheme().equals("restricted"))
+			if (object.getAccessScheme().equals("restricted")
 					&& node.getContentType().equals("version")) {
 				retreatWebpageVersion(node);
 				return "Webschnitt ist auf zugriffsbeschränkt (Lesesaal) gesetzt.";
