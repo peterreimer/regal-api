@@ -4496,7 +4496,7 @@ var defaultOptions = {
     kind: OptionKind.WORKER
   },
   workerSrc: {
-    value: '/public/build/pdf.worker.js',
+    value: '/static/build/pdf.worker.js',
     kind: OptionKind.WORKER
   }
 };
