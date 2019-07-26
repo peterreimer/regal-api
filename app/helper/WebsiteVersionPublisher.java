@@ -200,17 +200,30 @@ public class WebsiteVersionPublisher {
 		try {
 			String localDir = conf.getLocalDir();
 			WebgatherLogger.debug("localDir=" + localDir);
-			String jobDir = Play.application().configuration()
-					.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			if (!localDir.startsWith(jobDir)) {
-				throw new RuntimeException("Crawl-Verzeichnis " + localDir
-						+ " beginnt nicht mit " + conf.getCrawlerSelection()
-						+ "-jobDir für PID " + node.getPid());
-			}
-			if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
-				// zusätzliches Unterverzeichnis für Heritrix-Crawls
+			CrawlerSelection crawlerSelection = conf.getCrawlerSelection();
+			String jobDir = null;
+			if (crawlerSelection == null) {
+				// Ist es wget-Recrawl ?
+				jobDir = Play.application().configuration()
+						.getString("regal-api.wget.dataDir");
+				if (!localDir.startsWith(jobDir)) {
+					throw new RuntimeException("Crawl-Verzeichnis " + localDir
+							+ " beginnt nicht mit " + jobDir + " für PID " + node.getPid());
+				}
 				localDir = localDir.concat("/warcs");
+			} else {
+				jobDir = Play.application().configuration()
+						.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
+				WebgatherLogger.debug("jobDir=" + jobDir);
+				if (!localDir.startsWith(jobDir)) {
+					throw new RuntimeException("Crawl-Verzeichnis " + localDir
+							+ " beginnt nicht mit " + conf.getCrawlerSelection()
+							+ "-jobDir für PID " + node.getPid());
+				}
+				if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+					// zusätzliches Unterverzeichnis für Heritrix-Crawls
+					localDir = localDir.concat("/warcs");
+				}
 			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
@@ -242,17 +255,30 @@ public class WebsiteVersionPublisher {
 		String localDir = localDirP;
 		try {
 			WebgatherLogger.debug("localDir=" + localDir);
-			String jobDir = Play.application().configuration()
-					.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			if (!localDir.startsWith(jobDir)) {
-				throw new RuntimeException("Crawl-Verzeichnis " + localDir
-						+ " beginnt nicht mit " + conf.getCrawlerSelection()
-						+ "-jobDir für PID " + node.getPid());
-			}
-			if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
-				// zusätzliches Unterverzeichnis für Heritrix-Crawls
+			CrawlerSelection crawlerSelection = conf.getCrawlerSelection();
+			String jobDir = null;
+			if (crawlerSelection == null) {
+				// Ist es wget-Recrawl ?
+				jobDir = Play.application().configuration()
+						.getString("regal-api.wget.dataDir");
+				if (!localDir.startsWith(jobDir)) {
+					throw new RuntimeException("Crawl-Verzeichnis " + localDir
+							+ " beginnt nicht mit " + jobDir + " für PID " + node.getPid());
+				}
 				localDir = localDir.concat("/warcs");
+			} else {
+				jobDir = Play.application().configuration()
+						.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
+				WebgatherLogger.debug("jobDir=" + jobDir);
+				if (!localDir.startsWith(jobDir)) {
+					throw new RuntimeException("Crawl-Verzeichnis " + localDir
+							+ " beginnt nicht mit " + conf.getCrawlerSelection()
+							+ "-jobDir für PID " + node.getPid());
+				}
+				if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+					// zusätzliches Unterverzeichnis für Heritrix-Crawls
+					localDir = localDir.concat("/warcs");
+				}
 			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
