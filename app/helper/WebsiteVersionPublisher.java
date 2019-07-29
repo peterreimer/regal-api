@@ -48,6 +48,7 @@ public class WebsiteVersionPublisher {
 	// Das Unterverzeichnis in public-data/ (volle Pfadangabe) als Java-Klasse
 	// "File"
 	private static File publicCrawlDir = null;
+	private static String jobDir = null;
 
 	/**
 	 * Veröffentlicht und De-Publiziert Webschnitte
@@ -175,7 +176,7 @@ public class WebsiteVersionPublisher {
 				setLocalDirAndOpenwaybackLinkToRestrictedWeb(node, conf, newLocalDir);
 			} else {
 				// als WARC-Archiv gepackte Website (indexiert in Wayback)
-				chkRemoveSoftlinkInPublicData(node, conf, localDir);
+				chkRemoveSoftlinkInPublicData(node, conf);
 				setOpenwaybackLinkToRestrictedAccessPoint(node, conf);
 			}
 		} catch (Exception e) {
@@ -183,6 +184,33 @@ public class WebsiteVersionPublisher {
 					+ " konnte nicht de-publiziert werden.");
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static String findJobDirLocalDir(Node node, Gatherconf conf) {
+		String localDir = conf.getLocalDir();
+		WebgatherLogger.debug("localDir=" + localDir);
+		CrawlerSelection crawlerSelection = conf.getCrawlerSelection();
+		jobDir = null;
+		// Ist es wget-Recrawl ?
+		jobDir =
+				Play.application().configuration().getString("regal-api.wget.dataDir");
+		if (localDir.startsWith(jobDir)) {
+			localDir = localDir.concat("/warcs");
+		} else {
+			jobDir = Play.application().configuration()
+					.getString("regal-api." + crawlerSelection + ".jobDir");
+			WebgatherLogger.debug("jobDir=" + jobDir);
+			if (!localDir.startsWith(jobDir)) {
+				throw new RuntimeException(
+						"Crawl-Verzeichnis " + localDir + " beginnt nicht mit "
+								+ crawlerSelection + "-jobDir für PID " + node.getPid());
+			}
+			if (crawlerSelection.equals(CrawlerSelection.heritrix)) {
+				// zusätzliches Unterverzeichnis für Heritrix-Crawls
+				localDir = localDir.concat("/warcs");
+			}
+		}
+		return localDir;
 	}
 
 	/**
@@ -198,33 +226,7 @@ public class WebsiteVersionPublisher {
 	 */
 	private static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
 		try {
-			String localDir = conf.getLocalDir();
-			WebgatherLogger.debug("localDir=" + localDir);
-			CrawlerSelection crawlerSelection = conf.getCrawlerSelection();
-			String jobDir = null;
-			if (crawlerSelection == null) {
-				// Ist es wget-Recrawl ?
-				jobDir = Play.application().configuration()
-						.getString("regal-api.wget.dataDir");
-				if (!localDir.startsWith(jobDir)) {
-					throw new RuntimeException("Crawl-Verzeichnis " + localDir
-							+ " beginnt nicht mit " + jobDir + " für PID " + node.getPid());
-				}
-				localDir = localDir.concat("/warcs");
-			} else {
-				jobDir = Play.application().configuration()
-						.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
-				WebgatherLogger.debug("jobDir=" + jobDir);
-				if (!localDir.startsWith(jobDir)) {
-					throw new RuntimeException("Crawl-Verzeichnis " + localDir
-							+ " beginnt nicht mit " + conf.getCrawlerSelection()
-							+ "-jobDir für PID " + node.getPid());
-				}
-				if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
-					// zusätzliches Unterverzeichnis für Heritrix-Crawls
-					localDir = localDir.concat("/warcs");
-				}
-			}
+			String localDir = findJobDirLocalDir(node, conf);
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
 			File publicCrawlDirL = createPublicDataSubDir(subDir);
@@ -250,36 +252,10 @@ public class WebsiteVersionPublisher {
 	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
 	 *          diesem Webschnitt zugrunde gelegt wurde.
 	 */
-	private static void chkRemoveSoftlinkInPublicData(Node node, Gatherconf conf,
-			String localDirP) {
-		String localDir = localDirP;
+	private static void chkRemoveSoftlinkInPublicData(Node node,
+			Gatherconf conf) {
+		String localDir = findJobDirLocalDir(node, conf);
 		try {
-			WebgatherLogger.debug("localDir=" + localDir);
-			CrawlerSelection crawlerSelection = conf.getCrawlerSelection();
-			String jobDir = null;
-			if (crawlerSelection == null) {
-				// Ist es wget-Recrawl ?
-				jobDir = Play.application().configuration()
-						.getString("regal-api.wget.dataDir");
-				if (!localDir.startsWith(jobDir)) {
-					throw new RuntimeException("Crawl-Verzeichnis " + localDir
-							+ " beginnt nicht mit " + jobDir + " für PID " + node.getPid());
-				}
-				localDir = localDir.concat("/warcs");
-			} else {
-				jobDir = Play.application().configuration()
-						.getString("regal-api." + conf.getCrawlerSelection() + ".jobDir");
-				WebgatherLogger.debug("jobDir=" + jobDir);
-				if (!localDir.startsWith(jobDir)) {
-					throw new RuntimeException("Crawl-Verzeichnis " + localDir
-							+ " beginnt nicht mit " + conf.getCrawlerSelection()
-							+ "-jobDir für PID " + node.getPid());
-				}
-				if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
-					// zusätzliches Unterverzeichnis für Heritrix-Crawls
-					localDir = localDir.concat("/warcs");
-				}
-			}
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
 			if (!chkExistsPublicDataSubDir(subDir)) {
