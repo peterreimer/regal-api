@@ -186,6 +186,17 @@ public class WebsiteVersionPublisher {
 		}
 	}
 
+	/**
+	 * Ermittelt jobDir und ergänzt ggfs. localDir. jobDir ist das
+	 * Basisverzeichnis, unter dem das WARC-Archiv dieses Webschnitts liegt. Das
+	 * jobDir wird aus dem gewählten Crawler ermittelt. Bei heritrix- und
+	 * wget-Crawls muss das localDir um das Unterverzeichnis warcs/ ergänzt
+	 * werdem, um die WARC-Datei zu finden.
+	 * 
+	 * @param node der Knoten des Webschnitts
+	 * @param conf die Gatherconf des Webschnitts
+	 * @return localDir
+	 */
 	private static String findJobDirLocalDir(Node node, Gatherconf conf) {
 		String localDir = conf.getLocalDir();
 		WebgatherLogger.debug("localDir=" + localDir);
