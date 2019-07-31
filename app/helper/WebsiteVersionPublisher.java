@@ -49,6 +49,7 @@ public class WebsiteVersionPublisher {
 	// "File"
 	private static File publicCrawlDir = null;
 	private static String jobDir = null;
+	private static String msg = null;
 
 	/**
 	 * Veröffentlicht und De-Publiziert Webschnitte
@@ -79,6 +80,37 @@ public class WebsiteVersionPublisher {
 		} catch (Exception e) {
 			play.Logger.error("", e);
 			return e.toString();
+		}
+	}
+
+	/**
+	 * Diese Methode realisiert sowohl das Veröffentlichen als auch das
+	 * De-Publizieren eines Webschnitss anhand des Zugriffsrechts "accessScheme".
+	 * Diese Methode wird über den Endpoint /resource/:pid/publishVersion
+	 * aufgerufen.
+	 * 
+	 * @param node der Knoten des Webschnitts
+	 * @param accessScheme das Zugriffsrecht als String: "public", "restricted"
+	 * @throws RuntimeException eine Ausnahem, wenn es nicht geklappt hat
+	 */
+	public void publishWebpageVersion(Node node, String accessScheme)
+			throws RuntimeException {
+		WebgatherLogger
+				.info("Realisierung eines Zugriffsrechts für einen Webschnitt.");
+		try {
+			if (accessScheme.equals("public")) {
+				publishWebpageVersion(node);
+			} else if (accessScheme.equals("restricted")) {
+				retreatWebpageVersion(node);
+			} else {
+				msg = "Nicht unterstützes Zugriffsrecht :" + accessScheme;
+				WebgatherLogger.warn(msg);
+				throw new RuntimeException(msg);
+			}
+		} catch (Exception e) {
+			WebgatherLogger.error("Webpage Version " + node.getPid()
+					+ " kann nicht veröffentlicht werden!");
+			throw new RuntimeException(e);
 		}
 	}
 

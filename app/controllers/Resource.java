@@ -1132,6 +1132,42 @@ public class Resource extends MyController {
 		});
 	}
 
+	/**
+	 * Dieser Endpoint realiert ein gewünschtes Zugriffsrecht (AccessScheme) für
+	 * eine WebpageVersion (Webschnitt). Aktuell unterstützt werden die
+	 * Zugriffsrechte "öffentlich" (public) und "eingeschränkt" (restricted).
+	 * "eingeschränkt" bedeutet, dass der Webschnitt nur für bestimmte
+	 * IP-Adressen, die i.d.R. im Lesesaal des LBZ liegen, abgerufen (z.B. Replay
+	 * in Wayback) werden kann. "öffentlich" bedeutet, dass der Webschnitt
+	 * (Inhalt) für jedermann öffentlich im Netz dargestellt werden kann.
+	 * 
+	 * @param pid Die PID des Webschnitts
+	 * @param accessScheme Zugrifssrecht, kodiert als "public", "restricted", ...
+	 * @return
+	 */
+	public static Promise<Result> publishWebpageVersion(
+			@PathParam("pid") String pid,
+			@QueryParam("accessScheme") String accessScheme) {
+		try {
+			return new ModifyAction().call(pid, userId -> {
+				Node node = readNodeOrNull(pid);
+				WebsiteVersionPublisher wvp = new WebsiteVersionPublisher();
+				wvp.publishWebpageVersion(node, accessScheme);
+				return JsonMessage(new Message("WebpageVersion " + node.getPid()
+						+ " wurde auf Zugriffsrecht " + accessScheme + " gesetzt.", 200));
+			});
+		} catch (Exception e) {
+			play.Logger.error(e.toString());
+			return Promise.promise(() -> {
+				return JsonMessage(new Message(
+						"WebpageVersion " + pid + " konnte nicht auf Zugriffsrecht "
+								+ accessScheme + " gesetzt werden!",
+						200));
+			});
+
+		}
+	}
+
 	public static Promise<Result> getStatus(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
 			return getJsonResult(read.getStatus(node));

@@ -244,8 +244,11 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * @param n must be of type webpage
-	 * @return a new version pointing to a heritrix crawl
+	 * Diese Methode erzeugt eine neue WebpageVersion (Webschnitt) zu einer
+	 * Webpage. Ein Crawl mit dem gewählten Crawler wird angestoßen.
+	 * 
+	 * @param n must be of type webpage: Die Webpage
+	 * @return a new version pointing to a heritrix or wpull crawl
 	 */
 	public Node createWebpageVersion(Node n) {
 		Gatherconf conf = null;
@@ -349,6 +352,11 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode legt eine WebpageVersion für eine bestehende WARC-Datei an.
+	 * Es wird angenommen, dass diese WARC-Datei im Verzechnis wget-data/ liegt.
+	 * Diese Methode wurde bei der Migration der aus EDO2 stammenden Webschnitte,
+	 * die ausgepackt und mit wget erneut, lokal gecrawlt wurden, angewandt.
+	 * 
 	 * @param n must be of type webpage
 	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch)
 	 * @param label Label für die Version im Format YYYY-MM-DD
@@ -423,8 +431,18 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode erzeugt eine neue WebpageVersion (Webschnitt) und verknüpft
+	 * diese mit einem bereits erfolgten Crawl. Es wird angenommen, dass das
+	 * Ergebnis dieses Crawl ausgepackt auf der Festplatte liegt, also nicht in
+	 * WARC-Form vorhanden ist. Genauer wird angenommen, dass der ausgepackte
+	 * Webcrawl unter dem URL-Pfad webharvests/ zu finden ist. Diese Methode wurde
+	 * bei der Migration (Import) der aus EDO2 stammenden Webschnitte, die nicht
+	 * in die Form WARC überführt werden konnten, verwendet.
+	 * 
 	 * @param n must be of type web page
-	 * @param jsn Json node
+	 * @param jsn Json node: Im Json muss die Information über die versionPid,
+	 *          Datumsstempel (des Crawls) und ZIP-Size der gecrawlten Website
+	 *          vorhanden sein
 	 * @return a new version pointing to a linked, unpacked crawl
 	 */
 	public Node linkWebpageVersion(Node n, JsonNode jsn) {
