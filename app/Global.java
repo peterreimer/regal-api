@@ -72,8 +72,12 @@ public class Global extends GlobalSettings {
 
 	private static void sendMail() {
 		try {
-			Mail.sendMail("",
-					"New instance of regal-api is starting on " + Globals.server);
+			// Ersetzen der E-Mail durch eine Log-Meldung bis zu einer umfassenderen
+			// Lösung: EDOZWO-996
+			// Mail.sendMail("", "New instance of regal-api is starting on " +
+			// Globals.server);
+			play.Logger
+					.info("New instance of regal-api is starting on " + Globals.server);
 		} catch (Throwable t) {
 			play.Logger.warn("Failure at startup! Could not sent email!");
 		}
