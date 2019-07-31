@@ -19,6 +19,7 @@ data
 .project
 bin
 conf/application.conf
+conf/mail.properties
 scripts/variables.conf
 *.HIST
 *~
