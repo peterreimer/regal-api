@@ -241,14 +241,14 @@ public class WebsiteVersionPublisher {
 			return localDir;
 		}
 		jobDir = Play.application().configuration()
-				.getString("regal-api.heritrix.dataDir");
+				.getString("regal-api.heritrix.jobDir");
 		if (localDir.startsWith(jobDir)) {
 			WebgatherLogger.debug("jobDir=" + jobDir);
 			localDir = localDir.concat("/warcs");
 			return localDir;
 		}
 		jobDir =
-				Play.application().configuration().getString("regal-api.wpull.dataDir");
+				Play.application().configuration().getString("regal-api.wpull.jobDir");
 		if (localDir.startsWith(jobDir)) {
 			WebgatherLogger.debug("jobDir=" + jobDir);
 			return localDir;
