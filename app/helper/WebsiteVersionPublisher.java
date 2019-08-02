@@ -459,7 +459,20 @@ public class WebsiteVersionPublisher {
 	private static void setOpenwaybackLinkToPublicAccessPoint(Node node,
 			Gatherconf conf) {
 		try {
+			String localDir = conf.getLocalDir();
+			WebgatherLogger.debug("localDir=" + localDir);
 			String openWaybackLink = conf.getOpenWaybackLink();
+			if (openWaybackLink == null) {
+				// Baue Openwayback-Link selber neu zusammen
+				// Datumsstempel, 8stellig, aus localDir ermitteln
+				String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
+				WebgatherLogger.debug("dateStamp=" + dateStamp);
+				String openwaybackBaseLink = Play.application().configuration()
+						.getString("regal-api.heritrix.openwaybackLink");
+				String url = conf.getUrl();
+				openWaybackLink =
+						new String(openwaybackBaseLink + dateStamp + "/" + url);
+			}
 			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
 			play.Logger.debug("openWaybackLink=" + openWaybackLink);
 			String publicOpenWaybackLink =
@@ -481,8 +494,8 @@ public class WebsiteVersionPublisher {
 
 	/**
 	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
-	 * auf den öffentlichen Zugriffspunkt zeigt. Tut er dies schon, wird nichts
-	 * gemacht.
+	 * auf den zugriffsbeschränkten Zugriffspunkt zeigt. Tut er dies schon, wird
+	 * nichts gemacht.
 	 * 
 	 * @param node der Knoten des Webschnitts
 	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
@@ -491,32 +504,46 @@ public class WebsiteVersionPublisher {
 	private static void setOpenwaybackLinkToRestrictedAccessPoint(Node node,
 			Gatherconf conf) {
 		try {
-			String openWaybackLink = conf.getOpenWaybackLink();
-			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
-			play.Logger.debug("openWaybackLink=" + openWaybackLink);
-
+			String localDir = conf.getLocalDir();
+			WebgatherLogger.debug("localDir=" + localDir);
 			String restrictedAccessPoint = Play.application().configuration()
 					.getString("regal-api.heritrix.openwaybackLink");
-			if (openWaybackLink.startsWith(restrictedAccessPoint)) {
+			String openWaybackLink = conf.getOpenWaybackLink();
+			String restrictedOpenWaybackLink = null;
+			if (openWaybackLink == null) {
+				// Baue Openwayback-Link selber neu zusammen
+				// Datumsstempel, 8stellig, aus localDir ermitteln
+				String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
+				WebgatherLogger.debug("dateStamp=" + dateStamp);
+				String url = conf.getUrl();
+				restrictedOpenWaybackLink =
+						new String(restrictedAccessPoint + dateStamp + "/" + url);
+				WebgatherLogger.debug("openWaybackLink=" + restrictedOpenWaybackLink);
+			} else {
+				WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
+				play.Logger.debug("openWaybackLink=" + openWaybackLink);
+				if (openWaybackLink.startsWith(restrictedAccessPoint)) {
+					WebgatherLogger
+							.info("openWaybackLink steht schon auf beschränktem Zugriff.");
+					return;
+				}
+				// vorhandener OpenWaybackLink wird auf "zugriffsbeschränkt"
+				// umgeschrieben
+				int startIndex = openWaybackLink.indexOf("weltweit/");
+				if (startIndex < 0) {
+					throw new RuntimeException(
+							"Unbekannter Zugriffspunkt in OpenwaybackLink " + openWaybackLink
+									+ " !");
+				}
+				restrictedOpenWaybackLink =
+						restrictedAccessPoint + openWaybackLink.substring(startIndex + 9);
 				WebgatherLogger
-						.info("openWaybackLink steht schon auf beschränktem Zugriff.");
-				return;
+						.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
 			}
-			int startIndex = openWaybackLink.indexOf("weltweit/");
-			if (startIndex < 0) {
-				throw new RuntimeException(
-						"Unbekannter Zugriffspunkt in OpenwaybackLink " + openWaybackLink
-								+ " !");
-			}
-			String restrictedOpenWaybackLink =
-					restrictedAccessPoint + openWaybackLink.substring(startIndex + 9);
-			WebgatherLogger
-					.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
-
 			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
 			play.Logger
 					.debug("restrictedOpenWaybackLink=" + restrictedOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
+			msg = new Modify().updateConf(node, conf.toString());
 			WebgatherLogger.info(
 					"Openwayback-Link wurde auf \"lesesaal|wayback\" gesetzt für Webschnitt "
 							+ node.getPid() + ". Modify-Message: " + msg);
