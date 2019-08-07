@@ -95,6 +95,10 @@ public class ViewerInfo {
 			style = Style.LINKED;
 			return thumbyLink(n);
 		}
+		if (ViewerType.SEC_PDF.equals(viewertype)) {
+			style = Style.LINKED;
+			return thumbyLink(n);
+		}
 		style = Style.EMBEDDED;
 		return "";
 	}
