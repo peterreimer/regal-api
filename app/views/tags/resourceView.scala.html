@@ -20,7 +20,7 @@
 							</div>
 					<a href=@viewerInfo.viewerAdress target="_blank"><b>View<i class="fa fa-eye"></i></b><br/></a>
 				}
-
+				
 				@if(ViewerInfo.Style.EMBEDDED.equals(viewerInfo.style)){
 				   @mediaViewers.standardViewer(viewerInfo)
 				} else{
@@ -39,10 +39,18 @@
 						}
 					}
 				}
+				
+				@if(ViewerInfo.ViewerType.SEC_PDF.equals(viewerInfo.viewertype)){
+				<em>Download nicht erlaubt<em>
+				} else {
 				@createViewerLink(viewerInfo)
+				}
+				
+				
 			}
 		} 
 }
+
 @createViewerLink(viewerInfo:ViewerInfo)={
 	<a href=@viewerInfo.dataLink><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
  	@if("public".equals(viewerInfo.accessScheme)){
