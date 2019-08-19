@@ -175,7 +175,7 @@ public class DublinCoreData implements java.io.Serializable {
 	}
 
 	/**
-	 * @return dc:coverae
+	 * @return dc:coverage
 	 */
 	public List<String> getCoverage() {
 		return coverage;
