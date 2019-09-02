@@ -337,6 +337,17 @@ public class Create extends RegalAction {
 					Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
+			/*
+			 * Im Falle von veröffentlichten Websites müsste die neue Version sofort
+			 * veröffentlicht werden
+			 */
+			if (n.getAccessScheme().equals("public")) {
+				WebsiteVersionPublisher.createSoftlinkInPublicData(webpageVersion,
+						conf);
+				WebsiteVersionPublisher
+						.setOpenwaybackLinkToPublicAccessPoint(webpageVersion, conf);
+			}
+
 			WebgatherLogger.debug(msg);
 			WebgatherLogger.info("Version " + webpageVersion.getPid()
 					+ " zur Website " + n.getPid() + " erfolgreich angelegt!");
