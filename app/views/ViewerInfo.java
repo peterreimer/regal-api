@@ -122,7 +122,12 @@ public class ViewerInfo {
 	}
 
 	public String getViewerLink() {
+		if (ViewerType.SEC_PDF.equals(viewertype)) {
+			return Globals.protocol + Globals.server + "/viewers/pdf/" + pid
+					+ "/data";
+		}
 		return Globals.protocol + Globals.server + "/viewers/deepzoom/" + pid
 				+ "/data";
+
 	}
 }
