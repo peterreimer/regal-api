@@ -111,9 +111,9 @@ parsers.anyContent.maxLength = 20MB
 logger.com.jolbox=WARN // for EBean
 db.default.driver=com.mysql.jdbc.Driver
 db.default.url="jdbc:mysql://localhost/regal_api?characterEncoding=UTF-8"
-db.default.user=regal_api
+db.default.username=regal_api
 db.default.password="admin"
 evolutionplugin=enabled
-applyEvolutions.default=true
-applyDownEvolutions.default=true
+play.evolutions.db.default.autoApply=true
+play.evolutions.db.default.autoApplyDowns=true
 ebean.default = ["authenticate.*"]
