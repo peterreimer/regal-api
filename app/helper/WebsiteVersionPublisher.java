@@ -270,7 +270,7 @@ public class WebsiteVersionPublisher {
 	 * @param conf Die Konfigurationsdatei für das Webcrawling (Gatherconf), die
 	 *          diesem Webschnitt zugrunde gelegt wurde.
 	 */
-	private static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
+	public static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
 		try {
 			String localDir = findJobDirLocalDir(node, conf);
 			String subDir = localDir.substring(jobDir.length() + 1);
@@ -456,7 +456,7 @@ public class WebsiteVersionPublisher {
 	 * @param conf die Gatherconf, Konfigurationsdatei für den Crawler, die für
 	 *          diesen Webschnitt maßgeblich war
 	 */
-	private static void setOpenwaybackLinkToPublicAccessPoint(Node node,
+	public static void setOpenwaybackLinkToPublicAccessPoint(Node node,
 			Gatherconf conf) {
 		try {
 			String localDir = conf.getLocalDir();
