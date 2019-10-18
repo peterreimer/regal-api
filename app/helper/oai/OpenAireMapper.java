@@ -29,7 +29,7 @@ import models.Globals;
 import models.Node;
 
 /**
- * @author Jan Schnasse
+ * @author Jan Schnasse extended by Andres Quast
  *
  */
 public class OpenAireMapper {
