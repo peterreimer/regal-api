@@ -249,6 +249,8 @@ public class OaiDispatcher {
 					continue; // implicitly added - or not allowed to set
 				if ("wgl".equals(t))
 					continue; // implicitly added - or not allowed to set
+				if ("openaire".equals(t))
+					continue; // implicitly added - or not allowed to set
 				node.addTransformer(new Transformer(t));
 			}
 		}
@@ -320,7 +322,7 @@ public class OaiDispatcher {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
-				node.addTransformer(new Transformer("oaidc"));
+				node.addTransformer(new Transformer("openaire"));
 			}
 		}
 	}
