@@ -59,6 +59,6 @@ resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "http://repo1.mav
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
 EclipseKeys.preTasks := Seq(compile in Compile)
-
+EclipseKeys.withSource := true
 EclipseKeys.projectFlavor := EclipseProjectFlavor.Java           // Java project. Don't expect Scala IDE
 EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.ManagedClasses, EclipseCreateSrc.ManagedResources)  // Use .class files instead of generated .scala files for views and routes 

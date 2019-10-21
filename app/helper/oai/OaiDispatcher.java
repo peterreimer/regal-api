@@ -75,6 +75,8 @@ public class OaiDispatcher {
 		addMetsTransformer(node);
 		addRdfTransformer(node);
 		addWglTransformer(node);
+		addOpenAireTransformer(node);
+
 	}
 
 	public static String initContentModels(String namespace) {
@@ -95,6 +97,8 @@ public class OaiDispatcher {
 				internalAccessRoute + "aleph"));
 		transformers.add(new Transformer(namespace + "mets", "mets",
 				internalAccessRoute + "mets"));
+		transformers.add(new Transformer(namespace + "openaire", "openaire",
+				internalAccessRoute + "openaire"));
 		transformers.add(
 				new Transformer(namespace + "rdf", "rdf", internalAccessRoute + "rdf"));
 		transformers.add(
@@ -103,7 +107,7 @@ public class OaiDispatcher {
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
 				+ "aleph, " + namespace + "mets, " + namespace + "rdf, " + namespace
-				+ "wgl";
+				+ "wgl," + namespace + "openaire";
 		play.Logger.info(result);
 		return result;
 	}
@@ -309,4 +313,16 @@ public class OaiDispatcher {
 			}
 		}
 	}
+
+	private static void addOpenAireTransformer(Node node) {
+		String type = node.getContentType();
+		if ("public".equals(node.getPublishScheme())) {
+			if ("monograph".equals(type) || "journal".equals(type)
+					|| "webpage".equals(type) || "researchData".equals(type)
+					|| "article".equals(type)) {
+				node.addTransformer(new Transformer("oaidc"));
+			}
+		}
+	}
+
 }

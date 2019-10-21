@@ -27,10 +27,11 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * @author Andres Quast, quast@hbz-nrw.de
  * 
  */
 
-public class DublinCoreData implements java.io.Serializable {
+public class OpenAireData implements java.io.Serializable {
 
 	List<String> contributor = new Vector<>();
 	List<String> coverage = new Vector<>();
@@ -62,7 +63,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param cwgl:wglcontributor
 	 * @return this
 	 */
-	public DublinCoreData setWglType(List<String> wglType) {
+	public OpenAireData setWglType(List<String> wglType) {
 		this.wglType = wglType;
 		return this;
 	}
@@ -71,7 +72,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e wgl:wglcontributor
 	 * @return this
 	 */
-	public DublinCoreData addWglType(String e) {
+	public OpenAireData addWglType(String e) {
 		wglType.add(e);
 		return this;
 	}
@@ -87,7 +88,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param cwgl:wglsubject
 	 * @return this
 	 */
-	public DublinCoreData setWglSubject(List<String> wglSubject) {
+	public OpenAireData setWglSubject(List<String> wglSubject) {
 		this.wglSubject = wglSubject;
 		return this;
 	}
@@ -96,7 +97,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e wgl:wglsubject
 	 * @return this
 	 */
-	public DublinCoreData addWglSubject(String e) {
+	public OpenAireData addWglSubject(String e) {
 		wglSubject.add(e);
 		return this;
 	}
@@ -112,7 +113,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param cwgl:wglcontributor
 	 * @return this
 	 */
-	public DublinCoreData setWglContributor(List<String> wglContributor) {
+	public OpenAireData setWglContributor(List<String> wglContributor) {
 		this.wglcontributor = wglContributor;
 		return this;
 	}
@@ -121,7 +122,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e wgl:wglcontributor
 	 * @return this
 	 */
-	public DublinCoreData addWglContributor(String e) {
+	public OpenAireData addWglContributor(String e) {
 		wglcontributor.add(e);
 		return this;
 	}
@@ -149,7 +150,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param contributor dc:contributor
 	 * @return this
 	 */
-	public DublinCoreData setContributor(List<String> contributor) {
+	public OpenAireData setContributor(List<String> contributor) {
 		this.contributor = contributor;
 		return this;
 	}
@@ -158,7 +159,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:contributer
 	 * @return this
 	 */
-	public DublinCoreData addContributor(String e) {
+	public OpenAireData addContributor(String e) {
 		contributor.add(e);
 		return this;
 	}
@@ -185,7 +186,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param coverage dc:coverage
 	 * @return this
 	 */
-	public DublinCoreData setCoverage(List<String> coverage) {
+	public OpenAireData setCoverage(List<String> coverage) {
 		this.coverage = coverage;
 		return this;
 	}
@@ -194,7 +195,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:coverage
 	 * @return this
 	 */
-	public DublinCoreData addCoverage(String e) {
+	public OpenAireData addCoverage(String e) {
 		coverage.add(e);
 		return this;
 	}
@@ -222,7 +223,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param creator dc:creator
 	 * @return this
 	 */
-	public DublinCoreData setCreator(List<String> creator) {
+	public OpenAireData setCreator(List<String> creator) {
 		this.creator = creator;
 		return this;
 	}
@@ -231,7 +232,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:creator
 	 * @return this
 	 */
-	public DublinCoreData addCreator(String e) {
+	public OpenAireData addCreator(String e) {
 		creator.add(e);
 		return this;
 	}
@@ -259,7 +260,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param date dc:date
 	 * @return this
 	 */
-	public DublinCoreData setDate(List<String> date) {
+	public OpenAireData setDate(List<String> date) {
 		this.date = date;
 		return this;
 	}
@@ -268,7 +269,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:date
 	 * @return this
 	 */
-	public DublinCoreData addDate(String e) {
+	public OpenAireData addDate(String e) {
 		date.add(e);
 		return this;
 	}
@@ -296,7 +297,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param description dc:description
 	 * @return this
 	 */
-	public DublinCoreData setDescription(List<String> description) {
+	public OpenAireData setDescription(List<String> description) {
 		this.description = description;
 		return this;
 	}
@@ -305,7 +306,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:description
 	 * @return this
 	 */
-	public DublinCoreData addDescription(String e) {
+	public OpenAireData addDescription(String e) {
 		description.add(e);
 		return this;
 	}
@@ -333,7 +334,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param format dc:format
 	 * @return this
 	 */
-	public DublinCoreData setFormat(List<String> format) {
+	public OpenAireData setFormat(List<String> format) {
 		this.format = format;
 		return this;
 	}
@@ -342,7 +343,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:format
 	 * @return this
 	 */
-	public DublinCoreData addFormat(String e) {
+	public OpenAireData addFormat(String e) {
 		format.add(e);
 		return this;
 	}
@@ -370,7 +371,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param list dc:identifier
 	 * @return this
 	 */
-	public DublinCoreData setIdentifier(List<Pair<String, String>> list) {
+	public OpenAireData setIdentifier(List<Pair<String, String>> list) {
 		this.identifier = list;
 		return this;
 	}
@@ -379,14 +380,14 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:identifier
 	 * @return this
 	 */
-	public DublinCoreData addIdentifier(String e) {
+	public OpenAireData addIdentifier(String e) {
 		if (e == null || e.isEmpty())
 			return this;
 		identifier.add(new Pair<String, String>(e, null));
 		return this;
 	}
 
-	public DublinCoreData addIdentifier(List<String> list) {
+	public OpenAireData addIdentifier(List<String> list) {
 		if (identifier == null) {
 			identifier = new Vector<>();
 		}
@@ -401,7 +402,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param type type of the identifier preferred a qualified:name
 	 * @return the modified Data
 	 */
-	public DublinCoreData addIdentifier(String value, String type) {
+	public OpenAireData addIdentifier(String value, String type) {
 		if (value == null || value.isEmpty())
 			return this;
 		identifier.add(new Pair<String, String>(value, type));
@@ -431,7 +432,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param language dc:language
 	 * @return this
 	 */
-	public DublinCoreData setLanguage(List<String> language) {
+	public OpenAireData setLanguage(List<String> language) {
 		this.language = language;
 		return this;
 	}
@@ -440,7 +441,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:language
 	 * @return this
 	 */
-	public DublinCoreData addLanguage(String e) {
+	public OpenAireData addLanguage(String e) {
 		language.add(e);
 		return this;
 	}
@@ -468,7 +469,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param publisher dc:publisher
 	 * @return this
 	 */
-	public DublinCoreData setPublisher(List<String> publisher) {
+	public OpenAireData setPublisher(List<String> publisher) {
 		this.publisher = publisher;
 		return this;
 	}
@@ -477,7 +478,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:publisher
 	 * @return this
 	 */
-	public DublinCoreData addPublisher(String e) {
+	public OpenAireData addPublisher(String e) {
 		publisher.add(e);
 		return this;
 	}
@@ -505,7 +506,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param relation dc:relation
 	 * @return this
 	 */
-	public DublinCoreData setRelation(List<String> relation) {
+	public OpenAireData setRelation(List<String> relation) {
 		this.relation = relation;
 		return this;
 	}
@@ -514,7 +515,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:relation
 	 * @return this
 	 */
-	public DublinCoreData addRelation(String e) {
+	public OpenAireData addRelation(String e) {
 		relation.add(e);
 		return this;
 	}
@@ -542,7 +543,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param rights dc:rights
 	 * @return this
 	 */
-	public DublinCoreData setRights(List<String> rights) {
+	public OpenAireData setRights(List<String> rights) {
 		this.rights = rights;
 		return this;
 	}
@@ -551,7 +552,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:rights
 	 * @return this
 	 */
-	public DublinCoreData addRights(String e) {
+	public OpenAireData addRights(String e) {
 		rights.add(e);
 		return this;
 	}
@@ -579,7 +580,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param source dc:source
 	 * @return this
 	 */
-	public DublinCoreData setSource(List<String> source) {
+	public OpenAireData setSource(List<String> source) {
 		this.source = source;
 		return this;
 	}
@@ -588,7 +589,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:source
 	 * @return this
 	 */
-	public DublinCoreData addSource(String e) {
+	public OpenAireData addSource(String e) {
 		source.add(e);
 		return this;
 	}
@@ -620,7 +621,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param subject dc:subject
 	 * @return this
 	 */
-	public DublinCoreData setSubject(List<String> subject) {
+	public OpenAireData setSubject(List<String> subject) {
 		this.subject = subject;
 		return this;
 	}
@@ -629,12 +630,12 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:subject
 	 * @return this
 	 */
-	public DublinCoreData addSubject(String e) {
+	public OpenAireData addSubject(String e) {
 		subject.add(e);
 		return this;
 	}
 
-	public DublinCoreData addSubjects(List<String> list) {
+	public OpenAireData addSubjects(List<String> list) {
 		subject.addAll(list);
 		return this;
 	}
@@ -662,7 +663,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param title dc:title
 	 * @return this
 	 */
-	public DublinCoreData setTitle(List<String> title) {
+	public OpenAireData setTitle(List<String> title) {
 		this.title = title;
 		return this;
 	}
@@ -671,7 +672,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:title
 	 * @return this
 	 */
-	public DublinCoreData addTitle(String e) {
+	public OpenAireData addTitle(String e) {
 		title.add(e);
 		return this;
 	}
@@ -699,7 +700,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param type dc:type
 	 * @return this
 	 */
-	public DublinCoreData setType(List<String> type) {
+	public OpenAireData setType(List<String> type) {
 		this.type = type;
 		return this;
 	}
@@ -708,7 +709,7 @@ public class DublinCoreData implements java.io.Serializable {
 	 * @param e dc:type
 	 * @return this
 	 */
-	public DublinCoreData addType(String e) {
+	public OpenAireData addType(String e) {
 		type.add(e);
 		return this;
 	}

@@ -174,6 +174,17 @@ public class Transform {
 	}
 
 	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public DublinCoreData oAire(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		DublinCoreData data = new WglMapper(node, uri).getData();
+		return data;
+	}
+
+	/**
 	 * @param pid the pid of a node with pdf data
 	 * @return the plain text content of the pdf
 	 */
