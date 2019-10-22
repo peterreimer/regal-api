@@ -24,6 +24,10 @@ public class Viewers extends MyController {
 					return ok(views.html.mediaViewers.deepzoomViewer
 							.render(Helper.getViewerInfo(node)));
 				}
+				if ("pdf".equals(type)) {
+					return ok(views.html.mediaViewers.pdfViewer
+							.render(Helper.getViewerInfo(node)));
+				}
 				return redirect(routes.Resource.listData(pid));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);

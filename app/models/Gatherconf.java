@@ -69,7 +69,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum AgentIdSelection {
-		Undefined, Chrome, Edge, IE, Firefox, Safari;
+		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -87,6 +87,8 @@ public class Gatherconf {
 							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:40.0)%20Gecko/20100101%20Firefox/40.1\"");
 					put(AgentIdSelection.Safari,
 							"\"Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_13_3)%20AppleWebKit/604.5.6%20(KHTML,%20like%20Gecko)%20Version/11.0.3%20Safari/604.5.6\"");
+					put(AgentIdSelection.Googlebot,
+							"\"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)\"");
 				}
 			};
 

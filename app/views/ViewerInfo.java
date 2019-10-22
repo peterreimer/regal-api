@@ -13,7 +13,7 @@ public class ViewerInfo {
 	}
 
 	public enum ViewerType {
-		VIDEO, AUDIO, DEEPZOOM, IMAGE, UNDEFINED
+		SEC_PDF, VIDEO, AUDIO, DEEPZOOM, IMAGE, UNDEFINED
 	}
 
 	public String pid = null;
@@ -59,6 +59,9 @@ public class ViewerInfo {
 		if (mt.is(MediaType.ANY_AUDIO_TYPE)) {
 			return ViewerType.AUDIO;
 		}
+		if ("restricted".equals(n.getAccessScheme()) && mt.is(MediaType.PDF)) {
+			return ViewerType.SEC_PDF;
+		}
 		return ViewerType.UNDEFINED;
 	}
 
@@ -72,6 +75,10 @@ public class ViewerInfo {
 		if (ViewerType.AUDIO.equals(viewertype)) {
 			return "/viewers/audio/" + n.getPid() + "/data";
 		}
+		if (ViewerType.SEC_PDF.equals(viewertype)) {
+			return "/viewers/pdf/" + n.getPid() + "/data";
+		}
+
 		return dataLink;
 	}
 
@@ -85,6 +92,10 @@ public class ViewerInfo {
 			return thumbyLink(n);
 		}
 		if (ViewerType.DEEPZOOM.equals(viewertype)) {
+			style = Style.LINKED;
+			return thumbyLink(n);
+		}
+		if (ViewerType.SEC_PDF.equals(viewertype)) {
 			style = Style.LINKED;
 			return thumbyLink(n);
 		}
@@ -111,7 +122,12 @@ public class ViewerInfo {
 	}
 
 	public String getViewerLink() {
+		if (ViewerType.SEC_PDF.equals(viewertype)) {
+			return Globals.protocol + Globals.server + "/viewers/pdf/" + pid
+					+ "/data";
+		}
 		return Globals.protocol + Globals.server + "/viewers/deepzoom/" + pid
 				+ "/data";
+
 	}
 }

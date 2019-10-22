@@ -34,6 +34,7 @@ import models.Node;
 import models.RegalObject;
 import models.RegalObject.Provenience;
 import play.Logger;
+import play.Play;
 
 /**
  * @author Jan Schnasse
@@ -333,9 +334,26 @@ public class Create extends RegalAction {
 
 			conf.setLocalDir(crawlDir.getAbsolutePath());
 			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+			String waybackCollectionLink = null;
+			if (n.getAccessScheme().equals("public")) {
+				waybackCollectionLink = Play.application().configuration()
+						.getString("regal-api.wayback.weltweitLink");
+			} else {
+				waybackCollectionLink = Play.application().configuration()
+						.getString("regal-api.wayback.lesesaalLink");
+			}
 			conf.setOpenWaybackLink(
-					Globals.heritrix.openwaybackLink + owDatestamp + "/" + conf.getUrl());
+					waybackCollectionLink + owDatestamp + "/" + conf.getUrl());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
+
+			/*
+			 * Im Falle von veröffentlichten Websites soll die neue Version sofort
+			 * veröffentlicht werden
+			 */
+			if (n.getAccessScheme().equals("public")) {
+				WebsiteVersionPublisher.createSoftlinkInPublicData(webpageVersion,
+						conf);
+			}
 
 			WebgatherLogger.debug(msg);
 			WebgatherLogger.info("Version " + webpageVersion.getPid()
