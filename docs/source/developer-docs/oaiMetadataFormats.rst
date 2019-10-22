@@ -76,13 +76,7 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
     # Fedora Driver: Metadata Format Configuration #
     ################################################
     # Metadata formats to make available.
-    #
-    # This is a space-delimited list of all formats provided,
-    # identified by OAI metadata prefix.
-    #
     driver.fedora.md.formats = oai_dc epicur mabxml-1 mets rdf oai_wgl oai_openaire
-    #oai_dc oai_epicur oai_ore
-    # The location of the W3C schema for each format.
     #
     # Example property name: 
     # <code>driver.fedora.md.format.your_format.loc</code>.
@@ -95,10 +89,6 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
     driver.fedora.md.format.rdf.loc = http://ilrt.org/discovery/2001/09/rdf-xml-schema/rdf.xsd
     driver.fedora.md.format.oai_wgl.loc = http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/oai_wgl.xsd
     driver.fedora.md.format.oai_openaire.loc = https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd
-    driver.fedora.md.format.test_format.loc = http://example.org/test_format.xsd
-    driver.fedora.md.format.formatX.loc = http://example.org/formatX.xsd
-    driver.fedora.md.format.formatY.loc = http://example.org/formatY.xsd
-    # The namespace URI for each format. 
     #
     # Example property name: 
     # <code>driver.fedora.md.format.your_format.uri</code>.
@@ -111,33 +101,11 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
     driver.fedora.md.format.rdf.uri = http://ilrt.org/discovery/2001/09/rdf-xml-schema/
     driver.fedora.md.format.oai_wgl.uri = http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/
     driver.fedora.md.format.oai_openaire.uri = http://namespace.openaire.eu/schema/oaire/
-    driver.fedora.md.format.test_format.uri = http://example.org/test_format/
-    driver.fedora.md.format.formatX.uri = http://example.org/formatX/
-    driver.fedora.md.format.formatY.uri = http://example.org/formatY/
-    # The Fedora dissemination type for each format.
     #
     # <p>A Fedora dissemination type is a URI starting with 
     # <code>info:fedora/*/</code> and ending with a datastream ID (such as "DC"), 
     # a Behavior Definition PID followed by "/methodName", 
     # or a Behavior Definition PID followed by "/methodName?name=value".</p>
-    #
-    # <p>The dissType is the key to mapping an OAI metadata format to
-    # a kind of Fedora dissemination.  Here are a few examples:</p>
-    #
-    # <pre>
-    # info:fedora/*/DC                  ; identifies the "DC" datastream
-    #
-    # info:fedora/*/demo:1/getDC        ; identifies the "getDC" method of the 
-    #                                   ; demo:1 behavior definition
-    #
-    # info:fedora/*/demo:1/getMD?fmt=dc ; identifies the "getMD" method of the 
-    #                                   ; demo:1 behavior definition, when
-    #
-    # info:fedora/*/demo:1/getMD?fmt=dc ; identifies the "getMD" method of the 
-    #                                   ; demo:1 behavior definition, when
-    #                                   ; invoked with the required "fmt"
-    #                                   ; parameter
-    # </pre>
     #
     # When the OAI provider queries Fedora for records in your_format, 
     # it uses this special value to constrain the query to only those
@@ -157,8 +125,7 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
     driver.fedora.md.format.oai_openaire.dissType = info:fedora/*/CM:openaireServiceDefinition/openaire
     driver.fedora.md.format.oai_ore.dissType = info:fedora/*/ellinet:EllinetObjectServiceDefinition/oai_ore
     driver.fedora.md.format.test_format.dissType = info:fedora/*/test_format
-    driver.fedora.md.format.formatX.dissType = info:fedora/*/demo:OAIAdvancedItem-Service/getMetadata?format=x
-    driver.fedora.md.format.formatY.dissType = info:fedora/*/demo:OAIAdvancedItem-Service/getMetadata?format=y
+    #
     # The Fedora dissemination type for each format.
     #
     # This optional property identifies the OAI "about" dissemination 
