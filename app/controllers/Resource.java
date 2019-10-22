@@ -88,6 +88,7 @@ import views.html.oai.mab;
 import views.html.oai.mets;
 import views.html.oai.oaidc;
 import views.html.oai.wgl;
+import views.html.oai.openaire;
 import views.html.tags.getTitle;
 
 /**
