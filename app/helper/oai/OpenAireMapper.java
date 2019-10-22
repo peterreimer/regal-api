@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.hbz.lobid.helper.LobidTypes;
 import models.DublinCoreData;
+import models.OpenAireData;
 import models.Globals;
 import models.Node;
 
@@ -42,8 +43,8 @@ public class OpenAireMapper {
 		this.uri = uri;
 	}
 
-	public DublinCoreData getData() {
-		DublinCoreData data = new DublinCoreData();
+	public OpenAireData getData() {
+		OpenAireData data = new OpenAireData();
 		if (node == null)
 			return data;
 
