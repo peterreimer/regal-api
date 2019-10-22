@@ -319,11 +319,7 @@ public class OaiDispatcher {
 	private static void addOpenAireTransformer(Node node) {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
-			if ("monograph".equals(type) || "journal".equals(type)
-					|| "webpage".equals(type) || "researchData".equals(type)
-					|| "article".equals(type)) {
-				node.addTransformer(new Transformer("openaire"));
-			}
+			node.addTransformer(new Transformer("openaire"));
 		}
 	}
 
