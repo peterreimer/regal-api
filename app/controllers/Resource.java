@@ -890,7 +890,7 @@ public class Resource extends MyController {
 			response().setContentType("application/xml");
 			Html result = openaire.render(transform.openaire(pid), node.getLd2());
 			String xml = result.toString();
-			System.out.println(result.toString());
+			play.Logger.error(result.toString());
 			if (validate) {
 				validate(xml, "public/schemas/oai_wgl.xsd", null, "public/schemas");
 			}
