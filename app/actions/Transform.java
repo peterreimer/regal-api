@@ -179,10 +179,10 @@ public class Transform {
 	 * @param pid The pid of an object
 	 * @return a openaire mapping
 	 */
-	public OpenAireData openaire(String pid) {
+	public DublinCoreData openaire(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		OpenAireData data = new OpenAireMapper(node, uri).getData();
+		DublinCoreData data = new WglMapper(node, uri).getData();
 		return data;
 	}
 
