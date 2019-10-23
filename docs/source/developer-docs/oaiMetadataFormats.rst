@@ -4,7 +4,7 @@ Neues Metadaten-Format in die OAI-Schnittstelle integrieren
 Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Aktivitäten an mehreren Stellen.
 
 1. Java-Klassen erweitern und anpassen
-2. Konfiguration des OAI-Providers anpassen
+2. Konfiguration der regal-api und des OAI-Providers anpassen
 3. Testen der Schnittstelle
 
 Java-Klassen erweitern und anpassen
@@ -16,6 +16,8 @@ Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind
 * regal-api.app.helper.oai/\*Mapper.java
 * regal-api.app.helper.oai/OaiDispatcher.java
 * regal-api.app.models/DublinCoreData.java
+* regal-api.app.actions/Transform.java
+* regal-api.app.controllers/Resource.java
 
 
 Zunächst kopiere ich die Datei WGLMapper.java und erstelle damit die Datei OpenAireMapper.java
@@ -47,27 +49,31 @@ Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage in
         for (String t : transformers) {
           if ("oaidc".equals(t))
             continue; // implicitly added - or not allowed to set
-          if ("epicur".equals(t))
-            continue; // implicitly added - or not allowed to set
-          if ("aleph".equals(t))
-            continue; // implicitly added - or not allowed to set
-          if ("mets".equals(t))
-            continue; // implicitly added - or not allowed to set
-          if ("rdf".equals(t))
-            continue; // implicitly added - or not allowed to set
-          if ("wgl".equals(t))
-            continue; // implicitly added - or not allowed to set
+      [...]
           if ("openaire".equals(t))
             continue; // implicitly added - or not allowed to set
-		  node.addTransformer(new Transformer(t));
+          node.addTransformer(new Transformer(t));
         }
       }
     }
 
 
-Konfiguration des OAI-Providers anpassen
-----------------------------------------
+Die Datei Transform muss um eine Methode openaire erweitert werden. Diese Methode wird später über eine in der Datei Resource.java definierte ApiOperation "asOpenAire" als Restful Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.  
+Innerhalb des Packages view.oai habe ich die neuen Klassen openaire.scala.html und openaireView.scala.html angelegt, die nahc meinem Verständnis die Darstellung des openaire-Objektes steuern sollen.   
 
+
+Konfiguration der regal-api und des OAI-Providers anpassen
+----------------------------------------------------------
+
+Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann muss in der Datei conf/routes eine entsprechende Konfirgurationszeile erstellt werden.
+
+.. code:: bash
+
+    GET /resource/:pid.openaire	    controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
+
+Mit dieseem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Methode und dem über das Play Framework stattfindenden Aufruf über eine HTTP-Methode erreicht.  
+
+Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispile ist das nicht der Fall: validate : Boolean ?= false. 
 In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhängenden Konfigurationen angepasst werden. Die Datei wird direkt im entpackten Applikation-Container angepasst. 
 
 .. code:: bash
@@ -77,74 +83,27 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
     ################################################
     # Metadata formats to make available.
     driver.fedora.md.formats = oai_dc epicur mabxml-1 mets rdf oai_wgl oai_openaire
-    #
-    # Example property name: 
-    # <code>driver.fedora.md.format.your_format.loc</code>.
-    #
+    [...]
     driver.fedora.md.format.oai_ore.loc = http://www.w3.org/2000/07/rdf.xsd
-    driver.fedora.md.format.oai_dc.loc = http://www.openarchives.org/OAI/2.0/oai_dc.xsd
-    driver.fedora.md.format.epicur.loc = http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd
-    driver.fedora.md.format.mabxml-1.loc = http://files.dnb.de/standards/formate/mabxml-1.xsd
-    driver.fedora.md.format.mets.loc = http://www.loc.gov/standards/mets/mets.xsd
-    driver.fedora.md.format.rdf.loc = http://ilrt.org/discovery/2001/09/rdf-xml-schema/rdf.xsd
-    driver.fedora.md.format.oai_wgl.loc = http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/oai_wgl.xsd
+    
     driver.fedora.md.format.oai_openaire.loc = https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd
-    #
-    # Example property name: 
-    # <code>driver.fedora.md.format.your_format.uri</code>.
-    #
+    
+    [...]
+
     driver.fedora.md.format.oai_ore.uri = http://www.w3.org/1999/02/22-rdf-syntax-ns#
-    driver.fedora.md.format.oai_dc.uri = http://www.openarchives.org/OAI/2.0/oai_dc/
-    driver.fedora.md.format.epicur.uri = urn:nbn:de:1111-2004033116
-    driver.fedora.md.format.mabxml-1.uri = http://files.dnb.de/standards/formate/
-    driver.fedora.md.format.mets.uri = http://www.loc.gov/standards/mets/
-    driver.fedora.md.format.rdf.uri = http://ilrt.org/discovery/2001/09/rdf-xml-schema/
-    driver.fedora.md.format.oai_wgl.uri = http://www.leibnizopen.de/fileadmin/default/documents/oai_wgl/
+    
     driver.fedora.md.format.oai_openaire.uri = http://namespace.openaire.eu/schema/oaire/
-    #
-    # <p>A Fedora dissemination type is a URI starting with 
-    # <code>info:fedora/*/</code> and ending with a datastream ID (such as "DC"), 
-    # a Behavior Definition PID followed by "/methodName", 
-    # or a Behavior Definition PID followed by "/methodName?name=value".</p>
-    #
-    # When the OAI provider queries Fedora for records in your_format, 
-    # it uses this special value to constrain the query to only those
-    # disseminations that are in the expected format.
-    # Thus, all records that the OAI provider considers to be in
-    # your_format must have this dissemination type.
-    #
-    # Example property name: 
-    # <code>driver.fedora.md.format.your_format.dissType</code>.
-    #
+    
+    [...]
+
     driver.fedora.md.format.oai_dc.dissType = info:fedora/*/CM:oaidcServiceDefinition/oaidc
-    driver.fedora.md.format.mabxml-1.dissType = info:fedora/*/CM:alephServiceDefinition/aleph
-    driver.fedora.md.format.epicur.dissType = info:fedora/*/CM:epicurServiceDefinition/epicur
-    driver.fedora.md.format.mets.dissType = info:fedora/*/CM:metsServiceDefinition/mets
-    driver.fedora.md.format.rdf.dissType = info:fedora/*/CM:rdfServiceDefinition/rdf
-    driver.fedora.md.format.oai_wgl.dissType = info:fedora/*/CM:wglServiceDefinition/wgl
+    
     driver.fedora.md.format.oai_openaire.dissType = info:fedora/*/CM:openaireServiceDefinition/openaire
-    driver.fedora.md.format.oai_ore.dissType = info:fedora/*/ellinet:EllinetObjectServiceDefinition/oai_ore
-    driver.fedora.md.format.test_format.dissType = info:fedora/*/test_format
-    #
-    # The Fedora dissemination type for each format.
-    #
-    # This optional property identifies the OAI "about" dissemination 
-    # type for your_format. If specified for your_format, then the OAI provider
-    # will attempt to find disseminations of this type for each object
-    # that has a matching your_format.dissType.  If such a dissemination
-    # is found, for that particular object, the information therein
-    # will be used as the "about" metadata for the record.
-    #
-    # Example property name: 
-    # <code>driver.fedora.md.format.your_format.about.dissType</code>.
-    #
-    driver.fedora.md.format.oai_dc.about.dissType = info:fedora/*/about_oai_dc
-    driver.fedora.md.format.formatX.about.dissType = info:fedora/*/demo:OAIAdvancedItem-Service/getMetadataAbout?format=x
-    driver.fedora.md.format.formatY.about.dissType = info:fedora/*/demo:OAIAdvancedItem-Service/getMetadataAbout?format=y
+    
 
 
 Testen der Schnittstelle
 ------------------------
 
 Die OAI-Schnittstelle ist über die URL http://api.ellinet-dev.hbz-nrw.de/oai-pmh/ oder analog bei edoweb-test erreichbar.
-
+Der neue ServiceDisseminator kann über die regal-api aufgerufen werden, wenn der in der routes Datei deklarierte Pfad entsprechend aufgerufen wird. Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittels POST. Deshalb kommt cUrl zum Einsatz: curl -XGET -uedoweb-admin localhost:9000/resource/frl%3A6402576.openaire

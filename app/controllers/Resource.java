@@ -888,10 +888,10 @@ public class Resource extends MyController {
 			@QueryParam("validate") boolean validate) {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setContentType("application/xml");
-			Html result = wgl.render(transform.openaire(pid), node.getLd2());
+			Html result = openaire.render(transform.openaire(pid), node.getLd2());
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/oai_wgl.xsd", null, "public/schemas");
+				validate(xml, "public/schemas/openaire.xsd", null, "public/schemas");
 			}
 			return ok(result);
 		});
