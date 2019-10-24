@@ -5,9 +5,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xmlns:dcterms="http://purl.org/dc/terms/" 
 	xmlns:dc="http://purl.org/dc/elements/1.1/" 
+	xmlns:datacite="http://datacite.org/schema/kernel-4"
+	xmlns="http://namespace.openaire.eu/schema/oaire/"
 	xsi:schemaLocation="http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd 
 	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd 
-	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd">
+	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd
+	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd
+	http://namespace.openaire.eu/schema/oaire/  https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd">
 	
 @field(list: Seq[String],fieldname: String)() = {
 @for(i <- list){<@fieldname>@archive.fedora.XmlUtils.escapeContent(i)</@fieldname>}
@@ -31,7 +35,7 @@
 @for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
 }
 
-<dc:title>
+<datacite:title>
 @archive.fedora.XmlUtils.escapeContent(Title.getTitle(hit))
 @if(hit.contains("corporateBodyForTitle")){
 	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
@@ -39,7 +43,7 @@
 @if(hit.contains("P60493")){
 	: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
  }
-</dc:title>
+</datacite:title>
 
 @for(i <- data.getDate()){
 <dc:date>
