@@ -35,7 +35,7 @@
 @for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
 }
 
-<datacite:title>
+<datacite:title lang="@field(data.getLanguage")>
 @archive.fedora.XmlUtils.escapeContent(Title.getTitle(hit))
 @if(hit.contains("corporateBodyForTitle")){
 	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
@@ -50,7 +50,7 @@
 @i.substring(0,4)
 </dc:date>
 }
-@field(data.getCreator(),"dc:creator")
+@field(data.getCreator(),"datacite:creator")
 @field(data.getLanguage(),"dc:language")
 @field(data.getContributor(),"dc:contributor")
 @field(data.getType(),"dc:type")
