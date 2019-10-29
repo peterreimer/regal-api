@@ -44,21 +44,29 @@
 	: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
  }
 </datacite:title>
-
+@for(i <- data.getCreator()){
 <datacite:creator>
-@for(i <- data.getCrator()){
-<datacite:creatorName>@data.get("creator")</datacite:creatorName>
-}
+<datacite:creatorName>@data.getCreator()</datacite:creatorName>
 </datacite:creator>
+}
+
+@for(i <- data.getCreator()){
+<datacite:contributor>
+<datacite:contributorName>@data.getCreator()</datacite:contributorName>
+</datacite:contributor>
+}
+
+<oaire:FundingReferences>
+@for(i <- data.getCreator()){
+<oaire:FundingReference><oaire:FunderName>@data.getCreator()</oaire:FunderName></oaire:FundingReference>
+}
+</oaire:FundingReferences>
 
 @for(i <- data.getDate()){
 <dc:date>
 @i.substring(0,4)
 </dc:date>
 }
-@field(data.getCreator(),"datacite:creator")
-@field(data.getLanguage(),"dc:language")
-@field(data.getContributor(),"dc:contributor")
 @field(data.getType(),"dc:type")
 @fieldCombined(data.getSubject(),"dc:subject")
 @field(data.getDescription(),"dc:description")
