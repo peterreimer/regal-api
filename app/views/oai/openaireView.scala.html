@@ -35,7 +35,7 @@
 @for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
 }
 
-<datacite:title lang="@data.get("language")" >
+<datacite:title lang="@data.getLanguage()" >
 @archive.fedora.XmlUtils.escapeContent(Title.getTitle(hit))
 @if(hit.contains("corporateBodyForTitle")){
 	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
