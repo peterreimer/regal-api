@@ -74,9 +74,8 @@ public class OpenAireMapper {
 
 	private FundingReference getFundingReferencesFromJsonNode(JsonNode n) {
 		JsonNode fundingNode = n.path("JoinedFunding");
-		List<FundingReference> fRefList = new ArrayList<>();
+		FundingReference fRefer = new FundingReference();
 		for (JsonNode fNode : fundingNode) {
-			FundingReference fRefer = new FundingReference();
 			fRefer.setFunderName(fNode.get("fundingJoined/prefLabel").asText());
 			// fRefer.setFunderIdentifier(fNode.get("/Id").asText());
 			fRefer.setFundingStream(fNode.get("/fundingProgramJoined").asText());
