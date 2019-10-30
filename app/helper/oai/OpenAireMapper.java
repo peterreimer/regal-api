@@ -49,9 +49,6 @@ public class OpenAireMapper {
 			return data;
 
 		JsonNode n = new ObjectMapper().valueToTree(node.getLd2());
-		data.setWglContributor(getWglContributor(n));
-		data.setWglSubject(getWglSubject(n));
-		data.setWglType(getWglType(n));
 		data.setCreator(getCreator(n));
 		data.setDescription(getList(n, "/abstractText"));
 		data.setTitle(getList(n, "/title"));
@@ -68,7 +65,7 @@ public class OpenAireMapper {
 		data.addIdentifier(getString(n, "/urn"));
 		data.addIdentifier(getString(n, "/doi"));
 		data.addIdentifier(getString(n, "/bibo:doi"));
-		data.addFunderName(getString(n, "/fundingJoined", "/prefLabel"));
+		data.setFundingReference(getComplexList(n, "/fundingJoined", "/prefLabel"));
 		return data;
 	}
 

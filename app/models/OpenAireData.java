@@ -52,7 +52,7 @@ public class OpenAireData implements java.io.Serializable {
 	List<String> wglcontributor = new Vector<>();
 	List<String> wglSubject = new Vector<>();
 	List<String> wglType = new Vector<>();
-	List<String> funderName = new Vector<>();
+	List<String> fundingReference = new Vector<>();
 
 	/**
 	 * @return wgl:wglcontributor
@@ -763,16 +763,26 @@ public class OpenAireData implements java.io.Serializable {
 			;
 	}
 
-	public List<String> getFunderName() {
-		return funderName;
+	/**
+	 * @param fundingReference dc:rights
+	 * @return this
+	 */
+	public OpenAireData setFundingReference(List<String> fundingReference) {
+		this.fundingReference = fundingReference;
+		return this;
 	}
 
-	public void setFunderName(List<String> funderName) {
-		this.funderName = funderName;
+	/**
+	 * @param e dc:rights
+	 * @return this
+	 */
+	public OpenAireData addFundingReference(String e) {
+		this.fundingReference.add(e);
+		return this;
 	}
 
-	public void addFunderName(String funder) {
-		this.funderName.add(funder);
+	public List<String> getFundingReference() {
+		return this.fundingReference;
 	}
 
 	@Override
