@@ -57,7 +57,7 @@
 }
 
 <oaire:FundingReferences>
-@for(fReference<- data.getFunderName()){
+@for(fReference<- data.getFunderReference()){
 <oaire:FundingReference><oaire:FunderName>@fReference</oaire:FunderName></oaire:FundingReference>
 }
 </oaire:FundingReferences>
