@@ -68,6 +68,7 @@ public class OpenAireMapper {
 		data.addIdentifier(getString(n, "/urn"));
 		data.addIdentifier(getString(n, "/doi"));
 		data.addIdentifier(getString(n, "/bibo:doi"));
+		data.addFunderName(getString(n, "/fundingJoined", "/prefLabel"));
 		return data;
 	}
 

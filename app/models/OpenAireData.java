@@ -39,6 +39,7 @@ public class OpenAireData implements java.io.Serializable {
 	List<String> date = new Vector<>();
 	List<String> description = new Vector<>();
 	List<String> format = new Vector<>();
+
 	List<Pair<String, String>> identifier = new Vector<>();
 	List<String> language = new Vector<>();
 	List<String> publisher = new Vector<>();
@@ -51,6 +52,7 @@ public class OpenAireData implements java.io.Serializable {
 	List<String> wglcontributor = new Vector<>();
 	List<String> wglSubject = new Vector<>();
 	List<String> wglType = new Vector<>();
+	List<String> funderName = new Vector<>();
 
 	/**
 	 * @return wgl:wglcontributor
@@ -759,6 +761,18 @@ public class OpenAireData implements java.io.Serializable {
 			;
 		while (type.remove(""))
 			;
+	}
+
+	public List<String> getFunderName() {
+		return funderName;
+	}
+
+	public void setFunderName(List<String> funderName) {
+		this.funderName = funderName;
+	}
+
+	public void addFunderName(String funder) {
+		this.funderName.add(funder);
 	}
 
 	@Override
