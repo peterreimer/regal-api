@@ -6,7 +6,7 @@
 	xmlns:dcterms="http://purl.org/dc/terms/" 
 	xmlns:dc="http://purl.org/dc/elements/1.1/" 
 	xmlns:datacite="http://datacite.org/schema/kernel-4"
-	xmlns="http://namespace.openaire.eu/schema/oaire/"
+	xmlns:oaire="http://namespace.openaire.eu/schema/oaire/"
 	xsi:schemaLocation="http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd 
 	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd 
 	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd
@@ -57,7 +57,7 @@
 }
 
 <oaire:FundingReferences>
-@for(fReference<- data.getFunderReference()){
+@for(fReference<- data.getFundingReference()){
 <oaire:FundingReference><oaire:FunderName>@fReference</oaire:FunderName></oaire:FundingReference>
 }
 </oaire:FundingReferences>
