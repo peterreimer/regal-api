@@ -67,22 +67,21 @@ public class OpenAireMapper {
 		data.addIdentifier(getString(n, "/doi"));
 		data.addIdentifier(getString(n, "/bibo:doi"));
 
-		data.setFundingReference(getFundingReferencesFromJsonNode(n));
+		data.addFundingReference(getFundingReferencesFromJsonNode(n));
 
 		return data;
 	}
 
-	private List<FundingReference> getFundingReferencesFromJsonNode(JsonNode n) {
-		JsonNode fundingNode = n.path("fundingJoined");
+	private FundingReference getFundingReferencesFromJsonNode(JsonNode n) {
+		JsonNode fundingNode = n.path("JoinedFunding");
 		List<FundingReference> fRefList = new ArrayList<>();
 		for (JsonNode fNode : fundingNode) {
 			FundingReference fRefer = new FundingReference();
-			fRefer.setFunderName(fNode.get("/prefLabel").asText());
-			fRefer.setFunderIdentifier(fNode.get("/Id").asText());
+			fRefer.setFunderName(fNode.get("fundingJoined/prefLabel").asText());
+			// fRefer.setFunderIdentifier(fNode.get("/Id").asText());
 			fRefer.setFundingStream(fNode.get("/fundingProgramJoined").asText());
-			fRefList.add(fRefer);
 		}
-		return fRefList;
+		return fRefer;
 	}
 
 	private List<String> getLanguage(JsonNode n) {
