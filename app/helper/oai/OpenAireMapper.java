@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.hbz.lobid.helper.LobidTypes;
 import models.DublinCoreData;
 import models.OpenAireData;
+import models.metadata.FundingReference;
 import models.Globals;
 import models.Node;
 
@@ -65,8 +66,23 @@ public class OpenAireMapper {
 		data.addIdentifier(getString(n, "/urn"));
 		data.addIdentifier(getString(n, "/doi"));
 		data.addIdentifier(getString(n, "/bibo:doi"));
-		data.setFundingReference(getComplexList(n, "/fundingJoined", "/prefLabel"));
+
+		data.setFundingReference(getFundingReferencesFromJsonNode(n));
+
 		return data;
+	}
+
+	private List<FundingReference> getFundingReferencesFromJsonNode(JsonNode n) {
+		JsonNode fundingNode = n.path("fundingJoined");
+		List<FundingReference> fRefList = new ArrayList<>();
+		for (JsonNode fNode : fundingNode) {
+			FundingReference fRefer = new FundingReference();
+			fRefer.setFunderName(fNode.get("/prefLabel").asText());
+			fRefer.setFunderIdentifier(fNode.get("/Id").asText());
+			fRefer.setFundingStream(fNode.get("/fundingProgramJoined").asText());
+			fRefList.add(fRefer);
+		}
+		return fRefList;
 	}
 
 	private List<String> getLanguage(JsonNode n) {
@@ -176,54 +192,6 @@ public class OpenAireMapper {
 			return "Zeitschriftenartikel";
 		}
 		return null;
-	}
-
-	private List<String> getWglSubject(JsonNode n) {
-		List<String> result = new ArrayList<>();
-		JsonNode a = n.at("/ddc");
-		for (JsonNode item : a) {
-			String ddcId = item.at("/@id").asText("no Value found");
-			if (ddcId.endsWith("570/")) {
-				result.add("Biowissenschaften/Biologie");
-			} else if (ddcId.endsWith("580/")) {
-				result.add("Biowissenschaften/Biologie");
-			} else if (ddcId.endsWith("590/")) {
-				result.add("Biowissenschaften/Biologie");
-			} else if (ddcId.endsWith("540/")) {
-				result.add("Chemie");
-			} else if (ddcId.endsWith("550/")) {
-				result.add("Geowissenschaften");
-			} else if (ddcId.endsWith("940/")) {
-				result.add("Geschichte");
-			} else if (ddcId.endsWith("943/")) {
-				result.add("Geschichte");
-			} else if (ddcId.endsWith("020/")) {
-				result.add("Informatik");
-			} else if (ddcId.endsWith("630/")) {
-				result.add("Landwirtschaft");
-			} else if (ddcId.endsWith("610/")) {
-				result.add("Medizin, Gesundheit");
-			} else if (ddcId.endsWith("530/")) {
-				result.add("Physik");
-			} else if (ddcId.endsWith("150/")) {
-				result.add("Psychologie");
-			}
-		}
-
-		a = n.at("/professionalGroup");
-		for (JsonNode item : a) {
-			String label = item.at("/prefLabel").asText("no Value found");
-			if ("Ernährung".equals(label)) {
-				result.add("Ernährungswissenschaft");
-			} else if ("Bibliotheks- und Informationswissenschaft".equals(label)) {
-				result.add("Informatik");
-			} else if ("Agrar".equals(label)) {
-				result.add("Landwirtschaft");
-			} else if ("Medizin, Gesundheit".equals(label)) {
-				result.add("Medizin, Gesundheit");
-			}
-		}
-		return result;
 	}
 
 	private List<String> getComplexList(JsonNode n, String string,

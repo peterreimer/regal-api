@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
+import models.metadata.FundingReference;
+
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * @author Andres Quast, quast@hbz-nrw.de
@@ -49,97 +51,8 @@ public class OpenAireData implements java.io.Serializable {
 	List<String> subject = new Vector<>();
 	List<String> title = new Vector<>();
 	List<String> type = new Vector<>();
-	List<String> wglcontributor = new Vector<>();
-	List<String> wglSubject = new Vector<>();
-	List<String> wglType = new Vector<>();
-	List<String> fundingReference = new Vector<>();
 
-	/**
-	 * @return wgl:wglcontributor
-	 */
-	public List<String> getWglType() {
-		return removeDuplicateEntries(wglType);
-	}
-
-	/**
-	 * @param cwgl:wglcontributor
-	 * @return this
-	 */
-	public OpenAireData setWglType(List<String> wglType) {
-		this.wglType = wglType;
-		return this;
-	}
-
-	/**
-	 * @param e wgl:wglcontributor
-	 * @return this
-	 */
-	public OpenAireData addWglType(String e) {
-		wglType.add(e);
-		return this;
-	}
-
-	/**
-	 * @return wgl:wglsubject
-	 */
-	public List<String> getWglSubject() {
-		return removeDuplicateEntries(wglSubject);
-	}
-
-	/**
-	 * @param cwgl:wglsubject
-	 * @return this
-	 */
-	public OpenAireData setWglSubject(List<String> wglSubject) {
-		this.wglSubject = wglSubject;
-		return this;
-	}
-
-	/**
-	 * @param e wgl:wglsubject
-	 * @return this
-	 */
-	public OpenAireData addWglSubject(String e) {
-		wglSubject.add(e);
-		return this;
-	}
-
-	/**
-	 * @return wgl:wglcontributor
-	 */
-	public List<String> getWglContributor() {
-		return wglcontributor;
-	}
-
-	/**
-	 * @param cwgl:wglcontributor
-	 * @return this
-	 */
-	public OpenAireData setWglContributor(List<String> wglContributor) {
-		this.wglcontributor = wglContributor;
-		return this;
-	}
-
-	/**
-	 * @param e wgl:wglcontributor
-	 * @return this
-	 */
-	public OpenAireData addWglContributor(String e) {
-		wglcontributor.add(e);
-		return this;
-	}
-
-	/**
-	 * @return wgl:wglcontributor
-	 */
-	public String getFirstWglContributor() {
-		List<String> elements = getWglContributor();
-		if (elements == null || elements.size() == 0) {
-			return "";
-		}
-
-		return elements.get(0);
-	}
+	private List<FundingReference> fundingReference = new Vector<>();
 
 	/**
 	 * @return dc:contributer
@@ -360,6 +273,27 @@ public class OpenAireData implements java.io.Serializable {
 		}
 
 		return elements.get(0);
+	}
+
+	/**
+	 * @return the fundingReference
+	 */
+	public List<FundingReference> getFundingReference() {
+		return fundingReference;
+	}
+
+	/**
+	 * @param fundingReference the fundingReference to set
+	 */
+	public void setFundingReference(List<FundingReference> fundingReference) {
+		this.fundingReference = fundingReference;
+	}
+
+	/**
+	 * @param fundingReference the fundingReference to set
+	 */
+	public void addFundingReference(FundingReference fundingReference) {
+		this.fundingReference.add(fundingReference);
 	}
 
 	/**
@@ -761,28 +695,6 @@ public class OpenAireData implements java.io.Serializable {
 			;
 		while (type.remove(""))
 			;
-	}
-
-	/**
-	 * @param fundingReference dc:rights
-	 * @return this
-	 */
-	public OpenAireData setFundingReference(List<String> fundingReference) {
-		this.fundingReference = fundingReference;
-		return this;
-	}
-
-	/**
-	 * @param e dc:rights
-	 * @return this
-	 */
-	public OpenAireData addFundingReference(String e) {
-		this.fundingReference.add(e);
-		return this;
-	}
-
-	public List<String> getFundingReference() {
-		return this.fundingReference;
 	}
 
 	@Override

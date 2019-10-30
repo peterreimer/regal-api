@@ -50,15 +50,13 @@
 </datacite:creator>
 }
 
-@for(contributor<-data.getCreator()){
-<datacite:contributor>
-<datacite:contributorName>@contributor</datacite:contributorName>
-</datacite:contributor>
-}
-
 <oaire:FundingReferences>
 @for(fReference<- data.getFundingReference()){
-<oaire:FundingReference><oaire:FunderName>@fReference</oaire:FunderName></oaire:FundingReference>
+<oaire:FundingReference>
+<oaire:FunderName>@fReference.getFunderName()</oaire:FunderName>
+<oaire:FunderIdentifier>@fReference.getFunderIdentifier()</oaire:FunderIdentifier>
+<oaire:FundingStream>@fReference.getFundingStream()</oaire:FundingStream>
+</oaire:FundingReference>
 }
 </oaire:FundingReferences>
 
