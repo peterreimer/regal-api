@@ -20,6 +20,7 @@ import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
+import helper.oai.JsonLDMapper;
 import helper.oai.OpenAireMapper;
 import helper.oai.WglMapper;
 
@@ -31,6 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import models.DataciteRecord;
@@ -172,6 +175,17 @@ public class Transform {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
 		DublinCoreData data = new WglMapper(node, uri).getData();
+		return data;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public ArrayList<Hashtable<String,String>> jsonldmap(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		ArrayList<Hashtable<String,String>> data = new JsonLDMapper().getJsonAsList(node));
 		return data;
 	}
 
