@@ -13,63 +13,8 @@
 	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd
 	http://namespace.openaire.eu/schema/oaire/  https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd">
 	
-@field(list: Seq[String],fieldname: String)() = {
-@for(i <- list){<@fieldname>@archive.fedora.XmlUtils.escapeContent(i)</@fieldname>}
-}
+@data.getElementValue(creator)
+@data.getElementValue(fundingReference)
+@data.getElementValue(alternateIdentifier)
 
-@fieldCombined(list: Seq[String],fieldname: String)() = {
-@if(list.size>0){
-	<@fieldname>
-	@for((item, index) <- list.zipWithIndex) {
-		@item 
-		@if(index != list.size-1){
-			; 
-		}
-	}
-	</@fieldname>
-}
-}
-
-@import models.Pair
-@typedField(list: Seq[Pair[String,String]],fieldname: String)() = {
-@for(i <- list){@if(i.getRight()!=null){<@fieldname>@i.getRight():@i.getLeft()</@fieldname>}else{<@fieldname>@i.getLeft()</@fieldname>}}
-}
-
-<datacite:title lang="@data.getLanguage()" >
-@archive.fedora.XmlUtils.escapeContent(Title.getTitle(hit))
-@if(hit.contains("corporateBodyForTitle")){
-	/ @hit.get("corporateBodyForTitle").asInstanceOf[Set[String]].toArray()
-}
-@if(hit.contains("P60493")){
-	: @hit.get("P60493").asInstanceOf[Set[String]].toArray()
- }
-</datacite:title>
-@for(creator<- data.getCreator()){
-<datacite:creator>
-<datacite:creatorName>@creator</datacite:creatorName>
-</datacite:creator>
-}
-
-<oaire:FundingReferences>
-@for(fReference<- data.getFundingReference()){
-<oaire:FundingReference>
-<oaire:FunderName>@fReference.getFunderName()</oaire:FunderName>
-<oaire:FunderIdentifier>@fReference.getFunderIdentifier()</oaire:FunderIdentifier>
-<oaire:FundingStream>@fReference.getFundingStream()</oaire:FundingStream>
-</oaire:FundingReference>
-}
-</oaire:FundingReferences>
-
-@for(i <- data.getDate()){
-<dc:date>
-@i.substring(0,4)
-</dc:date>
-}
-@field(data.getType(),"dc:type")
-@fieldCombined(data.getSubject(),"dc:subject")
-@field(data.getDescription(),"dc:description")
-@field(data.getSource(),"dc:source")
-@field(data.getCoverage(),"dc:coverage")
-@field(data.getRights(),"dc:rights")
-@typedField(data.getIdentifier(),"dc:identifier")
 </oai_dc:dc>

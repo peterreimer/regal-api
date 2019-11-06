@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2017 hbz NRW (http://www.hbz-nrw.de/)
+ * Copyright 2019 hbz NRW (http://www.hbz-nrw.de/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,20 +18,17 @@
 package helper.oai;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.hbz.lobid.helper.LobidTypes;
-import models.DublinCoreData;
 import models.OpenAireData;
-import models.metadata.FundingReference;
-import models.Globals;
+import models.JsonElementModel;
 import models.Node;
 
 /**
- * @author Jan Schnasse extended by Andres Quast
+ * @author Andres Quast
  *
  */
 public class OpenAireMapper {
@@ -44,208 +41,88 @@ public class OpenAireMapper {
 		this.uri = uri;
 	}
 
-	public OpenAireData getData() {
+	public OpenAireData getOpenAireRecord() {
 		OpenAireData data = new OpenAireData();
 		if (node == null)
-			return data;
+			return null;
 
-		JsonNode n = new ObjectMapper().valueToTree(node.getLd2());
-		data.setCreator(getCreator(n));
-		data.setDescription(getList(n, "/abstractText"));
-		data.setTitle(getList(n, "/title"));
-		data.setDate(getList(n, "/publicationYear"));
-		data.setPublisher(getList(n, "/publisher"));
-		data.setSource(getSource(n));
-		data.setSubject(getComplexList(n, "/subject", "/prefLabel"));
-		data.addSubjects(getList(n, "/subjectName"));
-		data.setLanguage(getLanguage(n));
-		data.setRights(getComplexList(n, "/license", "/prefLabel"));
-		data.addIdentifier(uri);
-		data.addIdentifier(getComplexList(n, "/publisherVersion", "/@id"));
-		data.addIdentifier(getComplexList(n, "/additionalMaterial", "/@id"));
-		data.addIdentifier(getString(n, "/urn"));
-		data.addIdentifier(getString(n, "/doi"));
-		data.addIdentifier(getString(n, "/bibo:doi"));
+		JsonNode jNode = new ObjectMapper().valueToTree(node.getLd2());
 
-		data.setFundingReference(getFundingReferencesFromJsonNode(n));
+		JsonLDMapper mapper = new JsonLDMapper();
+		// ArrayList<JsonElementModel> jemList =
+		// mapper.mapToJsonElementModel(jNode);
+
+		StringBuffer sb = new StringBuffer();
+
+		// generate creator
+		ArrayList<JsonElementModel> jemList = mapper.getElement("root.creator");
+		Iterator<JsonElementModel> jemIt = jemList.iterator();
+		sb.append("<datacite:creators>");
+		while (jemIt.hasNext()) {
+			JsonElementModel jem = jemIt.next();
+
+			sb.append("<datacite:creator><datacite:creatorName>"
+					+ jem.getComplexElementList().get("prefLabel")
+					+ "<datacite:creatorName>");
+			if (jem.getComplexElementList().get("@id")
+					.startsWith("http://orchid.org")) {
+				sb.append(
+						"<datacite:creator><datacite:nameIdentifier nameIdentifierScheme=\"ORCID\">"
+								+ jem.getComplexElementList().get("@id")
+								+ "<datacite:nameIdentifier>");
+			}
+			sb.append("</datacite:creator>");
+		}
+		sb.append("</datacite:creators>");
+
+		data.addElement("creator", sb.toString());
+
+		// generate FundingReference
+		sb = new StringBuffer();
+		jemList = mapper.getElement("root.joinedFunding.fundingJoined");
+		jemIt = jemList.iterator();
+		sb.append("<oaire:fundingReferences>");
+		while (jemIt.hasNext()) {
+			JsonElementModel jem = jemIt.next();
+			sb.append("<oaire:fundingReference><oaire:funderName>"
+					+ jem.getComplexElementList().get("prefLabel")
+					+ "<oaire:funderName>");
+			if (jem.getComplexElementList().get("@id")
+					.startsWith("http://orchid.org")) {
+				sb.append(
+						"<oaire:funderIdentifier funderIdentifierType=\"Crossref Funder ID\">"
+								+ jem.getComplexElementList().get("@id")
+								+ "</oaire:funderIdentifier>");
+			}
+			sb.append("</oaire:fundingReference>");
+		}
+		sb.append("</oaire:fundingReferences>");
+		data.addElement("fundingReference", sb.toString());
+
+		// generate alternateIdentifiers, title
+		sb = new StringBuffer();
+		jemList = mapper.getElement("root");
+		jemIt = jemList.iterator();
+		while (jemIt.hasNext()) {
+			JsonElementModel jem = jemIt.next();
+			if (jem.getComplexElementList().get("bibo:doi") != null) {
+				sb.append("<datacite:alternateIdentifiers>");
+				sb.append("<datacite:alternateIdentifier type=\"DOI\">"
+						+ jem.getComplexElementList().get("bibo:doi")
+						+ "<oaire:funderName>");
+				sb.append("</datacite:alternateIdentifier>");
+				sb.append("</datacite:alternateIdentifier>");
+				data.addElement("alternateIdentifier", sb.toString());
+				sb = new StringBuffer();
+			}
+			if (jem.getComplexElementList().get("title") != null) {
+				sb.append(
+						"<datacite:title>" + jem.getComplexElementList().get("title"));
+				sb.append("</datacite:title>");
+				data.addElement("title", sb.toString());
+			}
+		}
 
 		return data;
 	}
-
-	private List<FundingReference> getFundingReferencesFromJsonNode(JsonNode n) {
-		JsonNode fundingNode = n.path("fundingJoined");
-		List<FundingReference> fRefList = new ArrayList<>();
-		for (JsonNode fNode : fundingNode) {
-			FundingReference fRefer = new FundingReference();
-			fRefer.setFunderName(fNode.get("/prefLabel").asText());
-			fRefer.setFunderIdentifier(fNode.get("/Id").asText());
-			fRefer.setFundingStream(fNode.get("/fundingProgramJoined").asText());
-			fRefList.add(fRefer);
-		}
-		return fRefList;
-	}
-
-	private List<String> getLanguage(JsonNode n) {
-		List<String> languageIds = getComplexList(n, "/language", "/@id");
-		List<String> result = new ArrayList<>();
-		for (String lang : languageIds) {
-			result.add(getLanguageAbrev(lang));
-		}
-		return result;
-	}
-
-	private String getLanguageAbrev(String lang) {
-		try {
-			return lang.substring(lang.lastIndexOf("/") + 1);
-		} catch (Exception e) {
-			play.Logger.debug("", e);
-		}
-		return "";
-	}
-
-	private List<String> getSource(JsonNode n) {
-		List<String> a = getComplexList(n, "/containedIn", "/prefLabel");
-		List<String> b = getList(n, "/bibliographicCitation");
-
-		if (a.size() != b.size()) {
-			return a;
-		}
-
-		List<String> result = new ArrayList<>();
-		for (int i = 0; i < a.size(); i++) {
-			// result.add(a.get(i) + ", " + parseBibliographicCitation(b.get(i)));
-			result.add(a.get(i) + ", " + b.get(i));
-		}
-
-		return result;
-	}
-
-	private String parseBibliographicCitation(String citation) {
-		String[] parts = citation.split(":");
-		if (parts.length != 2)
-			return citation;
-
-		if (parts[0] == null || parts[0].isEmpty()) {
-			if (parts[1] != null && !parts[1].isEmpty()) {
-				return findArticleNumberOrPages(parts[1]);
-			} else {
-				return "";
-			}
-		}
-
-		if (parts[1] == null || parts[1].isEmpty()) {
-			if (parts[0] != null && !parts[0].isEmpty()) {
-				return "Volume " + parts[0];
-			} else {
-				return "";
-			}
-		}
-
-		return "Volume " + parts[0] + ", " + findArticleNumberOrPages(parts[1]);
-	}
-
-	private String findArticleNumberOrPages(String in) {
-		if (in.contains("-")) {
-			return "Pages " + in;
-		}
-		return "Articlenumber " + in;
-	}
-
-	private List<String> getCreator(JsonNode n) {
-		List<String> result = new ArrayList<>();
-		if (result.isEmpty()) {
-			result.addAll(getComplexList(n, "/creator", "/prefLabel"));
-			result.addAll(getList(n, "/creatorName"));
-			result.addAll(getComplexList(n, "/contributor", "/prefLabel"));
-			result.addAll(getList(n, "/contributorName"));
-		}
-		return result;
-	}
-
-	private List<String> getWglType(JsonNode n) {
-		List<String> result = new ArrayList<>();
-		JsonNode a = n.at("/rdftype");
-		a.forEach(type -> {
-			String lobidType = type.at("/@id").textValue();
-			String wglType = mapLobidType(lobidType);
-			if (wglType != null) {
-				result.add(wglType);
-			}
-		});
-		return result;
-	}
-
-	private String mapLobidType(String lobidType) {
-		if (LobidTypes.Book.equals(lobidType)) {
-			return "Buch / Sammelwerk";
-		} else if (LobidTypes.Chapter.equals(lobidType)) {
-			return "Buchkapitel / Sammelwerksbeitrag";
-		} else if (LobidTypes.Thesis.equals(lobidType)) {
-			return "Hochschulschrift";
-		} else if (LobidTypes.Proceedings.equals(lobidType)) {
-			return "Konferenzbeitrag";
-		} else if (LobidTypes.Report.equals(lobidType)) {
-			return "Report / Forschungsbericht / Arbeitspapier";
-		} else if (LobidTypes.Miscellaneous.equals(lobidType)) {
-			return "Sonstige";
-		} else if (LobidTypes.Article.equals(lobidType)) {
-			return "Zeitschriftenartikel";
-		}
-		return null;
-	}
-
-	private List<String> getComplexList(JsonNode n, String string,
-			String string2) {
-		List<String> result = new ArrayList<>();
-		JsonNode a = n.at(string);
-		for (JsonNode item : a) {
-			String str = item.at(string2).asText("no Value found");
-			result.add(str);
-		}
-		return result;
-	}
-
-	private List<String> getWglContributor(JsonNode n) {
-		List<String> result = new ArrayList<>();
-		JsonNode collectionOneArray = n.at("/collectionOne");
-		for (JsonNode item : collectionOneArray) {
-			String id = item.at("/@id").asText("no Value found");
-			result.add(Globals.wglContributor.acronymOf(id));
-		}
-		if (result.isEmpty()) {
-			JsonNode institutionArray = n.at("/institution");
-			for (JsonNode item : institutionArray) {
-				String id = item.at("/@id").asText("no Value found");
-				result.add(Globals.wglContributor.acronymOf(id));
-			}
-		}
-		return result;
-	}
-
-	private List<String> getList(JsonNode n, String string) {
-		List<String> result = new ArrayList<>();
-		JsonNode a = n.at(string);
-		for (JsonNode item : a) {
-			String str = item.asText("no Value found");
-			result.add(str);
-		}
-		return result;
-	}
-
-	private String getString(JsonNode n, String string) {
-		StringBuffer result = new StringBuffer();
-		JsonNode a = n.at(string);
-		if (a.isArray()) {
-			for (JsonNode item : a) {
-				String str = item.asText("no Value found");
-				result.append(str + " ,");
-			}
-		} else {
-			result.append(a.asText());
-		}
-		if (result.length() == 0)
-			return null;
-		return result.subSequence(0, result.length() - 2).toString();
-	}
-
 }
