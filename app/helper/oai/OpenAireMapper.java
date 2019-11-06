@@ -72,8 +72,6 @@ public class OpenAireMapper {
 		}
 		sb.append("</datacite:creators>");
 
-		data.addElement("creator", sb.toString());
-
 		// generate FundingReference
 		jemList = mapper.getElement("root.joinedFunding.fundingJoined");
 		jemIt = jemList.iterator();
