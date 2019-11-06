@@ -185,8 +185,8 @@ public class Transform {
 	public String openaire(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		String data = new OpenAireMapper(node, uri).getData();
-		return data;
+		String result = new OpenAireMapper(node, uri).getData();
+		return result;
 	}
 
 	/**
