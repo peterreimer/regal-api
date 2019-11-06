@@ -88,7 +88,6 @@ import views.html.oai.mab;
 import views.html.oai.mets;
 import views.html.oai.oaidc;
 import views.html.oai.wgl;
-import views.html.oai.openaire;
 import views.html.tags.getTitle;
 
 /**
@@ -888,7 +887,7 @@ public class Resource extends MyController {
 			@QueryParam("validate") boolean validate) {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setContentType("application/xml");
-			String result = openaire.render(transform.openaire(pid), node.getLd2());
+			String result = transform.openaire(pid, node.getLd2());
 			if (validate) {
 				validate(result, "public/schemas/openaire.xsd", null, "public/schemas");
 			}
