@@ -41,7 +41,7 @@ public class OpenAireMapper {
 		this.uri = uri;
 	}
 
-	public OpenAireData getOpenAireRecord() {
+	public OpenAireData getData() {
 		OpenAireData data = new OpenAireData();
 		if (node == null)
 			return null;

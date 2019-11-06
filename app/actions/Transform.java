@@ -182,17 +182,6 @@ public class Transform {
 	 * @param pid The pid of an object
 	 * @return a openaire mapping
 	 */
-	public ArrayList<Hashtable<String,String>> jsonldmap(String pid) {
-		Node node = new Read().readNode(pid);
-		String uri = Globals.urnbase + node.getPid();
-		ArrayList<Hashtable<String,String>> data = new JsonLDMapper().getJsonAsList(node));
-		return data;
-	}
-
-	/**
-	 * @param pid The pid of an object
-	 * @return a openaire mapping
-	 */
 	public OpenAireData openaire(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
