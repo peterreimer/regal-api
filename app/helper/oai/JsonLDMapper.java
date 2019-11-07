@@ -25,22 +25,13 @@ public class JsonLDMapper {
 	private Hashtable<String, ArrayList<Integer>> index = new Hashtable<>();
 
 	/**
+	 * Constructor that integrates the indexing
+	 * 
 	 * @param node
 	 */
 	public JsonLDMapper(JsonNode node) {
 		jemElement = mapToJsonElementModel(node, new StringBuffer("root"));
 		createIndex();
-	}
-
-	/**
-	 * @param node
-	 * @return
-	 */
-	public ArrayList<JsonElementModel> mapToJsonElementModel(JsonNode node) {
-		ArrayList<JsonElementModel> jList =
-				mapToJsonElementModel(node, new StringBuffer("root"));
-		createIndex();
-		return jList;
 	}
 
 	/**
@@ -101,7 +92,7 @@ public class JsonLDMapper {
 					} else {
 						Hashtable<String, String> iE = new Hashtable<>();
 						iE.put(pBuffer.toString(), arrayNode.asText());
-						complexElement.add(iE);
+						// complexElement.add(iE);
 						jEM.addArrayElement(arrayNode.asText());
 					}
 				}
@@ -140,16 +131,22 @@ public class JsonLDMapper {
 		}
 	}
 
+	/**
+	 * @param path
+	 * @return
+	 */
 	public ArrayList<JsonElementModel> getElement(String path) {
 
-		ArrayList<JsonElementModel> result = new ArrayList<JsonElementModel>();
-		ArrayList<Integer> fieldIndex = index.get(path);
-		System.out.println(fieldIndex.size());
-		for (int i = 0; i < fieldIndex.size(); i++) {
-			JsonElementModel sJem = jemElement.get(fieldIndex.get(i));
-			result.add(sJem);
+		ArrayList<JsonElementModel> result = new ArrayList<>();
+		if (index.containsKey(path)) {
+			ArrayList<Integer> fieldIndex = index.get(path);
+			for (int i = 0; i < fieldIndex.size(); i++) {
+				JsonElementModel sJem = jemElement.get(fieldIndex.get(i));
+				result.add(sJem);
+			}
+			return result;
 		}
-		return result;
+		return null;
 	}
 
 }

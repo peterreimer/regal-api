@@ -45,15 +45,26 @@ public class OpenAireMapper {
 
 		JsonNode jNode = new ObjectMapper().valueToTree(node.getLd2());
 
+		// create one time the mapper object we work with until we have all data
+		// required
 		JsonLDMapper mapper = new JsonLDMapper(jNode);
-		// ArrayList<JsonElementModel> jemList =
-		// mapper.mapToJsonElementModel(jNode);
-
 		StringBuffer sb = new StringBuffer();
+		sb.append(setFilePreamble());
+		Iterator<JsonElementModel> jemIt = null;
 
+		// generate title
+		ArrayList<JsonElementModel> jemList = mapper.getElement("root.title");
+		sb.append("<datacite:title>"
+				+ jemList.get(0).getComplexElementList().get("root.title")
+				+ "</datacite:title>");
+		for (int i = 1; i < jemList.size(); i++) {
+
+			sb.append("<datacite:title>"
+					+ jemList.get(i).getComplexElementList().get("root.title")
+					+ "</datacite:title>");
+		}
 		// generate creator
-		ArrayList<JsonElementModel> jemList = mapper.getElement("root.creator");
-		Iterator<JsonElementModel> jemIt = jemList.iterator();
+		jemIt = mapper.getElement("root.creator").iterator();
 		sb.append("<datacite:creators>");
 		while (jemIt.hasNext()) {
 			JsonElementModel jem = jemIt.next();
@@ -73,8 +84,7 @@ public class OpenAireMapper {
 		sb.append("</datacite:creators>");
 
 		// generate FundingReference
-		jemList = mapper.getElement("root.joinedFunding.fundingJoined");
-		jemIt = jemList.iterator();
+		jemIt = mapper.getElement("root.joinedFunding.fundingJoined").iterator();
 		sb.append("<oaire:fundingReferences>");
 		while (jemIt.hasNext()) {
 			JsonElementModel jem = jemIt.next();
@@ -92,26 +102,22 @@ public class OpenAireMapper {
 		}
 		sb.append("</oaire:fundingReferences>");
 
-		// generate alternateIdentifiers, title
-		jemList = mapper.getElement("root");
-		jemIt = jemList.iterator();
-		while (jemIt.hasNext()) {
-			JsonElementModel jem = jemIt.next();
-			if (jem.getComplexElementList().get("bibo:doi") != null) {
-				sb.append("<datacite:alternateIdentifiers>");
-				sb.append("<datacite:alternateIdentifier type=\"DOI\">"
-						+ jem.getComplexElementList().get("bibo:doi")
-						+ "<oaire:funderName>");
-				sb.append("</datacite:alternateIdentifier>");
-				sb.append("</datacite:alternateIdentifier>");
-			}
-			if (jem.getComplexElementList().get("title") != null) {
-				sb.append(
-						"<datacite:title>" + jem.getComplexElementList().get("title"));
-				sb.append("</datacite:title>");
-			}
-		}
-
 		return sb.toString();
+	}
+
+	/**
+	 * @return
+	 */
+	public String setFilePreamble() {
+		String preamb = new String("<oai_dc:dc \n"
+				+ "    xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"\n"
+				+ "	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+				+ "	xmlns:dcterms=\"http://purl.org/dc/terms/\" \n"
+				+ "	xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n"
+				+ "	xsi:schemaLocation=\"http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd \n"
+				+ "	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd \n"
+				+ "	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd\">\n"
+				+ "");
+		return preamb;
 	}
 }
