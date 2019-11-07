@@ -4,8 +4,11 @@
 package helper.oai;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -116,9 +119,9 @@ public class JsonLDMapper {
 		ArrayList<Integer> position = new ArrayList<>();
 		int i = 0;
 		while (jemIt.hasNext()) {
-			JsonElementModel jEM = jemIt.next();
-			if (index.containsKey(jEM.getPath())) {
-				position = index.get(jEM.getPath());
+			JsonElementModel jEM1 = jemIt.next();
+			if (index.containsKey(jEM1.getPath())) {
+				position = index.get(jEM1.getPath());
 			} else {
 				position = new ArrayList<>();
 				System.out.println("da");
@@ -126,7 +129,7 @@ public class JsonLDMapper {
 
 			int pos = i;
 			position.add(Integer.valueOf(pos));
-			index.put(jEM.getPath(), position);
+			index.put(jEM1.getPath(), position);
 			i++;
 		}
 	}
@@ -135,7 +138,7 @@ public class JsonLDMapper {
 	 * @param path
 	 * @return
 	 */
-	public ArrayList<JsonElementModel> getElement(String path) {
+	public ArrayList<JsonElementModel> getElementModel(String path) {
 
 		ArrayList<JsonElementModel> result = new ArrayList<>();
 		if (index.containsKey(path)) {
@@ -143,6 +146,33 @@ public class JsonLDMapper {
 			for (int i = 0; i < fieldIndex.size(); i++) {
 				JsonElementModel sJem = jemElement.get(fieldIndex.get(i));
 				result.add(sJem);
+			}
+			return result;
+		}
+		return null;
+	}
+
+	/**
+	 * @param path
+	 * @return
+	 */
+	public ArrayList<Hashtable<String, String>> getElement(String path) {
+
+		ArrayList<Hashtable<String, String>> result = new ArrayList<>();
+		if (index.containsKey(path)) {
+			ArrayList<Integer> fieldIndex = index.get(path);
+			for (int i = 0; i < fieldIndex.size(); i++) {
+				JsonElementModel sJem = jemElement.get(fieldIndex.get(i));
+				if (sJem.isObject()) {
+					Hashtable<String, String> element = sJem.getComplexElementList();
+					result.add(element);
+				} else {
+					Hashtable<String, String> element = new Hashtable<>();
+					for (int j = 0; j < sJem.getArrayList().size(); j++) {
+						element.put("title", sJem.getArrayList().get(j));
+						result.add(element);
+					}
+				}
 			}
 			return result;
 		}

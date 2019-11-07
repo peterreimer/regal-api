@@ -18,13 +18,12 @@
 package helper.oai;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import models.OpenAireData;
-import models.JsonElementModel;
 import models.Node;
 
 /**
@@ -36,6 +35,10 @@ public class OpenAireMapper {
 	Node node;
 	String uri;
 
+	/**
+	 * @param node
+	 * @param uri
+	 */
 	public OpenAireMapper(Node node, String uri) {
 		this.node = node;
 		this.uri = uri;
@@ -50,57 +53,49 @@ public class OpenAireMapper {
 		JsonLDMapper mapper = new JsonLDMapper(jNode);
 		StringBuffer sb = new StringBuffer();
 		sb.append(setFilePreamble());
-		Iterator<JsonElementModel> jemIt = null;
-
+		Iterator<Hashtable<String, String>> jsonElementModelIterator = null;
+		Hashtable<String, String> element = null;
 		// generate title
-		ArrayList<JsonElementModel> jemList = mapper.getElement("root.title");
-		sb.append("<datacite:title>"
-				+ jemList.get(0).getComplexElementList().get("root.title")
-				+ "</datacite:title>");
+		ArrayList<Hashtable<String, String>> jemList =
+				mapper.getElement("root.title");
+		sb.append("<datacite:title>" + jemList.get(0).get("title")
+				+ "</datacite:title>\n");
 		for (int i = 1; i < jemList.size(); i++) {
 
-			sb.append("<datacite:title>"
-					+ jemList.get(i).getComplexElementList().get("root.title")
-					+ "</datacite:title>");
+			sb.append("<datacite:title>" + jemList.get(i).get("title")
+					+ "</datacite:title>\n");
 		}
 		// generate creator
-		jemIt = mapper.getElement("root.creator").iterator();
-		sb.append("<datacite:creators>");
-		while (jemIt.hasNext()) {
-			JsonElementModel jem = jemIt.next();
-
-			sb.append("<datacite:creator><datacite:creatorName>"
-					+ jem.getComplexElementList().get("prefLabel")
-					+ "<datacite:creatorName>");
-			if (jem.getComplexElementList().get("@id")
-					.startsWith("http://orchid.org")) {
-				sb.append(
-						"<datacite:creator><datacite:nameIdentifier nameIdentifierScheme=\"ORCID\">"
-								+ jem.getComplexElementList().get("@id")
-								+ "<datacite:nameIdentifier>");
+		jsonElementModelIterator = mapper.getElement("root.creator").iterator();
+		sb.append("<datacite:creators>\n");
+		while (jsonElementModelIterator.hasNext()) {
+			element = jsonElementModelIterator.next();
+			sb.append("\t<datacite:creator>\n\t\t<datacite:creatorName>"
+					+ element.get("prefLabel") + "</datacite:creatorName>\n");
+			if (element.get("@id").startsWith("")) {
+				sb.append("\t\t<datacite:nameIdentifier nameIdentifierScheme=\"ORCID\">"
+						+ element.get("@id") + "<datacite:nameIdentifier>\n");
 			}
-			sb.append("</datacite:creator>");
+			sb.append("\t</datacite:creator>\n");
 		}
-		sb.append("</datacite:creators>");
+		sb.append("</datacite:creators>\n");
 
 		// generate FundingReference
-		jemIt = mapper.getElement("root.joinedFunding.fundingJoined").iterator();
-		sb.append("<oaire:fundingReferences>");
-		while (jemIt.hasNext()) {
-			JsonElementModel jem = jemIt.next();
-			sb.append("<oaire:fundingReference><oaire:funderName>"
-					+ jem.getComplexElementList().get("prefLabel")
-					+ "<oaire:funderName>");
-			if (jem.getComplexElementList().get("@id")
-					.startsWith("http://orchid.org")) {
+		jsonElementModelIterator =
+				mapper.getElement("root.joinedFunding.fundingJoined").iterator();
+		sb.append("<oaire:fundingReferences>\n");
+		while (jsonElementModelIterator.hasNext()) {
+			element = jsonElementModelIterator.next();
+			sb.append("\t<oaire:fundingReference>\n\t\t<oaire:funderName>"
+					+ element.get("prefLabel") + "</oaire:funderName>\n");
+			if (element.get("@id").startsWith("")) {
 				sb.append(
-						"<oaire:funderIdentifier funderIdentifierType=\"Crossref Funder ID\">"
-								+ jem.getComplexElementList().get("@id")
-								+ "</oaire:funderIdentifier>");
+						"\t\t<oaire:funderIdentifier funderIdentifierType=\"Crossref Funder ID\">"
+								+ element.get("@id") + "</oaire:funderIdentifier>\n");
 			}
-			sb.append("</oaire:fundingReference>");
+			sb.append("\t</oaire:fundingReference>\n");
 		}
-		sb.append("</oaire:fundingReferences>");
+		sb.append("</oaire:fundingReferences>\n");
 
 		return sb.toString();
 	}
