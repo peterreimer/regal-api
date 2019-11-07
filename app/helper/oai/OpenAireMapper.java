@@ -45,7 +45,7 @@ public class OpenAireMapper {
 
 		JsonNode jNode = new ObjectMapper().valueToTree(node.getLd2());
 
-		JsonLDMapper mapper = new JsonLDMapper();
+		JsonLDMapper mapper = new JsonLDMapper(jNode);
 		// ArrayList<JsonElementModel> jemList =
 		// mapper.mapToJsonElementModel(jNode);
 
