@@ -41,10 +41,7 @@ public class OpenAireMapper {
 		this.uri = uri;
 	}
 
-	public OpenAireData getData() {
-		OpenAireData data = new OpenAireData();
-		if (node == null)
-			return null;
+	public String getData() {
 
 		JsonNode jNode = new ObjectMapper().valueToTree(node.getLd2());
 
@@ -75,10 +72,7 @@ public class OpenAireMapper {
 		}
 		sb.append("</datacite:creators>");
 
-		data.addElement("creator", sb.toString());
-
 		// generate FundingReference
-		sb = new StringBuffer();
 		jemList = mapper.getElement("root.joinedFunding.fundingJoined");
 		jemIt = jemList.iterator();
 		sb.append("<oaire:fundingReferences>");
@@ -97,10 +91,8 @@ public class OpenAireMapper {
 			sb.append("</oaire:fundingReference>");
 		}
 		sb.append("</oaire:fundingReferences>");
-		data.addElement("fundingReference", sb.toString());
 
 		// generate alternateIdentifiers, title
-		sb = new StringBuffer();
 		jemList = mapper.getElement("root");
 		jemIt = jemList.iterator();
 		while (jemIt.hasNext()) {
@@ -112,17 +104,14 @@ public class OpenAireMapper {
 						+ "<oaire:funderName>");
 				sb.append("</datacite:alternateIdentifier>");
 				sb.append("</datacite:alternateIdentifier>");
-				data.addElement("alternateIdentifier", sb.toString());
-				sb = new StringBuffer();
 			}
 			if (jem.getComplexElementList().get("title") != null) {
 				sb.append(
 						"<datacite:title>" + jem.getComplexElementList().get("title"));
 				sb.append("</datacite:title>");
-				data.addElement("title", sb.toString());
 			}
 		}
 
-		return data;
+		return sb.toString();
 	}
 }
