@@ -4,7 +4,6 @@
 package helper.oai;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -19,16 +18,19 @@ import models.Node;
  */
 public class JsonLDMapper {
 
-	Hashtable<String, String> simpleElements = new Hashtable<>();
-	ArrayList<Hashtable<String, String>> complexElement = new ArrayList<>();
-	ArrayList<Hashtable<String, String>> simpleElement = new ArrayList<>();
-	ArrayList<Hashtable<String, ArrayList<String>>> arrayElement =
+	private ArrayList<Hashtable<String, String>> complexElement =
 			new ArrayList<>();
-	ArrayList<JsonElementModel> jemElement = new ArrayList<>();
-	JsonElementModel jEM = null;
-	Hashtable<String, ArrayList<Integer>> index = new Hashtable<>();
+	private ArrayList<JsonElementModel> jemElement = new ArrayList<>();
+	private JsonElementModel jEM = null;
+	private Hashtable<String, ArrayList<Integer>> index = new Hashtable<>();
 
-	StringBuffer pathBuffer = new StringBuffer("");
+	/**
+	 * @param node
+	 */
+	public JsonLDMapper(JsonNode node) {
+		jemElement = mapToJsonElementModel(node, new StringBuffer("root"));
+		createIndex();
+	}
 
 	/**
 	 * @param node
@@ -63,7 +65,6 @@ public class JsonLDMapper {
 					ha.put(key, node.get(key).asText());
 					jEM.setComplexElement(ha);
 				} else {
-					iE.put(pBuffer + "." + key, node.get(key).asText());
 					iE.put(key, node.get(key).asText());
 					jEM = new JsonElementModel(pBuffer.toString());
 					jEM.setComplexElement(iE);
@@ -115,34 +116,9 @@ public class JsonLDMapper {
 	}
 
 	/**
-	 * method for examine the classes result
-	 * 
+	 * Create Index of all keys and their occurrences within the ArrayList
+	 * jemElement Convenience method to facilitate Access to the
 	 */
-	// TODO: move into separate testing Class
-	public void printElements() {
-		Iterator<Hashtable<String, String>> it = complexElement.iterator();
-		for (int i = 0; i < jemElement.size(); i++) {
-			if (jemElement.get(i).isArray()) {
-				System.out.print(jemElement.get(i).getPath() + ":\t");
-				Iterator jit = jemElement.get(i).getArrayList().iterator();
-				while (jit.hasNext()) {
-					System.out.print(jit.next().toString() + "\t");
-				}
-			} else if (jemElement.get(i).isObject()) {
-				System.out.println(jemElement.get(i).getPath());
-				Enumeration jEnum = jemElement.get(i).getComplexElementList().keys();
-				while (jEnum.hasMoreElements()) {
-					String key = jEnum.nextElement().toString();
-					System.out.print("\t" + "\t" + key + "\t");
-					System.out
-							.print(jemElement.get(i).getComplexElementList().get(key) + "\n");
-				}
-
-			}
-			System.out.println("" + jemElement.size());
-		}
-	}
-
 	public void createIndex() {
 
 		Iterator<JsonElementModel> jemIt = jemElement.iterator();
@@ -152,7 +128,6 @@ public class JsonLDMapper {
 			JsonElementModel jEM = jemIt.next();
 			if (index.containsKey(jEM.getPath())) {
 				position = index.get(jEM.getPath());
-				// System.out.println(jEM.getPath());
 			} else {
 				position = new ArrayList<>();
 				System.out.println("da");
@@ -161,8 +136,6 @@ public class JsonLDMapper {
 			int pos = i;
 			position.add(Integer.valueOf(pos));
 			index.put(jEM.getPath(), position);
-			System.out.println(position.size());
-			System.out.println(index.get(jEM.getPath()));
 			i++;
 		}
 	}
