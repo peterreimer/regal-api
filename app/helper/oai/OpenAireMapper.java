@@ -104,15 +104,14 @@ public class OpenAireMapper {
 	 * @return
 	 */
 	public String setFilePreamble() {
-		String preamb = new String("<oai_dc:dc \n"
-				+ "    xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"\n"
-				+ "	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
-				+ "	xmlns:dcterms=\"http://purl.org/dc/terms/\" \n"
-				+ "	xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n"
-				+ "	xsi:schemaLocation=\"http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd \n"
-				+ "	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd \n"
-				+ "	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd\">\n"
-				+ "");
+		String preamb = new String(
+				"<resource xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+						+ " 	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+						+ " 	xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
+						+ " 	xmlns:dcterms=\"http://purl.org/dc/terms/\"\n"
+						+ " 	xmlns:datacite=\"http://datacite.org/schema/kernel-4\"\n"
+						+ " 	xmlns=\"http://namespace.openaire.eu/schema/oaire/\"\n"
+						+ " 	xsi:schemaLocation=\"http://namespace.openaire.eu/schema/oaire/ https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd\">\n");
 		return preamb;
 	}
 }
