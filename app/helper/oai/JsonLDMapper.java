@@ -167,16 +167,16 @@ public class JsonLDMapper {
 					Hashtable<String, String> element = sJem.getComplexElementList();
 					result.add(element);
 				} else {
-					Hashtable<String, String> element = new Hashtable<>();
 					for (int j = 0; j < sJem.getArrayList().size(); j++) {
-						element.put("title", sJem.getArrayList().get(j));
+						Hashtable<String, String> element = new Hashtable<>();
+						element.put(path, sJem.getArrayList().get(j));
 						result.add(element);
 					}
 				}
 			}
 			return result;
 		}
-		return null;
+		return new ArrayList<Hashtable<String, String>>();
 	}
 
 }
