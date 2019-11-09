@@ -80,13 +80,17 @@ public class OpenAireMapper {
 				"http://datacite.org/schema/kernel-4");
 		resource.setAttribute("xmlns",
 				"http://namespace.openaire.eu/schema/oaire/");
+		resource.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+		resource.setAttribute("xmlns:dcterms", "http://purl.org/dc/terms/");
 		resource.setAttribute("xmlns:xsi",
 				"http://www.w3.org/2001/XMLSchema-instance");
 		resource.setAttribute("xsi:schemaLocation",
 				"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.1/metadata.xsd\n"
-						+ "	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd \n"
-						+ "	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd\n"
 						+ "	http://namespace.openaire.eu/schema/oaire/  https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd\">\n"
+						+ "	http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd \n"
+						+ "	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd \n"
+						+ "	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd\n"
+						+ "	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd\n"
 						+ "");
 
 		Hashtable<String, String> jsonElementList = new Hashtable<>();
@@ -244,6 +248,7 @@ public class OpenAireMapper {
 			resource.appendChild(subjects);
 		}
 
+		doc.appendChild(resource);
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
