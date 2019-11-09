@@ -52,6 +52,9 @@ public class OpenAireMapper {
 		this.uri = uri;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getData() {
 
 		JsonNode jNode = new ObjectMapper().valueToTree(node.getLd2());
@@ -140,6 +143,16 @@ public class OpenAireMapper {
 				sE.appendChild(ci);
 			}
 
+			Element cp = doc.createElement("fundingStream");
+			cp.appendChild(
+					doc.createTextNode(jemList.get(i).get("fundingProgramJoined")));
+			sE.appendChild(cp);
+
+			Element cpi = doc.createElement("awardNumber");
+			cpi.appendChild(
+					doc.createTextNode(jemList.get(i).get("projectIdJoined")));
+			sE.appendChild(cpi);
+
 			funding.appendChild(sE);
 			resource.appendChild(funding);
 
@@ -154,36 +167,86 @@ public class OpenAireMapper {
 			id.setAttribute("alternateIdentifierType", "DOI");
 			alternate.appendChild(id);
 		}
-
 		resource.appendChild(alternate);
 
-		// root.appendChild(elem);
+		// generate language
+		jemList = jMapper.getElement("root.language");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element language = doc.createElement("dc:language");
+			language.appendChild(
+					doc.createTextNode(jemList.get(i).get("@id").substring(38)));
+			resource.appendChild(language);
+		}
 
-		// elem.appendChild(doc.createTextNode("hallo"));
+		// generate dateIssued
+		jemList = jMapper.getElement("root.publicationYear");
+		Element issued = doc.createElement("datacite:date");
+		issued.appendChild(
+				doc.createTextNode(jemList.get(0).get("root.publicationYear")));
+		issued.setAttribute("dateType", "Issued");
+		resource.appendChild(issued);
+
+		// generate description
+		jemList = jMapper.getElement("root.abstractText");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element description = doc.createElement("datacite:description");
+			description.appendChild(
+					doc.createTextNode(jemList.get(i).get("root.abstractText")));
+			resource.appendChild(description);
+		}
+
+		// generate identifier
+		jemList = jMapper.getElement("root");
+		for (int i = 0; i < jemList.size(); i++) {
+			if (jemList.get(i).containsKey("@id")) {
+				Element identifier = doc.createElement("datacite:identifier");
+				identifier.appendChild(doc.createTextNode(
+						"https://frl.publisso.de/" + jemList.get(i).get("@id")));
+				identifier.setAttribute("identifierType", "PURL");
+				resource.appendChild(identifier);
+			}
+		}
+
+		// generate source
+		jemList = jMapper.getElement("root.containedIn");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element source = doc.createElement("dc:source");
+			source.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+			// source.setAttribute("identifierType", "PURL");
+			resource.appendChild(source);
+		}
+
+		// generate subjects
+		Element subjects = doc.createElement("datacite:subjects");
+		jemList = jMapper.getElement("root.ddc");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element sE = doc.createElement("datacite:subject");
+			sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+			sE.setAttribute("subjectScheme", "DDC");
+			sE.setAttribute("schemeURI", "http://dewey.info");
+			sE.setAttribute("valueURI", jemList.get(i).get("@id"));
+
+			subjects.appendChild(sE);
+			resource.appendChild(subjects);
+		}
+
+		jemList = jMapper.getElement("root.subject");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element sE = doc.createElement("datacite:subject");
+			sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+
+			// prevent record from displaying local id's
+			if (!jemList.get(i).get("@id").startsWith("https://frl")) {
+				sE.setAttribute("valueURI", jemList.get(i).get("@id"));
+			}
+
+			subjects.appendChild(sE);
+			resource.appendChild(subjects);
+		}
 
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
 	}
 
-	/**
-	 * @return
-	 */
-	public String setFilePreamble() {
-		String preamb = new String(
-				"<resource xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""
-						+ "    xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"\n"
-						+ "	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
-						+ "	xmlns:dcterms=\"http://purl.org/dc/terms/\" \n"
-						+ "	xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n"
-						+ "	xmlns:datacite=\"http://datacite.org/schema/kernel-4\"\n"
-						+ "	xmlns=\"http://namespace.openaire.eu/schema/oaire/\"\n"
-						+ "	xsi:schemaLocation=\"http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd \n"
-						+ "	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd \n"
-						+ "	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd\n"
-						+ "	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd\n"
-						+ "	http://namespace.openaire.eu/schema/oaire/  https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd\">\n"
-						+ "");
-		return preamb;
-	}
 }
