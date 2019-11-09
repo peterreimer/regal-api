@@ -249,7 +249,6 @@ public class OpenAireMapper {
 		}
 
 		doc.appendChild(resource);
-		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
 	}
