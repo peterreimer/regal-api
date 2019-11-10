@@ -120,7 +120,8 @@ public class OpenAireMapper {
 			sE.appendChild(cn);
 
 			// prevent record from displayinglocal ids
-			if (!jemList.get(i).get("@id").startsWith("https://frl")) {
+			if (!jemList.get(i).get("@id").startsWith("https://frl")
+					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
 				Element ci = doc.createElement("datacite:creatorIdentifier");
 				ci.appendChild(doc.createTextNode(jemList.get(i).get("@id")));
 				sE.appendChild(ci);

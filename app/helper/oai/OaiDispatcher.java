@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.IS_MEMBER_OF;
 import static archive.fedora.FedoraVocabulary.ITEM_ID;
 
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 
 import models.DublinCoreData;
