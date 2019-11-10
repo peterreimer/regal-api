@@ -85,12 +85,12 @@ public class OpenAireMapper {
 		resource.setAttribute("xmlns:xsi",
 				"http://www.w3.org/2001/XMLSchema-instance");
 		resource.setAttribute("xsi:schemaLocation",
-				"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.1/metadata.xsd\n"
-						+ "	http://namespace.openaire.eu/schema/oaire/  https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd\">\n"
+				"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.1/metadata.xsd \n"
+						+ "	http://namespace.openaire.eu/schema/oaire/  https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd \n"
 						+ "	http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/dcterms.xsd \n"
 						+ "	http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd \n"
-						+ "	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd\n"
-						+ "	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd\n"
+						+ "	http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd \n"
+						+ "	http://datacite.org/schema/kernel-4  http://schema.datacite.org/meta/kernel-4.1/metadata.xsd \n"
 						+ "");
 
 		Hashtable<String, String> jsonElementList = new Hashtable<>();
@@ -240,7 +240,8 @@ public class OpenAireMapper {
 			sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
 
 			// prevent record from displaying local id's
-			if (!jemList.get(i).get("@id").startsWith("https://frl")) {
+			if (!jemList.get(i).get("@id").startsWith("https://frl")
+					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
 				sE.setAttribute("valueURI", jemList.get(i).get("@id"));
 			}
 
