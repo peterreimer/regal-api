@@ -653,7 +653,8 @@ public class WebsiteVersionPublisher {
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann Softlink " + uploadFile + " in Verzeichnis "
 					+ publicCrawlDirP + " nicht anlegen!");
-			throw new RuntimeException(e);
+			// throw new RuntimeException(e);
+			return;
 		}
 	}
 
