@@ -6,7 +6,7 @@ Willkommen zur regal-api Dokumentation!
    :caption: Inhalt:
 
    developer-docs/oaiMetadataFormats
-
+   developer-docs/JsonLDMapper
 
 Suche
 =====

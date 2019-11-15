@@ -52,7 +52,7 @@
             
   <div class="section" id="neues-metadaten-format-in-die-oai-schnittstelle-integrieren">
 <h1>Neues Metadaten-Format in die OAI-Schnittstelle integrieren<a class="headerlink" href="#neues-metadaten-format-in-die-oai-schnittstelle-integrieren" title="Link zu dieser Überschrift">¶</a></h1>
-<p>Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Aktivitäten an mehreren Stellen.</p>
+<p>Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst zurzeit noch Aktivitäten an mehreren Stellen.</p>
 <ol class="arabic simple">
 <li>Java-Klassen erweitern und anpassen</li>
 <li>Konfiguration der regal-api und des OAI-Providers anpassen</li>
@@ -60,25 +60,22 @@
 </ol>
 <div class="section" id="java-klassen-erweitern-und-anpassen">
 <h2>Java-Klassen erweitern und anpassen<a class="headerlink" href="#java-klassen-erweitern-und-anpassen" title="Link zu dieser Überschrift">¶</a></h2>
-<p>Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind zunächst die folgenden Dateien relevant</p>
+<p>Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind die folgenden Dateien relevant.</p>
 <ul class="simple">
-<li>regal-api.app.helper.oai/*</li>
-<li>regal-api.app.helper.oai/*Mapper.java</li>
 <li>regal-api.app.helper.oai/OaiDispatcher.java</li>
-<li>regal-api.app.models/DublinCoreData.java</li>
 <li>regal-api.app.actions/Transform.java</li>
 <li>regal-api.app.controllers/Resource.java</li>
 </ul>
-<p>Zunächst kopiere ich die Datei WGLMapper.java und erstelle damit die Datei OpenAireMapper.java
-Die Datei DublinCoreData.java kopiere ich und erstelle damit OpenAireData.java</p>
-<p>In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addOpenaireTransformer erstellt werden.</p>
-<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addOpenAireTransformer</span><span class="p">(</span><span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+<p>In disen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung
+eines Metadaten-Stroms im System ausgelöst und gesteuert wird.</p>
+<p>In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden.</p>
+<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addNeuesFormatTransformer</span><span class="p">(</span><span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
   <span class="n">String</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">getContentType</span><span class="p">();</span>
     <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;public&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">getPublishScheme</span><span class="p">()))</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;monograph&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;journal&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
         <span class="o">||</span> <span class="s2">&quot;webpage&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;researchData&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
         <span class="o">||</span> <span class="s2">&quot;article&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span> <span class="p">{</span>
-          <span class="n">node</span><span class="o">.</span><span class="n">addTransformer</span><span class="p">(</span><span class="n">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="s2">&quot;openaire&quot;</span><span class="p">));</span>
+          <span class="n">node</span><span class="o">.</span><span class="n">addTransformer</span><span class="p">(</span><span class="n">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="s2">&quot;neuesFormat&quot;</span><span class="p">));</span>
       <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">}</span>
@@ -92,7 +89,7 @@ Die Datei DublinCoreData.java kopiere ich und erstelle damit OpenAireData.java</
       <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;oaidc&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
         <span class="k">continue</span><span class="p">;</span> <span class="o">//</span> <span class="n">implicitly</span> <span class="n">added</span> <span class="o">-</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">allowed</span> <span class="n">to</span> <span class="nb">set</span>
   <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-      <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;openaire&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+      <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;neuesFormat&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
         <span class="k">continue</span><span class="p">;</span> <span class="o">//</span> <span class="n">implicitly</span> <span class="n">added</span> <span class="o">-</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">allowed</span> <span class="n">to</span> <span class="nb">set</span>
       <span class="n">node</span><span class="o">.</span><span class="n">addTransformer</span><span class="p">(</span><span class="n">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
     <span class="p">}</span>
@@ -100,12 +97,21 @@ Die Datei DublinCoreData.java kopiere ich und erstelle damit OpenAireData.java</
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Die Datei Transform muss um eine Methode openaire erweitert werden. Diese Methode wird später über eine in der Datei Resource.java definierte ApiOperation „asOpenAire“ als Restful Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.
-Innerhalb des Packages view.oai habe ich die neuen Klassen openaire.scala.html und openaireView.scala.html angelegt, die nahc meinem Verständnis die Darstellung des openaire-Objektes steuern sollen.</p>
+<p>Die Datei Transform muss um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte
+ApiOperation „asNeuesFormat“ als Restful-Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.</p>
+<p>Das Mappen und die Erzeugung eines Metadatenstroms wurde in der Vergangenheit über unterschiedliche Wege umgesetzt, bei denen ebenfalls mehrere Klassen und ggf.
+ScalaViews beteiligt sind.</p>
+<p>Im Package helper.oai wird ein neuer Mapper angelegt, über den die im lobid V2-Format zur Verfügung gestellten Metadaten in das neue Format gemappt werden.
+Bisher kamen dafür die Klassen ObjectMapper aus der Jackson Library, models.Pair und entweder ein Datenmodell plus Mapper oder eine Record Klasse zum Einsatz.</p>
+<p>Innerhalb des Packages view.oai mussten bei der Nutzung eines Datenmodells und eines Mappers zusätzlich die Klassen NeuesFormat.scala.html und
+NeuesFormatView.scala.html angelegt werden.Diese steuern das Parsing und die Darstellung des neuen Formats über die Scala-Infrastruktur.
+Im Unterschied dazu erzeugen die Record-Klassen String-Representationen eines XML-Datenstroms.</p>
+<p>Zur Vereinfachung und Vereinheitlichung wurde für kommende Metadatenformate eine neue Klase angelegt, mit der variable JSON-Datenströme in vergleichsweise
+einheitlich nutzbare Java-Strukturen übersetzt werden.</p>
 </div>
 <div class="section" id="konfiguration-der-regal-api-und-des-oai-providers-anpassen">
 <h2>Konfiguration der regal-api und des OAI-Providers anpassen<a class="headerlink" href="#konfiguration-der-regal-api-und-des-oai-providers-anpassen" title="Link zu dieser Überschrift">¶</a></h2>
-<p>Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann muss in der Datei conf/routes eine entsprechende Konfirgurationszeile erstellt werden.</p>
+<p>Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.</p>
 <div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>GET /resource/:pid.openaire     controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
 </pre></div>
 </div>
@@ -139,7 +145,8 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
 <div class="section" id="testen-der-schnittstelle">
 <h2>Testen der Schnittstelle<a class="headerlink" href="#testen-der-schnittstelle" title="Link zu dieser Überschrift">¶</a></h2>
 <p>Die OAI-Schnittstelle ist über die URL <a class="reference external" href="http://api.ellinet-dev.hbz-nrw.de/oai-pmh/">http://api.ellinet-dev.hbz-nrw.de/oai-pmh/</a> oder analog bei edoweb-test erreichbar.
-Der neue ServiceDisseminator kann über die regal-api aufgerufen werden, wenn der in der routes Datei deklarierte Pfad entsprechend aufgerufen wird. Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittels POST. Deshalb kommt cUrl zum Einsatz: curl -XGET -uedoweb-admin localhost:9000/resource/frl%3A6402576.openaire</p>
+Der neue ServiceDisseminator kann über die regal-api aufgerufen werden, wenn der in der routes Datei deklarierte Pfad entsprechend aufgerufen wird.
+Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittels POST. Deshalb kommt cUrl zum Einsatz: curl -XGET -uedoweb-admin localhost:9000/resource/frl%3A6402576.openaire</p>
 </div>
 </div>
 

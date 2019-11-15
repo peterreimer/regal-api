@@ -1,7 +1,7 @@
 Neues Metadaten-Format in die OAI-Schnittstelle integrieren
 ===========================================================
 
-Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Aktivitäten an mehreren Stellen.
+Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst zurzeit noch Aktivitäten an mehreren Stellen.
 
 1. Java-Klassen erweitern und anpassen
 2. Konfiguration der regal-api und des OAI-Providers anpassen
@@ -10,30 +10,26 @@ Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Ak
 Java-Klassen erweitern und anpassen
 -----------------------------------
 
-Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind zunächst die folgenden Dateien relevant 
+Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind die folgenden Dateien relevant.
 
-* regal-api.app.helper.oai/\*
-* regal-api.app.helper.oai/\*Mapper.java
 * regal-api.app.helper.oai/OaiDispatcher.java
-* regal-api.app.models/DublinCoreData.java
 * regal-api.app.actions/Transform.java
 * regal-api.app.controllers/Resource.java
 
+In disen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung 
+eines Metadaten-Stroms im System ausgelöst und gesteuert wird.
 
-Zunächst kopiere ich die Datei WGLMapper.java und erstelle damit die Datei OpenAireMapper.java
-Die Datei DublinCoreData.java kopiere ich und erstelle damit OpenAireData.java
-
-In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addOpenaireTransformer erstellt werden. 
+In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden. 
 
 .. code:: java
 
-    private static void addOpenAireTransformer(Node node) {
+    private static void addNeuesFormatTransformer(Node node) {
       String type = node.getContentType();
         if ("public".equals(node.getPublishScheme())) {
           if ("monograph".equals(type) || "journal".equals(type)
             || "webpage".equals(type) || "researchData".equals(type)
             || "article".equals(type)) {
-              node.addTransformer(new Transformer("openaire"));
+              node.addTransformer(new Transformer("neuesFormat"));
           }
         }
       } 
@@ -50,7 +46,7 @@ Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage in
           if ("oaidc".equals(t))
             continue; // implicitly added - or not allowed to set
       [...]
-          if ("openaire".equals(t))
+          if ("neuesFormat".equals(t))
             continue; // implicitly added - or not allowed to set
           node.addTransformer(new Transformer(t));
         }
@@ -58,14 +54,29 @@ Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage in
     }
 
 
-Die Datei Transform muss um eine Methode openaire erweitert werden. Diese Methode wird später über eine in der Datei Resource.java definierte ApiOperation "asOpenAire" als Restful Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.  
-Innerhalb des Packages view.oai habe ich die neuen Klassen openaire.scala.html und openaireView.scala.html angelegt, die nahc meinem Verständnis die Darstellung des openaire-Objektes steuern sollen.   
+Die Datei Transform muss um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte 
+ApiOperation "asNeuesFormat" als Restful-Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.  
+
+Das Mappen und die Erzeugung eines Metadatenstroms wurde in der Vergangenheit über unterschiedliche Wege umgesetzt, bei denen ebenfalls mehrere Klassen und ggf.
+ScalaViews beteiligt sind.
+
+Im Package helper.oai wird ein neuer Mapper angelegt, über den die im lobid V2-Format zur Verfügung gestellten Metadaten in das neue Format gemappt werden. 
+Bisher kamen dafür die Klassen ObjectMapper aus der Jackson Library, models.Pair und entweder ein Datenmodell plus Mapper oder eine Record Klasse zum Einsatz.
+     
+Innerhalb des Packages view.oai mussten bei der Nutzung eines Datenmodells und eines Mappers zusätzlich die Klassen NeuesFormat.scala.html und 
+NeuesFormatView.scala.html angelegt werden.Diese steuern das Parsing und die Darstellung des neuen Formats über die Scala-Infrastruktur. 
+Im Unterschied dazu erzeugen die Record-Klassen String-Representationen eines XML-Datenstroms.
+
+Zur Vereinfachung und Vereinheitlichung wurde für kommende Metadatenformate eine neue Klase angelegt, mit der variable JSON-Datenströme in vergleichsweise 
+einheitlich nutzbare Java-Strukturen übersetzt werden. 
+
+      
 
 
 Konfiguration der regal-api und des OAI-Providers anpassen
 ----------------------------------------------------------
 
-Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann muss in der Datei conf/routes eine entsprechende Konfirgurationszeile erstellt werden.
+Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.
 
 .. code:: bash
 
@@ -106,4 +117,5 @@ Testen der Schnittstelle
 ------------------------
 
 Die OAI-Schnittstelle ist über die URL http://api.ellinet-dev.hbz-nrw.de/oai-pmh/ oder analog bei edoweb-test erreichbar.
-Der neue ServiceDisseminator kann über die regal-api aufgerufen werden, wenn der in der routes Datei deklarierte Pfad entsprechend aufgerufen wird. Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittels POST. Deshalb kommt cUrl zum Einsatz: curl -XGET -uedoweb-admin localhost:9000/resource/frl%3A6402576.openaire
+Der neue ServiceDisseminator kann über die regal-api aufgerufen werden, wenn der in der routes Datei deklarierte Pfad entsprechend aufgerufen wird. 
+Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittels POST. Deshalb kommt cUrl zum Einsatz: curl -XGET -uedoweb-admin localhost:9000/resource/frl%3A6402576.openaire
