@@ -21,7 +21,7 @@ eines Metadaten-Stroms im System ausgelöst und gesteuert wird.
 
 In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden. 
 
-.. code:: java
+ .. code:: java
 
     private static void addNeuesFormatTransformer(Node node) {
       String type = node.getContentType();
@@ -37,7 +37,7 @@ In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generi
 
 Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage integriert werden.
 
-.. code:: java
+ .. code:: java
 
     private static void addUnknownTransformer(List<String> transformers,
       Node node) {
@@ -78,7 +78,7 @@ Konfiguration der regal-api und des OAI-Providers anpassen
 
 Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.
 
-.. code:: bash
+ .. code:: bash
 
     GET /resource/:pid.openaire	    controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
 
@@ -87,7 +87,7 @@ Mit dieseem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Method
 Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispile ist das nicht der Fall: validate : Boolean ?= false. 
 In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhängenden Konfigurationen angepasst werden. Die Datei wird direkt im entpackten Applikation-Container angepasst. 
 
-.. code:: bash
+ .. code:: bash
 
     ################################################
     # Fedora Driver: Metadata Format Configuration #

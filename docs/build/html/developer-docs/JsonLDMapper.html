@@ -16,6 +16,7 @@
     <script type="text/javascript" src="../_static/translations.js"></script>
     <link rel="index" title="Stichwortverzeichnis" href="../genindex.html" />
     <link rel="search" title="Suche" href="../search.html" />
+    <link rel="prev" title="Neues Metadaten-Format in die OAI-Schnittstelle integrieren" href="oaiMetadataFormats.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -37,6 +38,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="Stichwortverzeichnis"
              accesskey="I">Index</a></li>
+        <li class="right" >
+          <a href="oaiMetadataFormats.html" title="Neues Metadaten-Format in die OAI-Schnittstelle integrieren"
+             accesskey="P">zurück</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">regal-api  Dokumentation</a> &#187;</li> 
       </ul>
     </div>  
@@ -63,45 +67,59 @@ in der Java-Notation abgebildet und in einem String abgelegt..</p>
 an. Der JsonLDMapper bietet jeweils die Methode getElement(Pfad), die transparent ArrayList&lt;Hashtable&lt;String,String&gt; zurückliefert.</p>
 <p>Über die Iteration über die jeweilige ArrayList stehen damit entweder zusammengehörende Key/Value zur Verfügung, oder die einzelnen Values eines
 Arrays of Value in Form des Array-Bezeichners aus dem JSON und des jeweiligen Wertes.</p>
-<p>Besipiele</p>
+<p>Beispiele</p>
+<p>Aus dem Array von Literalen „title“</p>
 <blockquote>
-<div><p>Für</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">record</span> <span class="p">:</span> <span class="p">{</span><span class="n">title</span><span class="p">:</span> <span class="p">[</span>\<span class="s2">&quot;Ausdrücke in Java</span><span class="se">\&quot;</span><span class="s2">, &quot;</span>\<span class="n">Java</span> <span class="n">Expressions</span>\<span class="s2">&quot;, </span><span class="se">\&quot;</span><span class="s2">Expression de Java</span><span class="se">\&quot;</span><span class="s2">]}}</span>
-</pre></div>
-</div>
-<p>erhält man durch:</p>
-<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
-<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">oot.record.title</span><span class="se">\&quot;</span><span class="s2">);</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">record</span> <span class="p">:</span> <span class="p">{</span><span class="n">title</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ausdrücke in Java&quot;</span><span class="p">,</span> <span class="s2">&quot;Java Expressions&quot;</span><span class="p">,</span> <span class="s2">&quot;Expression de Java&quot;</span><span class="p">]}}</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>eine ArrayListe die aus drei Key/Value-Paaren besteht:</p>
+<p>erhält man durch mit dem JsonLDMapper</p>
 <blockquote>
-<div>title : „Ausdrücke in Java“
-title : „Java Expressions“
-title : „Expression de Java“</div></blockquote>
-<p>Für</p>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
+<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;root.record.title&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>eine <strong>ArrayListe</strong> die aus drei Key/Value-Paaren besteht:</p>
+<blockquote>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Ausdrücke in Java&quot;</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Java Expressions&quot;</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Expression de Java&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Aus dem aus zwei Key/Value-Paaren bestehenden Objekt „creator“</p>
 <blockquote>
 <div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">record</span> <span class="p">:</span> <span class="p">{</span><span class="n">creator</span><span class="p">:</span> <span class="p">{</span>
-        <span class="n">prefLabel</span> <span class="p">:</span> \<span class="s2">&quot;Loki Schmidt</span><span class="se">\&quot;</span><span class="s2">,</span>
-        <span class="nd">@id</span> <span class="p">:</span> \<span class="s2">&quot;https://yxz.org</span><span class="se">\&quot;</span><span class="s2"> }</span>
+        <span class="n">prefLabel</span> <span class="p">:</span> <span class="s2">&quot;Loki Schmidt&quot;</span><span class="p">,</span>
+        <span class="nd">@id</span> <span class="p">:</span> <span class="s2">&quot;https://orcid.org/000-000-000&quot;</span> <span class="p">}</span>
 <span class="p">}}</span>
 </pre></div>
 </div>
 </div></blockquote>
-<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
-<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">oot.creator</span><span class="se">\&quot;</span><span class="s2">);</span>
+<p>erhält man durch den gleichen Aufruf:</p>
+<blockquote>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
+<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;root.creator&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>eine ArrayListe die aus zwei Key/Value-Paaren besteht:</p>
+</div></blockquote>
+<p>eine <strong>ArrayListe</strong> die aus zwei Key/Value-Paaren besteht:</p>
 <blockquote>
-<div>prefLabel : „Loki Schmidt“
-&#64;id : „<a class="reference external" href="https://yxz.org">https://yxz.org</a>“</div></blockquote>
-<p>Zusätzlich lässt sich mit den Methoden isArray() und isObject() feststellen, was der ursprüngliche Datentyp war.</p>
-<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prefLabel</span> <span class="o">=</span> <span class="s2">&quot;Loki Schmidt&quot;</span>
+<span class="nd">@id</span> <span class="p">:</span> <span class="s2">&quot;https://orcid.org/000-000-000&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Damit der in Json verwendete Datentyp weiterhin eindeutig unterscheiden werden kann, besitzt die JsonLDMapper-Klasse zusätzlich die Methoden
+isArray() und isObject().</p>
+<blockquote>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
 <span class="n">boolean</span> <span class="n">test</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">oot.creator</span><span class="se">\&quot;</span><span class="s2">).isArray();</span>
 </pre></div>
 </div>
+</div></blockquote>
 </div>
 
 
@@ -110,6 +128,9 @@ title : „Expression de Java“</div></blockquote>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h4>Vorheriges Thema</h4>
+  <p class="topless"><a href="oaiMetadataFormats.html"
+                        title="vorheriges Kapitel">Neues Metadaten-Format in die OAI-Schnittstelle integrieren</a></p>
   <div role="note" aria-label="source link">
     <h3>Diese Seite</h3>
     <ul class="this-page-menu">
@@ -139,6 +160,9 @@ title : „Expression de Java“</div></blockquote>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="Stichwortverzeichnis"
              >Index</a></li>
+        <li class="right" >
+          <a href="oaiMetadataFormats.html" title="Neues Metadaten-Format in die OAI-Schnittstelle integrieren"
+             >zurück</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">regal-api  Dokumentation</a> &#187;</li> 
       </ul>
     </div>

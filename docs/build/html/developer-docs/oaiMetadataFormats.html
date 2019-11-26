@@ -16,6 +16,7 @@
     <script type="text/javascript" src="../_static/translations.js"></script>
     <link rel="index" title="Stichwortverzeichnis" href="../genindex.html" />
     <link rel="search" title="Suche" href="../search.html" />
+    <link rel="next" title="JSON in Java-Klassen überführen" href="JsonLDMapper.html" />
     <link rel="prev" title="Willkommen zur regal-api Dokumentation!" href="../index.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -38,6 +39,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="Stichwortverzeichnis"
              accesskey="I">Index</a></li>
+        <li class="right" >
+          <a href="JsonLDMapper.html" title="JSON in Java-Klassen überführen"
+             accesskey="N">weiter</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Willkommen zur regal-api Dokumentation!"
              accesskey="P">zurück</a> |</li>
@@ -69,7 +73,8 @@
 <p>In disen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung
 eines Metadaten-Stroms im System ausgelöst und gesteuert wird.</p>
 <p>In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden.</p>
-<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addNeuesFormatTransformer</span><span class="p">(</span><span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+<blockquote>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addNeuesFormatTransformer</span><span class="p">(</span><span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
   <span class="n">String</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">getContentType</span><span class="p">();</span>
     <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;public&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">getPublishScheme</span><span class="p">()))</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;monograph&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;journal&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
@@ -81,8 +86,10 @@ eines Metadaten-Stroms im System ausgelöst und gesteuert wird.</p>
   <span class="p">}</span>
 </pre></div>
 </div>
+</div></blockquote>
 <p>Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage integriert werden.</p>
-<div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addUnknownTransformer</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">transformers</span><span class="p">,</span>
+<blockquote>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addUnknownTransformer</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">transformers</span><span class="p">,</span>
   <span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">transformers</span> <span class="o">!=</span> <span class="n">null</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">t</span> <span class="p">:</span> <span class="n">transformers</span><span class="p">)</span> <span class="p">{</span>
@@ -97,6 +104,7 @@ eines Metadaten-Stroms im System ausgelöst und gesteuert wird.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+</div></blockquote>
 <p>Die Datei Transform muss um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte
 ApiOperation „asNeuesFormat“ als Restful-Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.</p>
 <p>Das Mappen und die Erzeugung eines Metadatenstroms wurde in der Vergangenheit über unterschiedliche Wege umgesetzt, bei denen ebenfalls mehrere Klassen und ggf.
@@ -112,13 +120,16 @@ einheitlich nutzbare Java-Strukturen übersetzt werden.</p>
 <div class="section" id="konfiguration-der-regal-api-und-des-oai-providers-anpassen">
 <h2>Konfiguration der regal-api und des OAI-Providers anpassen<a class="headerlink" href="#konfiguration-der-regal-api-und-des-oai-providers-anpassen" title="Link zu dieser Überschrift">¶</a></h2>
 <p>Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>GET /resource/:pid.openaire     controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
+<blockquote>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>GET /resource/:pid.openaire     controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
 </pre></div>
 </div>
+</div></blockquote>
 <p>Mit dieseem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Methode und dem über das Play Framework stattfindenden Aufruf über eine HTTP-Methode erreicht.</p>
 <p>Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispile ist das nicht der Fall: validate : Boolean ?= false.
 In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhängenden Konfigurationen angepasst werden. Die Datei wird direkt im entpackten Applikation-Container angepasst.</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################</span>
+<blockquote>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################</span>
 <span class="c1"># Fedora Driver: Metadata Format Configuration #</span>
 <span class="c1">################################################</span>
 <span class="c1"># Metadata formats to make available.</span>
@@ -141,6 +152,7 @@ In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhän
 <span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_openaire</span><span class="o">.</span><span class="n">dissType</span> <span class="o">=</span> <span class="n">info</span><span class="p">:</span><span class="n">fedora</span><span class="o">/*/</span><span class="n">CM</span><span class="p">:</span><span class="n">openaireServiceDefinition</span><span class="o">/</span><span class="n">openaire</span>
 </pre></div>
 </div>
+</div></blockquote>
 </div>
 <div class="section" id="testen-der-schnittstelle">
 <h2>Testen der Schnittstelle<a class="headerlink" href="#testen-der-schnittstelle" title="Link zu dieser Überschrift">¶</a></h2>
@@ -169,6 +181,9 @@ Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittel
   <h4>Vorheriges Thema</h4>
   <p class="topless"><a href="../index.html"
                         title="vorheriges Kapitel">Willkommen zur regal-api Dokumentation!</a></p>
+  <h4>Nächstes Thema</h4>
+  <p class="topless"><a href="JsonLDMapper.html"
+                        title="nächstes Kapitel">JSON in Java-Klassen überführen</a></p>
   <div role="note" aria-label="source link">
     <h3>Diese Seite</h3>
     <ul class="this-page-menu">
@@ -198,6 +213,9 @@ Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittel
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="Stichwortverzeichnis"
              >Index</a></li>
+        <li class="right" >
+          <a href="JsonLDMapper.html" title="JSON in Java-Klassen überführen"
+             >weiter</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Willkommen zur regal-api Dokumentation!"
              >zurück</a> |</li>
