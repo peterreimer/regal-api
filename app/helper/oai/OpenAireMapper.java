@@ -185,11 +185,13 @@ public class OpenAireMapper {
 
 		// generate dateIssued
 		jemList = jMapper.getElement("root.publicationYear");
-		Element issued = doc.createElement("datacite:date");
-		issued.appendChild(
-				doc.createTextNode(jemList.get(0).get("root.publicationYear")));
-		issued.setAttribute("dateType", "Issued");
-		resource.appendChild(issued);
+		for (int i = 0; i < jemList.size(); i++) {
+			Element issued = doc.createElement("datacite:date");
+			issued.appendChild(
+					doc.createTextNode(jemList.get(i).get("root.publicationYear")));
+			issued.setAttribute("dateType", "Issued");
+			resource.appendChild(issued);
+		}
 
 		// generate description
 		jemList = jMapper.getElement("root.abstractText");
