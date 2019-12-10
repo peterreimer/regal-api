@@ -250,6 +250,34 @@ public class OpenAireMapper {
 			resource.appendChild(subjects);
 		}
 
+		// generate publisher
+		jemList = jMapper.getElement("root.containedIn");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element publisher = doc.createElement("dc:publisher");
+			publisher
+					.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+			resource.appendChild(publisher);
+		}
+
+		// generate oaire:file
+		jemList = jMapper.getElement("root.hasPart");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element oairefile = doc.createElement("file");
+			oairefile.appendChild(
+					doc.createTextNode("https://repository.publisso.de/resource/"
+							+ jemList.get(i).get("@id") + "/data"));
+			resource.appendChild(oairefile);
+		}
+
+		// generate licenseCondition
+		jemList = jMapper.getElement("root.license");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element license = doc.createElement("licenseCondition");
+			license.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+			license.setAttribute("uri", jemList.get(i).get("@id"));
+			resource.appendChild(license);
+		}
+
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
