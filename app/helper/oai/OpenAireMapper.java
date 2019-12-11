@@ -280,6 +280,30 @@ public class OpenAireMapper {
 			resource.appendChild(license);
 		}
 
+		// generate accessRights
+		jemList = jMapper.getElement("root");
+		for (int i = 0; i < jemList.size(); i++) {
+			if (jemList.get(i).containsKey("accessScheme")) {
+				Element rights = doc.createElement("datacite:date");
+				rights.appendChild(
+						doc.createTextNode(jemList.get(i).get("root.embargoTime")));
+				rights.setAttribute("dateType", "Available");
+				resource.appendChild(rights);
+			}
+		}
+
+		// generate dateAvailable
+		jemList = jMapper.getElement("root");
+		for (int i = 0; i < jemList.size(); i++) {
+			if (jemList.get(i).containsKey("embargoTime")) {
+				Element available = doc.createElement("datacite:date");
+				available.appendChild(
+						doc.createTextNode(jemList.get(i).get("root.embargoTime")));
+				available.setAttribute("dateType", "Available");
+				resource.appendChild(available);
+			}
+		}
+
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
