@@ -92,6 +92,7 @@ public class JsonMapper {
 	final static String fulltext_ocr = "fulltext-ocr";
 	final static String title = "title";
 	final static String fileLabel = "fileLabel";
+	final static String embargoTime = "embargoTime";
 
 	final static String[] typePrios = new String[] {
 			"http://purl.org/lobid/lv#ArchivedWebPage",
@@ -219,6 +220,7 @@ public class JsonMapper {
 		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
 		rdf.put(catalogId, node.getCatalogId());
+		rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
 			rdf.put(fulltext_ocr, node.getFulltext());

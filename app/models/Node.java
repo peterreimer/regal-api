@@ -118,6 +118,7 @@ public class Node implements java.io.Serializable {
 	private String fulltext;
 	private String lastModifyMessage = "";
 
+	private String embargoTime = null;
 	private boolean isManaged = true;
 
 	/**
@@ -1255,6 +1256,21 @@ public class Node implements java.io.Serializable {
 	public Date getObjectTimestamp() {
 		return objectTimestamp;
 	}
+
+	/**
+	 * @param value
+	 */
+	public void setEmbargoTime(String value) {
+		this.embargoTime = value;
+	};
+
+	/**
+	 * @param value
+	 * @return
+	 */
+	public String getEmbargoTime() {
+		return embargoTime;
+	};
 
 	/**
 	 * @return a map representing the rdf data on this object
