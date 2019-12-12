@@ -31,7 +31,11 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.nrw.hbz.json.helper.json2java.model.CoarModel;
+import de.nrw.hbz.json.helper.json2java.model.EmbargoModel;
 import models.Node;
+import models.CoarModel;
+import models.EmbargoModel;
 
 /**
  * @author Andres Quast
@@ -280,19 +284,8 @@ public class OpenAireMapper {
 			resource.appendChild(license);
 		}
 
-		// generate accessRights
-		jemList = jMapper.getElement("root");
-		for (int i = 0; i < jemList.size(); i++) {
-			if (jemList.get(i).containsKey("accessScheme")) {
-				Element rights = doc.createElement("datacite:date");
-				rights.appendChild(
-						doc.createTextNode(jemList.get(i).get("root.embargoTime")));
-				rights.setAttribute("dateType", "Available");
-				resource.appendChild(rights);
-			}
-		}
-
 		// generate dateAvailable
+		Element dates = doc.createElement("datacite:dates");
 		jemList = jMapper.getElement("root");
 		for (int i = 0; i < jemList.size(); i++) {
 			if (jemList.get(i).containsKey("embargoTime")) {
@@ -300,7 +293,42 @@ public class OpenAireMapper {
 				available.appendChild(
 						doc.createTextNode(jemList.get(i).get("root.embargoTime")));
 				available.setAttribute("dateType", "Available");
-				resource.appendChild(available);
+				dates.appendChild(available);
+				available.appendChild(doc.createTextNode(
+						jMapper.getElement("root.isDescribedBy.created").toString()));
+				available.setAttribute("dateType", "Accepted");
+				dates.appendChild(available);
+				resource.appendChild(dates);
+			}
+		}
+
+		// generate accessRights
+		jemList = jMapper.getElement("root");
+		if (jMapper.elementExists("embargoTime")) {
+			for (int i = 0; i < jemList.size(); i++) {
+				String acScheme = null;
+				if (jemList.get(i).containsKey("embargoTime")) {
+					EmbargoModel emb = new EmbargoModel();
+					acScheme = emb.getAccessScheme(jemList.get(i).get("embargoTime"));
+					Element rights = doc.createElement("dc:rights");
+					rights.appendChild(
+							doc.createTextNode(CoarModel.getElementValue(acScheme)));
+					rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
+					resource.appendChild(rights);
+				}
+			}
+		} else {
+
+			for (int i = 0; i < jemList.size(); i++) {
+				if (jemList.get(i).containsKey("accessScheme")) {
+					Element rights = doc.createElement("dc:rights");
+					rights.appendChild(doc.createTextNode(CoarModel
+							.getElementValue(jemList.get(i).get("root.accessScheme"))));
+					rights.setAttribute("uri", CoarModel
+							.getUriAttributeValue(jemList.get(i).get("root.accessScheme")));
+					resource.appendChild(rights);
+
+				}
 			}
 		}
 
