@@ -31,8 +31,6 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.nrw.hbz.json.helper.json2java.model.CoarModel;
-import de.nrw.hbz.json.helper.json2java.model.EmbargoModel;
 import models.Node;
 import models.CoarModel;
 import models.EmbargoModel;
