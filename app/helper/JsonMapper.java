@@ -220,7 +220,7 @@ public class JsonMapper {
 		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
 		rdf.put(catalogId, node.getCatalogId());
-		rdf.put(embargoTime, node.getEmbargoTime());
+		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
 			rdf.put(fulltext_ocr, node.getFulltext());
@@ -829,7 +829,7 @@ public class JsonMapper {
 		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
 		rdf.put(catalogId, node.getCatalogId());
-		rdf.put(embargoTime, node.getEmbargoTime());
+		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
 			rdf.put(fulltext_ocr, node.getFulltext());
