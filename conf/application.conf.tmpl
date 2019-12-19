@@ -94,6 +94,9 @@ regal-api.wpull.jobDir="/opt/regal/wpull-data"
 regal-api.wpull.dataUrl="http://localhost"
 regal-api.public.jobDir="/opt/regal/public-data"
 
+#-------------CDN Gatherer--------------------------                            
+regal-api.cdntools.cdn="/opt/edoweb/bin/cdn"
+
 #-------------Openwayback---------------------------
 regal-api.wayback.lesesaalLink="http://localhost:9080/wayback/"
 regal-api.wayback.weltweitLink="http://localhost:9080/weltweit/"
@@ -112,9 +115,9 @@ parsers.anyContent.maxLength = 20MB
 logger.com.jolbox=WARN // for EBean
 db.default.driver=com.mysql.jdbc.Driver
 db.default.url="jdbc:mysql://localhost/regal_api?characterEncoding=UTF-8"
-db.default.user=regal_api
+db.default.username=regal_api
 db.default.password="admin"
 evolutionplugin=enabled
-applyEvolutions.default=true
-applyDownEvolutions.default=true
+play.evolutions.db.default.autoApply=true
+play.evolutions.db.default.autoApplyDowns=true
 ebean.default = ["authenticate.*"]

@@ -69,6 +69,8 @@ public class WpullCrawl {
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
+	final static String cdn =
+			Play.application().configuration().getString("regal-api.cdntools.cdn");
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -129,6 +131,41 @@ public class WpullCrawl {
 			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
 			WebgatherLogger.error(msg);
 			throw new RuntimeException(msg);
+		}
+	}
+
+	/**
+	 * Ruft den CDN-Gatherer für diese Website auf
+	 */
+	public void execCDNGatherer() {
+		WebgatherLogger.info(
+				"Rufe CDN-Gatherer mit warcFilename=" + this.warcFilename + " auf.");
+		try {
+			String executeCommand =
+					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
+			String[] execArr = executeCommand.split(" ");
+			// unmask spaces in exec command
+			for (int i = 0; i < execArr.length; i++) {
+				execArr[i] = execArr[i].replaceAll("%20", " ");
+			}
+			executeCommand = executeCommand.replaceAll("%20", " ");
+			WebgatherLogger.info("Executing command " + executeCommand);
+			WebgatherLogger
+					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
+			ProcessBuilder pb = new ProcessBuilder(execArr);
+			assert crawlDir.isDirectory();
+			pb.directory(crawlDir);
+			File log = new File(crawlDir.toString() + "/cdncrawl.log");
+			log.createNewFile();
+			pb.redirectErrorStream(true);
+			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+			Process proc = pb.start();
+			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
+			assert pb.redirectOutput().file() == log;
+			assert proc.getInputStream().read() == -1;
+			WebgatherLogger.info("CDN-Gathering startet successfully !");
+		} catch (Exception e) {
+			WebgatherLogger.error("CDN-Gathering was unsuccessful !", e.toString());
 		}
 	}
 
@@ -262,6 +299,8 @@ public class WpullCrawl {
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors
 		sb.append(" --delete-after"); // mandatory for reducing required disc space
 		sb.append(" --convert-links"); // mandatory to rewrite relative urls
+		sb.append(" --warc-append"); // um CDN-Crawls und Haupt-Crawl im gleichen
+																	// Archiv zu bündeln
 		return sb.toString();
 	}
 
