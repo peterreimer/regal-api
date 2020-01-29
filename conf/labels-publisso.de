@@ -6507,7 +6507,7 @@
 }, {
   "uri" : "http://hbz-nrw.de/regal#original",
   "comment" : "",
-  "label" : "Veröffentlichungsversion",
+  "label" : "Postprint Verlagsversion",
   "icon" : "fa fa-wifi",
   "name" : "",
   "container" : "",
@@ -6549,7 +6549,7 @@
 }, {
   "uri" : "http://hbz-nrw.de/regal#postprint",
   "comment" : "",
-  "label" : "Postprint",
+  "label" : "Postprint Autorenversion",
   "icon" : "",
   "name" : "",
   "container" : "",
