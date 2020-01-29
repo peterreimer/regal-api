@@ -6549,8 +6549,8 @@
 }, {
   "uri" : "http://hbz-nrw.de/regal#postprint",
   "comment" : "",
-  "label" : "Postprint Autorenversion",
-  "icon" : "",
+  "label" : "Postprint Autorenmanuskript",
+  "icon" : "
   "name" : "",
   "container" : "",
   "weight" : "",
