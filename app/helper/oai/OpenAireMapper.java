@@ -310,19 +310,19 @@ public class OpenAireMapper {
 				rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
 				resource.appendChild(rights);
 			}
-		} else {
-			jemList = jMapper.getElement("root");
-			for (int i = 0; i < jemList.size(); i++) {
-				if (jemList.get(i).containsKey("accessScheme")) {
-					Element rights = doc.createElement("dc:rights");
-					rights.appendChild(doc.createTextNode(
-							CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
-					rights.setAttribute("uri", CoarModel
-							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
-					resource.appendChild(rights);
-				}
-			}
-		}
+		} // else {
+			// jemList = jMapper.getElement("root");
+			// for (int i = 0; i < jemList.size(); i++) {
+			// if (jemList.get(i).containsKey("accessScheme")) {
+			// Element rights = doc.createElement("dc:rights");
+			// rights.appendChild(doc.createTextNode(
+			// CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+			// rights.setAttribute("uri", CoarModel
+			// .getUriAttributeValue(jemList.get(i).get("accessScheme")));
+			// resource.appendChild(rights);
+			// }
+			// }
+		// }
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
