@@ -297,36 +297,28 @@ public class OpenAireMapper {
 		}
 		resource.appendChild(dates);
 
-		// generate accessRights
-		jemList = jMapper.getElement("root.embargoTime");
-		if (jMapper.elementExists("root.embargoTime")) {
-			for (int i = 0; i < jemList.size(); i++) {
-				String acScheme = null;
-				if (jemList.get(i).containsKey("root.embargoTime")) {
-					EmbargoModel emb = new EmbargoModel();
-					acScheme =
-							emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
-					Element rights = doc.createElement("dc:rights");
-					rights.appendChild(
-							doc.createTextNode(CoarModel.getElementValue(acScheme)));
-					rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
-					resource.appendChild(rights);
-				}
-			}
-		} else {
-			for (int i = 0; i < jemList.size(); i++) {
-				if (jemList.get(i).containsKey("accessScheme")) {
-					Element rights = doc.createElement("dc:rights");
-					rights.appendChild(doc.createTextNode(
-							CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
-					rights.setAttribute("uri", CoarModel
-							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
-					resource.appendChild(rights);
-
-				}
-			}
-		}
-
+		/*
+		 * // generate accessRights jemList =
+		 * jMapper.getElement("root.embargoTime"); if
+		 * (jMapper.elementExists("root.embargoTime")) { for (int i = 0; i <
+		 * jemList.size(); i++) { String acScheme = null; if
+		 * (jemList.get(i).containsKey("root.embargoTime")) { EmbargoModel emb = new
+		 * EmbargoModel(); acScheme =
+		 * emb.getAccessScheme(jemList.get(i).get("root.embargoTime")); Element
+		 * rights = doc.createElement("dc:rights"); rights.appendChild(
+		 * doc.createTextNode(CoarModel.getElementValue(acScheme)));
+		 * rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
+		 * resource.appendChild(rights); } } } else { for (int i = 0; i <
+		 * jemList.size(); i++) { if (jemList.get(i).containsKey("accessScheme")) {
+		 * Element rights = doc.createElement("dc:rights");
+		 * rights.appendChild(doc.createTextNode(
+		 * CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+		 * rights.setAttribute("uri", CoarModel
+		 * .getUriAttributeValue(jemList.get(i).get("accessScheme")));
+		 * resource.appendChild(rights);
+		 * 
+		 * } } }
+		 */
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
