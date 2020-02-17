@@ -299,29 +299,28 @@ public class OpenAireMapper {
 
 		// generate accessRights
 		jemList = jMapper.getElement("root.embargoTime");
-		if (jMapper.elementExists("root.embargoTime")) {
-			for (int i = 0; i < jemList.size(); i++) {
-				String acScheme = null;
-				EmbargoModel emb = new EmbargoModel();
-				acScheme = emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
-				Element rights = doc.createElement("dc:rights");
-				rights.appendChild(
-						doc.createTextNode(CoarModel.getElementValue(acScheme)));
-				rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
-				resource.appendChild(rights);
-			}
-		} // else {
-			// jemList = jMapper.getElement("root");
-			// for (int i = 0; i < jemList.size(); i++) {
-			// if (jemList.get(i).containsKey("accessScheme")) {
-			// Element rights = doc.createElement("dc:rights");
-			// rights.appendChild(doc.createTextNode(
-			// CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
-			// rights.setAttribute("uri", CoarModel
-			// .getUriAttributeValue(jemList.get(i).get("accessScheme")));
-			// resource.appendChild(rights);
-			// }
-			// }
+		for (int i = 0; i < jemList.size(); i++) {
+			String acScheme = null;
+			EmbargoModel emb = new EmbargoModel();
+			acScheme = emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
+			Element rights = doc.createElement("dc:rights");
+			rights
+					.appendChild(doc.createTextNode(CoarModel.getElementValue(acScheme)));
+			rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
+			resource.appendChild(rights);
+		}
+		// else {
+		// jemList = jMapper.getElement("root");
+		// for (int i = 0; i < jemList.size(); i++) {
+		// if (jemList.get(i).containsKey("accessScheme")) {
+		// Element rights = doc.createElement("dc:rights");
+		// rights.appendChild(doc.createTextNode(
+		// CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+		// rights.setAttribute("uri", CoarModel
+		// .getUriAttributeValue(jemList.get(i).get("accessScheme")));
+		// resource.appendChild(rights);
+		// }
+		// }
 		// }
 		doc.appendChild(resource);
 
