@@ -185,16 +185,6 @@ public class OpenAireMapper {
 			resource.appendChild(language);
 		}
 
-		// generate dateIssued
-		jemList = jMapper.getElement("root.publicationYear");
-		for (int i = 0; i < jemList.size(); i++) {
-			Element issued = doc.createElement("datacite:date");
-			issued.appendChild(
-					doc.createTextNode(jemList.get(i).get("root.publicationYear")));
-			issued.setAttribute("dateType", "Issued");
-			resource.appendChild(issued);
-		}
-
 		// generate description
 		jemList = jMapper.getElement("root.abstractText");
 		for (int i = 0; i < jemList.size(); i++) {
@@ -282,32 +272,43 @@ public class OpenAireMapper {
 			resource.appendChild(license);
 		}
 
-		// generate dateAvailable
-		Element dates = doc.createElement("datacite:dates");
-		jemList = jMapper.getElement("root");
+		// generate dates
+		Element dates = doc.createElement("datacite:dates"); // create field for
+																													// various dates
+
+		// generate dateIssued
+		jemList = jMapper.getElement("root.publicationYear");
 		for (int i = 0; i < jemList.size(); i++) {
-			if (jemList.get(i).containsKey("embargoTime")) {
-				Element available = doc.createElement("datacite:date");
-				available.appendChild(
-						doc.createTextNode(jemList.get(i).get("root.embargoTime")));
-				available.setAttribute("dateType", "Available");
-				dates.appendChild(available);
-				available.appendChild(doc.createTextNode(
-						jMapper.getElement("root.isDescribedBy.created").toString()));
-				available.setAttribute("dateType", "Accepted");
-				dates.appendChild(available);
-				resource.appendChild(dates);
-			}
+			Element issued = doc.createElement("datacite:date");
+			issued.appendChild(
+					doc.createTextNode(jemList.get(i).get("root.publicationYear")));
+			issued.setAttribute("dateType", "Issued");
+			dates.appendChild(issued);
+			resource.appendChild(dates);
+		}
+
+		jemList = jMapper.getElement("root.embargoTime");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element available = doc.createElement("datacite:date");
+			available.appendChild(
+					doc.createTextNode(jemList.get(i).get("root.embargoTime")));
+			available.setAttribute("dateType", "Available");
+			dates.appendChild(available);
+			// available.appendChild(doc.createTextNode(jMapper.getElement("root.isDescribedBy.created").toString()));
+			// available.setAttribute("dateType", "Accepted");
+			dates.appendChild(available);
+			resource.appendChild(dates);
 		}
 
 		// generate accessRights
-		jemList = jMapper.getElement("root");
-		if (jMapper.elementExists("embargoTime")) {
+		jemList = jMapper.getElement("root.embargoTime");
+		if (jMapper.elementExists("root.embargoTime")) {
 			for (int i = 0; i < jemList.size(); i++) {
 				String acScheme = null;
-				if (jemList.get(i).containsKey("embargoTime")) {
+				if (jemList.get(i).containsKey("root.embargoTime")) {
 					EmbargoModel emb = new EmbargoModel();
-					acScheme = emb.getAccessScheme(jemList.get(i).get("embargoTime"));
+					acScheme =
+							emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
 					Element rights = doc.createElement("dc:rights");
 					rights.appendChild(
 							doc.createTextNode(CoarModel.getElementValue(acScheme)));
