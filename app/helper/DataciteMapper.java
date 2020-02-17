@@ -85,7 +85,7 @@ public class DataciteMapper {
 		rec.typeGeneral = ld.at("/rdftype/0/@id").asText();
 		play.Logger.debug(ld.asText());
 		if (TYPE_VIDEO.equals(rec.typeGeneral)) {
-			rec.typeGeneral = "AudioVisual";
+			rec.typeGeneral = "Audiovisual";
 		} else if (TYPE_MISC.equals(rec.typeGeneral)) {
 			rec.typeGeneral = "Other";
 		} else {

@@ -295,6 +295,7 @@ public class Create extends RegalAction {
 					.equals(Gatherconf.CrawlerSelection.wpull)) {
 				WpullCrawl wpullCrawl = new WpullCrawl(conf);
 				wpullCrawl.createJob();
+				wpullCrawl.execCDNGatherer();
 				wpullCrawl.startJob();
 				crawlDir = wpullCrawl.getCrawlDir();
 				localpath = wpullCrawl.getLocalpath();
