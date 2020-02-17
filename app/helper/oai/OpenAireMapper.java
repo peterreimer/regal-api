@@ -121,7 +121,7 @@ public class OpenAireMapper {
 			cn.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
 			sE.appendChild(cn);
 
-			// prevent record from displayinglocal ids
+			// prevent record from displaying local ids
 			if (!jemList.get(i).get("@id").startsWith("https://frl")
 					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
 				Element ci = doc.createElement("datacite:creatorIdentifier");
@@ -284,9 +284,7 @@ public class OpenAireMapper {
 					doc.createTextNode(jemList.get(i).get("root.publicationYear")));
 			issued.setAttribute("dateType", "Issued");
 			dates.appendChild(issued);
-			resource.appendChild(dates);
 		}
-
 		jemList = jMapper.getElement("root.embargoTime");
 		for (int i = 0; i < jemList.size(); i++) {
 			Element available = doc.createElement("datacite:date");
@@ -296,9 +294,8 @@ public class OpenAireMapper {
 			dates.appendChild(available);
 			// available.appendChild(doc.createTextNode(jMapper.getElement("root.isDescribedBy.created").toString()));
 			// available.setAttribute("dateType", "Accepted");
-			dates.appendChild(available);
-			resource.appendChild(dates);
 		}
+		resource.appendChild(dates);
 
 		// generate accessRights
 		jemList = jMapper.getElement("root.embargoTime");
@@ -317,7 +314,6 @@ public class OpenAireMapper {
 				}
 			}
 		} else {
-
 			for (int i = 0; i < jemList.size(); i++) {
 				if (jemList.get(i).containsKey("accessScheme")) {
 					Element rights = doc.createElement("dc:rights");
