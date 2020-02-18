@@ -297,7 +297,27 @@ public class OpenAireMapper {
 		resource.appendChild(dates);
 
 		// generate accessRights
-		if (!jMapper.elementExists("root.embargoTime")) {
+		if (jMapper.elementExists("root.embargoTime")) {
+			jemList = jMapper.getElement("root.embargoTime");
+			for (int i = 0; i < jemList.size(); i++) {
+				String acScheme = null;
+				EmbargoModel emb = new EmbargoModel();
+				System.out.println(
+						emb.isActiveEmbargo(jemList.get(i).get("root.embargoTime")));
+				if (emb.isActiveEmbargo(jemList.get(i).get("root.embargoTime"))) {
+					acScheme =
+							emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
+					System.out.println(acScheme);
+				} else {
+					acScheme = "public";
+				}
+				Element rights = doc.createElement("dc:rights");
+				rights.appendChild(
+						doc.createTextNode(CoarModel.getElementValue(acScheme)));
+				rights.setAttribute("uri", CoarModel.getUriAttributeValue(acScheme));
+				resource.appendChild(rights);
+			}
+		} else {
 			jemList = jMapper.getElement("root");
 			for (int i = 0; i < jemList.size(); i++) {
 				if (jemList.get(i).containsKey("accessScheme")) {
@@ -309,14 +329,6 @@ public class OpenAireMapper {
 					resource.appendChild(rights);
 				}
 			}
-
-		} else {
-			Element rights = doc.createElement("dc:rights");
-			rights.appendChild(
-					doc.createTextNode(CoarModel.getElementValue("embargo")));
-			rights.setAttribute("uri", CoarModel.getUriAttributeValue("embargo"));
-			resource.appendChild(rights);
-
 		}
 
 		doc.appendChild(resource);
