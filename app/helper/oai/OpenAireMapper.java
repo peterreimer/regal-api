@@ -302,15 +302,7 @@ public class OpenAireMapper {
 			for (int i = 0; i < jemList.size(); i++) {
 				String acScheme = null;
 				EmbargoModel emb = new EmbargoModel();
-				System.out.println(
-						emb.isActiveEmbargo(jemList.get(i).get("root.embargoTime")));
-				if (emb.isActiveEmbargo(jemList.get(i).get("root.embargoTime"))) {
-					acScheme =
-							emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
-					System.out.println(acScheme);
-				} else {
-					acScheme = "public";
-				}
+				acScheme = emb.getAccessScheme(jemList.get(i).get("root.embargoTime"));
 				Element rights = doc.createElement("dc:rights");
 				rights.appendChild(
 						doc.createTextNode(CoarModel.getElementValue(acScheme)));
