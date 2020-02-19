@@ -40,7 +40,7 @@ public abstract class CoarModel {
 
 	private static void setUriHashtable() {
 		uriAttributeContent.put("public", CoarModel.OPEN_ACCESS_URI);
-		uriAttributeContent.put("embargo", CoarModel.EMBARGOED_ACCESS_URI);
+		uriAttributeContent.put("embargoed", CoarModel.EMBARGOED_ACCESS_URI);
 		uriAttributeContent.put("restricted", CoarModel.RESTRICTED_ACCESS_URI);
 		uriAttributeContent.put("metadata", CoarModel.METADATA_ONLY_ACCESS_URI);
 	}
