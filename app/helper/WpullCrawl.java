@@ -59,16 +59,30 @@ public class WpullCrawl {
 	private String date = null;
 	private String datetime = null;
 	private File crawlDir = null;
+	private File resultDir = null;
 	private String localpath = null;
 	private String host = null;
 	private String warcFilename = null;
 	private int exitState = 0;
 	private String msg = null;
 
+	/**
+	 * Die Schreibzugriffe von wpull (Downloads) erfolgen in das Verzeichnis
+	 * jobDir hinein. jobDir ist das Arbeitsverzeichnis von wpull. jobDir sollte
+	 * ein lokales Verzeichnis sein.
+	 */
 	final static String jobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
 	final static String tempJobDir = Play.application().configuration()
 			.getString("regal-api.wpull.tempJobDir");
+	/**
+	 * Im Verzeichnis outDir liegen die fertigen Crawls. Das ist das
+	 * Output-Verzeichnis von wpull. Von hier aus werden die Crawls entweder
+	 * direkt von Wayback indexiert oder vorher noch weitergehend bearbeitet, z.B.
+	 * getestet, ob sie erfolgreich waren.
+	 */
+	final static String outDir =
+			Play.application().configuration().getString("regal-api.wpull.outDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 	final static String cdn =
@@ -79,6 +93,10 @@ public class WpullCrawl {
 
 	public File getCrawlDir() {
 		return crawlDir;
+	}
+
+	public File getResultsDir() {
+		return resultDir;
 	}
 
 	public String getLocalpath() {
@@ -107,6 +125,7 @@ public class WpullCrawl {
 			this.datetime =
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
+			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
 			this.warcFilename = "WEB-" + host + "-" + date;
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
@@ -129,8 +148,15 @@ public class WpullCrawl {
 						+ conf.getName() + "/" + datetime);
 				crawlDir.mkdirs();
 			}
+			if (!resultDir.exists()) {
+				// create output directory
+				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
+						+ conf.getName() + "/" + datetime);
+				resultDir.mkdirs();
+			}
 		} catch (Exception e) {
 			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
+			msg.concat("Cannot create outDir in " + outDir + "/" + conf.getName());
 			WebgatherLogger.error(msg);
 			throw new RuntimeException(msg);
 		}
@@ -304,83 +330,70 @@ public class WpullCrawl {
 		sb.append(" --warc-append"); // um CDN-Crawls und Haupt-Crawl im gleichen
 																	// Archiv zu bündeln
 		sb.append(" --warc-tempdir=" + tempJobDir);
+		sb.append(" --warc-move=" + resultDir);
 		return sb.toString();
 	}
 
 	/**
-	 * Ermittelt Crawler Exit Status des letzten Crawls
+	 * Suche neuestes Crawler-Logfile. Guckt zuerst in crawlDir
+	 * (Arbeitsverzeichnis). Falls dort nichts gefunden, guckt in outDir
+	 * (Ergebnisverzeichnis).
+	 * 
+	 * @param node der Knoten einer Webpage
+	 */
+	private static File findLatestLogFile(Node node) {
+		File logfile = null;
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.jobDir"),
+				node.getPid());
+		File latestOutDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.outDir"),
+				node.getPid());
+		if (latestCrawlDir != null) {
+			logfile = new File(latestCrawlDir.toString() + "/crawl.log");
+		}
+		if (logfile == null || !logfile.exists()) {
+			if (latestOutDir != null) {
+				logfile = new File(latestOutDir.toString() + "/crawl.log");
+			}
+		}
+		return logfile;
+	}
+
+	/**
+	 * Ermittelt Crawler Exit Status des letzten Crawls. Der Exit-Status ist eine
+	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
+	 * verfügbar.
 	 * 
 	 * @param node der Knoten einer Webpage
 	 * @return Crawler Exit Status des letzten wpull-Crawls
 	 */
 	public static int getCrawlExitStatus(Node node) {
-		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.jobDir"),
-				node.getPid());
-		if (latestCrawlDir == null) {
-			WebgatherLogger.warn("Letztes Crawl-Verzeichnis zu Webpage "
-					+ node.getName() + " kann nicht gefunden werden!");
-			return -3;
-		}
-		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
-		if (!crawlLog.exists()) {
-			WebgatherLogger.warn("Crawl-Verzeichnis " + latestCrawlDir.toString()
-					+ " existiert, aber darin kein crawl.log.");
+		File logfile = findLatestLogFile(node);
+		if (logfile == null || !logfile.exists()) {
+			WebgatherLogger.warn(
+					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
 			return -2;
 		}
-		/* das Log wird geparst */
-		int exitStatus = -1;
-		BufferedReader buf = null;
-		String regExp = "^INFO Exiting with status ([0-9]+)";
-		Pattern pattern = Pattern.compile(regExp);
-		try {
-			buf = new BufferedReader(new FileReader(crawlLog));
-			String line = null;
-			while ((line = buf.readLine()) != null) {
-				Matcher matcher = pattern.matcher(line);
-				if (matcher.find()) {
-					exitStatus = Integer.parseInt(matcher.group(1));
-					break;
-				}
-			}
-		} catch (IOException e) {
-			WebgatherLogger
-					.warn("Crawler Exit Status cannot be defered from crawlLog "
-							+ crawlLog.getAbsolutePath() + "!", e.toString());
-		} finally {
-			try {
-				if (buf != null) {
-					buf.close();
-				}
-			} catch (IOException e) {
-				WebgatherLogger.warn("Read Buffer cannot be closed!");
-			}
-		}
-		return exitStatus;
+		CrawlLog crawlLog = new CrawlLog(logfile);
+		crawlLog.parse();
+		return crawlLog.getExitStatus();
 	}
 
 	/**
-	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls
+	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls. Mögliche
+	 * Werte sind : NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
+	 * Operator) - CRASHED - FINISHED
 	 * 
 	 * @param node der Knoten einer Webpage
-	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls; mögliche
-	 *         Werte: NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
-	 *         Operator) - CRASHED - FINISHED
+	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
 	 */
 	public static CrawlControllerState getCrawlControllerState(Node node) {
 		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
-		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.jobDir"),
-				node.getPid());
-		if (latestCrawlDir == null) {
-			WebgatherLogger.info("Letztes Crawl-Verzeichnis zu Webpage "
-					+ node.getName() + " kann nicht gefunden werden!");
-			return CrawlControllerState.NEW;
-		}
-		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
-		if (!crawlLog.exists()) {
-			WebgatherLogger.info("Crawl-Verzeichnis " + latestCrawlDir.toString()
-					+ " existiert, aber darin kein crawl.log.");
+		File logfile = findLatestLogFile(node);
+		if (logfile == null || !logfile.exists()) {
+			WebgatherLogger.info(
+					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
 			return CrawlControllerState.NEW;
 		}
 		// 2. Läuft noch => Status = RUNNING
@@ -393,7 +406,7 @@ public class WpullCrawl {
 		String regExp = "^INFO FINISHED.";
 		Pattern pattern = Pattern.compile(regExp);
 		try {
-			buf = new BufferedReader(new FileReader(crawlLog));
+			buf = new BufferedReader(new FileReader(logfile));
 			String line = null;
 			while ((line = buf.readLine()) != null) {
 				Matcher matcher = pattern.matcher(line);
@@ -404,7 +417,7 @@ public class WpullCrawl {
 		} catch (IOException e) {
 			WebgatherLogger.warn(
 					"Crawl Controller State cannot be defered from crawlLog "
-							+ crawlLog.getAbsolutePath() + "! Assuming CRASHED.",
+							+ logfile.getAbsolutePath() + "! Assuming CRASHED.",
 					e.toString());
 		} finally {
 			try {
