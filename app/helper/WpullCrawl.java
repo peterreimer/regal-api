@@ -67,6 +67,8 @@ public class WpullCrawl {
 
 	final static String jobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
+	final static String tempJobDir = Play.application().configuration()
+			.getString("regal-api.wpull.tempJobDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 	final static String cdn =
@@ -301,6 +303,7 @@ public class WpullCrawl {
 		sb.append(" --convert-links"); // mandatory to rewrite relative urls
 		sb.append(" --warc-append"); // um CDN-Crawls und Haupt-Crawl im gleichen
 																	// Archiv zu bündeln
+		sb.append(" --warc-tempdir=" + tempJobDir);
 		return sb.toString();
 	}
 
