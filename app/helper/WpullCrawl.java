@@ -190,7 +190,7 @@ public class WpullCrawl {
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			WpullThread wpullThread = new WpullThread(pb, log);
+			WpullThread wpullThread = new WpullThread(conf, pb, log);
 			wpullThread.start();
 			/*
 			 * den Pfad zum WARC unter Globals.heritrixData zu hängen ist eigentlich
