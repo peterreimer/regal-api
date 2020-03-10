@@ -170,7 +170,7 @@ public class WpullCrawl {
 	}
 
 	/**
-	 * starts crawling with wpull
+	 * Starts crawling with wpull
 	 */
 	public void startJob() {
 		try {
@@ -190,10 +190,8 @@ public class WpullCrawl {
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			Process proc = pb.start();
-			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
-			assert pb.redirectOutput().file() == log;
-			assert proc.getInputStream().read() == -1;
+			WpullThread wpullThread = new WpullThread(pb, log);
+			wpullThread.start();
 			/*
 			 * den Pfad zum WARC unter Globals.heritrixData zu hängen ist eigentlich
 			 * Blödsinn, aber ohne localpath wird im Frontend kein Link zu Openwayback
@@ -201,7 +199,6 @@ public class WpullCrawl {
 			 */
 			localpath = Globals.heritrixData + "/wpull-data" + "/" + conf.getName()
 					+ "/" + datetime + "/" + warcFilename + ".warc.gz";
-			// exitState = proc.waitFor(); // don't wait
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("wpull crawl not successfully started!", e);
