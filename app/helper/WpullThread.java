@@ -33,6 +33,11 @@ public class WpullThread extends Thread {
 			 */
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
+			if (exitState != 0) {
+				// Crawl wird erneut angestoßen
+				WpullThread wpullThread = new WpullThread(conf, pb, log);
+				wpullThread.start();
+			}
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("wpull crawl not successfully started!", e);
