@@ -35,6 +35,8 @@ public class WpullThread extends Thread {
 					+ " exited with exitState " + exitState);
 			if (exitState != 0) {
 				// Crawl wird erneut angestoßen
+				WebgatherLogger.info(
+						"Webcrawl for " + conf.getName() + " wird erneut angestoßen.");
 				WpullThread wpullThread = new WpullThread(conf, pb, log);
 				wpullThread.start();
 			}
