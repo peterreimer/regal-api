@@ -15,9 +15,12 @@ import play.Logger;
  */
 public class WpullThread extends Thread {
 
-	Gatherconf conf = null;
-	ProcessBuilder pb = null;
-	File log = null;
+	private Gatherconf conf = null;
+	private File crawlDir = null;
+	private String warcFilename = null;
+	private ProcessBuilder pb = null;
+	private File logFile = null;
+	private int exitState = 0;
 	/**
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
 	 */
@@ -30,18 +33,61 @@ public class WpullThread extends Thread {
 	/**
 	 * Der Konstruktor für diese Klasse.
 	 * 
-	 * @param conf Die Gatherconf der Website, die gecrawlt werden soll.
 	 * @param pb Ein Objekt der Klasse ProcessBuilder mit Aufrufinformationen für
 	 *          den Crawl.
-	 * @param log Eine Logdatei für den Webcrawl (crawl.log)
 	 * @param attempt Der wievielte Versuch es ist, diesen Webschnitt zu sammeln.
 	 */
-	public WpullThread(Gatherconf conf, ProcessBuilder pb, File log,
-			int attempt) {
-		this.conf = conf;
+	public WpullThread(ProcessBuilder pb, int attempt) {
 		this.pb = pb;
-		this.log = log;
 		this.attempt = attempt;
+		exitState = 0;
+	}
+
+	/**
+	 * Die Set-Methode für den Parameter conf
+	 * 
+	 * @param conf Die Gatherconf der Website, die gecrawlt werden soll.
+	 */
+	public void setConf(Gatherconf conf) {
+		this.conf = conf;
+	}
+
+	/**
+	 * Die Methode, um den Parameter crawlDir zu setzen.
+	 * 
+	 * @param crawlDir Das Verzeichnis (absoluter Pfad), in das wpull seine
+	 *          Ergebnisdateien (z.B. WARC-Datei) schreibt.
+	 */
+	public void setCrawlDir(File crawlDir) {
+		this.crawlDir = crawlDir;
+	}
+
+	/**
+	 * Die Methode, um den Parameter warcFilename zu setzen.
+	 * 
+	 * @param warcFilename Der Dateiname (kein Pfad, auch keine Endung !) für die
+	 *          WARC-Datei.
+	 */
+	public void setWarcFilename(String warcFilename) {
+		this.warcFilename = warcFilename;
+	}
+
+	/**
+	 * Die Methode, um den Parameter logFile zu setzen.
+	 * 
+	 * @param logFile Die Logdatei für wpull (crawl.log). Objekttyp "File".
+	 */
+	public void setLogFile(File logFile) {
+		this.logFile = logFile;
+	}
+
+	/**
+	 * Die Methode, um exit State auszulesen
+	 * 
+	 * @return exitState ist der Return-Wert von wpull.
+	 */
+	public int getExitState() {
+		return this.exitState;
 	}
 
 	/**
@@ -52,9 +98,9 @@ public class WpullThread extends Thread {
 		try {
 			Process proc = pb.start();
 			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
-			assert pb.redirectOutput().file() == log;
+			assert pb.redirectOutput().file() == logFile;
 			assert proc.getInputStream().read() == -1;
-			int exitState = proc.waitFor();
+			exitState = proc.waitFor();
 			/**
 			 * Exit-Status: 0 = Crawl erfolgreich beendet
 			 */
@@ -63,6 +109,13 @@ public class WpullThread extends Thread {
 			if (exitState == 0) {
 				return;
 			}
+			// Keep warc file of failed crawl
+			File warcFile =
+					new File(crawlDir.toString() + "/" + warcFilename + ".warc.gz");
+			File warcFileAttempted = new File(crawlDir.toString() + "/" + warcFilename
+					+ ".warc.gz.attempt" + attempt);
+			warcFile.renameTo(warcFileAttempted);
+			warcFile.delete();
 			attempt++;
 			if (attempt > maxNumberAttempts) {
 				throw new RuntimeException("Webcrawl für " + conf.getName()
@@ -71,7 +124,11 @@ public class WpullThread extends Thread {
 			// Crawl wird erneut angestoßen
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
-			WpullThread wpullThread = new WpullThread(conf, pb, log, attempt);
+			WpullThread wpullThread = new WpullThread(pb, attempt);
+			wpullThread.setConf(conf);
+			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setLogFile(logFile);
 			wpullThread.start();
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());

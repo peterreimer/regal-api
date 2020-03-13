@@ -62,8 +62,8 @@ public class WpullCrawl {
 	private String localpath = null;
 	private String host = null;
 	private String warcFilename = null;
-	private int exitState = 0;
 	private String msg = null;
+	private int exitState = 0;
 
 	final static String jobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
@@ -75,14 +75,32 @@ public class WpullCrawl {
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
+	/**
+	 * Die Methode, um das crawlDir auszulesen.
+	 * 
+	 * @return Das Verzeichnis (absolute Pfadangabe), in das wpull seine
+	 *         Ergebnisdateien (z.B. WARC-Archiv) schreibt.
+	 */
 	public File getCrawlDir() {
 		return crawlDir;
 	}
 
+	/**
+	 * Die Methode, um localPath auszulesen
+	 * 
+	 * @return localPath is ein Parameter, den Fedora benötigt. Es ist eine URL
+	 *         zur gecrawlten WARC-Datei.
+	 */
 	public String getLocalpath() {
 		return localpath;
 	}
 
+	/**
+	 * Die Methode, um exitState auszulesen
+	 * 
+	 * @return exitState ist der Return-Status von wpull. Es ist == 0, wenn der
+	 *         Crawl erfolgreich war, sonst > 0.
+	 */
 	public int getExitState() {
 		return exitState;
 	}
@@ -190,8 +208,13 @@ public class WpullCrawl {
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			WpullThread wpullThread = new WpullThread(conf, pb, log, 1);
+			WpullThread wpullThread = new WpullThread(pb, 1);
+			wpullThread.setConf(conf);
+			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setLogFile(log);
 			wpullThread.start();
+			exitState = wpullThread.getExitState();
 			/*
 			 * den Pfad zum WARC unter Globals.heritrixData zu hängen ist eigentlich
 			 * Blödsinn, aber ohne localpath wird im Frontend kein Link zu Openwayback
