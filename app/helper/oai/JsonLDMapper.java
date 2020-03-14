@@ -95,7 +95,6 @@ public class JsonLDMapper {
 					} else {
 						Hashtable<String, String> iE = new Hashtable<>();
 						iE.put(pBuffer.toString(), arrayNode.asText());
-						// complexElement.add(iE);
 						jEM.addArrayElement(arrayNode.asText());
 					}
 				}
@@ -104,6 +103,9 @@ public class JsonLDMapper {
 				}
 			}
 			pBuffer.setLength(l);
+			if (pBuffer.toString().equals("root")) {
+				jEM = new JsonElementModel(pBuffer.toString());
+			}
 
 		}
 		return jemElement;
