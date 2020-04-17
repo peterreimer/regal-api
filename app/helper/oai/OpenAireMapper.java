@@ -280,8 +280,8 @@ public class OpenAireMapper {
 							+ jemList.get(i).get("@id") + "/data"));
 
 			// fetch file details from child resources
-			// TODO fix glitch with literal inside of object in JsonLDMapper, 
-			// that leads to double "checksum"-object here 
+			// TODO fix glitch with literal inside of object in JsonLDMapper,
+			// that leads to double "checksum"-object here
 			JsonLDMapper partMapper = getFileElements(jemList.get(i).get("@id"));
 			ArrayList<Hashtable<String, String>> partJemList =
 					partMapper.getElement("root.hasData.checksum");
@@ -301,8 +301,8 @@ public class OpenAireMapper {
 					oairefile.setAttribute("accessRightsURI", CoarModel
 							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
 				}
-			
 
+			}
 			resource.appendChild(oairefile);
 		}
 
