@@ -211,7 +211,7 @@ public class OpenAireMapper {
 		jemList = jMapper.getElement("root");
 		for (int i = 0; i < jemList.size(); i++) {
 			if (jemList.get(i).containsKey("contentType")) {
-				Element resourceType = doc.createElement("oaire:resourceType");
+				Element resourceType = doc.createElement("resourceType");
 				resourceType.appendChild(doc.createTextNode(
 						CoarModel.getElementValue(jemList.get(i).get("contentType"))));
 				resourceType.setAttribute("uri",
@@ -283,25 +283,29 @@ public class OpenAireMapper {
 			// that leads to double "checksum"-object here
 			JsonLDMapper childMapper =
 					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
-			ArrayList<Hashtable<String, String>> childJemList =
-					childMapper.getElement("root.hasData.checksum");
-			if (childJemList.get(i).get("format") != null) {
-				oairefile.setAttribute("mimeType", childJemList.get(i).get("format"));
-				if (childJemList.get(i).get("format").equals("application/pdf")) {
-					oairefile.setAttribute("objectType", "fulltext");
-				} else {
-					oairefile.setAttribute("objectType", "other");
+			if (childMapper != null) {
+				ArrayList<Hashtable<String, String>> childJemList =
+						childMapper.getElement("root.hasData.checksum");
+				if (childJemList.get(i).get("format") != null) {
+					oairefile.setAttribute("mimeType", childJemList.get(i).get("format"));
+					if (childJemList.get(i).get("format").equals("application/pdf")) {
+						oairefile.setAttribute("objectType", "fulltext");
+					} else {
+						oairefile.setAttribute("objectType", "other");
+					}
 				}
-			}
-			childJemList = childMapper.getElement("root");
-			for (int j = 0; j < jemList.size(); j++) {
-				if (jemList.get(i).containsKey("accessScheme")) {
-					oairefile.appendChild(doc.createTextNode(
-							CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
-					oairefile.setAttribute("accessRightsURI", CoarModel
-							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
+				childJemList = childMapper.getElement("root");
+				for (int j = 0; j < jemList.size(); j++) {
+					if (jemList.get(i).containsKey("accessScheme")) {
+						oairefile.appendChild(doc.createTextNode(
+								CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+						oairefile.setAttribute("accessRightsURI", CoarModel
+								.getUriAttributeValue(jemList.get(i).get("accessScheme")));
+					}
 				}
 
+			} else {
+				oairefile.setAttribute("objectType", "data");
 			}
 			resource.appendChild(oairefile);
 		}
