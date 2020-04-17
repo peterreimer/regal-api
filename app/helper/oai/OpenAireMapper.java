@@ -281,18 +281,19 @@ public class OpenAireMapper {
 			// fetch file details from child resources
 			// TODO fix glitch with literal inside of object in JsonLDMapper,
 			// that leads to double "checksum"-object here
-			JsonLDMapper partMapper = getFileElements(jemList.get(i).get("@id"));
-			ArrayList<Hashtable<String, String>> partJemList =
-					partMapper.getElement("root.hasData.checksum");
-			if (partJemList.get(i).get("format") != null) {
-				oairefile.setAttribute("mimeType", partJemList.get(i).get("format"));
-				if (partJemList.get(i).get("format").equals("application/pdf")) {
+			JsonLDMapper childMapper =
+					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
+			ArrayList<Hashtable<String, String>> childJemList =
+					childMapper.getElement("root.hasData.checksum");
+			if (childJemList.get(i).get("format") != null) {
+				oairefile.setAttribute("mimeType", childJemList.get(i).get("format"));
+				if (childJemList.get(i).get("format").equals("application/pdf")) {
 					oairefile.setAttribute("objectType", "fulltext");
 				} else {
 					oairefile.setAttribute("objectType", "other");
 				}
 			}
-			partJemList = partMapper.getElement("root");
+			childJemList = childMapper.getElement("root");
 			for (int j = 0; j < jemList.size(); j++) {
 				if (jemList.get(i).containsKey("accessScheme")) {
 					oairefile.appendChild(doc.createTextNode(
@@ -370,10 +371,10 @@ public class OpenAireMapper {
 		return archive.fedora.XmlUtils.docToString(doc);
 	}
 
-	private JsonLDMapper getFileElements(String pid) {
-		Node partNode = new Read().readNode(pid);
-
-		return null;
+	private JsonNode getChildJsonNode(String pid) {
+		Node childNode = new Read().readNode(pid);
+		JsonNode childJNode = new ObjectMapper().valueToTree(childNode.getLd2());
+		return childNode;
 	}
 
 }
