@@ -16,8 +16,13 @@ import models.JsonElementModel;
 import models.Node;
 
 /**
+ * Maps a JsonNode into the regal-api JsonElementModel. Concept of
+ * JsonElementModel is to flatten any complex Json Representation into a List of
+ * key-value pairs. Keys within the ElementLists of the JsonElementModel are
+ * representing object structures as point separated paths.
+ * 
  * @author aquast
- *
+ * 
  */
 public class JsonLDMapper {
 
@@ -54,7 +59,7 @@ public class JsonLDMapper {
 				Hashtable<String, String> iE = new Hashtable<>();
 				complexElement.add(iE);
 
-				if (jEM != null && jEM.isObject()) {
+				if (jEM != null && jEM.isEmpty()) {
 					Hashtable<String, String> ha = jEM.getComplexElementList();
 					ha.put(key, node.get(key).asText());
 					jEM.setComplexElement(ha);

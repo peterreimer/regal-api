@@ -31,6 +31,8 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import actions.Read;
+import de.nrw.hbz.json.helper.json2java.JsonLDMapper;
 import models.Node;
 import models.CoarModel;
 import models.EmbargoModel;
@@ -134,7 +136,7 @@ public class OpenAireMapper {
 
 		}
 
-		// generate fundingreference
+		// generate fundingReference
 		Element funding = doc.createElement("fundingReferences");
 		jemList = jMapper.getElement("root.joinedFunding.fundingJoined");
 		for (int i = 0; i < jemList.size(); i++) {
@@ -206,6 +208,22 @@ public class OpenAireMapper {
 			}
 		}
 
+		// generate oaire:resourceType
+		jemList = jMapper.getElement("root");
+		for (int i = 0; i < jemList.size(); i++) {
+			if (jemList.get(i).containsKey("contentType")) {
+				Element resourceType = doc.createElement("oaire:resourceType");
+				resourceType.appendChild(doc.createTextNode(
+						CoarModel.getElementValue(jemList.get(i).get("contentType"))));
+				resourceType.setAttribute("uri",
+						CoarModel.getUriAttributeValue(jemList.get(i).get("contentType")));
+				resourceType.setAttribute("resourceTypeGeneral",
+						CoarModel.getResourceTypeGeneralAttribute(
+								jemList.get(i).get("contentType")));
+				resource.appendChild(resourceType);
+			}
+		}
+
 		// generate source
 		jemList = jMapper.getElement("root.containedIn");
 		for (int i = 0; i < jemList.size(); i++) {
@@ -260,6 +278,31 @@ public class OpenAireMapper {
 			oairefile.appendChild(
 					doc.createTextNode("https://repository.publisso.de/resource/"
 							+ jemList.get(i).get("@id") + "/data"));
+
+			// fetch file details from child resources
+			// TODO fix glitch with literal inside of object in JsonLDMapper, 
+			// that leads to double "checksum"-object here 
+			JsonLDMapper partMapper = getFileElements(jemList.get(i).get("@id"));
+			ArrayList<Hashtable<String, String>> partJemList =
+					partMapper.getElement("root.hasData.checksum");
+			if (partJemList.get(i).get("format") != null) {
+				oairefile.setAttribute("mimeType", partJemList.get(i).get("format"));
+				if (partJemList.get(i).get("format").equals("application/pdf")) {
+					oairefile.setAttribute("objectType", "fulltext");
+				} else {
+					oairefile.setAttribute("objectType", "other");
+				}
+			}
+			partJemList = partMapper.getElement("root");
+			for (int j = 0; j < jemList.size(); j++) {
+				if (jemList.get(i).containsKey("accessScheme")) {
+					oairefile.appendChild(doc.createTextNode(
+							CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+					oairefile.setAttribute("accessRightsURI", CoarModel
+							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
+				}
+			
+
 			resource.appendChild(oairefile);
 		}
 
@@ -326,6 +369,12 @@ public class OpenAireMapper {
 		doc.appendChild(resource);
 
 		return archive.fedora.XmlUtils.docToString(doc);
+	}
+
+	private JsonLDMapper getFileElements(String pid) {
+		Node partNode = new Read().readNode(pid);
+
+		return null;
 	}
 
 }
