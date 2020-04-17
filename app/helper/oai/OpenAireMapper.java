@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import actions.Read;
-import de.nrw.hbz.json.helper.json2java.JsonLDMapper;
 import models.Node;
 import models.CoarModel;
 import models.EmbargoModel;

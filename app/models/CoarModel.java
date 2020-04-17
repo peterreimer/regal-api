@@ -5,8 +5,6 @@ package models;
 
 import java.util.Hashtable;
 
-import de.nrw.hbz.json.helper.json2java.model.CoarModel;
-
 /**
  * @author aquast
  *

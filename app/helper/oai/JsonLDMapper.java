@@ -170,7 +170,7 @@ public class JsonLDMapper {
 			ArrayList<Integer> fieldIndex = index.get(path);
 			for (int i = 0; i < fieldIndex.size(); i++) {
 				JsonElementModel sJem = jemElement.get(fieldIndex.get(i));
-				if (sJem.isObject()) {
+				if (!sJem.isEmpty()) {
 					Hashtable<String, String> element = sJem.getComplexElementList();
 					result.add(element);
 				} else {
