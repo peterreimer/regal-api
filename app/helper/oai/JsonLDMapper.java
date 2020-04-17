@@ -59,7 +59,7 @@ public class JsonLDMapper {
 				Hashtable<String, String> iE = new Hashtable<>();
 				complexElement.add(iE);
 
-				if (jEM != null && jEM.isEmpty()) {
+				if (jEM != null && !jEM.isEmpty()) {
 					Hashtable<String, String> ha = jEM.getComplexElementList();
 					ha.put(key, node.get(key).asText());
 					jEM.setComplexElement(ha);
