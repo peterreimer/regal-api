@@ -373,8 +373,8 @@ public class OpenAireMapper {
 
 	private JsonNode getChildJsonNode(String pid) {
 		Node childNode = new Read().readNode(pid);
-		JsonNode childJNode = new ObjectMapper().valueToTree(childNode.getLd2());
-		return childNode;
+		JsonNode childJsonNode = new ObjectMapper().valueToTree(childNode.getLd2());
+		return childJsonNode;
 	}
 
 }
