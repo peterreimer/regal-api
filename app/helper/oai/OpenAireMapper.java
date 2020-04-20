@@ -281,6 +281,7 @@ public class OpenAireMapper {
 			// fetch file details from child resources
 			JsonLDMapper childMapper =
 					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
+
 			ArrayList<Hashtable<String, String>> childJemList =
 					childMapper.getElement("root.hasData");
 			for (int j = 0; j < childJemList.size(); j++) {
@@ -295,9 +296,9 @@ public class OpenAireMapper {
 
 				if (childJemList.get(j).containsKey("accessScheme")) {
 					oairefile.appendChild(doc.createTextNode(
-							CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+							CoarModel.getElementValue(jemList.get(j).get("accessScheme"))));
 					oairefile.setAttribute("accessRightsURI", CoarModel
-							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
+							.getUriAttributeValue(jemList.get(j).get("accessScheme")));
 				}
 
 				childJemList = childMapper.getElement("root");
