@@ -295,10 +295,10 @@ public class OpenAireMapper {
 				}
 
 				if (childJemList.get(j).containsKey("accessScheme")) {
-					oairefile.appendChild(doc.createTextNode(
-							CoarModel.getElementValue(jemList.get(j).get("accessScheme"))));
+					oairefile.appendChild(doc.createTextNode(CoarModel
+							.getElementValue(childJemList.get(j).get("accessScheme"))));
 					oairefile.setAttribute("accessRightsURI", CoarModel
-							.getUriAttributeValue(jemList.get(j).get("accessScheme")));
+							.getUriAttributeValue(childJemList.get(j).get("accessScheme")));
 				}
 
 				childJemList = childMapper.getElement("root");
