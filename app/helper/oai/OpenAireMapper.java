@@ -282,28 +282,44 @@ public class OpenAireMapper {
 			JsonLDMapper childMapper =
 					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
 
+			// Workaround to prevent deleted objects to be displayed :-(
+			// TODO: make deleted objects invisible for parent objects in lobid
 			ArrayList<Hashtable<String, String>> childJemList =
-					childMapper.getElement("root.hasData");
-			for (int j = 0; j < childJemList.size(); j++) {
-				if (childJemList.get(j).containsKey("format")) {
-					oairefile.setAttribute("mimeType", childJemList.get(j).get("format"));
-					if (childJemList.get(j).get("format").equals("application/pdf")) {
-						oairefile.setAttribute("objectType", "fulltext");
-					} else {
-						oairefile.setAttribute("objectType", "other");
-					}
-				}
+					childMapper.getElement("root");
 
-				if (childJemList.get(j).containsKey("accessScheme")) {
-					oairefile.appendChild(doc.createTextNode(CoarModel
-							.getElementValue(childJemList.get(j).get("accessScheme"))));
-					oairefile.setAttribute("accessRightsURI", CoarModel
-							.getUriAttributeValue(childJemList.get(j).get("accessScheme")));
+			boolean isDeletedChild = false;
+			for (int k = 0; k < childJemList.size(); k++) {
+				if (childJemList.get(k).get("notification") != null
+						&& childJemList.get(k).get("notification")
+								.equals("Dieses Objekt wurde gelöscht")) {
+					isDeletedChild = true;
 				}
-
-				childJemList = childMapper.getElement("root");
 			}
-			resource.appendChild(oairefile);
+
+			// append hasData only if child is not deleted
+			if (isDeletedChild == false) {
+				childJemList = childMapper.getElement("root.hasData");
+				for (int j = 0; j < childJemList.size(); j++) {
+					if (childJemList.get(j).containsKey("format")) {
+						oairefile.setAttribute("mimeType",
+								childJemList.get(j).get("format"));
+						if (childJemList.get(j).get("format").equals("application/pdf")) {
+							oairefile.setAttribute("objectType", "fulltext");
+						} else {
+							oairefile.setAttribute("objectType", "other");
+						}
+					}
+
+					if (childJemList.get(j).containsKey("accessScheme")) {
+						oairefile.setAttribute("accessRightsURI", CoarModel
+								.getUriAttributeValue(childJemList.get(j).get("accessScheme")));
+					}
+
+					childJemList = childMapper.getElement("root");
+				}
+				resource.appendChild(oairefile);
+
+			}
 		}
 
 		// generate licenseCondition

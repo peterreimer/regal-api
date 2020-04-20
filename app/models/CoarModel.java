@@ -12,39 +12,35 @@ import java.util.Hashtable;
  */
 public abstract class CoarModel {
 
-	public static final String OPEN_ACCESS = new String("open access");
+	public static final String OPEN_ACCESS = "open access";
 	public static final String OPEN_ACCESS_URI =
-			new String("http://purl.org/coar/access_right/c_abf2");
-	public static final String EMBARGOED_ACCESS = new String("embargoed access");
+			"http://purl.org/coar/access_right/c_abf2";
+	public static final String EMBARGOED_ACCESS = "embargoed access";
 	public static final String EMBARGOED_ACCESS_URI =
-			new String("http://purl.org/coar/access_right/c_f1cf");
-	public static final String RESTRICTED_ACCESS =
-			new String("restricted access");
+			"http://purl.org/coar/access_right/c_f1cf";
+	public static final String RESTRICTED_ACCESS = "restricted access";
 	public static final String RESTRICTED_ACCESS_URI =
-			new String("http://purl.org/coar/access_right/c_16ec");
-	public static final String METADATA_ONLY_ACCESS =
-			new String("metadata only access");
+			"http://purl.org/coar/access_right/c_16ec";
+	public static final String METADATA_ONLY_ACCESS = "metadata only access";
 	public static final String METADATA_ONLY_ACCESS_URI =
-			new String("http://purl.org/coar/access_right/c_14cb");
+			"http://purl.org/coar/access_right/c_14cb";
 
 	// https://openaire-guidelines-for-literature-repository-managers.readthedocs.io/en/v4.0.0/field_publicationtype.html
-	public static final String JOURNAL_ARTICLE = new String("journal article");
+	public static final String JOURNAL_ARTICLE = "journal article";
 	public static final String JOURNAL_ARTICLE_URI =
-			new String("http://purl.org/coar/resource_type/c_6501");
-	public static final String BOOK_PART = new String("book part");
+			"http://purl.org/coar/resource_type/c_6501";
+	public static final String BOOK_PART = "book part";
 	public static final String BOOK_PART_URI =
-			new String("http://purl.org/coar/resource_type/c_3248");
-	public static final String CONFERENCE_OBJECT =
-			new String("conference object");
+			"http://purl.org/coar/resource_type/c_3248";
+	public static final String CONFERENCE_OBJECT = "conference object";
 	public static final String CONFERENCE_OBJECT_URI =
-			new String("http://purl.org/coar/resource_type/c_c94f");
+			"http://purl.org/coar/resource_type/c_c94f";
 
 	// resourceTypeGeneral
-	public static final String LITERATURE = new String("literature");
-	public static final String DATASET = new String("dataset");
-	public static final String SOFTWARE = new String("software");
-	public static final String OTHER_RESEARCH_PRODUCT =
-			new String("other research product");
+	public static final String LITERATURE = "literature";
+	public static final String DATASET = "dataset";
+	public static final String SOFTWARE = "software";
+	public static final String OTHER_RESEARCH_PRODUCT = "other research product";
 
 	public static Hashtable<String, String> elementContent = new Hashtable<>();
 	public static Hashtable<String, String> uriAttributeContent =
