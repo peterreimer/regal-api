@@ -55,15 +55,18 @@ public class JsonLDMapper {
 			int l = pBuffer.length();
 
 			String key = it.next();
-			if (node.get(key).isValueNode()) {
+			if (node.get(key).isValueNode() || node.get(key).isNumber()) {
 				Hashtable<String, String> iE = new Hashtable<>();
 				complexElement.add(iE);
 
 				if (jEM != null && !jEM.isEmpty()) {
+					// if we have an jEM already, we will use the ElementList from this
 					Hashtable<String, String> ha = jEM.getComplexElementList();
 					ha.put(key, node.get(key).asText());
 					jEM.setComplexElement(ha);
 				} else {
+					// This block is used for the first method call only,
+					// as there is no jEM to provide
 					iE.put(key, node.get(key).asText());
 					jEM = new JsonElementModel(pBuffer.toString());
 					jEM.setComplexElement(iE);
@@ -71,17 +74,54 @@ public class JsonLDMapper {
 				}
 			}
 
+			// check if current field is of type object, if so, we have to make
+			// a recursive call to mapToJsonModel
 			if (node.get(key).isObject()) {
+				System.out.println(
+						"Dies ist ein ObjectNode: " + pBuffer.toString() + "." + key);
 				pBuffer.append("." + key);
-				JsonNode complexNode = node.get(key);
 
-				jEM = new JsonElementModel(pBuffer.toString());
-				jEM.setComplexElement(new Hashtable<String, String>());
-				Hashtable<String, String> ha = jEM.getComplexElementList();
-				mapToJsonElementModel(complexNode, pBuffer);
-				jemElement.add(jEM);
+				// find all child nodes and search for literals etc.
+				JsonNode complexNode = node.get(key);
+				Iterator<String> nIt = complexNode.fieldNames();
+				ArrayList<String> objKeyList = new ArrayList<>();
+				while (nIt.hasNext()) {
+					String objKey = nIt.next();
+
+					if (complexNode.get(objKey).isValueNode()
+							|| complexNode.get(objKey).isNumber()) {
+
+						Hashtable<String, String> iE = new Hashtable<>();
+						if (jEM != null && !jEM.isEmpty()) {
+							Hashtable<String, String> ha = jEM.getComplexElementList();
+							ha.put(objKey, complexNode.get(objKey).asText());
+							jEM.setComplexElement(ha);
+						} else {
+							iE.put(objKey, complexNode.get(objKey).asText());
+							jEM = new JsonElementModel(pBuffer.toString());
+							jEM.setComplexElement(iE);
+							jemElement.add(jEM);
+						}
+
+					} else {
+						objKeyList.add(objKey);
+					}
+				}
+
+				Iterator<String> objKeyIt = objKeyList.iterator();
+				while (objKeyIt.hasNext()) {
+					String objectItemKey = objKeyIt.next();
+					JsonNode realObjNode = complexNode.get(objectItemKey);
+					pBuffer.append("." + objectItemKey);
+
+					jEM = new JsonElementModel(pBuffer.toString());
+					jEM.setComplexElement(new Hashtable<String, String>());
+					mapToJsonElementModel(realObjNode, pBuffer);
+					jemElement.add(jEM);
+				}
 			}
 
+			// check if current field is of type array
 			if (node.get(key).isArray()) {
 				pBuffer.append("." + key);
 
