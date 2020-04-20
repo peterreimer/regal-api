@@ -297,7 +297,7 @@ public class OpenAireMapper {
 			}
 
 			// append hasData only if child is not deleted
-			if (isDeletedChild == false) {
+			//if (isDeletedChild == false) {
 				childJemList = childMapper.getElement("root.hasData");
 				for (int j = 0; j < childJemList.size(); j++) {
 					if (childJemList.get(j).containsKey("format")) {
@@ -315,11 +315,10 @@ public class OpenAireMapper {
 								.getUriAttributeValue(childJemList.get(j).get("accessScheme")));
 					}
 
-					childJemList = childMapper.getElement("root");
 				}
 				resource.appendChild(oairefile);
 
-			}
+			//}
 		}
 
 		// generate licenseCondition
