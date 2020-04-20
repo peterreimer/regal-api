@@ -283,23 +283,24 @@ public class OpenAireMapper {
 					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
 			ArrayList<Hashtable<String, String>> childJemList =
 					childMapper.getElement("root.hasData");
-			if (childJemList.get(i).get("format") != null) {
-				oairefile.setAttribute("mimeType", childJemList.get(i).get("format"));
-				if (childJemList.get(i).get("format").equals("application/pdf")) {
-					oairefile.setAttribute("objectType", "fulltext");
-				} else {
-					oairefile.setAttribute("objectType", "other");
-				}
-				childJemList = childMapper.getElement("root");
-				for (int j = 0; j < jemList.size(); j++) {
-					if (jemList.get(i).containsKey("accessScheme")) {
-						oairefile.appendChild(doc.createTextNode(
-								CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
-						oairefile.setAttribute("accessRightsURI", CoarModel
-								.getUriAttributeValue(jemList.get(i).get("accessScheme")));
+			for (int j = 0; j < childJemList.size(); j++) {
+				if (childJemList.get(j).containsKey("format")) {
+					oairefile.setAttribute("mimeType", childJemList.get(j).get("format"));
+					if (childJemList.get(j).get("format").equals("application/pdf")) {
+						oairefile.setAttribute("objectType", "fulltext");
+					} else {
+						oairefile.setAttribute("objectType", "other");
 					}
 				}
 
+				if (childJemList.get(j).containsKey("accessScheme")) {
+					oairefile.appendChild(doc.createTextNode(
+							CoarModel.getElementValue(jemList.get(i).get("accessScheme"))));
+					oairefile.setAttribute("accessRightsURI", CoarModel
+							.getUriAttributeValue(jemList.get(i).get("accessScheme")));
+				}
+
+				childJemList = childMapper.getElement("root");
 			}
 			resource.appendChild(oairefile);
 		}
