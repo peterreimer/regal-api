@@ -273,11 +273,6 @@ public class OpenAireMapper {
 		// generate oaire:file
 		jemList = jMapper.getElement("root.hasPart");
 		for (int i = 0; i < jemList.size(); i++) {
-			Element oairefile = doc.createElement("file");
-			oairefile.appendChild(
-					doc.createTextNode("https://repository.publisso.de/resource/"
-							+ jemList.get(i).get("@id") + "/data"));
-
 			// fetch file details from child resources
 			JsonLDMapper childMapper =
 					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
@@ -296,8 +291,12 @@ public class OpenAireMapper {
 				}
 			}
 
-			// append hasData only if child is not deleted
 			if (isDeletedChild == false) {
+				Element oairefile = doc.createElement("file");
+				oairefile.appendChild(
+						doc.createTextNode("https://repository.publisso.de/resource/"
+								+ jemList.get(i).get("@id") + "/data"));
+
 				childJemList = childMapper.getElement("root.hasData");
 				for (int j = 0; j < childJemList.size(); j++) {
 					if (childJemList.get(j).containsKey("format")) {
@@ -309,16 +308,16 @@ public class OpenAireMapper {
 							oairefile.setAttribute("objectType", "other");
 						}
 					}
+				}
 
+				childJemList = childMapper.getElement("root");
+				for (int j = 0; j < childJemList.size(); j++) {
 					if (childJemList.get(j).containsKey("accessScheme")) {
 						oairefile.setAttribute("accessRightsURI", CoarModel
 								.getUriAttributeValue(childJemList.get(j).get("accessScheme")));
 					}
-
-					childJemList = childMapper.getElement("root");
 				}
 				resource.appendChild(oairefile);
-
 			}
 		}
 
