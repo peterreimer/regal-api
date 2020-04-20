@@ -279,20 +279,16 @@ public class OpenAireMapper {
 							+ jemList.get(i).get("@id") + "/data"));
 
 			// fetch file details from child resources
-			// TODO fix glitch with literal inside of object in JsonLDMapper,
-			// that leads to double "checksum"-object here
 			JsonLDMapper childMapper =
 					new JsonLDMapper(getChildJsonNode(jemList.get(i).get("@id")));
-			if (childMapper != null) {
-				ArrayList<Hashtable<String, String>> childJemList =
-						childMapper.getElement("root.hasData.checksum");
-				if (childJemList.get(i).get("format") != null) {
-					oairefile.setAttribute("mimeType", childJemList.get(i).get("format"));
-					if (childJemList.get(i).get("format").equals("application/pdf")) {
-						oairefile.setAttribute("objectType", "fulltext");
-					} else {
-						oairefile.setAttribute("objectType", "other");
-					}
+			ArrayList<Hashtable<String, String>> childJemList =
+					childMapper.getElement("root.hasData");
+			if (childJemList.get(i).get("format") != null) {
+				oairefile.setAttribute("mimeType", childJemList.get(i).get("format"));
+				if (childJemList.get(i).get("format").equals("application/pdf")) {
+					oairefile.setAttribute("objectType", "fulltext");
+				} else {
+					oairefile.setAttribute("objectType", "other");
 				}
 				childJemList = childMapper.getElement("root");
 				for (int j = 0; j < jemList.size(); j++) {
@@ -304,8 +300,6 @@ public class OpenAireMapper {
 					}
 				}
 
-			} else {
-				oairefile.setAttribute("objectType", "data");
 			}
 			resource.appendChild(oairefile);
 		}
