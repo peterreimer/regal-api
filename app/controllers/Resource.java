@@ -815,7 +815,7 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/xml", nickname = "asWgl", value = "asWgl", notes = "Returns metadata for Open Leibnis", response = Message.class, httpMethod = "GET")
+	@ApiOperation(produces = "application/xml", nickname = "asWgl", value = "asWgl", notes = "Returns metadata for Open Leibniz", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asWgl(@PathParam("pid") String pid,
 			@QueryParam("validate") boolean validate) {
 		return new ReadMetadataAction().call(pid, node -> {
@@ -877,6 +877,19 @@ public class Resource extends MyController {
 			String xml = result.toString();
 			if (validate) {
 				validate(xml, "public/schemas/mets.xsd", null, "public/schemas/");
+			}
+			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "application/xml", nickname = "asOpenAire", value = "asOpenAire", notes = "Returns a OpenAire display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asOpenAire(@PathParam("pid") String pid,
+			@QueryParam("validate") boolean validate) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("application/xml");
+			String result = transform.openaire(pid);
+			if (validate) {
+				validate(result, "public/schemas/openaire.xsd", null, "public/schemas");
 			}
 			return ok(result);
 		});

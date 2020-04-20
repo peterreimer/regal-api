@@ -20,6 +20,8 @@ import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
+import helper.oai.JsonLDMapper;
+import helper.oai.OpenAireMapper;
 import helper.oai.WglMapper;
 
 import java.io.ByteArrayInputStream;
@@ -30,6 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import models.DataciteRecord;
@@ -37,6 +41,7 @@ import models.DublinCoreData;
 import models.Globals;
 import models.MabRecord;
 import models.Node;
+import models.OpenAireData;
 
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
@@ -171,6 +176,17 @@ public class Transform {
 		String uri = Globals.urnbase + node.getPid();
 		DublinCoreData data = new WglMapper(node, uri).getData();
 		return data;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public String openaire(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		String result = new OpenAireMapper(node, uri).getData();
+		return result;
 	}
 
 	/**
