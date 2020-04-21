@@ -77,8 +77,6 @@ public class JsonLDMapper {
 			// check if current field is of type object, if so, we have to make
 			// a recursive call to mapToJsonModel
 			if (node.get(key).isObject()) {
-				System.out.println(
-						"Dies ist ein ObjectNode: " + pBuffer.toString() + "." + key);
 				pBuffer.append("." + key);
 
 				// find all child nodes and search for literals etc.
@@ -171,7 +169,6 @@ public class JsonLDMapper {
 				position = index.get(jEM1.getPath());
 			} else {
 				position = new ArrayList<>();
-				System.out.println("da");
 			}
 
 			int pos = i;

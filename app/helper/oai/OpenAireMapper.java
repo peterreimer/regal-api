@@ -137,7 +137,7 @@ public class OpenAireMapper {
 
 		// generate fundingReference
 		Element funding = doc.createElement("fundingReferences");
-		jemList = jMapper.getElement("root.joinedFunding.fundingJoined");
+		jemList = jMapper.getElement("root.joinedFunding");
 		for (int i = 0; i < jemList.size(); i++) {
 			Element sE = doc.createElement("fundingReference");
 			funding.appendChild(sE);
@@ -268,6 +268,17 @@ public class OpenAireMapper {
 			publisher
 					.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
 			resource.appendChild(publisher);
+		}
+
+		// generate version aka green road OA version
+		jemList = jMapper.getElement("root.publicationStatus");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element version = doc.createElement("version");
+			version.appendChild(doc.createTextNode(
+					CoarModel.getElementValue(jemList.get(i).get("prefLabel"))));
+			version.setAttribute("uri",
+					CoarModel.getUriAttributeValue(jemList.get(i).get("prefLabel")));
+			resource.appendChild(version);
 		}
 
 		// generate oaire:file
