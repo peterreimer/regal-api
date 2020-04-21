@@ -270,6 +270,17 @@ public class OpenAireMapper {
 			resource.appendChild(publisher);
 		}
 
+		// generate version aka green road OA version
+		jemList = jMapper.getElement("root.publicationStatus");
+		for (int i = 0; i < jemList.size(); i++) {
+			Element version = doc.createElement("version");
+			version.appendChild(doc.createTextNode(
+					CoarModel.getElementValue(jemList.get(i).get("prefLabel"))));
+			version.setAttribute("uri",
+					CoarModel.getUriAttributeValue(jemList.get(i).get("prefLabel")));
+			resource.appendChild(version);
+		}
+
 		// generate oaire:file
 		jemList = jMapper.getElement("root.hasPart");
 		for (int i = 0; i < jemList.size(); i++) {
