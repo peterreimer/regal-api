@@ -137,7 +137,7 @@ public class OpenAireMapper {
 
 		// generate fundingReference
 		Element funding = doc.createElement("fundingReferences");
-		jemList = jMapper.getElement("root.joinedFunding.fundingJoined");
+		jemList = jMapper.getElement("root.joinedFunding");
 		for (int i = 0; i < jemList.size(); i++) {
 			Element sE = doc.createElement("fundingReference");
 			funding.appendChild(sE);
