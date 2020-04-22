@@ -1,7 +1,7 @@
 Neues Metadaten-Format in die OAI-Schnittstelle integrieren
 ===========================================================
 
-Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst zurzeit noch Aktivitäten an mehreren Stellen.
+Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Aktivitäten an mehreren Stellen.
 
 1. Java-Klassen erweitern und anpassen
 2. Konfiguration der regal-api und des OAI-Providers anpassen
@@ -16,7 +16,7 @@ Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind
 * regal-api.app.actions/Transform.java
 * regal-api.app.controllers/Resource.java
 
-In disen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung 
+In diesen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung 
 eines Metadaten-Stroms im System ausgelöst und gesteuert wird.
 
 In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden. 
@@ -53,25 +53,36 @@ Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage in
       }
     }
 
+In der Methode initContentModels(String namespace)ist dann noch ein zusätzlicher Block transformers.add einzutragen.
 
-Die Datei Transform muss um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte 
+ .. code:: java
+
+		transformers.add(new Transformer(namespace + "neuesFormat", "neuesFormat",
+				internalAccessRoute + "neuesFormat"));
+
+
+
+Die Datei Transform muss anschließend um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte 
 ApiOperation "asNeuesFormat" als Restful-Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.  
 
 Das Mappen und die Erzeugung eines Metadatenstroms wurde in der Vergangenheit über unterschiedliche Wege umgesetzt, bei denen ebenfalls mehrere Klassen und ggf.
 ScalaViews beteiligt sind.
 
 Im Package helper.oai wird ein neuer Mapper angelegt, über den die im lobid V2-Format zur Verfügung gestellten Metadaten in das neue Format gemappt werden. 
-Bisher kamen dafür die Klassen ObjectMapper aus der Jackson Library, models.Pair und entweder ein Datenmodell plus Mapper oder eine Record Klasse zum Einsatz.
-     
+Bisher kamen dafür die Klassen ObjectMapper aus der Jackson Library, models.Pair und entweder ein Datenmodell plus Mapper oder eine Record Klasse zum Einsatz. 
+
 Innerhalb des Packages view.oai mussten bei der Nutzung eines Datenmodells und eines Mappers zusätzlich die Klassen NeuesFormat.scala.html und 
 NeuesFormatView.scala.html angelegt werden.Diese steuern das Parsing und die Darstellung des neuen Formats über die Scala-Infrastruktur. 
 Im Unterschied dazu erzeugen die Record-Klassen String-Representationen eines XML-Datenstroms.
 
-Zur Vereinfachung und Vereinheitlichung wurde für kommende Metadatenformate eine neue Klase angelegt, mit der variable JSON-Datenströme in vergleichsweise 
-einheitlich nutzbare Java-Strukturen übersetzt werden. 
+Um die Umsetzung der neuen Formate zu vereinheitlichen, wurde mehrere neue Klassen eingeführt, die einen strukturierten Zugriff auf das existierende 
+(und künftige) lobid-JSON-Format ermöglichen sollen. Aktuell gibt es hier noch verschiedene Issues bei der Verarbeitung komplexer Strukturen aus Arrays und 
+Objektelementen, die aber gelöst werden sollen. Um strukturiert zuzugreifen, sollte die Klasse regal-api.app.helper.oai.JsonLDMapper verwendet werden. Damit 
+wird auch das Anlegen neuer ScalaViews obsolet.
 
+
+    
       
-
 
 Konfiguration der regal-api und des OAI-Providers anpassen
 ----------------------------------------------------------

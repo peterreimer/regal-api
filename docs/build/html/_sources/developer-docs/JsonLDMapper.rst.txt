@@ -4,6 +4,8 @@ JSON in Java-Klassen überführen
 Mit der Klasse JsonLDMapper steht ein generischer Ansatz zum Einlesen des lobid-JSON (oder anderer JSON-Formate) zur Verfügung, 
 der die im JSON liegenden Metadaten in einer einheitlichen Weise für die Verarbeitung zugänglich macht.
 
+Die Einrichtung der Klasse JsonLDMapper verfolgt das Ziel, kommende Änderungen am Datenmodell vom lobid mit möglichst wenig Aufwand in das Repository übernehmen zu können.  
+
 Grundlage bilden die von JSON unterstützten Datentypen. Die in JSON verwendeten Datentypen werden zunächst konzeptuell auf drei Typen reduziert.
 
 - Object
@@ -75,3 +77,4 @@ isArray() und isObject().
 	JsonLDMapper jMapper = new JsonLDMapper(JsonNode); 
 	boolean test = jMapper.getElement("\root.creator\").isArray();
 	
+
