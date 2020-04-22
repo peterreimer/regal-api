@@ -21,6 +21,7 @@ import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
 import helper.oai.JsonLDMapper;
+import helper.oai.ModsMapper;
 import helper.oai.OpenAireMapper;
 import helper.oai.WglMapper;
 
@@ -196,7 +197,7 @@ public class Transform {
 	public String mods(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		String result = new OpenAireMapper(node, uri).getData();
+		String result = new ModsMapper(node, uri).getData();
 		return result;
 	}
 
