@@ -200,8 +200,9 @@ public class OpenAireMapper {
 		for (int i = 0; i < jemList.size(); i++) {
 			if (jemList.get(i).containsKey("@id")) {
 				Element identifier = doc.createElement("datacite:identifier");
-				identifier.appendChild(doc.createTextNode(
-						"https://frl.publisso.de/" + jemList.get(i).get("@id")));
+				identifier.appendChild(
+						doc.createTextNode("https://repository.publisso.de/resource/"
+								+ jemList.get(i).get("@id")));
 				identifier.setAttribute("identifierType", "PURL");
 				resource.appendChild(identifier);
 			}
@@ -330,6 +331,24 @@ public class OpenAireMapper {
 				}
 				resource.appendChild(oairefile);
 			}
+		}
+
+		// generate relatedIdentifier
+		jemList = jMapper.getElement("root.hasPart");
+		if (jemList.size() > 0) {
+			Element relIdentifiers = doc.createElement("datacite:relatedIdentifiers");
+			for (int i = 0; i < jemList.size(); i++) {
+				if (jemList.get(i).containsKey("@id")) {
+					Element rIdentifier = doc.createElement("datacite:relatedIdentifier");
+					rIdentifier.appendChild(
+							doc.createTextNode("https://repository.publisso.de/resource/"
+									+ jemList.get(i).get("@id")));
+					rIdentifier.setAttribute("relatedIdentifierType", "PURL");
+					rIdentifier.setAttribute("relationType", "PURL");
+					relIdentifiers.appendChild(rIdentifier);
+				}
+			}
+			resource.appendChild(relIdentifiers);
 		}
 
 		// generate licenseCondition

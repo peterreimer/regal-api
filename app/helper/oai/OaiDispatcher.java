@@ -77,6 +77,7 @@ public class OaiDispatcher {
 		addRdfTransformer(node);
 		addWglTransformer(node);
 		addOpenAireTransformer(node);
+		addModsTransformer(node);
 
 	}
 
@@ -100,6 +101,8 @@ public class OaiDispatcher {
 				internalAccessRoute + "mets"));
 		transformers.add(new Transformer(namespace + "openaire", "openaire",
 				internalAccessRoute + "openaire"));
+		transformers.add(new Transformer(namespace + "mods", "mods",
+				internalAccessRoute + "mods"));
 		transformers.add(
 				new Transformer(namespace + "rdf", "rdf", internalAccessRoute + "rdf"));
 		transformers.add(
@@ -108,7 +111,7 @@ public class OaiDispatcher {
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
 				+ "aleph, " + namespace + "mets, " + namespace + "rdf, " + namespace
-				+ "wgl," + namespace + "openaire";
+				+ "wgl," + namespace + "openaire" + namespace + "mods";
 		play.Logger.info(result);
 		return result;
 	}
@@ -252,6 +255,8 @@ public class OaiDispatcher {
 					continue; // implicitly added - or not allowed to set
 				if ("openaire".equals(t))
 					continue; // implicitly added - or not allowed to set
+				if ("mods".equals(t))
+					continue; // implicitly added - or not allowed to set
 				node.addTransformer(new Transformer(t));
 			}
 		}
@@ -324,6 +329,17 @@ public class OaiDispatcher {
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
 				node.addTransformer(new Transformer("openaire"));
+			}
+		}
+	}
+
+	private static void addModsTransformer(Node node) {
+		String type = node.getContentType();
+		if ("public".equals(node.getPublishScheme())) {
+			if ("monograph".equals(type) || "journal".equals(type)
+					|| "webpage".equals(type) || "researchData".equals(type)
+					|| "article".equals(type)) {
+				node.addTransformer(new Transformer("mods"));
 			}
 		}
 	}

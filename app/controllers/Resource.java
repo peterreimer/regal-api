@@ -895,6 +895,19 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/xml", nickname = "asMods", value = "asMods", notes = "Returns a OpenAire display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asMods(@PathParam("pid") String pid,
+			@QueryParam("validate") boolean validate) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("application/xml");
+			String result = transform.mods(pid);
+			if (validate) {
+				validate(result, "public/schemas/mods-3-7.xsd", null, "public/schemas");
+			}
+			return ok(result);
+		});
+	}
+
 	@ApiOperation(produces = "application/xml", nickname = "asCsv", value = "asCsv", notes = "Returns a Csv display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asCsv(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {

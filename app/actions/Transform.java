@@ -190,6 +190,17 @@ public class Transform {
 	}
 
 	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public String mods(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		String result = new OpenAireMapper(node, uri).getData();
+		return result;
+	}
+
+	/**
 	 * @param pid the pid of a node with pdf data
 	 * @return the plain text content of the pdf
 	 */
