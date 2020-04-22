@@ -333,6 +333,27 @@ public class OpenAireMapper {
 			}
 		}
 
+		// generate citation Fields
+		jemList = jMapper.getElement("root.bibliographicCitation");
+		for (int i = 0; i < jemList.size(); i++) {
+			String fullCitation = jemList.get(i).get("root.bibliographicCitation");
+			String[] splitCitation = fullCitation.split("[()\\-\\:]");
+			if (splitCitation.length > 4) {
+				Element volCitation = doc.createElement("citationVolume");
+				volCitation.appendChild(doc.createTextNode(splitCitation[0]));
+				Element issueCitation = doc.createElement("citationIssue");
+				issueCitation.appendChild(doc.createTextNode(splitCitation[1]));
+				Element startPageCitation = doc.createElement("citationStartPage");
+				startPageCitation.appendChild(doc.createTextNode(splitCitation[3]));
+				Element endPageCitation = doc.createElement("citationEndPage");
+				endPageCitation.appendChild(doc.createTextNode(splitCitation[4]));
+				resource.appendChild(volCitation);
+				resource.appendChild(issueCitation);
+				resource.appendChild(startPageCitation);
+				resource.appendChild(endPageCitation);
+			}
+		}
+
 		// generate relatedIdentifier
 		jemList = jMapper.getElement("root.hasPart");
 		if (jemList.size() > 0) {
@@ -379,8 +400,6 @@ public class OpenAireMapper {
 					doc.createTextNode(jemList.get(i).get("root.embargoTime")));
 			available.setAttribute("dateType", "Available");
 			dates.appendChild(available);
-			// available.appendChild(doc.createTextNode(jMapper.getElement("root.isDescribedBy.created").toString()));
-			// available.setAttribute("dateType", "Accepted");
 		}
 		resource.appendChild(dates);
 
