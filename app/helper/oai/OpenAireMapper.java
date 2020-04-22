@@ -123,7 +123,8 @@ public class OpenAireMapper {
 			sE.appendChild(cn);
 
 			// prevent record from displaying local ids
-			if (!jemList.get(i).get("@id").startsWith("https://frl")
+			if (jemList.get(i).containsKey("@id")
+					&& !jemList.get(i).get("@id").startsWith("https://frl")
 					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
 				Element ci = doc.createElement("datacite:creatorIdentifier");
 				ci.appendChild(doc.createTextNode(jemList.get(i).get("@id")));
@@ -145,7 +146,9 @@ public class OpenAireMapper {
 			cn.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
 			sE.appendChild(cn);
 
-			if (!jemList.get(i).get("@id").startsWith("https://frl")) {
+			if (jemList.get(i).containsKey("@id")
+					&& !jemList.get(i).get("@id").startsWith("https://frl")
+					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
 				Element ci = doc.createElement("funderIdentifier");
 				ci.appendChild(doc.createTextNode(jemList.get(i).get("@id")));
 				sE.appendChild(ci);
@@ -253,7 +256,8 @@ public class OpenAireMapper {
 			sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
 
 			// prevent record from displaying local id's
-			if (!jemList.get(i).get("@id").startsWith("https://frl")
+			if (jemList.get(i).containsKey("@id")
+					&& !jemList.get(i).get("@id").startsWith("https://frl")
 					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
 				sE.setAttribute("valueURI", jemList.get(i).get("@id"));
 			}
@@ -295,6 +299,7 @@ public class OpenAireMapper {
 					childMapper.getElement("root");
 
 			boolean isDeletedChild = false;
+			boolean isContentTypeFile = false;
 			for (int k = 0; k < childJemList.size(); k++) {
 				if (childJemList.get(k).get("notification") != null
 						&& childJemList.get(k).get("notification")
@@ -303,7 +308,14 @@ public class OpenAireMapper {
 				}
 			}
 
-			if (isDeletedChild == false) {
+			for (int k = 0; k < childJemList.size(); k++) {
+				if (childJemList.get(k).get("contentType") != null
+						&& childJemList.get(k).get("contentType").equals("file")) {
+					isContentTypeFile = true;
+				}
+			}
+
+			if (isDeletedChild == false && isContentTypeFile == true) {
 				Element oairefile = doc.createElement("file");
 				oairefile.appendChild(
 						doc.createTextNode("https://repository.publisso.de/resource/"
@@ -321,7 +333,6 @@ public class OpenAireMapper {
 						}
 					}
 				}
-
 				childJemList = childMapper.getElement("root");
 				for (int j = 0; j < childJemList.size(); j++) {
 					if (childJemList.get(j).containsKey("accessScheme")) {
@@ -356,18 +367,16 @@ public class OpenAireMapper {
 
 		// generate relatedIdentifier
 		jemList = jMapper.getElement("root.hasPart");
-		if (jemList.size() > 0) {
-			Element relIdentifiers = doc.createElement("datacite:relatedIdentifiers");
-			for (int i = 0; i < jemList.size(); i++) {
-				if (jemList.get(i).containsKey("@id")) {
-					Element rIdentifier = doc.createElement("datacite:relatedIdentifier");
-					rIdentifier.appendChild(
-							doc.createTextNode("https://repository.publisso.de/resource/"
-									+ jemList.get(i).get("@id")));
-					rIdentifier.setAttribute("relatedIdentifierType", "PURL");
-					rIdentifier.setAttribute("relationType", "PURL");
-					relIdentifiers.appendChild(rIdentifier);
-				}
+		Element relIdentifiers = doc.createElement("datacite:relatedIdentifiers");
+		for (int i = 0; i < jemList.size(); i++) {
+			if (jemList.get(i).containsKey("@id")) {
+				Element rIdentifier = doc.createElement("datacite:relatedIdentifier");
+				rIdentifier.appendChild(
+						doc.createTextNode("https://repository.publisso.de/resource/"
+								+ jemList.get(i).get("@id")));
+				rIdentifier.setAttribute("relatedIdentifierType", "PURL");
+				rIdentifier.setAttribute("relationType", "PURL");
+				relIdentifiers.appendChild(rIdentifier);
 			}
 			resource.appendChild(relIdentifiers);
 		}
