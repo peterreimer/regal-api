@@ -254,6 +254,7 @@ public class Create extends RegalAction {
 	public Node createWebpageVersion(Node n) {
 		Gatherconf conf = null;
 		File crawlDir = null;
+		File outDir = null;
 		String localpath = null;
 		try {
 			if (!"webpage".equals(n.getContentType())) {
@@ -298,6 +299,7 @@ public class Create extends RegalAction {
 				wpullCrawl.execCDNGatherer();
 				wpullCrawl.startJob();
 				crawlDir = wpullCrawl.getCrawlDir();
+				outDir = wpullCrawl.getResultsDir();
 				localpath = wpullCrawl.getLocalpath();
 				if (wpullCrawl.getExitState() != 0) {
 					throw new RuntimeException("Crawl job returns with exit state "
@@ -333,7 +335,7 @@ public class Create extends RegalAction {
 			webpageVersion.setPublishScheme(n.getPublishScheme());
 			webpageVersion = updateResource(webpageVersion);
 
-			conf.setLocalDir(crawlDir.getAbsolutePath());
+			conf.setLocalDir(outDir.getAbsolutePath());
 			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
 			String waybackCollectionLink = null;
 			if (n.getAccessScheme().equals("public")) {
@@ -350,6 +352,10 @@ public class Create extends RegalAction {
 			/*
 			 * Im Falle von veröffentlichten Websites soll die neue Version sofort
 			 * veröffentlicht werden
+			 */
+			/* KS20200223: Das verursacht Probleme beim Wayback-Indexer. 
+			 * Wenn der Crawl fehlschlägt, darf auch in PublicData nichts angelegt werden.
+			 * Dieser Schritt darf erst ausgeführt werden, wenn der Crawl beendet ist. 
 			 */
 			if (n.getAccessScheme().equals("public")) {
 				WebsiteVersionPublisher.createSoftlinkInPublicData(webpageVersion,

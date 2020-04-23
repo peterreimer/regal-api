@@ -251,6 +251,14 @@ public class WebsiteVersionPublisher {
 				Play.application().configuration().getString("regal-api.wpull.jobDir");
 		if (localDir.startsWith(jobDir)) {
 			WebgatherLogger.debug("jobDir=" + jobDir);
+			/* Achtung, jobDir ist temporär <=> wpull-data-crawldir */
+			return localDir;
+		}
+		jobDir =
+				Play.application().configuration().getString("regal-api.wpull.outDir");
+		if (localDir.startsWith(jobDir)) {
+			WebgatherLogger.debug("jobDir=" + jobDir);
+			/* outDir ist der permanente Speicherort des Webschnitts, <=> wpull-data */
 			return localDir;
 		}
 		jobDir = null;
