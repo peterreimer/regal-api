@@ -222,6 +222,12 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 			String content =
 					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
 			Closeables.closeQuietly(input);
+			// fetch annoying errors from etikett service
+			if (response.getStatus() != 200) {
+				play.Logger.error("Etikett Service request fails for " + uri
+						+ "\nUse URI for setting Label now!");
+				content = uri;
+			}
 			return content;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
