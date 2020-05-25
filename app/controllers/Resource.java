@@ -1126,9 +1126,11 @@ public class Resource extends MyController {
 					return JsonMessage(WebgatherUtils.createInvalidUrlMessage(conf));
 				});
 			}
-			return new ModifyAction().call(pid, userId -> {
-				Node result = create.createWebpageVersion(node);
-				return getJsonResult(result);
+			new WebgatherUtils().startCrawl(node);
+			/* KS20200525 war: create.createWebpageVersion(node); */
+			return Promise.promise(() -> {
+				return JsonMessage(
+						new Message("Neuen Webcrawl zur Website " + pid + " angefangen."));
 			});
 		} catch (Exception e) {
 			play.Logger.error(e.toString());

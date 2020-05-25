@@ -3,7 +3,10 @@ package helper;
 import java.io.File;
 import java.lang.Process;
 import java.lang.ProcessBuilder;
+
+import actions.Create;
 import models.Gatherconf;
+import models.Node;
 import play.Logger;
 
 /**
@@ -15,9 +18,12 @@ import play.Logger;
  */
 public class WpullThread extends Thread {
 
+	private Node node = null;
 	private Gatherconf conf = null;
 	private File crawlDir = null;
+	private File outDir = null;
 	private String warcFilename = null;
+	private String localpath = null;
 	private ProcessBuilder pb = null;
 	private File logFile = null;
 	private int exitState = 0;
@@ -44,6 +50,16 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Set-Methode für den Parameter node
+	 * 
+	 * @param node Der Knoten der Website, für die ein neuer Webschnitt gesammelt
+	 *          werden soll.
+	 */
+	public void setNode(Node node) {
+		this.node = node;
+	}
+
+	/**
 	 * Die Set-Methode für den Parameter conf
 	 * 
 	 * @param conf Die Gatherconf der Website, die gecrawlt werden soll.
@@ -63,6 +79,18 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Methode, um den Parameter outDir zu setzen.
+	 * 
+	 * @param outDir Das Verzeichnis (absoluter Pfad), in dem das Endergebnis,
+	 *          also der fertig gecrawlte Webschnitt, liegt. Die Crawl-Datei wird
+	 *          ggfs. erst nach Ende eines erfolgrecihen Crawls in dieses
+	 *          Verzeichnis herein geschoben (bei wpull-Parameter warc-move).
+	 */
+	public void setOutDir(File outDir) {
+		this.outDir = outDir;
+	}
+
+	/**
 	 * Die Methode, um den Parameter warcFilename zu setzen.
 	 * 
 	 * @param warcFilename Der Dateiname (kein Pfad, auch keine Endung !) für die
@@ -70,6 +98,17 @@ public class WpullThread extends Thread {
 	 */
 	public void setWarcFilename(String warcFilename) {
 		this.warcFilename = warcFilename;
+	}
+
+	/**
+	 * Die Methode, um den Parameter localpath zu setzen.
+	 * 
+	 * @param localpath Eine URI, unter der die Archivdatei lokal gepeichert ist.
+	 *          Fedora benötigt diesesn Parametern, um ein "gemanagtes" Objekt
+	 *          anlegen zu können.
+	 */
+	public void setLocalPath(String localpath) {
+		this.localpath = localpath;
 	}
 
 	/**
@@ -107,6 +146,7 @@ public class WpullThread extends Thread {
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
 			if (exitState == 0) {
+				new Create().createWebpageVersion(node, conf, outDir, localpath);
 				return;
 			}
 			// Keep warc file of failed crawl
@@ -124,10 +164,15 @@ public class WpullThread extends Thread {
 			// Crawl wird erneut angestoßen
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
+			pb.directory(crawlDir);
+			pb.redirectErrorStream(true);
 			WpullThread wpullThread = new WpullThread(pb, attempt);
+			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setOutDir(outDir);
 			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setLocalPath(localpath);
 			wpullThread.setLogFile(logFile);
 			wpullThread.start();
 		} catch (Exception e) {

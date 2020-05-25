@@ -245,74 +245,22 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * Diese Methode erzeugt eine neue WebpageVersion (Webschnitt) zu einer
-	 * Webpage. Ein Crawl mit dem gewählten Crawler wird angestoßen.
+	 * Diese Methode legt eine neue Webpage-Version (Objekt-Typ "Knoten") für
+	 * einen erfolgreich beendeten Crawl an.
 	 * 
 	 * @param n must be of type webpage: Die Webpage
-	 * @return a new version pointing to a heritrix or wpull crawl
+	 * @param conf die Gatherconf zu der Webpage
+	 * @param outDir Das Verzeichnis, in dem die endgültige, fertig gecrawlte
+	 *          Version des neuen Webschnitts liegt.
+	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
+	 *          wird
+	 * @return Der Knoten der neuen Webpage-Version
 	 */
-	public Node createWebpageVersion(Node n) {
-		Gatherconf conf = null;
-		File crawlDir = null;
-		File outDir = null;
-		String localpath = null;
+	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
+			String localpath) {
 		try {
-			if (!"webpage".equals(n.getContentType())) {
-				throw new HttpArchiveException(400, n.getContentType()
-						+ " is not supported. Operation works only on regalType:\"webpage\"");
-			}
-			WebgatherLogger.debug("Create webpageVersion for name " + n.getPid());
-			conf = Gatherconf.create(n.getConf());
-			WebgatherLogger
-					.debug("Create webpageVersion with conf " + conf.toString());
-			conf.setName(n.getPid());
-			if (conf.getCrawlerSelection()
-					.equals(Gatherconf.CrawlerSelection.heritrix)) {
-				if (Globals.heritrix.isBusy()) {
-					throw new WebgathererTooBusyException(403,
-							"Webgatherer is too busy! Please try again later.");
-				}
-				if (!Globals.heritrix.jobExists(conf.getName())) {
-					Globals.heritrix.createJob(conf);
-				}
-				boolean success = Globals.heritrix.teardown(conf.getName());
-				WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
-
-				Globals.heritrix.launch(conf.getName());
-				WebgatherLogger.debug("Launched " + conf.getName());
-				Thread.currentThread().sleep(10000);
-
-				Globals.heritrix.unpause(conf.getName());
-				WebgatherLogger.debug("Unpaused " + conf.getName());
-				Thread.currentThread().sleep(10000);
-
-				crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
-				String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
-				String uriPath = Globals.heritrix.getUriPath(warcPath);
-
-				localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
-				WebgatherLogger.debug("Path to WARC " + localpath);
-			} else if (conf.getCrawlerSelection()
-					.equals(Gatherconf.CrawlerSelection.wpull)) {
-				WpullCrawl wpullCrawl = new WpullCrawl(conf);
-				wpullCrawl.createJob();
-				wpullCrawl.execCDNGatherer();
-				wpullCrawl.startJob();
-				crawlDir = wpullCrawl.getCrawlDir();
-				outDir = wpullCrawl.getResultsDir();
-				localpath = wpullCrawl.getLocalpath();
-				if (wpullCrawl.getExitState() != 0) {
-					throw new RuntimeException("Crawl job returns with exit state "
-							+ wpullCrawl.getExitState() + "!");
-				}
-				WebgatherLogger.debug("Path to WARC " + crawlDir.getAbsolutePath());
-			} else {
-				throw new RuntimeException(
-						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
-			}
-
-			// create fedora object with unmanaged content pointing to
-			// the respective warc container
+			// Erzeuge ein Fedora-Objekt mit ungemanagtem Inhalt,
+			// das auf den entsprechenden WARC-Container zeigt.
 			RegalObject regalObject = new RegalObject();
 			regalObject.setContentType("version");
 			Provenience prov = regalObject.getIsDescribedBy();
@@ -353,10 +301,6 @@ public class Create extends RegalAction {
 			 * Im Falle von veröffentlichten Websites soll die neue Version sofort
 			 * veröffentlicht werden
 			 */
-			/* KS20200223: Das verursacht Probleme beim Wayback-Indexer. 
-			 * Wenn der Crawl fehlschlägt, darf auch in PublicData nichts angelegt werden.
-			 * Dieser Schritt darf erst ausgeführt werden, wenn der Crawl beendet ist. 
-			 */
 			if (n.getAccessScheme().equals("public")) {
 				WebsiteVersionPublisher.createSoftlinkInPublicData(webpageVersion,
 						conf);
@@ -368,9 +312,9 @@ public class Create extends RegalAction {
 
 			return webpageVersion;
 		} catch (Exception e) {
-			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
-			WebgatherLogger.warn("Crawl of Webpage " + n.getPid() + ","
-					+ conf.getUrl() + " has failed !\n\tReason: " + e.getMessage());
+			WebgatherLogger.warn("Anlage einer Webpage-Version zu PID,URL "
+					+ n.getPid() + "," + conf.getUrl()
+					+ " ist fehlgeschlagen !\n\tGrund: " + e.getMessage());
 			WebgatherLogger.debug("", e);
 			throw new RuntimeException(e);
 		}

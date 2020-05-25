@@ -16,12 +16,15 @@
  */
 package helper;
 
+import java.io.File;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
+import actions.Create;
 import helper.mail.Mail;
 import models.Gatherconf;
 import models.Globals;
@@ -55,7 +58,6 @@ public class WebgatherUtils {
 	 * 
 	 * @param url ein Uniform Resource Locator als Zeichenkette
 	 * @return eine URL als Zeichenkette
-	 * @throws URISyntaxException eine Ausnahme, wenn die URL ungültig ist
 	 */
 	public static String convertUnicodeURLToAscii(String url) {
 		try {
@@ -121,5 +123,80 @@ public class WebgatherUtils {
 			WebgatherLogger.warn(e.toString());
 		}
 	}
+
+	/**
+	 * Diese Methode stößt einen neuen Webcrawl an.
+	 * 
+	 * @param node must be of type webpage: Die Webpage
+	 */
+	public void startCrawl(Node node) {
+		Gatherconf conf = null;
+		File crawlDir = null;
+		String localpath = null;
+		try {
+			if (!"webpage".equals(node.getContentType())) {
+				throw new HttpArchiveException(400, node.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			WebgatherLogger.debug("Starte Webcrawl für PID: " + node.getPid());
+			conf = Gatherconf.create(node.getConf());
+			WebgatherLogger.debug("Gatherer-Konfiguration: " + conf.toString());
+			conf.setName(node.getPid());
+			if (conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.heritrix)) {
+				if (Globals.heritrix.isBusy()) {
+					WebgatherLogger
+							.error("Webgatherer is too busy! Please try again later.");
+					throw new HttpArchiveException(403,
+							"Webgatherer is too busy! Please try again later.");
+				}
+				if (!Globals.heritrix.jobExists(conf.getName())) {
+					Globals.heritrix.createJob(conf);
+				}
+				boolean success = Globals.heritrix.teardown(conf.getName());
+				WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
+
+				Globals.heritrix.launch(conf.getName());
+				WebgatherLogger.debug("Launched " + conf.getName());
+				Thread.currentThread().sleep(10000);
+
+				Globals.heritrix.unpause(conf.getName());
+				WebgatherLogger.debug("Unpaused " + conf.getName());
+				Thread.currentThread().sleep(10000);
+
+				crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
+				String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
+				String uriPath = Globals.heritrix.getUriPath(warcPath);
+
+				localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
+				WebgatherLogger.debug("Path to WARC " + localpath);
+				new Create().createWebpageVersion(node, conf, crawlDir, localpath);
+			} else if (conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.wpull)) {
+				WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
+				wpullCrawl.createJob();
+				wpullCrawl.execCDNGatherer();
+				wpullCrawl.startJob(); // Startet Job in neuem Thread
+				crawlDir = wpullCrawl.getCrawlDir();
+				// localpath = wpullCrawl.getLocalpath();
+				if (wpullCrawl.getExitState() != 0) {
+					throw new RuntimeException("Crawl job returns with exit state "
+							+ wpullCrawl.getExitState() + "!");
+				}
+				WebgatherLogger
+						.debug("Path to WARC (crawldir):" + crawlDir.getAbsolutePath());
+			} else {
+				throw new RuntimeException(
+						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
+			}
+		} catch (Exception e) {
+			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
+			WebgatherLogger.warn("Crawl of Webpage " + node.getPid() + ","
+					+ conf.getUrl() + " has failed !\n\tReason: " + e.getMessage());
+			WebgatherLogger.debug("", e);
+			throw new RuntimeException(e);
+		}
+
+	} // Ende startCrawl
 
 }

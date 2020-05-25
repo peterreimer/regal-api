@@ -54,6 +54,7 @@ public class WpullCrawl {
 		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
 	}
 
+	private Node node = null;
 	private Gatherconf conf = null;
 	private String urlAscii = null;
 	private String date = null;
@@ -101,17 +102,17 @@ public class WpullCrawl {
 		return crawlDir;
 	}
 
-
 	/**
 	 * Die Methode, um resultDir auszulesen
 	 * 
-	 * @return resultDir ist das Verzeichnis, in das wpull fertige WARC-Dateien verschiebt (wpull Parameter --warc-move)
+	 * @return resultDir ist das Verzeichnis, in das wpull fertige WARC-Dateien
+	 *         verschiebt (wpull Parameter --warc-move)
 	 */
 	public File getResultsDir() {
 		return resultDir;
 	}
 
-  /**
+	/**
 	 * Die Methode, um localPath auszulesen
 	 * 
 	 * @return localPath is ein Parameter, den Fedora benötigt. Es ist eine URL
@@ -132,11 +133,14 @@ public class WpullCrawl {
 	}
 
 	/**
-	 * a constructor of a wpull crawl
+	 * Konstruktor zu WpullCrawl
 	 * 
+	 * @param node der Knoten der Website, zu der ein neuer Crawl gestartet werden
+	 *          soll.
 	 * @param conf the crawler configuration for the website
 	 */
-	public WpullCrawl(Gatherconf conf) {
+	public WpullCrawl(Node node, Gatherconf conf) {
+		this.node = node;
 		this.conf = conf;
 		try {
 			WebgatherLogger.debug("URL=" + conf.getUrl());
@@ -151,6 +155,13 @@ public class WpullCrawl {
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
 			this.warcFilename = "WEB-" + host + "-" + date;
+			/*
+			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
+			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
+			 * erzeugt.
+			 */
+			this.localpath = Globals.heritrixData + "/wpull-data" + "/"
+					+ conf.getName() + "/" + datetime + "/" + warcFilename + ".warc.gz";
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
 			throw new RuntimeException(e);
@@ -243,19 +254,16 @@ public class WpullCrawl {
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
 			WpullThread wpullThread = new WpullThread(pb, 1);
+			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setOutDir(resultDir);
 			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setLocalPath(localpath);
 			wpullThread.setLogFile(log);
 			wpullThread.start();
 			exitState = wpullThread.getExitState();
-			/*
-			 * den Pfad zum WARC unter Globals.heritrixData zu hängen ist eigentlich
-			 * Blödsinn, aber ohne localpath wird im Frontend kein Link zu Openwayback
-			 * erzeugt (warum nicht ?)
-			 */
-			localpath = Globals.heritrixData + "/wpull-data" + "/" + conf.getName()
-					+ "/" + datetime + "/" + warcFilename + ".warc.gz";
+
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("wpull crawl not successfully started!", e);
