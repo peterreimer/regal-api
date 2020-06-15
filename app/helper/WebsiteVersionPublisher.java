@@ -60,6 +60,11 @@ public class WebsiteVersionPublisher {
 	 */
 	public String handleWebpagePublishing(Node node, RegalObject object) {
 		try {
+			if ((object == null) || (object.getAccessScheme() == null)) {
+				play.Logger.warn("Zugriffsrecht für ID " + node.getPid()
+						+ " kann nicht ermittelt werden!");
+				return "";
+			}
 			if (object.getAccessScheme().equals("public")) {
 				if (node.getContentType().equals("version")) {
 					publishWebpageVersion(node);
