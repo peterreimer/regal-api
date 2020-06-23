@@ -284,6 +284,7 @@ public class Create extends RegalAction {
 			webpageVersion = updateResource(webpageVersion);
 
 			conf.setLocalDir(outDir.getAbsolutePath());
+			WebgatherLogger.info("localDir=" + outDir.getAbsolutePath());
 			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
 			String waybackCollectionLink = null;
 			if (n.getAccessScheme().equals("public")) {
@@ -295,6 +296,8 @@ public class Create extends RegalAction {
 			}
 			conf.setOpenWaybackLink(
 					waybackCollectionLink + owDatestamp + "/" + conf.getUrl());
+			WebgatherLogger
+					.info("waybackCollectionLink=" + conf.getOpenWaybackLink());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
 			/*

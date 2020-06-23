@@ -258,7 +258,9 @@ public class WebsiteVersionPublisher {
 				Play.application().configuration().getString("regal-api.wpull.outDir");
 		if (localDir.startsWith(jobDir)) {
 			WebgatherLogger.debug("jobDir=" + jobDir);
-			/* outDir ist der permanente Speicherort des Webschnitts, <=> wpull-data */
+			/*
+			 * outDir ist der permanente Speicherort des Webschnitts, <=> wpull-data
+			 */
 			return localDir;
 		}
 		jobDir = null;
@@ -281,6 +283,7 @@ public class WebsiteVersionPublisher {
 	public static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
 		try {
 			String localDir = findJobDirLocalDir(node, conf);
+			WebgatherLogger.debug("localDir: " + localDir);
 			String subDir = localDir.substring(jobDir.length() + 1);
 			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
 			File publicCrawlDirL = createPublicDataSubDir(subDir);
