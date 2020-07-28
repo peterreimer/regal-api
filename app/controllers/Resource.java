@@ -1150,6 +1150,19 @@ public class Resource extends MyController {
 		});
 	}
 
+	public static Promise<Result> postVersion(@PathParam("pid") String pid,
+			@QueryParam("versionPid") String versionPid,
+			@QueryParam("dataDir") String dataDir,
+			@QueryParam("timestamp") String timestamp,
+			@QueryParam("filename") String filename) {
+		return new ModifyAction().call(pid, userId -> {
+			Node node = readNodeOrNull(pid);
+			Node result = create.postWebpageVersion(node, versionPid, dataDir,
+					timestamp, filename);
+			return getJsonResult(result);
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "linkVersion", value = "linkVersion", response = Result.class, httpMethod = "POST")
 	public static Promise<Result> linkVersion(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
