@@ -245,6 +245,30 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Kurzform von createWepageVersion mit nur 4 Parametern. Dabei werden Label
+	 * und Datestamp aus dem aktuellen Datum erzeugt. Für Neuanlage von
+	 * Website-Versionen direkt nach erfolgreich beendetem Crawl. Für nachträglich
+	 * angelegte Webschnitte oder zu importierende Altdaten ist dagegen die
+	 * vollständige Methode mit 7 Parametern zu benutzen.
+	 * 
+	 * @param n Der Knoten der Website
+	 * @param conf Die Gatherconf der Website
+	 * @param outDir Das Verzeichnis, in dem die endgültige, fertig gecrawlte
+	 *          Version des neuen Webschnitts liegt.
+	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
+	 *          wird
+	 * @return Der Knoten der neuen Webpage-Version
+	 */
+	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
+			String localpath) {
+		String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+		String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+		String versionPid = null;
+		return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
+				owDatestamp);
+	}
+
+	/**
 	 * Diese Methode legt eine neue Webpage-Version (Objekt-Typ "Knoten") für
 	 * einen erfolgreich beendeten Crawl an.
 	 * 
@@ -254,10 +278,17 @@ public class Create extends RegalAction {
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
 	 *          wird
+	 * @param versionPid die PID der neuen WbesiteVersion, falls schon bekannt
+	 *          (bei Altdatenimport), ansonsten NULL oder "" (bei Import eines
+	 *          neuen Webschnittes)
+	 * @param label Der Bezeichner des Webschnitts, wie er auf der UI angezeigt
+	 *          werden soll (z.B. "2020-07-28")
+	 * @param owDatestamp Ein Datumstempel zum Wiederauffinden des Archivs in der
+	 *          Wayback, z.B. "20200728"
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
 	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
-			String localpath) {
+			String localpath, String versionPid, String label, String owDatestamp) {
 		try {
 			// Erzeuge ein Fedora-Objekt mit ungemanagtem Inhalt,
 			// das auf den entsprechenden WARC-Container zeigt.
@@ -269,8 +300,14 @@ public class Create extends RegalAction {
 			prov.setImportedFrom(conf.getUrl());
 			regalObject.setIsDescribedBy(prov);
 			regalObject.setParentPid(n.getPid());
-			Node webpageVersion = createResource(n.getNamespace(), regalObject);
-			String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+			Node webpageVersion = null;
+			if ((versionPid != null) && (!versionPid.isEmpty())) {
+				webpageVersion =
+						createResource(versionPid, n.getNamespace(), regalObject);
+			} else {
+				webpageVersion = createResource(n.getNamespace(), regalObject);
+			}
+
 			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
@@ -285,7 +322,7 @@ public class Create extends RegalAction {
 
 			conf.setLocalDir(outDir.getAbsolutePath());
 			WebgatherLogger.info("localDir=" + outDir.getAbsolutePath());
-			String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+
 			String waybackCollectionLink = null;
 			if (n.getAccessScheme().equals("public")) {
 				waybackCollectionLink = Play.application().configuration()
@@ -298,6 +335,7 @@ public class Create extends RegalAction {
 					waybackCollectionLink + owDatestamp + "/" + conf.getUrl());
 			WebgatherLogger
 					.info("waybackCollectionLink=" + conf.getOpenWaybackLink());
+			conf.setId(webpageVersion.getPid());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
 
 			/*
@@ -325,12 +363,14 @@ public class Create extends RegalAction {
 
 	/**
 	 * Diese Methode legt eine WebpageVersion für eine bestehende WARC-Datei an.
-	 * Es wird angenommen, dass diese WARC-Datei im Verzechnis wget-data/ liegt.
-	 * Diese Methode wurde bei der Migration der aus EDO2 stammenden Webschnitte,
-	 * die ausgepackt und mit wget erneut, lokal gecrawlt wurden, angewandt.
+	 * Es wird angenommen, dass diese WARC-Datei unterhalb des Verzechnisses
+	 * wget-data liegt. Diese Methode wurde bei der Migration der aus EDO2
+	 * stammenden Webschnitte, die ausgepackt und mit wget erneut, lokal gecrawlt
+	 * wurden, angewandt.
 	 * 
 	 * @param n must be of type webpage
-	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch)
+	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
+	 *          leer (Pid wird generiert)
 	 * @param label Label für die Version im Format YYYY-MM-DD
 	 * @return a new version pointing to an imported crawl. The imported crawl is
 	 *         in wget-data/ and indexed in openwayback
@@ -342,16 +382,16 @@ public class Create extends RegalAction {
 				throw new HttpArchiveException(400, n.getContentType()
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
-			ApplicationLogger.debug("Import webpageVersion PID" + n.getPid());
+			ApplicationLogger.debug("Import webpageVersion for PID" + n.getPid());
 			conf = Gatherconf.create(n.getConf());
 			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
 			conf.setName(n.getPid());
-			conf.setId(versionPid);
+			// conf.setId(versionPid);
 			Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 					.parse(label + " 12:00:00");
 			conf.setStartDate(startDate);
 
-			// hier auf ein bestehendes WARC in wget-data/ verweisen
+			// hier auf ein bestehendes WARC in dataDir verweisen
 			String crawlDateTimestamp = label.substring(0, 4) + label.substring(5, 7)
 					+ label.substring(8, 10); // crawl-Datum im Format yyyymmdd
 			File crawlDir = new File(Globals.wget.dataDir + "/" + conf.getName() + "/"
@@ -364,40 +404,70 @@ public class Create extends RegalAction {
 			String localpath = Globals.wgetData + "/wget-data" + uriPath;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
 
-			// create fedora object with unmanaged content pointing to
-			// the respective warc container
-			RegalObject regalObject = new RegalObject();
-			regalObject.setContentType("version");
-			Provenience prov = regalObject.getIsDescribedBy();
-			prov.setCreatedBy("webgatherer");
-			prov.setName(conf.getName()); // name=parentPid
-			prov.setImportedFrom(conf.getUrl());
-			regalObject.setIsDescribedBy(prov);
-			regalObject.setParentPid(n.getPid());
-			Node webpageVersion =
-					createResource(versionPid, n.getNamespace(), regalObject);
-			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
-					"<" + webpageVersion.getPid()
-							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
-			webpageVersion.setLocalData(localpath);
-			webpageVersion.setMimeType("application/warc");
-			webpageVersion.setFileLabel(label);
-			webpageVersion.setAccessScheme(n.getAccessScheme());
-			webpageVersion.setPublishScheme(n.getPublishScheme());
-			webpageVersion = updateResource(webpageVersion);
+			return createWebpageVersion(n, conf, crawlDir, localpath, versionPid,
+					label, crawlDateTimestamp);
 
-			conf.setLocalDir(crawlDir.getAbsolutePath());
-			conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink
-					+ crawlDateTimestamp + "/" + conf.getUrl());
-			String msg = new Modify().updateConf(webpageVersion, conf.toString());
-
-			ApplicationLogger.info(msg);
-
-			return webpageVersion;
 		} catch (Exception e) {
 			ApplicationLogger.error(
 					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
 					versionPid, n.getPid());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Diese Methode legt eine WebpageVersion für eine bestehende WARC-Datei an.
+	 * Es wird angenommen, dass diese WARC-Datei unterhalb des Verzechnisses
+	 * dataDir liegt.
+	 * 
+	 * 27.07.2020 | Ingolf Kuss | Neuanlage für EDOZWO-1020
+	 * 
+	 * @param n Der Knoten der Webpage
+	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
+	 *          leer (Pid wird generiert)
+	 * @param dataDir Datenhauptverzeichnis, unter dem die WARC-Datei liegt. Z.B.
+	 *          /opt/regal/wpull-data
+	 * @param timestamp Der Zeitstempel des Crawl. Ist auch Name des
+	 *          Unterverzeichnisses für den Crawl. Aus dem Datum wird der
+	 *          Bezeichner (Label auf der UI) für den Webschnitt generiert.
+	 * @param filename Der Dateiname der Archivdatei (ohne Pfadangaben, aber mit
+	 *          Dateiendung) (WARC-Archiv).
+	 * @return a new website version pointing to the posted crawl.
+	 */
+	public Node postWebpageVersion(Node n, String versionPid, String dataDir,
+			String timestamp, String filename) {
+		Gatherconf conf = null;
+		try {
+			if (!"webpage".equals(n.getContentType())) {
+				throw new HttpArchiveException(400, n.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			ApplicationLogger.debug("POST webpageVersion for PID " + n.getPid());
+			/*
+			 * Legt eine Gatherconf für die Version an, zunächst als Kopie von der
+			 * Website
+			 */
+			conf = Gatherconf.create(n.getConf());
+			ApplicationLogger.debug("POST webpageVersion Conf" + conf.toString());
+			conf.setName(n.getPid());
+			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(timestamp);
+			conf.setStartDate(startDate);
+
+			// hier auf ein bestehendes WARC in dataDir verweisen
+			File outDir = new File(dataDir + "/" + conf.getName() + "/" + timestamp);
+			String localpath = Globals.heritrixData + "/wpull-data" + "/"
+					+ conf.getName() + "/" + timestamp + "/" + filename;
+			ApplicationLogger.debug("URI-Path to WARC " + localpath);
+			String label = timestamp.substring(0, 4) + "-" + timestamp.substring(4, 6)
+					+ "-" + timestamp.substring(6, 8);
+			String owDatestamp = timestamp.substring(0, 8);
+			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
+					owDatestamp);
+
+		} catch (Exception e) {
+			ApplicationLogger.error(
+					"Anlegen der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
+					timestamp, n.getPid());
 			throw new RuntimeException(e);
 		}
 	}
