@@ -442,7 +442,7 @@ public class Create extends RegalAction {
 				throw new HttpArchiveException(400, n.getContentType()
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
-			ApplicationLogger.debug("POST webpageVersion for PID" + n.getPid());
+			ApplicationLogger.debug("POST webpageVersion for PID " + n.getPid());
 			/*
 			 * Legt eine Gatherconf für die Version an, zunächst als Kopie von der
 			 * Website
