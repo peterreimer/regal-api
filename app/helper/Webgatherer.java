@@ -43,6 +43,8 @@ import models.Node;
 import actions.Create;
 import actions.Modify;
 import actions.Create.WebgathererTooBusyException;
+import helper.WpullCrawl.CrawlControllerState;
+import helper.WpullCrawl;
 import actions.Read;
 
 /**
@@ -187,7 +189,11 @@ public class Webgatherer implements Runnable {
 	private static boolean isOutstanding(Node n, Gatherconf conf) {
 		if (new Date().before(conf.getStartDate()))
 			return false;
-		// if a crawl job is still running, never return with true !!
+		// Falls ein Crawl noch läuft, gib nie `true` zurück !!
+		CrawlControllerState ccs = WpullCrawl.getCrawlControllerState(n);
+		if (ccs.equals(CrawlControllerState.RUNNING)) {
+			return false;
+		}
 		List<Link> parts = n.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
 		if (parts == null || parts.isEmpty()) {
 			return true;
