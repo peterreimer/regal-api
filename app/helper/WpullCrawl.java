@@ -260,6 +260,7 @@ public class WpullCrawl {
 			wpullThread.setOutDir(resultDir);
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setLocalPath(localpath);
+			wpullThread.setExecArr(execArr);
 			wpullThread.setLogFile(log);
 			wpullThread.start();
 			exitState = wpullThread.getExitState();
@@ -363,7 +364,7 @@ public class WpullCrawl {
 		sb.append(" --convert-links"); // mandatory to rewrite relative urls
 		sb.append(" --no-strong-redirects"); // ohne diesen Parameter wird www.facebook.com, www.youtoube.com uvm. eingesammelt (aktiviert 12.05.2020)
 		sb.append(" --warc-append"); // um CDN-Crawls und Haupt-Crawl im gleichen Archiv zu bündeln
-		// sb.append(" --warc-tempdir=" + tempJobDir); auskommentiert 27.08.2020 für EDOZWO-1026
+	        // sb.append(" --warc-tempdir=" + tempJobDir); auskommentiert 27.08.2020 für EDOZWO-1026
 		sb.append(" --warc-move=" + resultDir);
 		return sb.toString();
 	}

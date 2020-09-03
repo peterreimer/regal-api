@@ -25,6 +25,7 @@ public class WpullThread extends Thread {
 	private String warcFilename = null;
 	private String localpath = null;
 	private ProcessBuilder pb = null;
+	private String[] execArr = null;
 	private File logFile = null;
 	private int exitState = 0;
 	/**
@@ -112,6 +113,16 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Methode, um execArr zu setzen.
+	 * 
+	 * @param execArr ein Array of String mit den Parametern für den Aufruf von
+	 *          wpull
+	 */
+	public void setExecArr(String[] execArr) {
+		this.execArr = execArr;
+	}
+
+	/**
 	 * Die Methode, um den Parameter logFile zu setzen.
 	 * 
 	 * @param logFile Die Logdatei für wpull (crawl.log). Objekttyp "File".
@@ -145,6 +156,7 @@ public class WpullThread extends Thread {
 			 */
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
+			proc.destroy();
 			if (exitState == 0) {
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
 				return;
@@ -161,18 +173,22 @@ public class WpullThread extends Thread {
 				throw new RuntimeException("Webcrawl für " + conf.getName()
 						+ " fehlgeschlagen: Maximale Anzahl Versuche überschritten !");
 			}
-			// Crawl wird erneut angestoßen
+			// Crawl wird erneut angestoßen; rekursiver Aufruf von wpullThread.start()
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
-			pb.directory(crawlDir);
-			pb.redirectErrorStream(true);
-			WpullThread wpullThread = new WpullThread(pb, attempt);
+			ProcessBuilder pb_attempt = new ProcessBuilder(execArr);
+			assert crawlDir.isDirectory();
+			pb_attempt.directory(crawlDir);
+			pb_attempt.redirectErrorStream(true);
+			pb_attempt.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+			WpullThread wpullThread = new WpullThread(pb_attempt, attempt);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
 			wpullThread.setOutDir(outDir);
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setLocalPath(localpath);
+			wpullThread.setExecArr(execArr);
 			wpullThread.setLogFile(logFile);
 			wpullThread.start();
 		} catch (Exception e) {
