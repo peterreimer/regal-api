@@ -157,40 +157,12 @@ public class WpullThread extends Thread {
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
 			proc.destroy();
-			if (exitState == 0) {
+			if (exitState == 0 || exitState == 4 || exitState == 8) {
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
-				return;
+				WebgatherLogger
+						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
 			}
-			// Keep warc file of failed crawl
-			File warcFile =
-					new File(crawlDir.toString() + "/" + warcFilename + ".warc.gz");
-			File warcFileAttempted = new File(crawlDir.toString() + "/" + warcFilename
-					+ ".warc.gz.attempt" + attempt);
-			warcFile.renameTo(warcFileAttempted);
-			warcFile.delete();
-			attempt++;
-			if (attempt > maxNumberAttempts) {
-				throw new RuntimeException("Webcrawl für " + conf.getName()
-						+ " fehlgeschlagen: Maximale Anzahl Versuche überschritten !");
-			}
-			// Crawl wird erneut angestoßen; rekursiver Aufruf von wpullThread.start()
-			WebgatherLogger.info("Webcrawl for " + conf.getName()
-					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
-			ProcessBuilder pb_attempt = new ProcessBuilder(execArr);
-			assert crawlDir.isDirectory();
-			pb_attempt.directory(crawlDir);
-			pb_attempt.redirectErrorStream(true);
-			pb_attempt.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
-			WpullThread wpullThread = new WpullThread(pb_attempt, attempt);
-			wpullThread.setNode(node);
-			wpullThread.setConf(conf);
-			wpullThread.setCrawlDir(crawlDir);
-			wpullThread.setOutDir(outDir);
-			wpullThread.setWarcFilename(warcFilename);
-			wpullThread.setLocalPath(localpath);
-			wpullThread.setExecArr(execArr);
-			wpullThread.setLogFile(logFile);
-			wpullThread.start();
+			return;
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("wpull crawl not successfully started!", e);
