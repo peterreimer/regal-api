@@ -25,6 +25,7 @@ public class WpullThread extends Thread {
 	private String warcFilename = null;
 	private String localpath = null;
 	private ProcessBuilder pb = null;
+	private String[] execArr = null;
 	private File logFile = null;
 	private int exitState = 0;
 	/**
@@ -112,6 +113,16 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Methode, um execArr zu setzen.
+	 * 
+	 * @param execArr ein Array of String mit den Parametern für den Aufruf von
+	 *          wpull
+	 */
+	public void setExecArr(String[] execArr) {
+		this.execArr = execArr;
+	}
+
+	/**
 	 * Die Methode, um den Parameter logFile zu setzen.
 	 * 
 	 * @param logFile Die Logdatei für wpull (crawl.log). Objekttyp "File".
@@ -145,36 +156,13 @@ public class WpullThread extends Thread {
 			 */
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
-			if (exitState == 0) {
+			proc.destroy();
+			if (exitState == 0 || exitState == 4 || exitState == 8) {
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
-				return;
+				WebgatherLogger
+						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
 			}
-			// Keep warc file of failed crawl
-			File warcFile =
-					new File(crawlDir.toString() + "/" + warcFilename + ".warc.gz");
-			File warcFileAttempted = new File(crawlDir.toString() + "/" + warcFilename
-					+ ".warc.gz.attempt" + attempt);
-			warcFile.renameTo(warcFileAttempted);
-			warcFile.delete();
-			attempt++;
-			if (attempt > maxNumberAttempts) {
-				throw new RuntimeException("Webcrawl für " + conf.getName()
-						+ " fehlgeschlagen: Maximale Anzahl Versuche überschritten !");
-			}
-			// Crawl wird erneut angestoßen
-			WebgatherLogger.info("Webcrawl for " + conf.getName()
-					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
-			pb.directory(crawlDir);
-			pb.redirectErrorStream(true);
-			WpullThread wpullThread = new WpullThread(pb, attempt);
-			wpullThread.setNode(node);
-			wpullThread.setConf(conf);
-			wpullThread.setCrawlDir(crawlDir);
-			wpullThread.setOutDir(outDir);
-			wpullThread.setWarcFilename(warcFilename);
-			wpullThread.setLocalPath(localpath);
-			wpullThread.setLogFile(logFile);
-			wpullThread.start();
+			return;
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("wpull crawl not successfully started!", e);
