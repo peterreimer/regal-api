@@ -319,6 +319,9 @@ public class OaiDispatcher {
 					&& node.getLd2().containsKey("collectionOne")) {
 				node.addTransformer(new Transformer("wgl"));
 			}
+			if ("monograph".equals(type)) {
+				node.addTransformer(new Transformer("wgl"));
+			}
 		}
 	}
 
