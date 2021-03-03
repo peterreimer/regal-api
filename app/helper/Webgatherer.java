@@ -169,7 +169,10 @@ public class Webgatherer implements Runnable {
 	 * @throws Exception Ausnahme beim Lesen
 	 */
 	public static Date getLastLaunch(Node n) throws Exception {
-		return new Read().getLastModifiedChild(n, "version").getLastModified();
+		Node lastModifiedChild = new Read().getLastModifiedChild(n, "version");
+		if (lastModifiedChild == null)
+			return null;
+		return lastModifiedChild.getLastModified();
 	}
 
 	/**
