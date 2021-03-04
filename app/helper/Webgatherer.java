@@ -160,12 +160,20 @@ public class Webgatherer implements Runnable {
 	}
 
 	/**
+	 * Diese Methode ermittelt das Datum, an dem zuletzt erfolgreich ein
+	 * Webschnitt an die Webpage angehängt wurde.
+	 * 
 	 * @param n der Knoten für die Webpage
-	 * @return Datum+Zeit (Typ Date), als zuletzt ein Crawl angestoßen wurde
+	 * @return Datum+Zeit (Typ Date) des letzten erfolgreich beendeten Webcrwals =
+	 *         Änderungsdatum des neuesten Webschnitts
 	 * @throws Exception Ausnahme beim Lesen
 	 */
 	public static Date getLastLaunch(Node n) throws Exception {
-		return new Read().getLastModifiedChild(n, (Node) null).getLastModified();
+		Node lastModifiedChild =
+				new Read().getLastModifiedChildOrNull(n, "version");
+		if (lastModifiedChild == null)
+			return null;
+		return lastModifiedChild.getLastModified();
 	}
 
 	/**
